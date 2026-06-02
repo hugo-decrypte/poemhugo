@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using Windows.Media.SpeechRecognition;
 using System.Net.NetworkInformation;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace PoemClient.Source.Tools.IA.SpeechRecognition
 {
@@ -35,7 +33,7 @@ namespace PoemClient.Source.Tools.IA.SpeechRecognition
             this.lang = lang;
 
             checkMicrophone();
-            // startRecognizer();
+            startRecognizer();
         }
 
         public void messageReceived(string msg)
@@ -59,11 +57,8 @@ namespace PoemClient.Source.Tools.IA.SpeechRecognition
             {
                 if (micOn)
                 {
-                    Mouse.SetCursor(Cursors.Wait);
-                    startRecognizer();
                     messageReceived("LISTENING:");
                     listening = true;
-                    Mouse.SetCursor(null);
                 }
                 else
                 {
@@ -80,10 +75,6 @@ namespace PoemClient.Source.Tools.IA.SpeechRecognition
         public void stopListen()
         {
             listening = false;
-            Task.Run(() => // Lancer en background pour pas bloquer l'ui
-            {
-                stopRecognizer();
-            });
         }
 
         public void stop()
@@ -138,31 +129,27 @@ namespace PoemClient.Source.Tools.IA.SpeechRecognition
         // ------------  Recognizer events ------------ //
         private void onPartialResult(SpeechRecognizer sender, SpeechRecognitionHypothesisGeneratedEventArgs e)
         {
-            /*
-            if(!listening)
-            {
-                waitNextResult = true;
-            }
-            */
-
-            //if(!waitNextResult)
-                messageReceived($"RESULT:{text}{e.Hypothesis.Text.ToLower()}");
-        }
-        private void onResult(SpeechContinuousRecognitionSession sender, SpeechContinuousRecognitionResultGeneratedEventArgs e)
-        {
-            /*
             if(!listening)
             {
                 waitNextResult = true;
             }
 
             if(!waitNextResult)
-            */
+                messageReceived($"RESULT:{text}{e.Hypothesis.Text.ToLower()}");
+        }
+        private void onResult(SpeechContinuousRecognitionSession sender, SpeechContinuousRecognitionResultGeneratedEventArgs e)
+        {
+            if(!listening)
+            {
+                waitNextResult = true;
+            }
+
+            if(!waitNextResult)
             {
                 text += e.Result.Text.ToLower() + " ";
                 messageReceived($"RESULT:{text}");
             }
-            //waitNextResult = false;
+            waitNextResult = false;
         }
         private void onStateChange(SpeechRecognizer sender, SpeechRecognizerStateChangedEventArgs args)
         {
@@ -176,7 +163,7 @@ namespace PoemClient.Source.Tools.IA.SpeechRecognition
             {
                 stopRecognizer();
                 System.Threading.Thread.Sleep(1000);
-                // waitNextResult = false; // New recognizer so no need to wait for next result
+                waitNextResult = false; // New recognizer so no need to wait for next result
                 startRecognizer();
             }
         }

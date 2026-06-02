@@ -137,6 +137,7 @@ namespace PoemClient.Source.View
             try
             {
                 string reponse;
+                Agent agentIA = null;
 
                 if (AiModelSelector.SelectedIndex == 2)
                 {
@@ -168,15 +169,20 @@ namespace PoemClient.Source.View
                                 break;
                             }
                     }
-                    TypeRequete agent = new Agent(MainWindow.config, _main.clientConfig, modeleIA, userPrompt);
+                    agentIA = new Agent(MainWindow.config, _main.clientConfig, modeleIA, userPrompt);
 
                     Console.WriteLine($"[IA] Envoi de la requête au modèle : {userPrompt}");
-                    reponse = await agent.executerRequete();
-                    Console.WriteLine($"[IA] REPONSE REÇUE :\n{reponse}");
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    reponse = await agentIA.executerRequete();
+                    sw.Stop();
+                    Console.WriteLine($"[IA] REPONSE REÇUE ({sw.ElapsedMilliseconds}ms) :\n{reponse}");
                 }
+
+                reponse = StripJson(reponse);
 
                 if (reponse.Contains("\"tool\":\"none\"") || reponse.Contains("\"tool\": \"none\""))
                 {
+                    Console.WriteLine($"[IA] tool:none — requête sans correspondance : {userPrompt}");
                     MessageBox.Show(MainWindow.config.GetKeyValue("NoAgentResponse"), "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 else
@@ -188,35 +194,62 @@ namespace PoemClient.Source.View
                         switch (jsonroot.GetProperty("tool").ToString())
                         {
                             case "static":
-                                await StaticFunctions.RunAction($"{elts.Deserialize<string[]>()[0]}".Split(','));
-                                break;
+                                {
+                                    string[] staticArgs = elts.Deserialize<string[]>();
+                                    if (staticArgs != null && staticArgs.Length > 0)
+                                        await StaticFunctions.RunAction(staticArgs[0].Split(','));
+                                    break;
+                                }
                             case "view":
                                 {
                                     foreach (var elt in elts.EnumerateArray())
                                     {
                                         string viewName = elt.ToString();
-                                        if (!MainWindow.GetViews().Contains(viewName))
+                                        int p = viewName.IndexOfAny(new[] { '(', '=' });
+                                        if (p >= 0) viewName = viewName.Substring(0, p).Trim();
+                                        string viewFile = MainWindow.GetViews().FirstOrDefault(v =>
+                                            Path.GetFileNameWithoutExtension(v) == viewName || v == viewName);
+                                        if (viewFile == null)
                                         {
                                             MessageBox.Show(MainWindow.config.GetKeyValue("NoAgentResponse"), "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                                             break;
                                         }
-                                        new OpenView(viewName, _main).Show();
+                                        new OpenView(viewFile, _main).Show();
                                         break;
                                     }
                                     break;
                                 }
                             case "menu":
-                                foreach (var script in elts.EnumerateArray())
                                 {
-                                    await _main.ContextMenu_Click(script.ToString());
+                                    string menuName = jsonroot.TryGetProperty("nom", out JsonElement nomElt)
+                                        ? nomElt.ToString() : "";
+                                    // Si nom absent ou non reconnu, tenter arguments[0]
+                                    if (agentIA != null && !agentIA.MenuTasks.ContainsKey(menuName))
+                                    {
+                                        var firstArg = elts.EnumerateArray().FirstOrDefault();
+                                        if (firstArg.ValueKind != System.Text.Json.JsonValueKind.Undefined)
+                                            menuName = firstArg.ToString();
+                                    }
+                                    if (agentIA != null && agentIA.MenuTasks.TryGetValue(menuName, out List<string> menuTaskList))
+                                    {
+                                        foreach (string menuTask in menuTaskList)
+                                            await _main.ContextMenu_Click(menuTask);
+                                    }
+                                    else
+                                    {
+                                        foreach (var script in elts.EnumerateArray())
+                                            await _main.ContextMenu_Click(script.ToString());
+                                    }
+                                    break;
                                 }
-                                break;
                             case "script":
                                 {
                                     foreach (var script in elts.EnumerateArray())
                                     {
+                                        string desc = script.ToString();
+                                        string task = agentIA != null && agentIA.ScriptTasks.TryGetValue(desc, out string t) ? t : desc;
                                         string[] values = _main.GetQueries(
-                                            script.ToString(),
+                                            task,
                                             _main.login.GetServerPort() + "%20" + _main.GetUserId()
                                         );
 
@@ -262,6 +295,14 @@ namespace PoemClient.Source.View
 
         #endregion
 
+        private static string StripJson(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return s;
+            int start = s.IndexOf('{');
+            int end = s.LastIndexOf('}');
+            return (start >= 0 && end > start) ? s.Substring(start, end - start + 1) : s;
+        }
+
         private static string SplitCamelCase(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
@@ -303,7 +344,6 @@ namespace PoemClient.Source.View
                     Dispatcher.Invoke(() =>
                     {
                         microOn = true;
-                        Speech.IsEnabled = true;
                         changerMicro();
                     });
                     break;

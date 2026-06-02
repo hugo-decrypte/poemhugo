@@ -3,6 +3,7 @@ using PoemClientWPF.Tools;
 using PoemClientWPF.Tools.IA;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -24,97 +25,96 @@ namespace PoemClient.Source.Tools.IA
         }
 
         Config config;
+
+        // Accessible depuis PromptWindow pour résoudre nom → tasks sans les inclure dans le prompt
+        public Dictionary<string, List<string>> MenuTasks { get; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, string> ScriptTasks { get; } = new Dictionary<string, string>();
+
         public Agent(Config config, string clientConfig, ModeleIA modeleIA, string donnees = null) : base(modeleIA, donnees)
         {
             this.config = config;
-            this.prompt = config.GetKeyValue("PromptAgent");
+            string promptKey = modeleIA is Ollama ? "PromptAgent" : "PromptAgentGPT";
+            this.prompt = config.GetKeyValue(promptKey);
 
-            // Récupère les fonctions statiques
-            List<string> staticFunctions = StaticFunctions.GetFunctionsString();
-            string functions = "";
-            foreach (string f in staticFunctions)
+            // Fonctions statiques — liste compacte pipe-séparée
+            this.prompt = this.prompt.Replace("{STATIC}",
+                string.Join("|", StaticFunctions.GetFunctionsString()));
+
+            // Mapping ViewName → premier alias FR depuis AIKeyword_/AIAlias_
+            var viewHints = new Dictionary<string, string>();
+            foreach (string key in config.GetAllKeys().Where(k => k.Trim().StartsWith("AIKeyword_")))
             {
-                functions += $"'{f}', ";
+                string val = config.GetKeyValue(key.Trim());
+                if (val != null && val.Trim().StartsWith("view:"))
+                {
+                    string viewName = Path.GetFileNameWithoutExtension(val.Trim().Substring(5));
+                    if (!viewHints.ContainsKey(viewName))
+                    {
+                        string aliases = config.GetKeyValue("AIAlias_" + key.Trim().Substring(10));
+                        if (!string.IsNullOrEmpty(aliases))
+                            viewHints[viewName] = aliases.Split(',')[0].Trim();
+                    }
+                }
             }
-            this.prompt = this.prompt.Replace("{STATIC}", functions);
 
-            // Récupère les vues
-            List<string> views = MainWindow.GetViews();
-            string viewsAPI = "";
-            foreach (string view in views)
-            {
-                viewsAPI += $"'{view}', ";
-            }
-            viewsAPI = viewsAPI.Remove(viewsAPI.Length - 1);
-            this.prompt = this.prompt.Replace("{VIEWS}", viewsAPI);
+            // Vues principales (sans sous-vues TITLEOBJ) — format nom=description pipe-séparé
+            var views = MainWindow.GetViews()
+                .Where(v => {
+                    try {
+                        string firstLine = File.ReadLines(Path.Combine("..", "Logistics", "View", "Admin", v)).FirstOrDefault() ?? "";
+                        return !firstLine.Contains("TITLEOBJ");
+                    } catch { return true; }
+                });
+            this.prompt = this.prompt.Replace("{VIEWS}",
+                string.Join("|", views.Select(v => {
+                    string name = Path.GetFileNameWithoutExtension(v);
+                    return viewHints.TryGetValue(name, out string hint) ? name + "=" + hint : name;
+                })));
 
-            // Récupère les scripts exécutables
-            string scripts = "";
+            // Scripts — descriptions uniquement dans le prompt, tasks stockées dans ScriptTasks
             string[] lines = clientConfig.Split('\n');
             int currentLine = Array.FindIndex(lines, l => l.Contains("------Agent")) + 3;
-
             int numberOfScripts = int.Parse(MainWindow.GetLineBelowParameter(clientConfig, "------Agent"));
+            var scriptNames = new List<string>();
             for (int i = 0; i < numberOfScripts; i++)
             {
-                scripts += $"description : {lines[currentLine]}, task : {lines[currentLine + 1]} - ";
+                string desc = lines[currentLine].Trim();
+                string task = lines[currentLine + 1].Trim();
+                ScriptTasks[desc] = task;
+                scriptNames.Add(desc);
                 currentLine += 4 + int.Parse(lines[currentLine + 2]) * 2;
             }
-            this.prompt = this.prompt.Replace("{SCRIPTS}", scripts);
+            this.prompt = this.prompt.Replace("{SCRIPTS}", string.Join("|", scriptNames));
 
-            // Get all menu buttons
-            // string buttons = "";
+            // Menus — noms uniquement dans le prompt, tasks stockées dans MenuTasks
             Dictionary<string, List<Button>> mergedButtons = new Dictionary<string, List<Button>>();
             for (int menuId = 1; menuId <= int.Parse(config.GetKeyValue("MenuNumber")); menuId++)
             {
                 for (int buttonId = 1; buttonId <= int.Parse(config.GetKeyValue($"Menu{menuId}FunctionNumber")); buttonId++)
                 {
-                    /*
-                    buttons += getButton(menuId, buttonId, "Executable");
-                    buttons += getButton(menuId, buttonId, "Static");
-                    buttons += getButton(menuId, buttonId, "Script");
-                    */
-                    string[] types = { "Executable", "Static", "Script" };
-
-                    foreach (string type in types)
+                    foreach (string type in new[] { "Executable", "Static", "Script" })
                     {
                         Button b = getButton(menuId, buttonId, type);
-
                         if (b != null && b.Name != null)
                         {
                             if (!mergedButtons.ContainsKey(b.Name))
-                            {
                                 mergedButtons[b.Name] = new List<Button>();
-                            }
-
                             mergedButtons[b.Name].Add(b);
                         }
                     }
                 }
-
             }
-
-            StringBuilder buttonsPrompt = new StringBuilder();
-
-            foreach (KeyValuePair<string, List<Button>> kvp in mergedButtons)
+            foreach (var kvp in mergedButtons)
             {
-                string name = kvp.Key;
-                List<Button> list = kvp.Value;
-
-                list.Sort((a, b) => a.Order.CompareTo(b.Order));
-
-                buttonsPrompt.Append($"name : {name}, tasks : [");
-
-                buttonsPrompt.Append(
-                    string.Join(",", list.Select(b => $"\"{b.Task}\""))
-                );
-
-                buttonsPrompt.AppendLine("] -");
+                MenuTasks[kvp.Key] = kvp.Value
+                    .OrderBy(b => b.Order)
+                    .Select(b => b.Task)
+                    .ToList();
             }
-
-            this.prompt = this.prompt.Replace("{MENUS}", buttonsPrompt.ToString());
+            this.prompt = this.prompt.Replace("{MENUS}", string.Join("|", MenuTasks.Keys));
 
             this.prompt = this.prompt.Replace('\'', '"');
-            Console.WriteLine(this.prompt);
+            this.temperature = 0.0;
         }
 
         private Button getButton(int menuId, int buttonId, string type)

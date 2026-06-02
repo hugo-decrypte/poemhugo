@@ -180,7 +180,6 @@
     <Compile Include="Source\Tools\IA\Agent.cs" />
     <Compile Include="Source\Tools\IA\DocumentInput.cs" />
     <Compile Include="Source\Tools\IA\ChatGPTClient.cs" />
-    <Compile Include="Source\Tools\IA\EmbeddingService.cs" />
     <Compile Include="Source\Tools\IA\KeywordMatcher.cs" />
     <Compile Include="Source\Tools\IA\GeminiClient.cs" />
     <Compile Include="Source\Tools\IA\ModeleIA.cs" />

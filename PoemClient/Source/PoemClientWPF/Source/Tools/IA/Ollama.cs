@@ -1,4 +1,5 @@
 ﻿using OllamaSharp;
+using OllamaSharp.Models;
 using OllamaSharp.Models.Chat;
 using PoemClientWPF.Tools;
 using PoemClientWPF.Tools.IA;
@@ -25,7 +26,6 @@ namespace PoemClient.Source.Tools.IA
                 Timeout = TimeSpan.FromMinutes(15)
             };
             this.client = new OllamaApiClient(customHttpClient);
-            Console.WriteLine("Ollama");
         }
 
         public override async Task<string> contacterIA(string prompt, string donnees, double temperature)
@@ -39,7 +39,12 @@ namespace PoemClient.Source.Tools.IA
                     new Message(ChatRole.User, donnees)
                 },
                 Stream = false,
-                KeepAlive = "1h"        // Theo
+                KeepAlive = "1h",
+                Options = new RequestOptions
+                {
+                    Temperature = (float)temperature,
+                    NumPredict = 200,
+                }
             };
 
             var stream = client.ChatAsync(request);
