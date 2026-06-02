@@ -1,0 +1,44 @@
+%==================================================%
+%                                                  %
+%  		   DataTour.n	  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: TOUR
+@ "Data ",
+
+% ID
+@ ("TOUR "),
+
+% Caption
+@ ("TOUR "),
+
+% Group
+@ " TOUR ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[3;(string,IDTOUR,IDTOUR,,20,0); (string,IDVEHICLE,IDVEHICLE,,20,0); (int,TOURRESOURCE,TOURVEHICLE,,20,0)]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ (	"SELECT	t.id		AS IDTOUR, \
+		t.idResource 	AS IDVEHICLE, \
+		t.tourResource 	AS TOURVEHICLE \
+	FROM	" DB_PREFIX "OPT_TOUR t \
+	WHERE " SQL_UserVisibleClubIs "t.idClub)\
+	ORDER BY t.id\"\n\n"),
+
+

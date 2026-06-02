@@ -1,0 +1,108 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		HeaderSheet.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+@ "\"[]\" - \\\n",		% JZ 1015
+
+%@ ("\"[HORIZONTALLINEWIDTH=1;VERTICALLINEWIDTH=1;HORIZONTALLINECOLOR=" tableHeaderLineColor ";VERTICALLINECOLOR=" tableHeaderLineColor ";FILLCOLOR=" tableTitleFillColor ";]\" \\\n"),
+%@ "- ", %@ "\\\n",
+
+
+% Title
+@ ("\"[TITLE=" title ";FONTCOLOR=" tableTitleFontColor ";FONTSIZE=" tableTitleFontSize ";FONTNAME="tableTitleFont";LINESEPARATOR=\\n;HEIGHT=30;BORDER=0;]\"\\\n"),
+
+
+
+% [Horizontal header options]:
+@ ("\"[COLUMNNUMBER=" sheetFieldNumbering "; MULTILINES=" sheetFieldLines ";FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableXFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+% [Vertical header options]:
+@ ("\"[FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableYFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+% JZ 1013
+
+% [Horizontal header options]:
+%@ ("\"[COLUMNNUMBER=" sheetFieldNumbering "; MULTILINES=" sheetFieldLines ";BORDERCOLOR=" tableHeaderFillColor ";FILLCOLOR=" tableHeaderFillColor ";LINEWIDTH=1;LINECOLOR=" tableLineColor ";FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableXFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+% [Vertical header options]:
+%@ ("\"[BORDERCOLOR=" tableHeaderFillColor ";FILLCOLOR=" tableHeaderFillColor ";LINEWIDTH=1;LINECOLOR=" tableLineColor ";FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableYFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+
+
+% [Table cell options]:
+@ ("\"[MARGIN=" tableMargin ";FONTCOLOR=" tableFontColor ";FONTSIZE=" tableFontSize ";FONTNAME="tableTextFont";] \\\n"),
+
+
+
+FieldSelected <> {},
+
+
+@ "COLUMNFILL={",
+\forall i \in FieldSelected (
+	@ rgbColumnField_{i},
+	i < \sup FieldSelected => @ ",",
+),
+@ "};\\\n", 
+
+
+@ "ALIGNTEXT={",
+\forall i \in FieldSelected (
+	@ alignmentColumnField_{i},
+	i < \sup FieldSelected => @ ",",
+),
+@ "}]\"\\\n",
+
+
+/*
+@ "COLUMNFILL={",
+\forall i \in FieldSelected (
+	@ rgbField_{i},
+	i < \sup FieldSelected => @ ",",
+),
+@ "};\\\n",
+
+
+@ "ALIGNTEXT={",
+\forall i \in FieldSelected (
+	@ alignmentField_{i},
+	i < \sup FieldSelected => @ ",",
+),
+@ "}]\"\\\n",
+*/
+
+% [Data source options]:
+@ ("\"[DATAOBJ=" aliasTable ";FILLCOLOR=LINERGB]\"\n\n"),
+
+@ ("Data "aliasTable" '" title "' " aliasTable " "),
+
+@ typeDataUser,
+
+
+
+% FIND
+@ (" 0 \'[FIND={"),
+
+\forall i \in FieldSelected (
+	@ aliasField_{i},
+
+	i < \sup FieldSelected => @ ",",
+),
+
+@ "}]\' ",
+
+
+% DOUBLECLICK
+@ ("  [DOUBLECLICK=" doubleclick "] \\\n"),
+
+
+
+% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[" #FieldSelected ";"),
+
+\forall i \in FieldSelected
+	@ ("(" typeField_{i} "," aliasField_{i} "," nameColumnField_{i} "," formatField_{i} ");"),
+

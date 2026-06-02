@@ -1,0 +1,76 @@
+/******************************************************/
+/*	          	ERP	              	      */
+/*	                                              */
+/*	 	ReadMonthDay.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+? databaseType (
+"ACCESS":
+	sqlMonth = (
+		"SELECT	id,LEFT(name,4)
+		FROM	" DB_PREFIX "ALIAS al
+		WHERE	al.category='CALENDAR' AND al.field='month'
+		ORDER BY al.id"), 
+	;
+
+"ORACLE":
+	sqlMonth = (
+		"SELECT	id,SUBSTR(name,1,10)
+		FROM	" DB_PREFIX "ALIAS al
+		WHERE	al.category='CALENDAR' AND al.field='month'
+		ORDER BY al.id"),	% JZ 0723
+	;
+
+"SQLSERVER":
+	sqlMonth = (
+		"SELECT	id,SUBSTRING(name,1,10)
+		FROM	" DB_PREFIX "ALIAS al
+		WHERE	al.category='CALENDAR' AND al.field='month'
+		ORDER BY al.id"),
+),
+
+
+
+
+(SQL:  sqlMonth), 
+
+
+MONTH = [1,()],
+MONTH = [1,12],	% JZ 23
+
+\forall m \in MONTH0
+	nameMonth_{m} :: "",
+
+\forall m \in MONTH (
+	idMonth_{m}	:: "",
+
+	idMonth_{m}	= (),
+	nameMonth_{m}	= (),
+),
+
+MONTH_SET = (
+	"{" [\forall i \in MONTH (nameMonth_{i} ",")][-\infty..-2] "}"
+),
+
+
+
+(SQL :  "SELECT	name
+	FROM 	" DB_PREFIX "ALIAS
+	WHERE 	category='CALENDAR' AND field='weekday'
+	ORDER BY id"),
+
+7 = (),
+\forall i \in [1,7] (
+	nameDay_{i} :: "",
+	nameDay_{i} = (),
+),
+
+WEEK_SET = (
+	"{" [\forall i \in [1,7] (nameDay_{i} ",")][-\infty..-2] "}"
+),
+

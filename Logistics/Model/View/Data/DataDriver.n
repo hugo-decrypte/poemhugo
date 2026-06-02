@@ -1,0 +1,28 @@
+%==================================================%
+%                                                  %
+%           	Logistics               		   %
+%                                                  %
+%  		   DataDriver.n					  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+@ ("Data DRIVER 'Driver' DRIVER "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[3;(string,IDDRIVER," TAG_DRIVER_ID ",,15.0.80,0);(string,NAMEDRIVER," TAG_DRIVER_NAME ",,50.0.300,0);\\\n"),
+@ ("(date,TOMORROW," TAG_TOMORROW ",,8.0.100,1,YYYYMMDD);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT dr.id AS IDDRIVER,\
+ "SQL_CONCAT"trim(dr.LastName) "SQL_CONCATWITH" ', ' "SQL_CONCATWITH" dr.FirstName"SQL_CONCATEND" as NAMEDRIVER,\
+ "SQL_FORMATDATE"("SQL_CURRENTDATE"+1, '"SQL_FORMATDATENUM "') as TOMORROW \
+ FROM " DB_PREFIX "DRIVER dr \
+ ORDER BY dr.Id\"\n\n\n"),
+ 
+
+
+

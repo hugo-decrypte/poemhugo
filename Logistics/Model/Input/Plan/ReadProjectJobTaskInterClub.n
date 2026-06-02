@@ -1,0 +1,207 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%      						   %
+%      	   ReadProjectJobTaskInterClub.n	   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+
+	% IdProjectClubSub
+	(SQL : "SELECT	DISTINCT id FROM " DB_PREFIX "PROJECT" SQL_WHERE_CLUB), 
+
+	IdProjectClubSub = \{ \forall i \in [1,()] () \},
+
+
+	% IdJobClubSub 
+	(SQL : "SELECT	DISTINCT id
+		FROM	" DB_PREFIX "JOB
+		WHERE	idProject IN(	SELECT	DISTINCT id
+					FROM	" DB_PREFIX "PROJECT o "
+					SQL_WHERE_CLUB_o") " SQL_AND_CLUB " "),
+
+	IdJobClubSub = \{ \forall i \in [1,()] () \},
+
+
+	% IdTaskClubSub
+	(SQL : "SELECT	DISTINCT id
+		FROM	" DB_PREFIX "TASK
+		WHERE	idProject IN(	SELECT	DISTINCT id
+					FROM	" DB_PREFIX "PROJECT o "
+					SQL_WHERE_CLUB_o ") " SQL_AND_CLUB " "),
+
+	IdTaskClubSub = \{ \forall i \in [1,()] () \},
+
+	
+
+
+	% Inter-Club Preceding Constraints Between Projects
+	idClubActive \in IdClubRelatedLogin && #IdClubRelatedLogin > 1 => (
+		ruleSchedulingBackward => (
+			ProjectWithPrecInterClubProject = {},
+
+			ProjectWithSuccInterClubProject = \{
+				\forall o \in Project
+				(IdSuccProject_{o} \setminus IdProjectClubSub <> {} ? o : 0)
+			\} \setminus 0,
+			;
+
+			ProjectWithPrecInterClubProject = \{
+				\forall o \in Project
+				(IdPrecProject_{o} \setminus IdProjectClubSub <> {} ? o : 0)
+			\} \setminus 0,
+
+			ProjectWithSuccInterClubProject = {},		
+		),
+		;
+
+		ProjectWithPrecInterClubProject = {},
+		ProjectWithSuccInterClubProject = {},
+	),
+
+	\forall o \in ProjectWithPrecInterClubProject (
+		(SQL:  "SELECT	t1Plan,t2Plan
+			FROM	" DB_PREFIX "PROJECT
+			WHERE	state>='" STATE_PLANNED "' AND
+				id IN (" concatSetQuoted(IdPrecProject_{o} \setminus IDPROJECT) ")"),
+
+		TimeClubPrecProject_{o} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubPrecProject_{o} = [(),()],
+			;
+			TimeClubPrecProject_{o} = {},
+		),
+	),
+
+	\forall o \in ProjectWithSuccInterClubProject (
+		(SQL:  "SELECT	t1Plan,t2Plan
+			FROM	" DB_PREFIX "PROJECT
+			WHERE	state>='" STATE_PLANNED "' AND
+				id IN (" concatSetQuoted(IdSuccProject_{o} \setminus IDPROJECT) ")"),
+
+		TimeClubSuccProject_{o} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubSuccProject_{o} = [(),()],
+			;
+			TimeClubSuccProject_{o} = {},
+		),
+	),
+
+
+	% Inter-Club Preceding Constraints Between Jobs
+	idClubActive \in IdClubRelatedLogin && #IdClubRelatedLogin > 1 => (
+		ruleSchedulingBackward => (
+			JobWithPrecInterClubJob = {},
+
+			JobWithSuccInterClubJob = \{
+				\forall j \in Job
+				(IdSuccJob_{j} \setminus IdJobClubSub <> {} ? j : 0)
+			\} \setminus 0,
+			;
+
+			JobWithPrecInterClubJob = \{
+				\forall j \in Job
+				(IdPrecJob_{j} \setminus IdJobClubSub <> {} ? j : 0)
+			\} \setminus 0,
+
+			JobWithSuccInterClubJob = {},
+		),
+		;
+
+		JobWithPrecInterClubJob = {},
+		JobWithSuccInterClubJob = {},
+	),
+
+	\forall j \in JobWithPrecInterClubJob ( 
+		(SQL:  "SELECT	MIN(t1Task) AS minT1Task,MAX(t2Task) AS maxT2Task
+			FROM	" DB_PREFIX "PLAN
+			WHERE	state>=" STATE_PLANNED " AND
+				idJob IN (" concatSetQuoted(IdPrecJob_{j} \setminus IDJOB) ")"),	
+
+		TimeClubPrecJob_{j} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubPrecJob_{j} = [(),()],
+			;
+			TimeClubPrecJob_{j} = {},
+		),
+	),
+
+	\forall j \in JobWithSuccInterClubJob (
+		(SQL:  "SELECT	MIN(t1Task) AS minT1Task,MAX(t2Task) AS maxT2Task
+			FROM	" DB_PREFIX "PLAN
+			WHERE	state>=" STATE_PLANNED " AND
+				idJob IN (" concatSetQuoted(IdSuccJob_{j} \setminus IDJOB) ")"),	
+
+		TimeClubSuccJob_{j} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubSuccJob_{j} = [(),()],
+			;
+			TimeClubSuccJob_{j} = {},
+		),
+	),
+
+
+	% Inter-Club Preceding Constraints Between Tasks
+	idClubActive \in IdClubRelatedLogin && #IdClubRelatedLogin > 1 => (
+		ruleSchedulingBackward => (
+			TaskWithPrecInterClubTask = {},
+
+			TaskWithSuccInterClubTask = \{
+				\forall i \in Task
+				(IdSuccTask_{i} \setminus IdTaskClubSub <> {} ? i : 0)
+			\} \setminus 0,
+			;
+
+			TaskWithPrecInterClubTask = \{
+				\forall i \in Task
+				(IdPrecTask_{i} \setminus IdTaskClubSub <> {} ? i : 0)
+			\} \setminus 0,
+
+			TaskWithSuccInterClubTask = {},
+		),	
+		;
+
+		TaskWithPrecInterClubTask = {},
+		TaskWithSuccInterClubTask = {},
+	),
+
+	\forall i \in TaskWithPrecInterClubTask (
+		(SQL:  "SELECT	MIN(t1Task) AS minT1Task,MAX(t2Task) AS maxT2Task
+			FROM	" DB_PREFIX "PLAN
+			WHERE	state>=" STATE_PLANNED " AND
+				idTask IN (" concatSetQuoted(IdPrecTask_{i} \setminus IDTASK) ")"),
+
+		TimeClubPrecTask_{i} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubPrecTask_{i} = [(),()] \setminus DefaultDateTime,
+			;
+			TimeClubPrecTask_{i} = {},
+		),
+	),
+
+	\forall i \in TaskWithSuccInterClubTask (
+		(SQL:  "SELECT	MIN(t1Task) AS minT1Task,MAX(t2Task) AS maxT2Task
+			FROM	" DB_PREFIX "PLAN
+			WHERE	state>=" STATE_PLANNED " AND
+				idTask IN (" concatSetQuoted(IdSuccTask_{i} \setminus IDTASK) ")"),
+
+		TimeClubSuccTask_{i} :: DefaultDateTime,
+
+		() > 0 => (
+			TimeClubSuccTask_{i} = [(),()] \setminus DefaultDateTime,
+			;
+			TimeClubSuccTask_{i} = {},
+		),
+	),
+
+	database <- '()',
+),

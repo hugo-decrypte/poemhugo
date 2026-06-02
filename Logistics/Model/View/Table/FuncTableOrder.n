@@ -1,0 +1,128 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	       	   %
+%                                                  %
+%  		 FuncTableOrder.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableOrder>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),	% JZ 0926 A
+		viewFile = ("TableOrder" postfix),
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		related = "" => (
+			(
+				@ ("(string,IDAGENCY," TAG_AGENCY_ID ",,15,0);(string,NAMEAGENCY," TAG_AGENCY_NAME ",,50,0);\\\n"),
+				@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,15.0.80,0);\\\n"),
+			
+				@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+			),
+			;
+			(
+				@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+			),
+		),	
+
+		
+		@ VIEWSQL,
+		
+		
+		@ ("SELECT cm.id AS ID, cm.idClient AS IDCLIENT, cl.name as NAMECLIENT,\\\n"),
+ 		@ ("\t\t cm.idAgency AS IDAGENCY,\\\n"),
+		@ ("\t\t (select ay.Name from " DB_PREFIX "AGENCY ay where ay.id=cm.idAgency) as NAMEAGENCY,\\\n"),
+ 		@ ("\t\t (select "SQL_CONCAT"trim(Address)"SQL_CONCATWITH""SQL_CASEWHEN"AddressSup is not NULL and AddressSup>' '"SQL_THEN" ', '"SQL_CONCATWITH"trim(AddressSup) "SQL_ELSE" ' '"SQL_CASEEND""SQL_CONCATEND" from (/*DBOWNER*/)" DB_PREFIX "POINTDELIVERY p where p.IdClient=cm.IdClient and p.IdPoint=cm.IdPointDelivery) as ADDRESSDELIVERY,\\\n"),
+ 		@ ("\t\t (select "SQL_CONCAT"trim(PostCode) "SQL_CONCATWITH" '-' "SQL_CONCATWITH" City "SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY p where p.IdClient=cm.IdClient and p.IdPoint=cm.IdPointDelivery) as CITYDELIVERY,\\\n"),
+		@ ("\t\t cm.dateOrder as DATEORDER,\\\n"),
+ 		@ ("\t\t cm.dateDelivery as DATEDELIVERY,\\\n"),
+ 		@ ("\t\t (select "SQL_CONCAT"trim(LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" ID "SQL_CONCATWITH" ')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.ID=cm.idState and s.CATEGORY='ORDER') as IDSTATE,\\\n"),
+ 		@ ("\t\t (select count(1) from " DB_PREFIX "ORDER_PRODUCT lc where lc.idOrder=cm.id) as NBPRODUCT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(cm.quantity,"SQL_FORMATSCALE0")      AS QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(cm.quantityRest,"SQL_FORMATSCALE0")  AS QUANTITYREST,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(cm.AmountHT,"SQL_FORMATSCALE2")      AS PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(cm.NbPallet,"SQL_FORMATSCALE1")      AS NBPALLET,\\\n"),
+ 		@ ("\t\t (select "SQL_FORMATNUM"(sum(lc.QuantityRest*a.Weight),"SQL_FORMATSCALE0") from " DB_PREFIX "ORDER_PRODUCT lc inner join " DB_PREFIX "PRODUCT a on a.Id=lc.IdProduct where lc.idOrder=cm.id) as WEIGHTREST,\\\n"),
+		@ ("\t\t cm.Incoterm as INCOTERM,\\\n"),
+		@ ("\t\t cm.IdInvoice as IDINVOICE,\\\n"),
+		@ ("\t\t cm.IdProforma as IDPROFORMA,\\\n"),
+		@ ("\t\t cm.Reference as REFERENCE,\\\n"),
+		@ ("\t\t cm.Comments as COMMENTS,\\\n"),
+  		@ ("\t\t "SQL_CASEWHEN"cm.idState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='ORDER')"SQL_THEN"\\\n"),
+		@ ("\t\t    (select Color from " DB_PREFIX "STATE s where s.Id=cm.idState and s.CATEGORY='ORDER')"SQL_ELSE"\\\n"),
+   		@ ("\t\t '(255 255 255)'"SQL_CASEEND" AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "CLIENTORDER cm, " DB_PREFIX "CLIENT cl \\\n"),
+		@ ("\t WHERE cm.idClient=cl.id \\\n"),
+			
+
+		related = "" => (
+		(
+  			@ ("\t AND (cm.idState is NULL or cm.idState<>'9')\\\n"),
+			@ ("\t ORDER BY cm.dateOrder desc, cm.id\"\n\n\n"), 
+		),
+		;
+
+		(
+			@ ("\t AND (cm.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)) )\\\n"),
+  			@ ("\t AND ( (exists (select 1 from " DB_PREFIX "ORDER_PRODUCT lcm where lcm.idOrder=cm.id and lcm.(/*OWNERSUBOBJ*/) in ((/*IDSUBOBJ*/))) and cm.idState<>'9') or 'XXX' in ((/*IDSUBOBJ*/)) ) \\\n"),
+  			@ ("\t AND ('XXX' in ((/*IDTOUR*/)) or not exists (select 1 from " DB_PREFIX "DELIVERY d where d.id='D'+cm.id and cm.QuantityRest>0) ) \\\n"),
+			@ ("\t ORDER BY cm.id\"\n\n\n"),
+
+		),
+		),
+
+
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2EditOrder.n"],
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableOrderProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableProductForOrder.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableDeliveryMenu.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2PrintConfirmation.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2PrintProforma.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2PrintInvoice.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2PrintDelivery.n"],
+
+
+		related = "" => (
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2EditOnView.n"],
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableState.n"],
+		),
+
+
+
+		related = "" => (
+			['Work Directory' "Model\View\Data\DataClient.n"],
+			['Work Directory' "Model\View\Data\DataState.n"],
+		),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

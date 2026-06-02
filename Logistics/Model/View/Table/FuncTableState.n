@@ -1,0 +1,65 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableState.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableState>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableState" postfix),
+		
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+
+
+
+		@ ("SELECT s.id AS ID,\\\n"),
+		@ ("\t\t s.Label AS LABEL,\\\n"),
+		@ ("\t\t s.Comments AS COMMENTS,\\\n"),
+		@ ("\t\t s.Color AS COLOR,\\\n"),
+		@ ("\t\t s.Category AS CATEGORY,\\\n"),
+		@ ("\t\t s.Color AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "STATE s \\\n"),
+
+		related <> "" =>
+			@ ("\t WHERE s.Category=(/*CATEGORY*/) \\\n"),
+
+		@ ("\t ORDER BY s.Category, s.Id \"\n\n\n"), 
+
+
+
+
+
+		related <> "" => (
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableState2EditOnView.n"],
+			;
+
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableState2EditState.n"],
+		),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

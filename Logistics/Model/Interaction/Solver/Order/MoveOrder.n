@@ -1,0 +1,121 @@
+/******************************************************/
+/*	          	Logistocs	              */
+/*                                                    */
+/*	       		MoveOrder.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	idTour2Relaxed = (idVehicle2Selected "-" idxTourVehicle2Selected),
+
+	Tour2Relaxed = \{ tourId_{idTour2Relaxed} \},
+
+
+
+
+	% PreSolving
+	['Work Directory' "Model\Common\Solver\ParameterizeResourceTime.n"],
+	['Work Directory' "Model\Common\Solver\ParameterizeObjective.n"],
+	%['Work Directory' "Model\Solver\ParameterizeTimeDistance.n"],
+
+
+
+
+	( TAG_SELECTION_ERROR :
+		['Work Directory' "Model\Relaxation\InitRelaxation.n"],
+	),
+
+
+
+	% IdOrderTour1Relaxed
+	\forall s \in [1, nbSelected] (
+		idSiteOrderSelected_{s} = idSiteOrderBuffer_{orderIdBuffer_{idOrderSelected_{s}}},
+
+		IdOrderSiteSelected_{s} = \{
+			\forall o \in ORDER
+			(idSiteOrderBuffer_{o} = idSiteOrderSelected_{s} ? idOrderBuffer_{o} : "")
+		\}
+		\setminus "",
+
+		OrderSiteSelected_{s} = \{ \forall i \in IdOrderSiteSelected_{s} orderIdBuffer_{i} \},
+
+
+		Tour1Selected_{s} = \{
+			\forall o \in OrderSiteSelected_{s}
+			(idSiteOrderBuffer_{o} = idSiteOrderSelected_{s} ? tourOrderBuffer_{o} : 0)
+		\} \setminus 0 \setminus Tour2Relaxed,
+
+		Tour1Selected_{s} \subset TourActiveBuffer,
+	),
+
+
+	IdOrderTour1Relaxed = \bigcup_{s \in [1, nbSelected]}{IdOrderSiteSelected_{s}},
+
+	( idOrderSelected_{1} " " TAG_NOT_MOVABLE_TO_SAME_TOUR " " idTour2Relaxed :
+		#IdOrderTour1Relaxed > 0,
+	),
+
+
+
+	Tour1Relaxed = \bigcup_{s \in [1, nbSelected]}{Tour1Selected_{s}},
+
+
+
+	OrderTour1Relaxed = \bigcup_{s \in [1, nbSelected]}{OrderSiteSelected_{s}},
+
+
+
+	TourRelaxed = Tour1Relaxed \cup Tour2Relaxed,
+
+
+	% Global variable
+	\forall t \in TourActiveBuffer
+		mileageTour_{t} :: 0,
+
+	loop = 0,
+
+	TourToRelaxBuffer = TourRelaxed,
+
+	Swap_oBuffer = Swap_o,
+	Swap_iBuffer = Swap_i,
+
+	tour_oBuffer = tour_o,
+	tour_iBuffer = tour_i,
+
+	ResultWithSolution = \{
+		'all solutions found',
+		'optimal solution proved',
+		'approximate solution found',
+		'stopped with solution'
+	\},
+
+
+	result = [['Work Directory' "Model\Solver\SolveMoveOrderTSPs.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+
+
+	result \in ResultWithSolution => (
+		\forall t \in TYPEVEHICLE (
+			maxQuantityTypeVehicle_{t} 	= (maxQuantity0TypeVehicle_{t} = 0 ? +\infty : maxQuantity0TypeVehicle_{t}),
+			maxWeightTypeVehicle_{t} 	= (maxWeight0TypeVehicle_{t} = 0.0 ? +\infty : maxWeight0TypeVehicle_{t}),
+			maxVolumeTypeVehicle_{t} 	= (maxVolume0TypeVehicle_{t} = 0.0 ? +\infty : maxVolume0TypeVehicle_{t}),
+		),
+
+
+		[['Work Directory' "Model\Output\WriteSolution.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+		;
+
+		result = TAG_CAPACITY_INSUFFICIENT => (
+			quantityMoveOrder = \sum_{o \in OrderTour1Relaxed}{quantityOrderBuffer_{o}},
+			weightMoveOrder = \sum_{o \in OrderTour1Relaxed}{weightOrderBuffer_{o}},
+			volumeMoveOrder = \sum_{o \in OrderTour1Relaxed}{volumeOrderBuffer_{o}},
+
+			(result " : " quantityMoveOrder " " weightMoveOrder " " volumeMoveOrder : false),
+			;
+
+			(result : false),
+		),
+	),
+),
+

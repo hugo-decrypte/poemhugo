@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTablePrevisionProduct.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTablePrevisionProduct.n"],
+
+'@' => (
+	tablePrevisionProduct("",TAG_TABLE,"PREVISIONPRODUCT",true,"", TAG_SALES_PREVISION_QUANTITY, "", ""), 
+),

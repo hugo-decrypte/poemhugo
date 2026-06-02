@@ -1,0 +1,41 @@
+View ViewTableRESOURCEABSENCE 'Absences : [, ]' 'Absences : [, ]'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableRESOURCEABSENCE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Absences : [, ];FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Center,Center,Center,Center,Left,Left,Center}]"\
+"[DATAOBJ=RESOURCEABSENCE;FILLCOLOR=LINERGB]"
+
+Data RESOURCEABSENCE 'Absences : [, ]' RESOURCEABSENCE HTTPSQL 0 '[FIND={NAMECLUB,IDRESOURCE,DATESTART,TIMESTART,DATEEND,TIMEEND,NAMETYPEABSENCE,COMMENTS,NAMESTATE}]'   [DOUBLECLICK=] \
+"[9;(string,NAMECLUB,Division,,10,,);(string,IDRESOURCE,Véhicule,,10,,);(date,DATESTART,Date début,,10,,YYYY-MM-DD|DD/MM/YYYY);(time,TIMESTART,Heure début,,10,,HH:MM);(date,DATEEND,Date fin,,10,,YYYY-MM-DD|DD/MM/YYYY);(time,TIMEEND,Heure fin,,10,,HH:MM);(string,NAMETYPEABSENCE,Type,,10,,);(string,COMMENTS,Alerte,,15,,);(string,NAMESTATE,Etat,,20,,);(color,LINERGB,,,13.0.0);(string,IDRESOURCE,,,);(string,NAMERESOURCE,,,);(string,TYPE,,,);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT 	r.idClub 			AS IDCLUB,\
+				(SELECT clb.name FROM CLUB clb WHERE clb.id=r.idClub) 	AS NAMECLUB, \
+	    			rr.idResource			AS IDRESOURCE, \
+				r.name				AS NAMERESOURCE, \
+				rr.idTypeAbsence 		AS TYPEABSENCE, \
+				t.name				AS NAMETYPEABSENCE, \
+				rr.dateStart 			AS DATESTART,\
+				rr.dateEnd 			AS DATEEND,\
+				rr.timeStart			AS TIMESTART,\
+				rr.timeEnd			AS TIMEEND,\
+				rr.duration			AS DURATION,\
+				rr.state 			AS STATE,\
+				(SELECT al.name FROM ALIAS al WHERE al.category='ACTIVITY' AND al.field='state' AND al.id=rr.state) AS NAMESTATE,\
+				IIF(EXISTS(SELECT 1 FROM RESOURCE_ABSENCE rr1 WHERE rr1.idResource=rr.idResource AND rr1.dateStart+rr1.timeStart<>rr.dateStart+rr.timeStart AND rr1.dateStart+rr1.timeStart<rr.dateEnd+rr.timeEnd AND rr1.dateEnd+rr1.timeEnd>=rr.dateStart+rr.timeStart),'Alerte doublon',IIF(rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd,'Alerte dates invalides',rr.comments)) AS COMMENTS,\
+				IIF(EXISTS(SELECT 1 FROM RESOURCE_ABSENCE rr1 WHERE rr1.idResource=rr.idResource AND rr1.dateStart+rr1.timeStart<>rr.dateStart+rr.timeStart AND rr1.dateStart+rr1.timeStart<rr.dateEnd+rr.timeEnd AND rr1.dateEnd+rr1.timeEnd>=rr.dateStart+rr.timeStart),(SELECT al.color FROM ALIAS al WHERE al.category='HIGHLIGHT' AND al.field='alert' AND al.id='0'),IIF(rr.idResource=(SELECT u.idResource FROM USER u WHERE u.id='(/*USERID*/)'),'(255 140 0)',IIF(rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd,'(255 0 0)',(SELECT al.color FROM ALIAS al WHERE al.category='ACTIVITY' AND al.field='state' AND al.id=rr.state)))) AS LINERGB \
+	 FROM (RESOURCE r INNER JOIN RESOURCE_ABSENCE rr ON rr.idResource=r.id)\
+	 	LEFT JOIN TYPEABSENCE t ON t.id=rr.idTypeAbsence \
+	 WHERE r.id=rr.idResource \
+	 AND r.id IN ((/*IDOBJ*/)) \
+	 AND (rr.dateEnd>=format(DateAdd('d',-37,Date()),'DD/MM/YYYY') OR rr.state<>'9' OR rr.state IS NULL)\
+ AND EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=r.idClub AND ( usr.permission>='1' OR usr.idResource=r.id))  ORDER BY rr.idResource,rr.dateStart DESC,rr.timeStart DESC"
+
+
+Script EditResourceAbsence 'Editer' _ 1 'Editer' _ 'tableResourceAbsence' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE RESOURCE_ABSENCE&idResource in ({/*selected(tableRESOURCEABSENCE;1;(string,IDRESOURCE))*/}) AND dateStart in ({/*selected(tableRESOURCEABSENCE;1;(string,DATESTART))*/}) AND timeStart in ({/*selected(tableRESOURCEABSENCE;1;(string,TIMESTART))*/})"\
+Reload _ _ _ _ 
+
+

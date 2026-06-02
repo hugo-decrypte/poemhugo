@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableOfferSupply.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOfferSupply.n"],
+
+'@' => (
+	tableOfferSupply("OFFERPRODUCT",TAG_TABLE,"OFFERPRODUCT",true,"",TAG_OFFER_PRODUCT,""),
+),

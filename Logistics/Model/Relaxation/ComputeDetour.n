@@ -1,0 +1,233 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ComputeDetour.n			   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+\forall o \in OrderSinkActiveBuffer
+	prevOrderBuffer_{o} \in SourceActiveOrderBuffer,
+
+\forall o \in SourceActiveOrderBuffer
+	prevOrderBuffer_{nextOrderBuffer_{o}} = o,
+
+
+\forall o \in SourceOrderSinkActiveBuffer
+	siteOrderBuffer_{o} = siteId_{idSiteOrderBuffer_{o}},
+
+
+\forall t \in TourActiveBuffer (
+	SiteTour_{t} \subset SiteOrder,
+	SiteTour_{t} = \{ \forall o \in OrderTourBuffer_{t} siteOrderBuffer_{o} \},
+	SiteTour_{t} <> {},
+
+	maxDistTour_{t} = \max_{s<>i \in SiteTour_{t}}{dSiteSite_{s,i}},
+	#SiteTour_{t} < 2 -> 0 = maxDistTour_{t},
+
+	\forall o \in ORDER (
+		minDistOrderTour_{t,o} = \min_{s \in SiteTour_{t}}{dOrderSite_{s,o}},
+	),
+),
+
+
+
+/*
+% Reciprocal distance method
+\forall t \in TourActiveBuffer
+\forall s,i \in SiteOrder
+	distSiteSiteTour_{t,s,i} = dSiteSite1Tour_{t,s} + dSiteSite_{s,i} + dSite2TourSite_{i,t},	% ????????
+*/
+
+% Greatest triangle area method
+% Heron's formula
+% area = \sqrt{s (s-a) (s-b) (s-c)}
+% s = (a + b + c) / 2
+
+<areaSquareTriangle>(t1,t2, v1,v2)
+(
+	sAreaSite = (dSiteSite1Tour_{t1,v1} + dSiteSite_{v1,v2} + dSite2TourSite_{v2,t2}) / 2,
+
+	areaSquareTriangle =
+		sAreaSite *
+		(sAreaSite - dSiteSite1Tour_{t1,v1}) *
+		(sAreaSite - dSiteSite_{v1,v2}) *
+		(sAreaSite - dSite2TourSite_{v2,t2}),
+),
+
+/*<areaSquareVertex2Vertex1Tour2Tour1>(t1,t2, SiteTour1, v2)
+(
+	SiteTour1 \subset SiteOrder,
+
+	\forall v1 \in SiteTour1
+		sAreaVertex_{v1} = (dSiteSite1Tour_{t1,v1} + dSiteSite_{v1,v2} + dSite2TourSite_{v2,t2}) / 2,
+
+	areaSquareVertex2Vertex1Tour2Tour1 = \max_{v1 \in SiteTour1}{
+		sAreaVertex_{v1} *
+		(sAreaVertex_{v1} - dSiteSite1Tour_{t1,v1}) *
+		(sAreaVertex_{v1} - dSiteSite_{v1,v2}) *
+		(sAreaVertex_{v1} - dSite2TourSite_{v2,t2})
+	},
+
+	SiteTour1 = {} -> areaSquareVertex2Vertex1Tour2Tour1 = 0.0,
+),
+
+<Vertex2TriangleVertex2Vertex1Tour2Tour1>(
+	t1,t2, SiteTour1,SiteTour2, site1Tour1,site2Tour2,
+	areaSquare)
+(
+	'()' => (
+		SiteTour1 \subset SiteOrder,
+		SiteTour2 \subset SiteOrder,
+
+		\forall v2 \in SiteTour2 (
+			%\forall v1 \in SiteTour1
+			%	sAreaVertexVertex_{v1,v2} = (dSiteSite1Tour_{t1,v1} + dSiteSite_{v1,v2} + dSite2TourSite_{v2,t2}) / 2,
+
+			areaSquareSiteTour2_{v2} = \max_{v1 \in SiteTour1}{
+				areaSquareSiteSiteTour_{t1,v1,v2}
+
+				%sAreaVertexVertex_{v1,v2} *
+				%(sAreaVertexVertex_{v1,v2} - dSiteSite1Tour_{t1,v1}) *
+				%(sAreaVertexVertex_{v1,v2} - dSiteSite_{v1,v2}) *
+				%(sAreaVertexVertex_{v1,v2} - dSite2TourSite_{v2,t2})
+			},
+
+			SiteTour1 = {} -> areaSquareSiteTour2_{v2} = 0.0,
+		),
+
+		areaSquare = \max_{v2 \in SiteTour2}{areaSquareSiteTour2_{v2}},
+		SiteTour2 = {} -> areaSquare = 0.0,
+
+		Vertex2TriangleVertex2Vertex1Tour2Tour1 = \{
+			\forall v2 \in SiteTour2 (
+				areaSquareSiteTour2_{v2} >= areaSquare ? v2 : 0
+			)
+		\} \setminus 0,
+	),
+),*/
+
+\forall t1,t2 \in TourActiveBuffer (
+	SiteTour_{t2} \subset SiteOrder,
+
+	\forall v2 \in SiteTour_{t2} (
+		areaSquareSite1Tour2Tour1_{t1,t2,v2} = \max_{v1 \in SiteTour_{t1}}{
+			areaSquareSiteSiteTour_{t1,v1,v2}
+		},
+
+		SiteTour_{t1} = {} -> areaSquareSite1Tour2Tour1_{t1,t2,v2} = 0.0,
+	),
+
+	areaSquareTour2Tour1_{t1,t2} = \max_{v2 \in SiteTour_{t2}}{areaSquareSite1Tour2Tour1_{t1,t2,v2}},
+	SiteTour_{t2} = {} -> areaSquareTour2Tour1_{t1,t2} = 0.0,
+
+	Vertex2Tour2Tour1_{t1,t2} = \{
+		\forall v2 \in SiteTour_{t2} (
+			areaSquareSite1Tour2Tour1_{t1,t2,v2} >= areaSquareTour2Tour1_{t1,t2} ? v2 : 0
+		)
+	\} \setminus 0,
+
+
+	/*Vertex2Tour2Tour1_{t1,t2} = Vertex2TriangleVertex2Vertex1Tour2Tour1(
+		t1,t2,
+		SiteTour_{t1},SiteTour_{t2},
+		siteId_{idSite1TourBuffer_{t1}},siteId_{idSite2TourBuffer_{t1}},
+		areaSquareTour2Tour1_{t1,t2}
+	),*/
+),
+
+VERTEX2 \subset SiteOrder,
+VERTEX2 = \bigcup_{t1,t2 \in TourActiveBuffer}{Vertex2Tour2Tour1_{t1,t2}},
+
+\forall o \in ORDER (
+	\forall s \in VERTEX2
+		dSiteSite1TourOrder_{o,s} =
+		dSiteSite1Tour_{tourOrderBuffer_{o},s},
+
+	\forall s \in SiteOrder (
+		detourSiteOrderTourOrder_{o,s} =
+		detourSiteOrderTour_{tourOrderBuffer_{o},o,s},
+
+		areaSquareSiteOrderTourOrder_{o,s} =
+		areaSquareSiteOrderTour_{tourOrderBuffer_{o},o,s},
+	),
+),
+
+\forall o \in ORDER
+\forall t \in TourActiveBuffer (
+	VertexIfTourOrder_{o,t} \subset SiteOrder,
+	VertexIfTourOrder_{o,t} = Vertex2Tour2Tour1_{tourOrderBuffer_{o}, t},
+
+	VertexTourOrder_{o,t} \subset SiteOrder,
+	VertexTourOrder_{o,t} = Vertex2Tour2Tour1_{t, tourOrderBuffer_{o}},
+
+
+/*	areaSquareOrderTour1_{t,o} = \max_{v1 \in VertexTourOrder_{o,t}}{
+		areaSquareSiteOrderTourOrder_{o,v1}
+	},
+	VertexTourOrder_{o,t} = {} -> areaSquareOrderTour1_{t,o} = 0.0,
+
+	moreVertex1IfOrderTour2_{t,o} =
+		areaSquareOrderTour1_{t,o} > areaSquareTour2Tour1_{tourOrderBuffer_{o},t},
+
+	\forall s \in VertexIfTourOrder_{o,t}
+		detourIfSiteOrderTour2_{t,o,s} = (
+			moreVertex1IfOrderTour2_{t,o} ?
+			detourOrderSiteTour_{t,s,o}
+			:
+			detourSiteOrderTour_{t,o,s}
+		),
+
+*/
+
+	areaSquareOrderTour1_{t,o} = \max_{v1 \in VertexTourOrder_{o,t}}{
+		areaSquareSiteOrderTourOrder_{o,v1}
+	},
+	VertexTourOrder_{o,t} = {} -> areaSquareOrderTour1_{t,o} = 0.0,
+
+	moreVertex1IfOrderTour2_{t,o} =
+		areaSquareOrderTour1_{t,o} > areaSquareTour2Tour1_{tourOrderBuffer_{o},t},
+
+	\forall s \in VertexIfTourOrder_{o,t}
+		detourIfSiteOrderTour2_{t,o,s} = (
+			moreVertex1IfOrderTour2_{t,o} ?
+			%dOrderSite1Tour_{t,o} > dSiteSite1Tour_{t,s} ?
+			detourOrderSiteTour_{t,s,o}
+			:
+			detourSiteOrderTour_{t,o,s}
+		),
+
+
+
+	% detourIfTourOrder
+	detourIfTourOrder_{o,t} = \max_{s \in VertexIfTourOrder_{o,t}}{
+		detourIfSiteOrderTour2_{t,o,s}
+	},
+	VertexIfTourOrder_{o,t} <> {},
+
+	% detourOrderTour
+	detourTourOrder_{o,t} = \max_{s \in VertexTourOrder_{o,t}}{
+		detourSiteOrderTourOrder_{o,s}
+	},
+	VertexTourOrder_{o,t} <> {},
+),
+
+\forall t \in TourActiveBuffer (
+	\forall o \in ORDER
+		improvementIfTourOrder_{o,t} = detourTourOrder_{o,t} - detourIfTourOrder_{o,t},
+
+	\forall s \in SiteOrder
+	\forall t1 \in TourActiveBuffer
+		improvementIfTourTourSite_{s,t1,t} :: 0,
+
+	\forall o \in ORDER (
+		improvementIfTourTourSite_{siteOrderBuffer_{o},tourOrderBuffer_{o},t} =
+		improvementIfTourOrder_{o,t},
+	),
+),
+
+\forall t \in TourActiveBuffer (
+	SpanTourBuffer_{t} = [t1TourBuffer_{t}, t2TourBuffer_{t}],
+),
+

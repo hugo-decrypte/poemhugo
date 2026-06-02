@@ -1,0 +1,168 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 SetToDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+
+	
+	idOrderSelectedBuffer 			:: "",
+	dateDeliveryBuffer				:: 0,
+	
+	idOrderSelectedBuffer 	= (),
+	dateDeliveryBuffer		= (),
+
+
+	'()' <- database,
+
+	databaseType = "ACCESS" => (
+		SetToDelivery_SQL1 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set QuantityDelivered=0 where IdOrder='"idOrderSelectedBuffer"' "
+		),
+		SetToDelivery_SQL2 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=Quantity where IdOrder='"idOrderSelectedBuffer"' "
+		),
+		SetToDelivery_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct set
+			OP.QuantityDelivered=OP.QuantityDelivered+DP.QuantityReal,
+			OP.QuantityRest=OP.QuantityRest-DP.QuantityReal
+			where OP.IdOrder='"idOrderSelectedBuffer"'"
+		),
+		;
+
+		SetToDelivery_SQL1 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set
+				QuantityDelivered=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdOrder=ORDER_PRODUCT.IdOrder and DP.IdProduct=ORDER_PRODUCT.IdProduct),
+				QuantityRest=OP.Quantity-(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdOrder=ORDER_PRODUCT.IdOrder and DP.IdProduct=ORDER_PRODUCT.IdProduct)
+			where OP.IdOrder='"idOrderSelectedBuffer"'"
+		),
+		SetToDelivery_SQL2 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set QuantityDelivered=0 where IdOrder='"idOrderSelectedBuffer"' and QuantityDelivered is NULL "
+		),
+		SetToDelivery_SQL3 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=Quantity where IdOrder='"idOrderSelectedBuffer"' and QuantityRest is NULL "
+		),
+	),
+	SetToDelivery_SQL4 = (
+		"INSERT INTO " DB_PREFIX "DELIVERY
+		(IdClub, Id, IdClient, IdPointDelivery, DateDelivery, IdAgency, Quantity, QuantityReal,
+		Comments, IdState) 
+		select O.IdClub, "SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND", O.IdClient, O.IdPointDelivery, '"dateDeliveryBuffer"', O.IdAgency, O.QuantityRest, O.QuantityRest,
+		"SQL_CONCAT"'Commande '"SQL_CONCATWITH" '"idOrderSelectedBuffer"'"SQL_CONCATEND", '0'
+		from " DB_PREFIX "CLIENTORDER O
+		where O.Id = '"idOrderSelectedBuffer"'
+		and not exists (select 1 from " DB_PREFIX "DELIVERY d where d.Id="SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND") "
+	),
+	SetToDelivery_SQL5 = (
+		"INSERT INTO " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery,IdOrder, IdProduct, NoLine, Quantity, QuantityReal, QuantityOrderRest, QuantityDefective, PriceUnit, Comments, DateDelivery, NoPallet,NoPalletDelivery) 
+		select "SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND", O.Id, OP.IdProduct, 1 as NoLine,
+		0, 0, 0, 0, OP.PriceUnit, OP.Comments, '"dateDeliveryBuffer"', 1, OP.NoPallet
+		from " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on OP.IdOrder=O.Id
+		where O.Id='"idOrderSelectedBuffer"'
+		and OP.QuantityRest>0
+		and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND" and DP.IdOrder=O.Id and DP.IdProduct=OP.IdProduct)"
+	),
+
+	databaseType = "ACCESS" => (
+		SetToDelivery_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "ORDER_PRODUCT OP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct
+			set DP.Quantity=DP.Quantity+OP.QuantityRest, DP.QuantityReal=DP.QuantityReal+OP.QuantityRest, OP.QuantityDelivered=OP.QuantityDelivered+OP.QuantityRest, OP.QuantityRest=0
+			where OP.IdOrder='"idOrderSelectedBuffer"' and DP.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and OP.QuantityRest>0 "
+		),
+		SetToDelivery_SQL6b = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP
+			set OP.QuantityDelivered=OP.QuantityDelivered+OP.QuantityRest, OP.QuantityRest=0
+			where OP.IdOrder='"idOrderSelectedBuffer"'
+			and OP.QuantityRest>0 "
+		),
+
+		SetToDelivery_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "ORDER_PRODUCT OP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct
+			set DP.PriceUnit=OP.PriceUnit
+			where OP.IdOrder='"idOrderSelectedBuffer"' and DP.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and (DP.PriceUnit is NULL or DP.PriceUnit<=0) "
+		),
+		SetToDelivery_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "ORDER_PRODUCT OP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct
+			set DP.IdVAT=OP.IdVAT
+			where OP.IdOrder='"idOrderSelectedBuffer"' and DP.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and (DP.IdVAT is NULL or DP.IdVAT<=' ')"
+		),
+
+		SetToDelivery_SQL9 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT A on DP.IdProduct=A.Id
+			set DP.IdVAT=A.IdVAT
+			where DP.IdOrder='"idOrderSelectedBuffer"' and DP.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and (DP.IdVAT is NULL or DP.IdVAT<=' ')"
+		),
+		;
+
+		SetToDelivery_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set
+				Quantity=Quantity+(select LO.QuantityRest from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='"idOrderSelectedBuffer"' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct), 
+				QuantityReal=QuantityReal+(select LO.QuantityRest  from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='"idOrderSelectedBuffer"' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct) 
+			where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND" "
+		),
+		SetToDelivery_SQL6b = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set
+				QuantityDelivered=QuantityDelivered+QuantityRest, 
+				QuantityRest=0
+			where IdOrder='"idOrderSelectedBuffer"'
+			and QuantityRest>0 "
+		),
+
+		SetToDelivery_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set
+				PriceUnit= (select LO.PriceUnit from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='"idOrderSelectedBuffer"' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct)
+			where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and (PriceUnit is NULL or PriceUnit<=0)"
+		),
+		SetToDelivery_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set
+				IdVAT=(select LO.IdVAT from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='"idOrderSelectedBuffer"' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct)
+			where LO.IdOrder='"idOrderSelectedBuffer"' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"
+			and (IdVAT is NULL or IdVAT<=' ') "
+		),
+
+		SetToDelivery_SQL9 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set\
+				LD.IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where DELIVERY_PRODUCT.IdProduct=P.Id)\
+			where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'"idOrderSelectedBuffer"'"SQL_CONCATEND"\
+			and (IdVAT is NULL or IdVAT<=' ') "
+		),
+	),
+
+	SetToDelivery_SQL10 = (
+		"Update " DB_PREFIX "CLIENTORDER
+		set DateDelivery='"dateDeliveryBuffer"', IdState='2'
+		where Id='"idOrderSelectedBuffer"'"
+	),
+
+	(SQL : SetToDelivery_SQL1), 
+	(SQL : SetToDelivery_SQL2), 
+	(SQL : SetToDelivery_SQL3), 
+	(SQL : SetToDelivery_SQL4), 
+	(SQL : SetToDelivery_SQL5), 
+	(SQL : SetToDelivery_SQL6), 
+	(SQL : SetToDelivery_SQL6b), 
+	(SQL : SetToDelivery_SQL7), 
+	(SQL : SetToDelivery_SQL8), 
+	(SQL : SetToDelivery_SQL9), 
+	(SQL : SetToDelivery_SQL10), 
+	
+
+	database <- '()',
+),

@@ -1,0 +1,169 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 UpdateProductQunatity.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idProductSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+
+	idOrderBuffer	:: "",
+	quantityBuffer	:: 0,
+
+	idOrderBuffer	= (),
+	quantityBuffer	= (),
+	
+
+	'()' <- database,
+
+	%% add if not exists
+	UpdateProductQuantity_SQL1 = (
+		"INSERT INTO " DB_PREFIX "ORDER_PRODUCT (IdOrder, IdProduct, Quantity, QuantityRest, Discount, Comments, NoPallet) 
+		select O.ID, P.id, "quantityBuffer", "quantityBuffer", 0, ' ', 1 
+		from " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "PRODUCT P
+		WHERE O.ID in ("idOrderBuffer") and P.id in ("IDPRODUCTSELECTEDBUFFER")
+			and not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT OP where OP.IdOrder=O.ID and OP.IdProduct=P.id) "
+	),
+
+	%% set quantities to 0 if NULL
+	UpdateProductQuantity_SQL2 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set QuantityDelivered=0 WHERE IdOrder in ("idOrderBuffer") and QuantityDelivered is NULL and IdProduct in ("IDPRODUCTSELECTEDBUFFER") "
+	),
+	UpdateProductQuantity_SQL3 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=Quantity WHERE IdOrder in ("idOrderBuffer") and QuantityRest is NULL and IdProduct in ("IDPRODUCTSELECTEDBUFFER") "
+	),
+	%% set quantity
+	UpdateProductQuantity_SQL4 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set Quantity="quantityBuffer", QuantityRest="quantityBuffer"-QuantityDelivered 
+		WHERE IdOrder in ("idOrderBuffer")
+		and IdProduct in ("IDPRODUCTSELECTEDBUFFER") "
+	),
+
+	%% set NoPallet to 0 if NULL
+	UpdateProductQuantity_SQL5 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set NoPallet=0 WHERE IdOrder in ("idOrderBuffer") and NoPallet is NULL "
+	),
+
+	databaseType = "ACCESS" => (
+		%% set PriceUnit from product if NULL
+		UpdateProductQuantity_SQL6 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "PRODUCT P on P.Id=OP.IdProduct set 
+				OP.PriceUnit=P.PriceUnit
+			WHERE (OP.PriceUnit is NULL or OP.PriceUnit<=0) and OP.IdOrder in ("idOrderBuffer")"
+		),
+		%% set IdVAT from product if NULL
+		UpdateProductQuantity_SQL7 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "ORDER_PRODUCT OP on P.Id=OP.IdProduct
+			set OP.IdVAT=P.IdVAT
+			where OP.IdOrder in ("idOrderBuffer")
+				and (OP.IdVAT is NULL or OP.IdVAT<= ' ') "
+		 ),
+
+		%% set quantity for order
+		UpdateProductQuantity_SQL8 = (
+			"Update " DB_PREFIX "CLIENTORDER O set O.Quantity=0, QuantityRest=0, O.Weight=0, O.AmountHT=0 WHERE O.ID in ("idOrderBuffer") "
+		),
+		UpdateProductQuantity_SQL9 = (
+			"Update " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder set 
+				O.Quantity=O.Quantity+OP.Quantity,
+				O.QuantityRest = O.QuantityRest + OP.QuantityRest,
+				O.AmountHT=O.AmountHT+ int(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount)+0.5)/100.0
+			WHERE O.ID in ("idOrderBuffer") "
+		),
+		UpdateProductQuantity_SQL10 = (
+			"Update (" DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder) inner join " DB_PREFIX "PRODUCT P on P.Id=OP.IdProduct  set 
+				O.Weight=O.Weight+OP.Quantity*P.Weight
+			WHERE O.ID in ("idOrderBuffer") "
+		),
+
+		%% set quantity for product
+		UpdateProductQuantity_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT P set P.QuantityOrdered=0 WHERE P.Id in ("IDPRODUCTSELECTEDBUFFER") "
+		),
+		UpdateProductQuantity_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT P inner join ( " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.ID=OP.IdOrder) ON P.id=OP.idorder set
+				P.QuantityOrdered=P.QuantityOrdered+OP.QuantityRest 
+				WHERE P.Id=OP.IdProduct and O.IdState<>'9'
+				 AND P.Id in ("IDPRODUCTSELECTEDBUFFER") "
+		),
+
+	;
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		UpdateProductQuantity_SQL6 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set 
+				PriceUnit=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct )
+			WHERE (PriceUnit is NULL or PriceUnit<=0) and IdOrder in ("idOrderBuffer")"
+		),
+		UpdateProductQuantity_SQL7 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set 
+				IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct )
+			where IdOrder in ("idOrderBuffer")
+				and (IdVAT is NULL or IdVAT<= ' ') "
+		),
+
+		UpdateProductQuantity_SQL8 = (
+			"Update " DB_PREFIX "CLIENTORDER set 
+				Quantity		=(select sum(OP.Quantity) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				QuantityRest	= (select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				AmountHT		= (select sum(TRUNCATE(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount)+0.5)/100.0) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				Weight			=(select sum(OP.Quantity*P.Weight) from " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "PRODUCT P on P.Id=OP.IdProduct where CLIENTORDER.ID=OP.IdOrder and P.Weight is not NULL)
+			WHERE ID in ("idOrderBuffer")"
+		),
+
+		UpdateProductQuantity_SQL9 = (
+			"Update " DB_PREFIX "CLIENTORDER set Quantity=0, QuantityRest=0, AmountHT=0 WHERE ID in ("idOrderBuffer") and Quantity is NULL "
+		),
+		UpdateProductQuantity_SQL10 = (
+			"Update " DB_PREFIX "CLIENTORDER set Weight=0 WHERE ID in ("idOrderBuffer") and Weight is NULL "
+		),
+
+		UpdateProductQuantity_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT set
+				QuantityOrdered=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.ID=OP.IdOrder where PRODUCT.Id=OP.IdProduct and O.IdState<>'9')
+			WHERE Id in ("IDPRODUCTSELECTEDBUFFER")"),
+
+		UpdateProductQuantity_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0 WHERE Id in ("IDPRODUCTSELECTEDBUFFER") and QuantityOrdered is NULL"
+		),
+
+	),
+
+
+	(SQL : UpdateProductQuantity_SQL1), 
+	(SQL : UpdateProductQuantity_SQL2), 
+	(SQL : UpdateProductQuantity_SQL3), 
+	(SQL : UpdateProductQuantity_SQL4), 
+	(SQL : UpdateProductQuantity_SQL5), 
+	(SQL : UpdateProductQuantity_SQL6), 
+	(SQL : UpdateProductQuantity_SQL7), 
+	(SQL : UpdateProductQuantity_SQL8), 
+	(SQL : UpdateProductQuantity_SQL9), 
+	(SQL : UpdateProductQuantity_SQL10), 
+	(SQL : UpdateProductQuantity_SQL11), 
+	(SQL : UpdateProductQuantity_SQL12), 
+
+	database <- '()',
+),

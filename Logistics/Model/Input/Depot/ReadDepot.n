@@ -1,0 +1,76 @@
+/******************************************************/
+/*	        Vehicle Routing 	              */
+/*	                                              */
+/*		ReadDepot.n   			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+% Data Reading
+'()' => (
+	'()' <- database,
+
+	SQL_SelectDepot = ("SELECT id,name,idSite FROM " DB_PREFIX "AGENCY WHERE idClub='" idClubActive "' ORDER BY id"),
+
+	(SQL: SQL_SelectDepot), % Chen 0726
+
+	% DEPOT
+	nbDepot	= (),
+	DEPOT	= [1, nbDepot],
+
+	\forall d \in DEPOT (
+		idDepot_{d}		:: "",
+		nameDepot_{d}		:: "",
+
+		idSiteDepot_{d}		:: "",
+		%idShiftDepot_{d}	:: "",
+
+		%t1Depot_{d}		:: defaultDateTime,
+		%t2Depot_{d}		:: defaultDateTime,
+		%IdTypeVehicle0Depot_{d}	:: IDTYPEVEHICLE,
+
+		idDepot_{d}		= (),
+		nameDepot_{d}		= (),
+		idSiteDepot_{d}		= (),
+
+		%idShiftDepot_{d}	= (),
+		%t1Depot_{d}		= (),
+		%t2Depot_{d}		= (),
+		%IdTypeVehicle0Depot_{d}	= (),
+	),
+
+
+	\forall d \in DEPOT (
+		%SQL_SelectDepotProductDepotIs = ("SELECT dp.idProduct,dp.minQuantity,dp.maxQuantity FROM " DB_PREFIX "OPT_DEPOT_PRODUCT dp WHERE dp.idDepot='"),
+		%(SQL: SQL_SelectDepotProductDepotIs idDepot_{d} "' " sql_AND_CLUB_DEPOT_PRODUCT), % Chen 0823
+
+
+		(SQL: "SELECT idProduct,minQuantity,maxQuantity FROM " DB_PREFIX "GROUPRESOURCE_PRODUCT WHERE idAgency='" idDepot_{d} "' AND idClub='" idClubActive "'"), % Chen 0819
+
+		nbProductDepot_{d} = (),
+		nbProductDepot_{d} =< nbProduct,
+
+		\forall i \in [1,nbProductDepot_{d}] (
+			idProductIdxDepot_{d,i}		:: "",
+			minQuantityIdxDepot_{d,i} 	:: 0.0,
+			maxQuantity0IdxDepot_{d,i} 	:: 0.0,
+
+			idProductIdxDepot_{d,i}		= (),
+			minQuantityIdxDepot_{d,i} 	= (),
+			maxQuantity0IdxDepot_{d,i} 	= (),
+
+			maxQuantityIdxDepot_{d,i} 	= (maxQuantity0IdxDepot_{d,i} = 0 ? +\infty : maxQuantity0IdxDepot_{d,i}),
+		),
+	),
+
+	database <- '()',
+
+
+	IDDEPOT = \{ \forall d \in DEPOT idDepot_{d} \},
+
+	\forall d \in IDDEPOT (
+		depotId_{d} \in DEPOT,
+		idDepot_{depotId_{d}} = d,
+	),
+),

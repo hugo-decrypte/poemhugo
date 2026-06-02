@@ -1,0 +1,52 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeleteClient.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	
+	idClientBuffer		:: "",
+	nbOrderBuffer		:: 0,
+	
+	
+	
+	idClientBuffer		= (), % pas besoin, selected [CLIENT.ID] ???
+	nbOrderBuffer		= (), % a quoi ça sert ?
+	
+	
+
+	'()' <- database,
+
+	DeleteClient_SQL1 = (
+		"Delete from " DB_PREFIX "POINTDELIVERY 
+		where IdClient='"idClientBuffer"'
+		and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=POINTDELIVERY.IdClient )"
+	),
+	DeleteClient_SQL2 = (
+		"delete from " DB_PREFIX "CLIENT 
+		where Id = '"idClientBuffer"' 
+		and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where CLIENT.Id=IdClient)
+		and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=CLIENT.Id )"
+	),
+	DeleteClient_SQL3 = (
+		"Update " DB_PREFIX "CLIENT
+		set Comments='NON Supprimée'
+		where Id='"idClientBuffer"' "
+	),
+	
+
+	(SQL : DeleteClient_SQL1), 
+	(SQL : DeleteClient_SQL2), 
+	(SQL : DeleteClient_SQL3), 
+	
+	database <- '()',
+),

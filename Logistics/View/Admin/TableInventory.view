@@ -1,0 +1,78 @@
+View ViewTableInventory 'Inventaire' 'Inventaire'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableInventory _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Inventaire;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Right,Right,Left}]"\
+"[DATAOBJ=Inventory;FILLCOLOR=LINERGB]"
+
+Data Inventory 'Inventaire' Inventory HTTPSQL 0 '[FIND={IDPRODUCT,FAMILY,DESIGNATION,MINQUANTITYSTOCK,QUANTITYSTOCK,QUANTITYORDER,QTYTODAY,QTY2M,QTY3M,QTY4M,QTYP4M,STATE}]'   [DOUBLECLICK=TableOrder] \
+"[12;(string,IDPRODUCT,Produit,,15,,);(string,FAMILY,Famille,,15,,);(string,DESIGNATION,Désignation,,20,,);(int,MINQUANTITYSTOCK,Stock sécurité,,18,,);(int,QUANTITYSTOCK,Qté stock,,13,,);(int,QUANTITYORDER,Qté commande,,18,,);(int,QTYTODAY,Retard,,10,,);(int,QTY2M,2 mois,,10,,);(int,QTY3M,3 mois,,10,,);(int,QTY4M,4 mois,,10,,);(int,QTYP4M,>4 mois,,10,,);(string,STATE,Etat,,20,,);(string,REFERENCE,Référence,,25,0);\
+(string,LEVELTECH,Niveau Tech,,20,0);\
+(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT	a.ID as IDPRODUCT,  a.Reference as REFERENCE, \
+		 a.LevelTech as LEVELTECH, \
+		 a.QuantityStock as QUANTITYSTOCK, \
+		 tabCM.QTYTOTAL as QUANTITYORDER, \
+		 a.MinQuantityStock as MINQUANTITYSTOCK, \
+		 tabCM.QTYTODAY as QTYTODAY, \
+		 tabCM.QTY2M as QTY2M,  tabCM.QTY3M as QTY3M, \
+		 tabCM.QTY4M as QTY4M,  tabCM.QTYP4M as QTYP4M, \
+		 a.Designation as DESIGNATION,  a.Family as FAMILY,\
+		 IIF(tabCM.QTYTODAY>0,'Retard livraison', \
+		 	IIF(tabCM.QTY2M>a.QuantityStock, 'Rupture 2 mois', \
+		 	IIF(tabCM.QTYTOTAL>a.QuantityStock, 'Stock insuffisant',' '))) as STATE, \
+		 IIF(tabCM.QTYTODAY>0, '(255 172 0)', \
+		 	IIF(tabCM.QTY2M>a.QuantityStock, '(255 255 0)',  \
+		 		IIF(tabCM.QTYTOTAL>a.QuantityStock,'(255 255 255)', '(255 255 255)'))) as LINERGB \
+	 FROM PRODUCT a left join \
+		 (SELECT trim(LnO.IdProduct) as IdA, sum(LnO.QuantityRest) as QTYTOTAL, \
+		 sum(IIF( O.DateDelivery<=format(Date(), 'YYYY-MM-DD') , LnO.QuantityRest, 0)) as QTYTODAY, \
+		 sum(IIF( O.DateDelivery>format(Date(), 'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',2,Date()), 'YYYY-MM-DD') , LnO.QuantityRest, 0)) as QTY2M, \
+		 sum(IIF( O.DateDelivery>format(dateAdd('m',2,Date()), 'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',3,Date()), 'YYYY-MM-DD') , LnO.QuantityRest, 0)) as QTY3M, \
+		 sum(IIF( O.DateDelivery>format(dateAdd('m',3,Date()), 'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',4,Date()), 'YYYY-MM-DD') , LnO.QuantityRest, 0)) as QTY4M, \
+		 sum(IIF( O.DateDelivery>format(dateAdd('m',4,Date()),'YYYY-MM-DD') , LnO.QuantityRest, 0)) as QTYP4M \
+		 from CLIENTORDER O, ORDER_PRODUCT LnO \
+		  WHERE  O.Id=LnO.IdOrder and LnO.QuantityRest is not NULL and LnO.QuantityRest>0 \
+		  AND O.idState<>'9' \
+		  GROUP BY LnO.IdProduct \
+		 ) tabCM on tabCM.IdA=a.ID \
+	 WHERE a.TypeProduct<>'F' \
+	 ORDER BY a.Reference, a.LevelTech"
+
+Script TableOrder  'Commandes' _ 20 'Commandes' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrder_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);IDTOUR='XXX';TITLEOBJ=Commandes pour produit {/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};OWNEROBJ=IdClient;IDOBJ='XXX';OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/}]"
+
+Script TableOrderProduct  'Détail commandes' _ 31 'Détail commandes' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrderProduct_Product.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);OWNEROBJ=IdORDER;IDOBJ='XXX';TITLEOBJ=Détail commandes pour produit {/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};IDPRODUCT={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};IDCLIENT='XXX';IDORDER='XXX']"
+
+Script TablePalletProduct  'Palettes pour produit' _ 24 'Palettes' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TablePalletProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);TITLEOBJ=Palettes pour produit {/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};IDPACKING='XXX';NOPALLET=0;IDPRODUCT={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/}]"
+
+Script TableDeliveryProduct  'Livraisons' _ 25 'Livraisons' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);OWNEROBJ=IdTour;IDOBJ='XXX';TITLEOBJ=pour produit {/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/};IDTOUR='XXX']"
+
+Script TableDefaultRate  'Taux de défaut' _ 26 'Taux de défaut' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDefaultRate_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);FAMILY={/*Selected(tableINVENTORY;1;(string,FAMILY))*/};OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=pour famille produit {/*Selected(tableINVENTORY;1;(string,FAMILY))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/}]"
+
+Script TableBlanceSheetRevenueProduct 'CA' _ 34 'CA' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableBalanceSheetRevenueProduct_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);FAMILY={/*Selected(tableINVENTORY;1;(string,FAMILY))*/};OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=pour famille produit {/*Selected(tableINVENTORY;1;(string,FAMILY))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableINVENTORY;1;(string,IDPRODUCT))*/}]"
+
+// Script . Synchronization quantities between Product, ClientOrder, Delivery, Packing List
+// SINGLESEL=0;
+
+Script UpdateQuantities  'Mettre à jour des données quantités' _ 61 'Mettre à jour des données quantités' _ 'tableINVENTORY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptUpdateProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  ' \
+Reload _ _ _
+

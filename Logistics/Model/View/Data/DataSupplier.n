@@ -1,0 +1,26 @@
+%==================================================%
+%                                                  %
+%           	Logistics                %
+%                                                  %
+%  		   DataSupplier.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+
+
+@ ("SUPPLIER 'Supplier' SUPPLIER "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[2;(string,IDSUPPLIER,Fournisseur ID,,15.0.80,0);(string,LABELSUPPLIER,Identit  Fournisseur,,100.0.100,0);]\"\\\n"),
+	
+@ VIEWSQL,
+
+@ ("SELECT sp.Id AS IDSUPPLIER,\
+ "SQL_CONCAT"trim(sp.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(sp.City) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELSUPPLIER \
+ FROM " DB_PREFIX "SUPPLIER sp \
+ ORDER BY sp.Id\"\n\n"),
+
+

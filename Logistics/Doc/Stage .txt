@@ -1,0 +1,83 @@
+Stage :
+
+
+Gemini
+Claude
+GPT
+
+
+Anthropic
+Cowork
+Claude Code
+
+
+
+
+
+Enzo, Léo ->
+
+Les fonctions statics de PoemClient :
+GPT Translation
+Gemini Translation
+Claude Translation (?)
+
+
+
+
+Léo, Martin ->
+
+Product Price:
+product name, zone (countries), date1 (year, month, day), date2 (year, month, day),
+
+min price, producer, quantity, weight, volume
+max price, producer, quantity, weight, volume
+
+nbPrice
+
+producer, quantity, weight, volume, price
+...
+producer, quantity, weight, volume, price
+
+
+
+Product Demand:
+product name, zone (countries), date1 (year, month, day), date2 (year, month, day),
+
+min demand (quantity, weight, volume)
+max demand (quantity, weight, volume)
+
+
+
+Document Input
+PDF -> Text file -> Excel
+
+
+
+
+
+Martin, Léo, Enzo
+
+OpenClaw
+
+Gateway
+agent
+skills
+channels
+nodes
+memory
+heartbeat
+cron
+
+open source ?
+Léger ? Lourd ?
+Peut recompiler facilement ?
+Un outil pour fonctionner les API IA générative ou lui-même un outil IA générative ?
+Sécurité
+
+
+Speech Command
+Text Command
+
+
+
+

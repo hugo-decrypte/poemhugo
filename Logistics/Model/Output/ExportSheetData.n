@@ -1,0 +1,68 @@
+/******************************************************/
+/*	          	ERP	  	     	      */
+/*                                                    */
+/*		ExportMonthlyData.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	
+	'()' <- database,
+
+	sqlSheetLine = (
+		"SELECT s.category,s.id,s.line,s.column,s.name,s.type,s.idFormula,s.value
+		FROM " DB_PREFIX "SHEET s WHERE s.line IN (1,2,3) ORDER BY s.column"),
+	
+	(SQL:  sqlSheetLine),
+	
+	#ColumnLine = (),
+	
+	\forall c \in [1,#ColumnLine] (
+		categoryColumnLine_{c}  :: "",
+		idColumnLine_{c} 	:: "",
+		nameColumnLine_{c} 	:: "",
+		typeColumnLine_{c} 	:: "",
+		idFormulaColumnLine_{c} :: "",
+		valueColumnLine_{c} 	:: "",
+
+		categoryColumnLine_{c}  = (),
+		idColumnLine_{c} 	= (),
+		lineColumnLine_{c} 	= (),
+		columnColumnLine_{c} 	= (),
+		nameColumnLine_{c} 	= (),
+		typeColumnLine_{c} 	= (),
+		idFormulaColumnLine_{c} = (),
+		valueColumnLine_{c} 	= (),
+	),
+
+	database <- '()',
+),
+
+
+'@' => (
+
+	sheetDataCsv = ('Work Directory' downloadDirectory "SheetData.csv"),
+
+
+	[sheetDataCsv] <- '@',
+	
+	@ ("category;id;line;column;name;type;idFormula;value\n"),
+
+	\forall c \in [1,#ColumnLine] (
+		@ (categoryColumnLine_{c}	";"),
+		@ (idColumnLine_{c}	";"),
+		@ (lineColumnLine_{c}	";"),
+		@ (columnColumnLine_{c}	";"),
+		@ (nameColumnLine_{c}	";"),
+		@ (typeColumnLine_{c}	";"),
+		@ (idFormulaColumnLine_{c}	";"),
+		@ (valueColumnLine_{c}	"\n"),
+
+	),
+
+	'@' <- [sheetDataCsv],
+).
+
+

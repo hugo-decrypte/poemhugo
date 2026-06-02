@@ -1,0 +1,46 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%	   FuncHistogramTourWeight.n	        %
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+<histogramTourWeight>(aliasHistogram,bestfit, labelX,labelY, labelLegend,colorLegend, IdTourSelected, title, postfix0)	
+(
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("HistogramTourWeight" postfix ".view"),
+
+
+		IdTourSelected <> {} => (
+			sqlFrom = (
+				" FROM " DB_PREFIX "OPT_TOUR t  WHERE "
+				SQL_ViewUserVisibleClubIs "t.idClub) AND t.id IN ("
+				concatSetQuoted(IdTourSelected) ")"
+			),
+			;
+
+			sqlFrom = (
+				" FROM " DB_PREFIX "OPT_TOUR t  WHERE "
+				SQL_ViewUserVisibleClubIs "t.idClub)"
+			),
+		),
+
+
+		sqlRate = (SQL_CASEWHEN "ISNULL(t.rateWeight)" SQL_THEN "0" SQL_ELSE "t.rateWeight" SQL_CASEEND),
+		sqlDataXY = ("SELECT DISTINCT t.id AS X, " sqlRate " AS Y, "),
+
+
+		%sqlDataHistogram = (
+		%	"SELECT DISTINCT t.id AS X, "
+		%		SQL_CASEWHEN "ISNULL(t.rateWeight)" SQL_THEN "0" SQL_ELSE "t.rateWeight" SQL_CASEEND " AS Y, "
+		%		SQL_CASEWHEN "Y>0" SQL_THEN "'" RGB_Y1_RATE1 "'" SQL_ELSE "'" RGB_Y1_RATE2 "'" SQL_CASEEND " AS C_1 " sqlFrom),
+
+		['Work Directory' "Model\Common\View\HistogramBar1.n"],
+
+	),
+),
+
+.

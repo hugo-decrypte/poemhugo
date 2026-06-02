@@ -1,0 +1,11 @@
+View LoginView _ LoginView 255 255 255 _ 0 0 40 40 5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;GLOBALVARIABLE=1;DEBUGLEVEL=0;SCROLLBAR=0;NATURESCALE=0;BESTFIT=1]'\
+'{/*Input(Lancement système;2;(string,USERID,Utilisateur,,30.0.580,,);(password,PASSWORD,Mot de passe,,30.0.580,,)*/}\
+{/*(GLOBALPARAMETERS;3;\
+(string,PERMISSION,,XXXXXXXX);\
+(string,SERVERIP,,127.0.0.1);\
+(string,SERVERPORT,,89);\
+)*/}'
+
+Script Login 'Connexion' _ 0 'Connexion' _ _ '0 0 40 40' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl './' './Model\Common\Interface\LoginClient.n' './ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) "(/*PASSWORD*/)"' 
+

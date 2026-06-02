@@ -1,0 +1,120 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableInventory.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableInventory>(id,type,aliasTable,bestfit,doubleclick,title)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+	
+
+
+	'@' => (
+		viewFile = "TableInventory",
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(string,REFERENCE,"		TAG_REFERENCE		",,25,0);\\\n"),
+		@ ("(string,LEVELTECH,"		TAG_LEVEL_TECH		",,20,0);\\\n"),
+		@ ("(color,LINERGB,"		RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+	dateAdd2M :: "",
+	dateAdd3M :: "",
+	dateAdd4M :: "",
+	dateMinus1Y :: "",
+
+	? databaseType (
+	"ACCESS" : 
+		dateAdd2M = ("dateAdd("SQL_DATEPART_MONTH",2,"SQL_CURRENTDATE")"),
+		dateAdd3M = ("dateAdd("SQL_DATEPART_MONTH",3,"SQL_CURRENTDATE")"),
+		dateAdd4M = ("dateAdd("SQL_DATEPART_MONTH",4,"SQL_CURRENTDATE")"),
+
+		dateMinus1Y = ("dateAdd("SQL_DATEPART_MONTH",-12,"SQL_CURRENTDATE")"),
+	;
+	"SQLSERVER" :
+		dateAdd2M = ("dateAdd("SQL_DATEPART_MONTH",2,"SQL_CURRENTDATE")"),
+		dateAdd3M = ("dateAdd("SQL_DATEPART_MONTH",3,"SQL_CURRENTDATE")"),
+		dateAdd4M = ("dateAdd("SQL_DATEPART_MONTH",4,"SQL_CURRENTDATE")"),
+
+		dateMinus1Y = ("dateAdd("SQL_DATEPART_MONTH",-12,"SQL_CURRENTDATE")"),
+	;
+	"MYSQL" :
+		dateAdd2M = ("addDate("SQL_CURRENTDATE", INTERVAL 2 MONTH)"),
+		dateAdd3M = ("addDate("SQL_CURRENTDATE", INTERVAL 3 MONTH)"),
+		dateAdd4M = ("addDate("SQL_CURRENTDATE", INTERVAL 4 MONTH)"),
+
+		dateMinus1Y = ("date_Add("SQL_CURRENTDATE", INTERVAL -12 MONTH)"),
+	;
+	"ORACLE" :
+		dateAdd2M = ("ADD_MONTHS("SQL_CURRENTDATE",2)"),
+		dateAdd3M = ("ADD_MONTHS("SQL_CURRENTDATE",3)"),
+		dateAdd4M = ("ADD_MONTHS("SQL_CURRENTDATE",4)"),
+
+		dateMinus1Y = ("ADD_MONTHS("SQL_CURRENTDATE",-12)"),
+),
+
+
+% JZ 0926 A : ID -> IDPRODUCT
+		@ ("SELECT	a.ID as IDPRODUCT,  a.Reference as REFERENCE, \\\n"),
+		@ ("\t\t a.LevelTech as LEVELTECH, \\\n"),
+		@ ("\t\t a.QuantityStock as QUANTITYSTOCK, \\\n"),
+		@ ("\t\t tabCM.QTYTOTAL as QUANTITYORDER, \\\n"),
+		@ ("\t\t a.MinQuantityStock as MINQUANTITYSTOCK, \\\n"),
+		@ ("\t\t tabCM.QTYTODAY as QTYTODAY, \\\n"),
+		@ ("\t\t tabCM.QTY2M as QTY2M,  tabCM.QTY3M as QTY3M, \\\n"),
+		@ ("\t\t tabCM.QTY4M as QTY4M,  tabCM.QTYP4M as QTYP4M, \\\n"),
+		@ ("\t\t a.Designation as DESIGNATION,  a.Family as FAMILY,\\\n"),
+		@ ("\t\t "SQL_CASEWHEN"tabCM.QTYTODAY>0"SQL_THEN"'Retard livraison'"SQL_ELSE" \\\n"),
+		@ ("\t\t 	"SQL_CASEWHEN"tabCM.QTY2M>a.QuantityStock"SQL_THEN" 'Rupture 2 mois'"SQL_ELSE" \\\n"),
+		@ ("\t\t 	"SQL_CASEWHEN"tabCM.QTYTOTAL>a.QuantityStock"SQL_THEN" 'Stock insuffisant'"SQL_ELSE"' '"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as STATE, \\\n"),
+		@ ("\t\t "SQL_CASEWHEN"tabCM.QTYTODAY>0"SQL_THEN" '(255 172 0)'"SQL_ELSE" \\\n"),
+		@ ("\t\t 	"SQL_CASEWHEN"tabCM.QTY2M>a.QuantityStock"SQL_THEN" '(255 255 0)'"SQL_ELSE"  \\\n"),
+		@ ("\t\t 		"SQL_CASEWHEN"tabCM.QTYTOTAL>a.QuantityStock"SQL_THEN"'(255 255 255)'"SQL_ELSE" '(255 255 255)'"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as LINERGB \\\n"),
+
+		@ ("\t FROM " DB_PREFIX "PRODUCT a left join \\\n"),
+
+		@ ("\t\t (SELECT trim(LnO.IdProduct) as IdA, sum(LnO.QuantityRest) as QTYTOTAL, \\\n"),
+		@ ("\t\t sum("SQL_CASEWHEN" O.DateDelivery<="SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"') "SQL_THEN" LnO.QuantityRest"SQL_ELSE" 0"SQL_CASEEND") as QTYTODAY, \\\n"),
+		@ ("\t\t sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd2M", '"SQL_FORMATDATESTR"') "SQL_THEN" LnO.QuantityRest"SQL_ELSE" 0"SQL_CASEEND") as QTY2M, \\\n"),
+		@ ("\t\t sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd2M", '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd3M", '"SQL_FORMATDATESTR"') "SQL_THEN" LnO.QuantityRest"SQL_ELSE" 0"SQL_CASEEND") as QTY3M, \\\n"),
+		@ ("\t\t sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd3M", '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd4M", '"SQL_FORMATDATESTR"') "SQL_THEN" LnO.QuantityRest"SQL_ELSE" 0"SQL_CASEEND") as QTY4M, \\\n"),
+		@ ("\t\t sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd4M",'"SQL_FORMATDATESTR"') "SQL_THEN" LnO.QuantityRest, 0)) as QTYP4M \\\n"),
+		@ ("\t\t from " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "ORDER_PRODUCT LnO \\\n"),
+		@ ("\t\t  WHERE  O.Id=LnO.IdOrder and LnO.QuantityRest is not NULL and LnO.QuantityRest>0 \\\n"),
+		@ ("\t\t  AND O.idState<>'9' \\\n"),
+		@ ("\t\t  GROUP BY LnO.IdProduct \\\n"),
+		@ ("\t\t ) tabCM on tabCM.IdA=a.ID \\\n"),
+
+	 	@ ("\t WHERE a.TypeProduct<>'F' \\\n"),
+	 	@ ("\t ORDER BY a.Reference, a.LevelTech\"\n\n"),
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TableOrderMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TableOrderProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TablePalletProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TableDeliveryMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TableDefaultRateMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2TableBalanceRevenueMenu.n"],
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInventory2EditOnView.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

@@ -1,0 +1,67 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableSupplyProduct.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableSupplyProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		%postfix = (postfix0 = "" ? "" : idUserLogin),
+		postfix = (postfix0 = "" ? "" : "Menu"),
+		%viewFile = ("TableSupplyProduct" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableSupplyProduct" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(string,IDSUPPLIER,ID Fournisseur,,15.0.80,0);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+		
+
+		@ VIEWSQL,
+		
+		@ ("SELECT S.id AS IDSUPPLY, SP.idSupplier AS IDSUPPLIER,\\\n"),
+		@ ("\t\t (select Name from " DB_PREFIX "SUPPLIER SR where SR.Id=SP.IdSupplier) as NAMESUPPLIER,\\\n"),
+		@ ("\t\t SP.idProduct AS IDPRODUCT,\\\n"),
+		@ ("\t\t P.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t SP.Quantity AS QUANTITY,\\\n"),
+		@ ("\t\t SP.QuantityReal AS QUANTITYREAL,\\\n"),
+		@ ("\t\t SP.Quantity-SP.QuantityReal+0 AS QUANTITYREST,\\\n"),
+		@ ("\t\t SP.PriceUnit AS PRICE,\\\n"),
+		@ ("\t\t " SQL_FORMATNUM "(SP.Quantity*SP.PriceUnit,"SQL_FORMATSCALE2") AS AMOUNTHT,\\\n"),
+		@ ("\t\t SP.DateSupply as DATESUPPLY,\\\n"),
+		@ ("\t\t SP.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t SP.DateLimit as DATELIMIT,\\\n"),
+		@ ("\t\t SP.Comments AS COMMENTS,\\\n"),
+		@ ("\t\t SP.Comments1 AS COMMENTS2,\\\n"),	% JZ 0919 COMMENTS2
+
+		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "SUPPLY S, " DB_PREFIX "SUPPLY_PRODUCT SP, " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t WHERE S.Id=SP.IdSupply and SP.IdProduct=P.Id\\\n"),
+		@ ("\t\t  and (SP.IdSupply in ((/*IDSUPPLY*/)) or 'XXX' in ((/*IDSUPPLY*/)))\\\n"),
+		@ ("\t\t  and (SP.IdProduct in ((/*IDPRODUCT*/)) or 'XXX' in ((/*IDPRODUCT*/))) \\\n"),
+		@ ("\t ORDER BY SP.IdSupply, SP.IdProduct\"\n\n"), 
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplyProduct2TableOfferSupplier.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplyProduct2EditSupply.n"],
+
+		
+		%===============================================================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplyProduct2EditOnView.n"],
+		%==============================================================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

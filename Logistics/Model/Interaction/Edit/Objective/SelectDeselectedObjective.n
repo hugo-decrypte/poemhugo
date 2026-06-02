@@ -1,0 +1,77 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 	 SelectDeselectedObjective.n	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0820
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+%['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+
+'()' => (
+	idClubObjectiveBuffer		:: "",
+	valueObjectiveBuffer		:: "",
+
+	nbConfigSelected		= (),
+	nbParameterSelected		= (),
+
+	idClubObjectiveBuffer		= (),
+	valueObjectiveBuffer		= (),
+
+
+	'()' <- database,
+
+	(SQL : SQL_SelectRuleTypeIs TAG_OBJECTIVE "' " SQL_AndWhereRuleValueIs "'" valueObjectiveBuffer "' " SQL_AndWhereRuleClubIs idClubObjectiveBuffer "'"), % Zhou 0910 : SQL_SelectRuleTypeIs modified
+
+	/*? databaseType(
+		 "ACCESS":
+		(SQL : "SELECT * FROM " DB_PREFIX "RULE WHERE type='"TAG_OBJECTIVE"' AND [value]='" valueObjectiveBuffer "' AND idClub='" idClubObjectiveBuffer "'"),
+		;
+			:
+		(SQL : "SELECT * FROM " DB_PREFIX "RULE WHERE type='"TAG_OBJECTIVE"' AND value='" valueObjectiveBuffer "' AND idClub='" idClubObjectiveBuffer "'"),
+	),	%li 0905
+*/
+	nbObjectiveRecord=(),
+
+
+	nbObjectiveRecord > 0 =>(
+		
+/*		(SQL : "UPDATE	" DB_PREFIX "RULE
+			SET 	selected=" STATE_DESELECTED "
+			WHERE	type='"TAG_OBJECTIVE"' AND
+				selected=" STATE_SELECTED " AND
+				idClub='" idClubObjectiveBuffer "'"),
+*/
+		(SQL : SQL_UpdateRuleSetSelectedToBe STATE_DESELECTED " "SQL_WhereRuleTypeIs TAG_OBJECTIVE "' " SQL_AndWhereRuleSelectedIs STATE_SELECTED " " SQL_AndWhereRuleClubIs idClubObjectiveBuffer "'"), %li 0917
+
+
+		(SQL : SQL_UpdateRuleSetSelectedToBe STATE_SELECTED " "SQL_WhereRuleTypeIs TAG_OBJECTIVE "' " SQL_AndWhereRuleValueIs "'" valueObjectiveBuffer "' " SQL_AndWhereRuleClubIs idClubObjectiveBuffer "'"),
+
+/*		? databaseType(
+		 "ACCESS":
+			(SQL : "UPDATE	" DB_PREFIX "RULE
+				SET 	selected=" STATE_SELECTED "
+				WHERE	type='"TAG_OBJECTIVE"' AND
+					[value]='" valueObjectiveBuffer "' AND
+					idClub='" idClubObjectiveBuffer "'"),
+		;
+			:
+			(SQL : "UPDATE	" DB_PREFIX "RULE
+				SET 	selected=" STATE_SELECTED "
+				WHERE	type='"TAG_OBJECTIVE"' AND
+					value='" valueObjectiveBuffer "' AND
+					idClub='" idClubObjectiveBuffer "'"),
+		),	%li 0905
+*/
+	),
+
+	sqlOperationLog := TAG_EDIT_OBJECTIVE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

@@ -1,0 +1,27 @@
+%==================================================%
+%                                                  %
+%           	Logistics               	   %
+%                                                  %
+%  		   DataAgency.n  		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+@ ("/// AGENCY /////////////// \n"),
+
+@ ("Data AGENCY 'Agency' AGENCY "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[3;(string,IDAGENCY," TAG_AGENCY_ID ",,15.0.80,0);(string,NAMEAGENCY," TAG_AGENCY_NAME ",,100.0.100,0);(string,CITYAGENCY,Ville,,15.0.80,0);]\"\\\n"),
+
+@ VIEWSQL,
+@ ("SELECT id AS IDAGENCY, \\\n"),
+@ ("\t\t Name as NAMEAGENCY, \\\n"),
+@ ("\t\t City as CITYAGENCY \\\n"),
+@ ("\t FROM " DB_PREFIX "AGENCY\"\n\n\n"),
+
+
+
+
+

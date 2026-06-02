@@ -1,0 +1,123 @@
+View ViewTablePRODUCTFORQUOTE '(/*TITLEOBJ*/)' '(/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCTFORQUOTE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=(/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Right,Right,Right,Left,Left,Left}]"\
+"[DATAOBJ=PRODUCTFORQUOTE;FILLCOLOR=LINERGB]"
+
+Data PRODUCTFORQUOTE '(/*TITLEOBJ*/)' PRODUCTFORQUOTE HTTPSQL 0 '[FIND={IDPRODUCT,FAMILY,DESIGNATION,NBPACKAGE,QUANTITY,QUANTITYPACKAGE,WEIGHTPACKAGE,QUANTITYSTOCK,PRICE,PRICEQUOTE,DISCOUNT,AMOUNT,COMMENTS,COMMENTS2,STATE}]'   [DOUBLECLICK=] \
+"[15;(string,IDPRODUCT,Produit,,15,,);(string,FAMILY,Famille,,12,,);(string,DESIGNATION,Désignation,,20,,);(float,NBPACKAGE,#Paquets,,15,,);(float,QUANTITY,Quantité,,15,,);(float,QUANTITYPACKAGE,Qté paquet,,18,,);(float,WEIGHTPACKAGE,Poids paquet,,18,,);(string,QUANTITYSTOCK,Qté stock,,15,,);(float,PRICE,Prix unitaire,,18,,);(float,PRICEQUOTE,Prix devis,,18,,);(float,DISCOUNT,Remise(%),,18,,);(float,AMOUNT,Montant HT(€),,20,,);(string,COMMENTS,Commentaire,,20,,);(string,COMMENTS2,Commentaire sup,,25,,);(string,STATE,Etat,,20,,);(string,IDCLIENT,ID client,,20.0.50,0);\
+(string,IDQUOTE,No Devis,,20.0.50,0);\
+(string,NAMECLIENT,Nom client,,50.0.150,0);\
+(float,WEIGHT,Poids,,8.2.50,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY, P.TypeProduct as TYPEPRODUCT,\
+		 P.QuantityPackaging as QUANTITYPACKAGE,P.QuantityStock as QUANTITYSTOCK,\
+		 P.PriceUnit as PRICE, ' ' as PRICEQUOTE, ' ' as DISCOUNT,\
+		 ' ' as AMOUNT, P.Weight as WEIGHTUNIT,\
+		 format(P.Weight*P.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		 ' ' as NBPACKAGE, ' ' as QUANTITY, ' ' as WEIGHT, ' ' AS IDQUOTE, ' ' AS IDCLIENT, ' ' as NAMECLIENT,\
+		 ' ' as COMMENTS, ' ' as COMMENTS2, 0 as INQUOTE, ' ' AS STATE,\
+		 '(255 255 255)' AS LINERGB \
+	 FROM PRODUCT P \
+	 WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) ) \
+	 and P.Id not in (select QP.IdProduct from QUOTE_PRODUCT QP where QP.IdQuote in ((/*IDQUOTE*/))) \
+	 UNION ALL \
+	 SELECT P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY,\
+		 P.TypeProduct as TYPEPRODUCT,\
+		 P.QuantityPackaging as QUANTITYPACKAGE,P.QuantityStock as QUANTITYSTOCK,\
+		 P.PriceUnit as PRICE,\
+		 format(QP.PriceUnit,'0.0000') as PRICEQUOTE,\
+		 QP.Discount as DISCOUNT,\
+		 format(QP.AmountHT,'0.00') as AMOUNT,\
+		 P.Weight as WEIGHTUNIT,\
+		 format(P.Weight*P.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		 IIF( format(QP.Quantity*100/P.QuantityPackaging,'0')=format(QP.Quantity/P.QuantityPackaging,'0')*100, format(QP.Quantity/P.QuantityPackaging,'0'),\
+		 format(QP.Quantity/P.QuantityPackaging,'0.0')) as NBPACKAGE,\
+		 format(QP.Quantity,'0') as QUANTITY,\
+		 format(P.Weight*QP.Quantity,'0.0') as WEIGHT,\
+		 q.Id AS IDQUOTE, q.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\
+		 QP.Comments as COMMENTS,\
+		 QP.Comments_1 as COMMENTS2,\
+		 1 as INQUOTE,\
+		 IIF(P.TypeProduct='F',' ', IIF(QP.Quantity>P.QuantityStock and QP.Quantity>0,'Stock insuffisant','' ) ) AS STATE,\
+		 IIF(P.TypeProduct='F','(200 220 200)',\
+		  IIF(QP.Quantity=0,'(200 200 200)',\
+		 '(150 150 255)') ) AS LINERGB \
+	 FROM PRODUCT P \
+	 inner join ((QUOTE q inner join CLIENT cl on cl.Id=q.IdClient) \
+		 inner join QUOTE_PRODUCT QP on q.Id=QP.IdQuote ) on QP.IdProduct=P.Id \
+	 WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+	 AND (q.Id in ((/*IDQUOTE*/)) )\
+	 ORDER BY INQUOTE desc, TYPEPRODUCT desc, Family, DESIGNATION, IDPRODUCT "
+
+Script AddProductToQuote 'Quantité + un paquet' _ 61 'Quantité + un paquet' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\AddProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;1;(string,IDPRODUCT))*/} \
+'\
+Reload _ _ _
+
+
+
+
+Script ModifyProductQty 'Add/Modify Quantity' _ 62 'Modifier quantité' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;1;(string,IDPRODUCT))*/} \
+{/*Input(Modifier quantite;1;\
+(int,QTY,Quantité,1,10.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+
+
+Script RemoveProduct  'Enlever produit' _ 63 'Enlever produit' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\RemoveProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;1;(string,IDPRODUCT))*/} \
+'\
+Reload _ _ _
+
+
+
+Script ModifyPrice 'Modifier prix' _ 64 'Modifier prix' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateProductPrice.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;2;(string,IDPRODUCT);(string,IDQUOTE))*/} \
+{/*Input(Modifier prix [/*PRODUCT.IDPRODUCT*/];4;\
+(float,QUANTITY,Quantité,[/*PRODUCT.QUANTITY*/],10.0.580,0,,);\
+(float,PRICEQUOTE,Prix,[/*PRODUCT.PRICEQUOTE*/],10.4.580,0,,);\
+(float,TOOLCOST,Coût cutillage,[/*QUOTE.TOOLCOST*/],15.2.580,1);\
+(float,DISCOUNT,Remise(%),[/*PRODUCT.DISCOUNT*/],10.0.580,0,,);\
+)*/}\
+'\
+Reload _ _ _
+
+
+
+Script ModifyDiscount  'Modifier remise' _ 65 'Modifier remise' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateProductDiscount.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;2;(string,IDPRODUCT);(string,IDQUOTE))*/} \
+{/*Input(Modifier remise;1;\
+(int,DISCOUNT,Remise(%),[/*PRODUCT.DISCOUNT*/],3.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+
+
+Script ModifyComment 'Modifier commentaire' _ 66 'Modifier commentaire' _ 'tablePRODUCTFORQUOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateProductComment.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tablePRODUCTFORQUOTE;1;(string,IDPRODUCT))*/} \
+{/*Input(Modifier commentaire [/*PRODUCT.IDPRODUCT*/];2;\
+(string,COMMENTS,Commentaire,[/*PRODUCT.COMMENTS*/],100.0.580,1);\
+(string,COMMENTS2,Commentaire sup,[/*PRODUCT.COMMENTS2*/],100.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+
+

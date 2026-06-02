@@ -1,0 +1,8 @@
+﻿SHEET_NUMBER=1;
+SHEET_NAME=Produit;18;5;
+ID;Désignation;Matière;Famille;Type;Fournisseur;Poids;Prix unitaire;Stock sécurité;Qté stock;Qté commande;Qté provision;Longueur;Hauteur;Largeur;Profondeur;Volume;état;
+id;désignation;matière;famille;type;fournisseur;poids;prixunit;stocksécurité;qtéstock;qtécommande;qtéprovision;longueur;hauteur;largeur;profondeur;volume;état;
+string key;string;string;string;string;string;float;float;int;int;int;int;float;float;float;float;float;string;
+0007408;COLLIER WHITE ZINC (KH83090596);;;Produit(P);;;0,061;0,55;0;0;205;2;;;Livraison en retard;;;
+6003417;DOSIERWELLE RECHTS;;;Produit(P);;;1,840;58,58;0;0;1;1;;;;;;
+58761800_1;VERROU;XC38 - ROND 15h10;Produit(P);;;0,300;0,70;0;15800;3001;2;0.00;0.00;0.00;;Livraison en retard;;

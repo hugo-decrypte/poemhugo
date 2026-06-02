@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 CreateOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idOrderBuffer 			:: "",
+    referenceBuffer 		:: "",
+    clientSiteBuffer		:: "",
+	dateDeliveryBuffer		:: 0,
+	
+	idOrderBuffer 			= (),
+    referenceBuffer 		= (),
+	clientSiteBuffer		= (),
+	dateDeliveryBuffer		= (),
+
+	
+
+	'()' <- database,
+
+	CreateOrder_SQL1 = (
+		"INSERT INTO " DB_PREFIX "CLIENTORDER (IdClub, Id, Reference, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, IdState) "
+		"select cl.IdClub, '" idOrderBuffer "', '" referenceBuffer "', cl.Id, p.IdPoint, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), " dateDeliveryBuffer ", cl.IdAgency , '0' "
+		"from " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id "
+		"where "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '" clientSiteBuffer "'"
+	),
+	
+
+	(SQL : CreateOrder_SQL1), 
+	
+
+	database <- '()',
+),

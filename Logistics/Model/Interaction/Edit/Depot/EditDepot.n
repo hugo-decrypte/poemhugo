@@ -1,0 +1,123 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   EditDepot.n		   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+'()' => (
+	aliasTable	= "DEPOT",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],
+
+'()' => (
+	idDepot0Buffer	:: "",
+
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	(TAG_ONLY_ONE_TO_EDIT : nbSelected = 1),
+
+	idDepot0Buffer	= (),
+
+
+	idDepotBuffer				:: "",
+	nameDepotBuffer				:: "",
+	idSiteDepotBuffer			:: "",
+	t1DepotBuffer				:: defaultDateTime,
+	t2DepotBuffer				:: defaultDateTime,
+	IdTypeVehicleBuffer			:: {""},
+
+	"IDDEPOT" \in IdFieldSelected => ( 
+		idDepotBuffer			= (),
+		;
+		idDepotBuffer			= TAG_EMPTY_STRING, 
+	),
+	"NAMEDEPOT" \in IdFieldSelected => (
+		nameDepotBuffer			= (),
+		;
+		nameDepotBuffer			= TAG_EMPTY_STRING, 
+	),
+	"IDSITEDEPOT" \in IdFieldSelected => (
+		idSiteDepotBuffer		= (),
+		;
+		idSiteDepotBuffer		= TAG_EMPTY_STRING, 
+	),
+	"T1DEPOT" \in IdFieldSelected => (
+		t1DepotBuffer			= (),
+		;
+		t1DepotBuffer			= defaultDateTime, 
+	),
+	"T2DEPOT" \in IdFieldSelected => (
+		t2DepotBuffer			= (),
+		;
+		t2DepotBuffer			= defaultDateTime, 
+	),
+	"IDTYPEVEHICLE" \in IdFieldSelected => (
+		IdTypeVehicleBuffer		= (),
+		;
+		IdTypeVehicleBuffer		= {}, % Zhou 0816
+	),
+
+
+	'()' <- database,
+
+	sqlIdDepot = (	
+		"IDDEPOT" \in IdFieldSelected ?		(SQL_LetDepotIdBe idDepotBuffer "',"):		""
+		%"IDDEPOT" \in IdFieldSelected ?	(" d.id='" idDepotBuffer "',"):			""
+	),
+	sqlNameDepot = (
+		"NAMEDEPOT" \in IdFieldSelected ?	(SQL_LetDepotNameBe nameDepotBuffer "',"):		""
+		%"NAMEDEPOT" \in IdFieldSelected ?	(" d.name='" nameDepotBuffer "',"):			""
+	),
+	sqlIdSiteDepot = (
+		"IDSITEDEPOT" \in IdFieldSelected ?	(SQL_LetDepotIdSiteBe idSiteDepotBuffer "',"):		""
+		%"IDSITEDEPOT" \in IdFieldSelected ?	(" d.idSite='" idSiteDepotBuffer "',"):			""
+	),
+	sqlT1Depot = (
+		"T1DEPOT" \in IdFieldSelected ?		(SQL_LetDepotT1Be t1DepotBuffer "',"):			""
+		%"T1DEPOT" \in IdFieldSelected ?	(" d.t1='" t1DepotBuffer "',"):				""
+	),
+	sqlT2Depot = (
+		"T2DEPOT" \in IdFieldSelected ?		(SQL_LetDepotT2Be t2DepotBuffer "',"):			""
+		%"T2DEPOT" \in IdFieldSelected ?	(" d.t2='" t2DepotBuffer "',"):				""
+	),
+	sqlIdTypeVehicle = (
+		"IDTYPEVEHICLE" \in IdFieldSelected ?	(SQL_LetDepotIdTypeVehicleBe IdTypeVehicleBuffer "'"):	""
+		%"IDTYPEVEHICLE" \in IdFieldSelected ?	(" d.IdTypeVehicle='" IdTypeVehicleBuffer "'"):		""
+	),
+
+
+	(SQL :  SQL_UpdateDepotSet
+		sqlIdDepot
+		sqlNameDepot
+		sqlIdSiteDepot
+		sqlT1Depot
+		sqlT2Depot
+		sqlIdTypeVehicle
+		SQL_WhereDepotIdIs idDepot0Buffer "'"), % bai 0815
+/*
+	(SQL :  "UPDATE	" DB_PREFIX "DEPOT	SET"
+		sqlIdDepot
+		sqlNameDepot
+		sqlIdSiteDepot
+		sqlT1Depot
+		sqlT2Depot
+		sqlIdTypeVehicle
+		" WHERE id='" idDepot0Buffer "'"),
+*/
+
+	sqlOperationLog := TAG_EDIT_DEPOT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

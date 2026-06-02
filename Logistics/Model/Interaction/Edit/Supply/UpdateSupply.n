@@ -1,0 +1,81 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateSupply.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+
+	
+	dateDeliveryBuffer				:: "",
+	incotermBuffer					:: "",
+	commentBuffer					:: "",
+	stateBuffer						:: "",
+
+	
+	dateDeliveryBuffer				= (),
+	incotermBuffer					= (),
+	commentBuffer					= (),
+	stateBuffer						= (),
+	
+
+	'()' <- database,
+	
+UpdateSupply_SQL1=(
+	"Update " DB_PREFIX "SUPPLY set 
+		DateDelivery='"dateDeliveryBuffer"',
+		Incoterm='"incotermBuffer"',
+		Comments='"commentBuffer"'
+	where Id in ("IDOBJSELECTEDBUFFER")"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateSupply_SQL2=(
+		"Update " DB_PREFIX "SUPPLY O, " DB_PREFIX "STATE s
+			set O.IdState=s.Id
+		where O.Id in ("IDOBJSELECTEDBUFFER")
+			and "SQL_CONCAT"trim(s.LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"trim(s.ID)"SQL_CONCATWITH"')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='SUPPLY'"
+	),
+	;
+
+	UpdateSupply_SQL2=(
+		"Update " DB_PREFIX "SUPPLY 
+			set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"trim(s.ID)"SQL_CONCATWITH"')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='SUPPLY' )
+		where O.Id in ("IDOBJSELECTEDBUFFER")"
+	),
+
+),
+
+	
+	(SQL : UpdateSupply_SQL1), 
+	(SQL : UpdateSupply_SQL2), 
+	
+	
+	
+	database <- '()',
+),

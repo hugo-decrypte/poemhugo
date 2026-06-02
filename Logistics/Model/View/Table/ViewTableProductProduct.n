@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	 Logistics	  	           %
+%                                                  %
+%  		ViewTableProductForProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableProductProduct.n"],	% JZ 1018
+
+'@' => (
+	tableProductProduct("PRODUCTPRODUCT",TAG_TABLE,"PRODUCTPRODUCT",true,"", TAG_COMPONENTS, ""),
+),

@@ -1,0 +1,73 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DuplicateQuote.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idQuoteSelectedBuffer	:: "",
+	idQuoteBuffer 			:: "",
+	dateDeliveryBuffer		:: 0,
+	
+	idQuoteSelectedBuffer	= (),
+	idQuoteBuffer 			= (),
+	dateDeliveryBuffer		= (),
+	
+
+	dateValid :: "",
+	? databaseType (
+		"ACCESS" : 
+			dateValid = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 1, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"SQLSERVER" :
+			dateValid = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 1, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"MYSQL" :
+			dateValid = (SQL_FORMATDATE"(Date_Add("SQL_CURRENTDATE", INTERVAL 1 MONTH),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"ORACLE" :
+			dateValid = (SQL_FORMATDATE"(Add_Months("SQL_CURRENTDATE", 1),'"SQL_FORMATDATESTR"')" ),
+	),
+
+
+
+	'()' <- database,
+
+	DuplicateQuote_SQL1=(
+		"INSERT INTO " DB_PREFIX "QUOTE (Id, IdClient, IdPointDelivery, DateQuote, DateValid, DateDelivery, IdAgency, Quantity,Comments, Reference, IdState) 
+		select '" idQuoteBuffer "', q.IdClient, q.IdPointDelivery, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), "dateValid", '"dateDeliveryBuffer"' ,
+			IdAgency, Quantity, "SQL_CONCAT"'Dupliquée de '"SQL_CONCATWITH"Id"SQL_CONCATEND", Id, '0' 
+		from " DB_PREFIX "QUOTE q 
+		where q.Id = '"idQuoteSelectedBuffer"'"
+	),
+
+	DuplicateQuote_SQL2=(
+		"INSERT INTO " DB_PREFIX "QUOTE_PRODUCT (IdQuote, IdProduct, Quantity, PriceUnit, Discount, Comments, IdVAT) 
+			select '" idQuoteBuffer "', IdProduct,Quantity, PriceUnit, Discount, Comments, IdVAT
+		FROM " DB_PREFIX "QUOTE_PRODUCT 
+		WHERE IdQuote = '"idQuoteSelectedBuffer"'"
+	),
+
+
+	(SQL : DuplicateQuote_SQL1), 
+	(SQL : DuplicateQuote_SQL2),
+	
+	
+
+	database <- '()',
+),

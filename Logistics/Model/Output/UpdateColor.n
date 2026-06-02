@@ -1,0 +1,94 @@
+%==================================================%
+%                                                  %
+%            	  Routing	    	           %
+%                                                  %
+% 		UpdateColor.n        	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%['Work Directory' "Model\Common\Config\ReadConfig.n"],
+%['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+%['Work Directory' "Model\Common\Config\ReadColor.n"],
+
+
+% Read Project
+%'()' => (
+%	'()' <- database,
+
+
+/*
+	(SQL : SQL_SelectProjectIdProjectById), % li 0816
+	%(SQL: 	"SELECT	id FROM	" DB_PREFIX "COMMAND ORDER BY id"),
+
+	nbIdxProject	= (),
+	\forall i \in [1, nbIdxProject] (
+		idIdxProject_{i}	:: "",
+		idIdxProject_{i}	= (),
+	),
+
+	(SQL : SQL_SelectVehicleIdProjectById), % Zhou 0831
+	%(SQL: 	"SELECT	id FROM " DB_PREFIX "RESOURCE ORDER BY id"),
+
+	nbIdxVehicle	= (),
+	\forall i \in [1, nbIdxVehicle] (
+		idIdxVehicle_{i}	:: "",
+		idIdxVehicle_{i}	= (),
+	),
+*/
+
+	% ORDER
+	\forall i \in [1,nbIdxProject] (
+		(SQL:   SQL_UpdateProject
+			SQL_SetProjectColorToBe colorIdx_{(i-1) \mod nbColor} "' "
+			SQL_WhereProjectIdIs idIdxProject_{i} "'"
+		),
+
+		%(SQL:  "UPDATE " DB_PREFIX "COMMAND
+		%	SET 	color='" colorIdx_{(i-1) \mod nbColor} "'
+		%	WHERE 	id='" idIdxProject_{i} "'"
+		%),
+	),
+
+
+	% VEHICLE
+	\forall i \in [1,nbIdxVehicle]
+		(SQL:  	SQL_UpdateVehicle
+			SQL_SetVehicleColorToBe		colorIdx_{(i-1) \mod nbColor} "'"
+			SQL_AndLetVehicleColorLineBe	colorDistinctIdx_{(i-1) \mod nbDistinctColor} "'"
+			SQL_AndLetVehicleColorFillBe	colorDistinctIdx_{(i-1) \mod nbDistinctColor} "'"
+			SQL_WhereVehicleIdIs		idIdxVehicle_{i} "'"
+		), % Zhou 0822
+
+%		(SQL:  "UPDATE 	" DB_PREFIX "RESOURCE
+%			SET 	colorLine='" colorDistinctIdx_{(i-1) \mod nbDistinctColor} "',
+%				colorFill='" colorDistinctIdx_{(i-1) \mod nbDistinctColor} "',
+%				color='" colorIdx_{(i-1) \mod nbColor} "'
+%			WHERE 	id='" idIdxVehicle_{i} "'"
+%		), 
+
+
+	LightColors = \{ RGB_GREEN, RGB_YELLOW, RGB_ORANGE \},
+
+
+	% RULE
+	(SQL : 	SQL_UpdateRuleSetColorToBe LightColors[1] "' "
+		SQL_WhereRuleTypeIs TAG_OBJECTIVE "' "
+		SQL_AndWhereRuleClubIs idClubLogin "'"),
+
+	(SQL : 	SQL_UpdateRuleSetColorToBe LightColors[2] "' "
+		SQL_WhereRuleTypeIs TAG_CONSTRAINT "' "
+		SQL_AndWhereRuleClubIs idClubLogin "'"),
+
+	(SQL : 	SQL_UpdateRuleSetColorToBe LightColors[3] "' "
+		SQL_WhereRuleTypeIs TAG_RULE "' "
+		SQL_AndWhereRuleClubIs idClubLogin "'"),
+
+	%(SQL : SQL_UpdateRuleSetColorToBe LightColors[4] "' "
+	%	SQL_WhereRuleTypeIs TAG_MODE "' "
+	%	SQL_AndWhereRuleClubIs idClubLogin "'"),
+
+
+%	database <- '()',
+%),

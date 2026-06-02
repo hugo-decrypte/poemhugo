@@ -1,0 +1,422 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTableSupply2EditOnView.n				%
+%														%
+% 	(c)2000 Enginest. All rights reserved.				%
+%=======================================================%
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "CreateSupply ",
+
+% Caption
+@ ("'" TAG_INSERT_SUPPLY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '"TAG_INSERT "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+AddSupply_Input = (
+	"{/*Input(" TAG_INSERT_SUPPLY ";3;\\\n"
+	"(string,LABELSUPPLIER,Fournisseur,,100." inputWidth ",0,,[/*SUPPLIER.LABELSUPPLIER*/]);\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(date,DATELIMIT,Date Limite,,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+AddSupply_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "SUPPLY (Id, DateSupply, DateDelivery, DateLimit, IdState, Comments) \
+	select "SQL_CONCAT"'S'"
+			SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+			SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"
+			SQL_CONCATEND", "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), [/*DATEDELIVERY*/], [/*DATELIMIT*/], '0', "
+			SQL_CONCAT"'S'"
+			SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+			SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"
+			SQL_CONCATEND"\
+	from \
+	(select (round("SQL_SUBSTRING"(max(S.Id),6,3))) as N from " DB_PREFIX "SUPPLY S where "SQL_SUBSTRING"(S.Id,1,5)= "
+		SQL_CONCAT"'S'"
+		SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+		SQL_CONCATEND" and S.Id>"SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND"\
+		UNION ALL \
+		select distinct 0 as N from " DB_PREFIX "Agency \
+	) IDO\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	AddSupply_SQL2 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY S, " DB_PREFIX "SUPPLIER SR \
+		SET S.IdSupplier=SR.Id\
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and "SQL_CONCAT"trim(SR.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(SR.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '[/*LABELSUPPLIER*/]'\"\\\n"
+	),
+	AddSupply_SQL3 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY S, " DB_PREFIX "USER u \
+		SET S.IdAgency=u.IdAgency\
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and u.Id='(/*USERID*/)'\"\\\n"
+	),
+	AddSupply_SQL4 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY S \
+		SET S.Comments=' '\
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and S.IdAgency is not NULL and S.IdAgency>' '\"\n\n\n"
+	),
+	;
+
+	AddSupply_SQL2 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY SET \
+			IdSupplier=(select SR.Id from " DB_PREFIX "SUPPLIER SR \
+				where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.CommentS.Id and "SQL_CONCAT"trim(SR.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(SR.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '[/*LABELSUPPLIER*/]'\
+			)\"\\\n"
+	),
+	AddSupply_SQL3 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY  \
+		SET IdAgency=(select u.IdAgency from " DB_PREFIX "USER u where u.Id='(/*USERID*/)')\
+		where "SQL_SUBSTRING"(Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and Comments=Id \"\\\n"
+	),
+	AddSupply_SQL4 = (
+		"\"UPDATE " DB_PREFIX "SUPPLY \
+		SET Comments=' '\
+		where "SQL_SUBSTRING"(Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and Comments=Id and IdAgency is not NULL and IdAgency>' '\"\n\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\CreateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ AddSupply_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ ("'" AddSupply_Input),
+		@ ("'\\\n"),
+		@ AddSupply_SQL1,
+		@ AddSupply_SQL2,
+		@ AddSupply_SQL3,
+		@ AddSupply_SQL4,
+),
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DuplicateSupply ",
+
+% Caption
+@ ("'" TAG_COPY_SUPPLY "' "),	% JZ 0906
+%@ ("'Duplicate Supply' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '"TAG_COPY"' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DuplicateSupply_Input = (
+	"{/*Input(L;" TAG_COPY_SUPPLY " [/*SUPPLY.ID*/];2;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(date,DATELIMIT," TAG_DATE_LIMIT ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+DuplicateSupply_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "SUPPLY (Id, DateSupply, DateDelivery, DateLimit, IdState, Comments, \
+			Reference, Quantity,ProductCondition, PayCondition, Packaging, CustomsInfo, Incoterm)\
+	select "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATWITH" format(max(N)+1,'0')"SQL_CONCATEND", "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), [/*DATEDELIVERY*/], [/*DATELIMIT*/], '0', "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND",\
+			"SQL_CONCAT"'Copie de '"SQL_CONCATWITH" S.Id"SQL_CONCATEND", S.Quantity,S.ProductCondition, S.PayCondition, S.Packaging, S.CustomsInfo, S.Incoterm\
+	from " DB_PREFIX "SUPPLY S,\
+		(select (round("SQL_SUBSTRING"(max(S0.Id),6,3))) as N from " DB_PREFIX "SUPPLY S0 where "SQL_SUBSTRING"(S0.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S0.Id>"SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND"\
+    UNION ALL \
+		select distinct 0 as N from " DB_PREFIX "Agency \
+	) IDO \
+	where S.Id = ('[/*SUPPLY.ID*/]') \
+	group by S.Id, S.Quantity,S.ProductCondition, S.PayCondition, S.Packaging, S.CustomsInfo, S.Incoterm\"\\\n"
+),
+
+DuplicateSupply_SQL2 = (
+	"\"INSERT INTO " DB_PREFIX "SUPPLY_PRODUCT (IdSupply, IdProduct, IdSupplier, Quantity, PriceUnit, Comments, Comments1) \
+	select S.Id, SP.IdProduct,SP.IdSupplier, SP.Quantity, SP.PriceUnit, SP.Comments, SP.Comments1\
+	from " DB_PREFIX "SUPPLY S," DB_PREFIX "SUPPLY_PRODUCT SP\
+	where S.Comments="SQL_CONCAT"'Copie de '"SQL_CONCATWITH"SP.IdSupply"SQL_CONCATEND"\
+	and S.Reference=SP.IdSupply\
+	and S.DateSupply="SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"') and S.DateDelivery=[/*DATEDELIVERY*/]\
+	and SP.IdSupply = ('[/*SUPPLY.ID*/]')\"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\DuplicateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/} \\\n"),
+		@ DuplicateSupply_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ ("'" DuplicateSupply_Input),
+		@ ("'\\\n"),
+		@ DuplicateSupply_SQL1,
+		@ DuplicateSupply_SQL2,
+),
+@ ("\n\n\n"),
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifySupply ",
+
+% Caption
+@ ("'" TAG_UPDATE_SUPPLY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '"TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateSupply_Input = (
+	"{/*Input(MO;" TAG_UPDATE_SUPPLY " [/*SUPPLY.ID*/];4;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*SUPPLY.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(string,INCOTERM," TAG_INCOTERMS ",[/*SUPPLY.INCOTERM*/],50." inputWidth ",1,,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*SUPPLY.COMMENTS*/],50." inputWidth ",1,,);\\\n"
+	"(string,STATE," TAG_STATE ",[/*SUPPLY.STATESUPPLY*/],50." inputWidth ",1,,[/*STATE.LABELSTATE*/]);\\\n"
+ 	")*/}\\\n"
+),
+
+UpdateSupply_SQL1=(
+	"\"Update " DB_PREFIX "SUPPLY set \
+		DateDelivery='[/*DATEDELIVERY*/]',\
+		Incoterm='[/*INCOTERM*/]',\
+		Comments='[/*COMMENTS*/]'\
+	where Id in ([/*SUPPLY.ID*/])\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateSupply_SQL2=(
+		"\"Update " DB_PREFIX "SUPPLY O, " DB_PREFIX "STATE s\
+			set O.IdState=s.Id\
+		where O.Id in ([/*SUPPLY.ID*/])\
+			and "SQL_CONCAT"trim(s.LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"trim(s.ID)"SQL_CONCATWITH"')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='SUPPLY'\"\n\n\n"
+	),
+	;
+
+	UpdateSupply_SQL2=(
+		"\"Update " DB_PREFIX "SUPPLY \
+			set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"trim(s.ID)"SQL_CONCATWITH"')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='SUPPLY' )\
+		where O.Id in ([/*SUPPLY.ID*/])\"\n\n\n"
+	),
+
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/} \\\n"),
+		@ UpdateSupply_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ ("'" UpdateSupply_Input),
+		@ ("'\\\n"),
+		@ UpdateSupply_SQL1,
+		@ UpdateSupply_SQL2,
+),
+@ ("\n\n\n"),
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteSupply ",
+
+% Caption
+@ ("'" TAG_DELETE_SUPPLY "' "),
+
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" '"TAG_DELETE"' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeleteSupply_SQL1= (
+	"\"Delete from " DB_PREFIX "SUPPLY_PRODUCT \
+	where IdSupply IN ('[/*SUPPLY.ID*/]')\
+	and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT LO0 where SUPPLY_PRODUCT.IdSupply=LO0.IdSupply)\
+	and exists (select 1 from " DB_PREFIX "SUPPLY O where O.Id=SUPPLY_PRODUCT.IdSupply and (O.IdState is NULL or O.IdState='0') )\"\\\n"
+),
+DeleteSupply_SQL2= (
+	"\"delete from " DB_PREFIX "SUPPLY\
+	where SUPPLY.Id in ('[/*SUPPLY.ID*/]') and (SUPPLY.IdState is NULL or SUPPLY.IdState='0') \
+	and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT LO0 where SUPPLY.Id=LO0.IdSupply)\"\\\n"
+),
+DeleteSupply_SQL3= (
+	"\"Update " DB_PREFIX "SUPPLY \
+	set Comments='NON Supprimée'\
+	where Id IN ('[/*SUPPLY.ID*/]')\"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\DeleteSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ DeleteSupply_SQL1,
+		@ DeleteSupply_SQL2,
+		@ DeleteSupply_SQL3,
+),
+.

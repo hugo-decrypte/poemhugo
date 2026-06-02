@@ -1,0 +1,42 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		FuncHistogramVehicleCost.n	%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+<histogramVehicleCost>(aliasHistogram,bestfit, labelX,labelY, labelLegend,colorLegend, IdVehicleSelected, title, postfix0)
+(
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("HistogramVehicleCost" postfix ".view"),
+
+		IdVehicleSelected <> {} => (
+			sqlFrom = (
+				" FROM " DB_PREFIX "RESOURCE v  WHERE "
+				SQL_ViewUserVisibleClubIs "v.idClub) AND v.id IN (" concatSetQuoted(IdVehicleSelected) ")"
+			),
+			;
+
+			sqlFrom = (
+				" FROM " DB_PREFIX "RESOURCE v  WHERE "
+				SQL_ViewUserVisibleClubIs "v.idClub)"
+			),
+		),
+
+		sqlRate = (SQL_CASEWHEN "ISNULL(v.cost)" SQL_THEN "0" SQL_ELSE "v.cost" SQL_CASEEND),
+		sqlDataXY = ("SELECT DISTINCT v.id AS X, " sqlRate " AS Y, "),
+
+
+		%sqlDataHistogram = (
+		%	"SELECT DISTINCT v.id AS X, "
+		%		SQL_CASEWHEN "ISNULL(v.cost)" SQL_THEN "0" SQL_ELSE "v.cost" SQL_CASEEND " AS Y, "
+		%		SQL_CASEWHEN "ISNULL(v.cost) OR v.cost <=0" SQL_THEN "'" RGB_Y1_RATE2 "'" SQL_ELSE "'" RGB_Y1_RATE1 "'" SQL_CASEEND " AS C_1 " sqlFrom),
+
+	
+		['Work Directory' "Model\Common\View\HistogramBar1.n"],
+
+	),
+),

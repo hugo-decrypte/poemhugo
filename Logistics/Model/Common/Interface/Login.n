@@ -1,0 +1,103 @@
+%==================================================%
+%                                                  %
+% 		 Login.n			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	%consoleLogin => (
+	%	(TAG_CONSOLE_LOGIN : ),
+	%	;
+
+	passwordLogin :: "",
+	passwordLogin = (),
+
+
+	% Password matching
+	(TAG_PASSWORD_ERROR :
+		passwordLogin = passwordUser_{userId_{idUserLogin}}
+	),
+
+
+
+
+	'()' <- database,
+
+
+	%sqlPermissionLogin = (
+	%	"SELECT "SQL_FIELD_PERMISSION" FROM " SQL_TABLE_USER " WHERE id='" idUserLogin "'"),
+	%(SQL : sqlPermissionLogin),
+	%1 = (),
+	%permissionLogin = (),
+
+
+
+	% Only one STATE_WRITE user per club
+	IdUserWrite :: {""},
+
+	permissionLogin >= STATE_WRITE => (
+		sqlUserWriteLogin = (
+			"SELECT l.idUser FROM " DB_PREFIX "LOG l," DB_PREFIX "CLUB c WHERE l.t2 IS NULL AND l.idClub=c.id AND l.idClub='" idClubLogin
+			"' AND l."SQL_FIELD_PERMISSION"='" STATE_WRITE "'"
+		),
+		(SQL : sqlUserWriteLogin),
+
+		IdUserWrite = \{ \forall i \in [1, ()] () \},
+
+
+
+		% Write login jam
+		permissionLogin < STATE_ADMIN && IdUserWrite <> {} && idUserLogin \not\in IdUserWrite => (
+			(SQL :	"UPDATE " DB_PREFIX "LOG SET comments='" TAG_ALERT_WRITE_LOGIN_JAM
+				"' WHERE idUser='" \inf IdUserWrite "' AND (t2 IS NULL OR t2='" TAG_EMPTY_STRING "')"),
+
+			(SQL :	"UPDATE " SQL_TABLE_USER " SET comments='" TAG_ALERT_WRITE_LOGIN_JAM
+				"' WHERE id='" \inf IdUserWrite "'"),
+
+	
+			(TAG_LOGIN_DENIED_BY_EXCLUSIVE_USER_IS \inf IdUserWrite : false),
+		),
+		;
+
+
+		IdUserWrite = {},
+	),
+
+
+
+
+	% Current time
+	timeLogin := 'yyyy-mm-dd hh:mm:ss',
+
+
+
+
+	% Duplicate login
+	(SQL : "UPDATE " DB_PREFIX "LOG SET t2='" timeLogin "',comments='" TAG_ALERT_LOGIN_CANCELED
+		"' WHERE idUser='" idUserLogin "' AND (t2 IS NULL OR t2='" TAG_EMPTY_STRING "')"),
+
+
+
+	% LOG
+	IdUserWrite <> {} => (
+		comments = TAG_ALERT_DUPLICATE_LOGIN,
+		;
+	
+		comments = "",
+	),
+
+	(SQL : "INSERT	INTO " DB_PREFIX "LOG(idClub,idUser,ip," SQL_FIELD_PERMISSION ",t1,operation,comments)VALUES("
+		"'" idClubLogin "','" idUserLogin "','" serverIpLogin "','" permissionLogin "','"
+		timeLogin "','" TAG_LOGIN "','" comments "')"),
+
+
+
+
+	database <- '()',
+),
+
+

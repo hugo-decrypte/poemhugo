@@ -1,0 +1,10 @@
+
+Normally use 32-bit PoemView
+C:\Windows\SysWOW64\regsvr32 "D:\PoemView\ComView32.ocx"
+C:\Windows\system32\regsvr32 "D:\PoemView\ComView64.ocx"
+
+
+Normally use 64-bit PoemServer:
+
+// POEM64:	C:\Windows\system32\ODBCAD32
+// POEM32:	C:\Windows\SysWOW64\ODBCAD32

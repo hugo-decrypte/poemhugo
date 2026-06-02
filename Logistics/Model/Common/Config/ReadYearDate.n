@@ -1,0 +1,36 @@
+%==================================================%
+%                                                  %
+%            		ERP		 	   %
+%                                                  %
+%		ReadYearDate.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	%%%% month info
+
+	dateStartPlanning	:: defaultDate,
+	dateEndPlanning		:: defaultDate,
+
+	%% input one date of the month
+	dateYear		:: defaultDate,
+	dateYear		= (),
+
+	%% the first date of the month
+	dateStartPlanning["yyyy"]	= dateYear["yyyy"],
+	dateStartPlanning["mm"]		= 1,
+	dateStartPlanning["dd"]		= 1,
+
+	dateEndPlanning["yyyy"]	= dateYear["yyyy"],
+	dateEndPlanning["mm"]		= 12,
+	dateEndPlanning["dd"]		= 31,
+
+
+	("dateYear		= " dateYear 		: ),
+	("dateStartPlanning	= " dateStartPlanning 	: ),
+	("dateEndPlanning	= " dateEndPlanning 	: ),
+
+
+	DATE = [dateStartPlanning, dateEndPlanning],
+),

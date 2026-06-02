@@ -1,0 +1,122 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		InitiateData.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+(TAG_NO_CANDIDATE_ORDER :
+	ORDER <> {},
+),
+
+
+['Work Directory' "Model\Common\Function\FuncConcatSetNotQuoted.n"],
+
+
+'()' <- database,
+
+
+% RESOURCE
+
+\forall r \in RESOURCE
+	(SQL:	"UPDATE	" DB_PREFIX "RESOURCE
+		SET 	IdTypeResource='" IdTypeResourceResource_{r} "'
+		WHERE 	id='" idResource_{r} "' " SQL_AND_CLUB),
+
+
+
+% SPECIAL: If strict, then to reject other projects conflict with its [t1,t2]
+ruleProjectStrictDeadline =>
+databaseType="SQLSERVER" =>(
+	(SQL:	"UPDATE o SET o.state=" STATE_CANDIDATE
+		" FROM " DB_PREFIX "PROJECT o WHERE o.state=" STATE_PLANNED
+		" AND o.strict=1 AND o.id IN( SELECT o.id
+					FROM	" DB_PREFIX "PROJECT o," DB_PREFIX "PRODUCT p"
+					SQL_WHERE_CLUB_PRODUCT_PROJECT_CANDIDATE_PLUS
+					sqlAndClubProject0
+		")  AND o.t2Plan>=o.t1 AND o.t1Plan<=o.t2 " SQL_AND_PROJECT_RELEASED SQL_AND_CLUB_o),
+	;
+
+	(SQL:	"UPDATE " DB_PREFIX "PROJECT o SET o.state=" STATE_CANDIDATE
+		" WHERE o.state=" STATE_PLANNED
+		" AND o.strict=1 AND o.id IN(SELECT o.id
+					FROM	" DB_PREFIX "PROJECT o," DB_PREFIX "PRODUCT p"
+					SQL_WHERE_CLUB_PRODUCT_PROJECT_CANDIDATE_PLUS
+					sqlAndClubProject0
+		") AND o.t2Plan>=o.t1 AND o.t1Plan<=o.t2  " SQL_AND_PROJECT_RELEASED SQL_AND_CLUB_o),	% li 0903
+),
+
+
+
+% PROCESS
+
+% Normalize task process
+(SQL : "UPDATE " DB_PREFIX "PROCESS p SET p.idProduct=NULL WHERE "
+	SQL_PROCESS_NOT_TASK " AND p.id NOT IN " SQL_SELECT_NON_TASK_PROCESS),
+
+
+% Normalize job process (not task parent cannot be batch)
+(SQL : "UPDATE " DB_PREFIX "PROCESS p SET p.idxParent=NULL WHERE "
+	SQL_PROCESS_NOT_TASK " AND p.id NOT IN " SQL_SELECT_TASK_PARENT_PROCESS),
+
+
+
+
+(SQL : "SELECT	id,IdCoupledResource
+       	FROM	" DB_PREFIX "PROCESS p
+	WHERE	("SQL_PROCESS_TASK") AND (initTime IS NULL OR initTime=0) AND (unitTime IS NULL OR unitTime=0)" SQL_AND_CLUB),
+
+IdProcessTime0 :: {""},
+IdProcessTime0 = \{ \forall i \in [1,()] () \},
+
+IdProcessTime0 <> {} =>
+( TAG_PROCESS_TIME_0 " : " IdProcessTime0 : ),
+% ??????
+
+
+
+(SQL : "SELECT	id,IdCoupledResource
+       	FROM	" DB_PREFIX "PROCESS
+	WHERE	IdCoupledResource IS NOT NULL AND IdCoupledResource<>'" TAG_EMPTY_STRING "'" SQL_AND_CLUB),
+
+nbCoupledResource = (),
+
+\forall i \in [1,nbCoupledResource] (
+	idCoupledResourceProcess_{i} :: "",
+	IdCoupledResourceProcess_{i} :: {""},
+
+	idCoupledResourceProcess_{i} = (),
+	IdCoupledResourceProcess_{i} = (),
+),
+
+\forall i \in [1,nbCoupledResource] (
+	(SQL :	"UPDATE " DB_PREFIX "PROCESS SET IdCoupledResource='{"
+		concatSetNotQuoted(IdCoupledResourceProcess_{i} \cup \{ idCoupledResourceProcess_{i} \})
+		"}' WHERE id IN(" concatSetQuoted(IdCoupledResourceProcess_{i}) ")"),
+),
+
+
+
+
+% PLAN
+
+% li 0604 oracle IN<1000
+
+sqlWhereValidProject = (
+	" WHERE idProject IN(
+		SELECT	"SQL_TOP_PERCENT" o.id
+		FROM	" DB_PREFIX "PROJECT o
+		WHERE o.state=" STATE_CANDIDATE sqlAndClubProject0 ")" SQL_AND_CLUB
+), % Zhou 0922
+
+(SQL : "DELETE FROM " DB_PREFIX "PLAN"		sqlWhereValidProject),
+(SQL : "DELETE FROM " DB_PREFIX "SUBPLAN"	sqlWhereValidProject),
+(SQL : "DELETE FROM " DB_PREFIX "JOB"		sqlWhereValidProject),
+(SQL : "DELETE FROM " DB_PREFIX "TASK"		sqlWhereValidProject),
+
+
+database <- '()',
+

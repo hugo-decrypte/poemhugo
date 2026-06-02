@@ -1,0 +1,80 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ReadUserLogin.n		  	   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+% Reading Input Buffer
+'()' => (
+	( "Port/User ID input error" :
+		serverPortDefault	:: "",
+		idUserLogin 		:: "",
+
+		serverPortDefault	= (),
+		idUserLogin		= (),
+	),
+
+
+	bootConfig = ('Work Directory' "Boot\Boot.cfg"),
+	[bootConfig],
+
+
+%	( TAG_USER_ID_IS idUserLogin : ),
+
+),
+
+
+
+['Work Directory' "Model\Common\Config\ReadUser.n"],
+
+
+
+'()' => (
+
+
+	% Login User
+	(TAG_INVALID_USER_IS idUserLogin : idUserLogin \in IDUSER),
+
+
+	% Login Club
+	idClubLogin = idClubUser_{userId_{idUserLogin}},
+
+
+	% User maxPermission
+	permissionLogin = permissionUser_{userId_{idUserLogin}},
+
+
+	% See Club matching in Login.n
+	%(TAG_INVALID_PORT_IS serverPortLogin : serverPortLogin = portClub_{clubId_{idClubLogin}}),
+
+
+	% Login Related Club
+	IdRelatedClubLogin = IdRelatedClub_{clubId_{idClubLogin}},
+
+	IdDomClubLogin = [ \forall i \in IdRelatedClubLogin ("'" i "',") ] [-\infty..-2],
+	IDDOMCLUBLOGIN = ("(" IdDomClubLogin ")"),
+
+
+
+
+	% Login IP/Port
+	serverIpLogin = ipClub_{clubId_{idClubLogin}},
+	serverPortLogin = portClub_{clubId_{idClubLogin}},
+
+
+%	( TAG_USER_CLUB_IS idClubLogin : ),
+%	( TAG_RELATED_CLUB_DOM_IS IdRelatedClubLogin : ),
+
+%	( TAG_USER_SERVER_IS serverIpLogin ":" serverPortLogin : ),
+
+
+
+
+	% Rule config files
+	parameterConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\Parameter.cfg"),
+
+	[parameterConfig],
+),

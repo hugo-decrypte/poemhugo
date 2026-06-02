@@ -1,0 +1,101 @@
+/******************************************************/
+/*	                                              */
+/* 		 FuncMapOrder.n  	    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapOrder>(IdSiteSelected, doubleclick,title,related,idUserPostfix)
+(
+	'@' => (
+		postfix = (idUserPostfix = "" ? (related = "" ? "" : ("_" related)) : idUserLogin),
+		viewFile = ("MapOrder" postfix),
+		
+
+
+		IdSiteSelected = {} => (
+			sqlIdSite = "",
+			;
+			sqlIdSite = (" AND s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+		),
+
+		sqlWhereSiteSelected = (" WHERE s.id=p.idSite1 OR s.id=p.idSite2"), % Chen 1024
+
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+		['Work Directory' "Model\\Interaction\\Solver\\Map\\ScenarioMapOrder2AddToTour.n"], % wu 08/11/2022
+		
+	
+
+
+
+		% Data: SITEORDER
+		@ "Data ",
+
+		% ID
+		@ "ORDER '", % Chen 1024
+
+		% Caption
+		@ title,
+
+		% Group
+		@ "' ORDER ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;MAP=VRP;WIDTH=-30;FIND={ID,IDCLIENT,NAMECLIENT,IDSITE,NAMESITE,IDVEHICLE};TIPINFO=" TIPINFO_MAP_ORDER "]' _ \\\n"),
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[12;(string,ID,"TAG_ID");(string,IDCLIENT,"TAG_CLIENT_ID");(string,NAMECLIENT,"TAG_CLIENT_NAME");"),
+		@ ("(string,IDSITE,"TAG_SITE_ID");(string,NAMESITE,"TAG_SITE_NAME");(string,POSTCODE,"TAG_POSTCODE");"),
+		@ ("(float,LATITUDE,"TAG_LATITUDE");(float,LONGITUDE,"TAG_LONGITUDE");(int,X,X);(int,Y,Y);"),
+                @ ("(string,IDVEHICLE,"TAG_PLAN_RESOURCE");(string,TOURVEHICLE,"TAG_PLAN_TOUR");"),
+		@ ("(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		 @ ("SELECT DISTINCT	o.id AS ID, \
+						c.id AS IDCLIENT, \
+						c.name AS NAMECLIENT, \
+						s.id as IDSITE, \
+						s.name as NAMESITE, \
+		 				s.longitude AS LONGITUDE, \
+						s.latitude AS LATITUDE, \
+		 				o.idResource AS IDVEHICLE, \
+						o.tourResource AS TOURVEHICLE, \
+						NULL AS X, \
+						NULL AS Y, \
+						o.idIcon as ICON, \
+                				o.sizeIcon AS WIDTH \
+                			FROM  " DB_PREFIX "OPT_ORDER o," DB_PREFIX "OPT_CLIENT c," DB_PREFIX "SITE s \
+					WHERE o.idClient=c.id AND o.idSite2=s.id AND o.state>='" STATE_CANDIDATE "' AND " SQL_ViewUserVisibleClubIs "s.idClub) \"\n\n\n"),
+
+
+
+		% Data : VEHICLE2
+		['Work Directory' "Model\View\Data\DataVehicle2.n"],
+
+		% wu 07/11/2022 why this ?
+		%@(";QUERY=" SQL_SelectVehicleClubIdNameWhereTrue sql_AND_CLUB_VEHICLE " ORDER BY 1,2\"\n\n"), % Chen 1107
+		
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

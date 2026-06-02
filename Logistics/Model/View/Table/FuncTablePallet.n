@@ -1,0 +1,92 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTablePallet.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tablePallet>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TablePallet" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(string,NAMESENDER," TAG_SENDER ",,15.0.300,0);\\\n"),		
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+		
+
+		@ VIEWSQL,
+
+
+		@ ("SELECT pl.idPacking AS IDPACKING, \\\n"),
+		@ ("\t\t pl.NoPallet as NOPALLET,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "exists (select Name from " DB_PREFIX "COMPANY c where c.Id=pc.IdSender)" SQL_THEN "(select Name from " DB_PREFIX "COMPANY c where c.Id=pc.IdSender)" SQL_ELSE "pc.IdSender" SQL_CASEEND " as NAMESENDER,\\\n"),
+		@ ("\t\t pc.DateCreate as DATESTART,\\\n"),
+		@ ("\t\t pc.DateDelivery as DATEINPUT,\\\n"),
+		@ ("\t\t pl.Quantity AS QUANTITY,\\\n"),
+		@ ("\t\t pl.QuantityReal AS QUANTITYREAL,\\\n"),
+		@ ("\t\t pl.QuantityStock AS QUANTITYSTOCK,\\\n"),
+		@ ("\t\t pl.QuantityDefective AS QUANTITYDEFECTIVE,\\\n"),
+		@ ("\t\t pl.WeightNet AS WEIGHTNET,\\\n"),
+		@ ("\t\t pl.WeightPallet AS WEIGHTPALLET,\\\n"),
+		@ ("\t\t pl.WeightGlobal AS WEIGHTGLOBAL,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(pl.Length,"SQL_FORMATSCALE0") AS LENGTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(pl.Width,"SQL_FORMATSCALE0") AS WIDTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(pl.Height,"SQL_FORMATSCALE0") AS HEIGHT,\\\n"),
+		@ ("\t\t pl.Designation AS COMMENTS,\\\n"),
+		@ ("\t\t pl.IDZONE AS STOCKZONE,\\\n"),
+		@ ("\t\t pl.IDROW AS STOCKROW,\\\n"),
+		@ ("\t\t pl.IDCOLUMN AS STOCKCOLUMN,\\\n"),
+		 
+		@ ("\t\t (select count(1) from " DB_PREFIX "PALLET_PRODUCT PD where PD.IdPacking=pl.IdPacking and PD.NoPallet=pl.NoPallet) as NBPRODUCT,\\\n"),
+		@ ("\t\t (" SQL_CASEWHEN "exists (select 1 from " DB_PREFIX "STATE s where s.Id=pc.IdState and s.Category='SUPPLY')" SQL_THEN "(select Label from " DB_PREFIX "STATE s where s.Id=pc.IdState and s.Category='SUPPLY')" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.Quantity<>pl.QuantityReal or pl.QuantityStock<0 or pl.QuantityDefective>0" SQL_THEN "'Quantit  incorrecte'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock=pl.QuantityReal" SQL_THEN "'A Livrer'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock<pl.QuantityReal and pl.QuantityStock>0" SQL_THEN "'Livrée Partielle'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock=0" SQL_THEN "'Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t   ' '" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") as STATE,\\\n"),
+
+		@ ("\t\t (" SQL_CASEWHEN "pc.IdState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='SUPPLY')" SQL_THEN "(select Color from " DB_PREFIX "STATE s where s.Id=pc.IdState and s.CATEGORY='SUPPLY')" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.Quantity<>pl.QuantityReal or pl.QuantityStock<0 or pl.QuantityDefective>0" SQL_THEN "'(255 120 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock=pl.QuantityReal" SQL_THEN "'(160 160 255)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock<pl.QuantityReal and pl.QuantityStock>0" SQL_THEN "'(255 255 60)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "pl.QuantityStock=0" SQL_THEN "'(120 255 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t    '(200 200 160)'" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PACKING pc inner join " DB_PREFIX "PALLET pl on pc.Id=pl.IdPacking \\\n"),
+		@ ("\t WHERE (pl.IdPacking in ((/*IDPACKING*/)) or 'XXX' in ((/*IDPACKING*/)) ) \\\n"),
+		@ ("\t\t  and (exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PD where pl.IdPacking=PD.IdPacking and PD.NoPallet=pl.NoPallet and PD.IdProduct in ((/*IDPRODUCT*/))) or 'XXX' in ((/*IDPRODUCT*/)) ) \\\n"),
+		@ ("\t ORDER BY pl.IdPacking, pl.NoPallet \"\n\n\n"),
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePallet2EditPallet.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePallet2TablePalletProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePallet2TableProductForPallet.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePallet2EditOnView.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

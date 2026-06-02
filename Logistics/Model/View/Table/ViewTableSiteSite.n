@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	      Planning    	           %
+%                                                  %
+%  		ViewTableSiteSite.n		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableSiteSite.n"],
+
+'@' => (
+	tableSiteSite("SITESITE",TAG_TABLE,"SITE_SITE",true, {}, "EditSiteSite",TAG_TABLE_SITE_SITE,"",""),
+	%tableSiteSite("SITESITE",TAG_TABLE,"SITE_SITE",{},TAG_TABLE_SITE_SITE,"Menu"),
+),

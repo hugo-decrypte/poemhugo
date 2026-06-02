@@ -1,0 +1,87 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 UpdateOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idOrderSelectedBuffer_{i} 			:: "",
+		idOrderSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdOrderSelectedBuffer_{i} = ("'" idOrderSelectedBuffer_{i} "',"),
+			;
+			strIdOrderSelectedBuffer_{i} = ("'" idOrderSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDORDERSELECTEDBUFFER :: "",
+	IDORDERSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdOrderSelectedBuffer_{i}],
+
+	dateDeliveryBuffer			:: 0,
+	incotermBuffer				:: "",
+	referenceBuffer 			:: "",
+	invoiceBuffer				:: "",
+	proformaBuffer				:: "",
+	commentBuffer				:: "",
+	stateBuffer					:: "",
+	
+	
+	dateDeliveryBuffer		= (),
+    incotermBuffer			= (),
+	referenceBuffer 		= (),
+	invoiceBuffer			= (),
+	proformaBuffer			= (),
+	commentBuffer			= (),
+	stateBuffer				= (),
+	
+
+	
+
+	'()' <- database,
+
+		UpdateOrder_SQL1 = (
+			"Update " DB_PREFIX "CLIENTORDER set
+				DateDelivery='"dateDeliveryBuffer"',
+				Incoterm='"incotermBuffer"',
+				Reference='"referenceBuffer"',
+				Comments='"commentBuffer"',
+				IdInvoice='"invoiceBuffer"',
+				IdProforma='"proformaBuffer"'
+			WHERE 	Id in ("IDORDERSELECTEDBUFFER")"
+		),
+
+		databaseType = "ACCESS" => (
+			UpdateOrder_SQL2 = (
+				"Update " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "STATE s
+				SET O.IdState=s.Id
+				WHERE O.Id in ("IDORDERSELECTEDBUFFER")
+				AND "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='ORDER'"
+			),
+			;
+
+			UpdateOrder_SQL2 = (
+				"Update " DB_PREFIX "CLIENTORDER 
+				set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='ORDER')\
+				where Id in ("IDORDERSELECTEDBUFFER")"
+			),
+		),
+
+
+	(SQL : UpdateOrder_SQL1), 
+	(SQL : UpdateOrder_SQL2), 
+	'',
+	database <- '()',
+),

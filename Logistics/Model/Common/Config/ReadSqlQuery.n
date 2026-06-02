@@ -1,0 +1,33 @@
+%==================================================%
+%                                                  %
+%            	Vehicle Routing           	   %
+%                                                  %
+%		ReadSqlQuery.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% Database config files
+sqlConfig = ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\Database\SqlQuery.cfg"),
+
+
+sqlQueryFile = [sqlConfig],
+
+
+'()' <- sqlQueryFile,
+
+nbSqlQuery = #(sqlQueryFile, "\n\n"),
+
+\forall i \in [1, nbSqlQuery] (
+	idSqlQuery_{i}		:: "",
+	valueSqlQuery_{i}	:: "",
+
+	idSqlQuery_{i} = ()	: "=",
+	valueSqlQuery_{i} = ()	: "\n\n",
+
+	&[idSqlQuery_{i}] = valueSqlQuery_{i},
+),
+
+sqlQueryFile <- '()',
+

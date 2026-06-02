@@ -1,0 +1,27 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	        ScriptGenerateView.n                  */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	        ScriptGenerateView.n                  */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+'@' => (
+	[['Work Directory'  "Model\View\GenerateView.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+),
+

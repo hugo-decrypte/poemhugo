@@ -1,0 +1,66 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	               %
+%                                                  %
+%  		 FuncTableSupplier.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%% 2025.10.27 Jianyi pass 
+%%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplier2TableProductForOffer.n"], 
+%%  into TableOfferSupplier
+%%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOfferSupplier2TableProductForOffer.n"], 
+
+<tableSupplier>(id,type,aliasTable,bestfit,doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		viewFile = ("TableSupplier" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,POSTCODE," TAG_POSTCODE ",,10.0.50,0);\\\n"),
+		@ ("(string,ADDRESSSUP," TAG_ADDRESS2 ",,10.0.100,0);\\\n"),
+		@ ("(int,TODAY," TAG_TODAY ",,8.0.100,1);\\\n"),		
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT s.id AS ID,\\\n"),
+ 		@ ("\t\t s.name AS NAME,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"trim(s.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"s.City"SQL_CONCATEND" AS CITY,\\\n"),
+ 		@ ("\t\t s.Country AS COUNTRY,\\\n"),
+ 		@ ("\t\t s.PhoneFix AS PHONE,\\\n"),
+ 		@ ("\t\t s.PhoneMobile AS MOBILE,\\\n"),
+ 		@ ("\t\t s.EMAIL AS MAIL,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"trim(s.Address) "SQL_CONCATWITH" "SQL_CASEWHEN"s.AddressSup is not NULL and s.AddressSup>' '"SQL_THEN" "SQL_CONCAT"', '"SQL_CONCATWITH"s.AddressSup"SQL_CONCATEND""SQL_THEN"  ''"SQL_CASEEND""SQL_CONCATEND" AS ADDRESS,\\\n"),
+ 		@ ("\t\t s.PostCode AS POSTCODE,\\\n"),
+ 		@ ("\t\t s.AddressSup AS ADDRESSSUP,\\\n"),
+ 		@ ("\t\t "SQL_FORMATDATE"(Date(), '"SQL_FORMATDATENUM"') as TODAY,\\\n"),
+ 		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "SUPPLIER s \\\n"),
+		@ ("\t WHERE s.idClub='(/*CLUBID*/)' \\\n"),
+		@ ("\t ORDER BY s.Name\"\n\n\n"), 
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplier2TableOfferSupplier.n"], 	
+%%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplier2TableProductForOffer.n"], 
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplier2EditSupplier.n"], % JZ 0919
+		
+		
+
+		
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

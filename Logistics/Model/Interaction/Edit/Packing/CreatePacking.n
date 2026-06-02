@@ -1,0 +1,50 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreatePacking.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	
+	dateDeliveryBuffer				:: 0,
+	
+	dateDeliveryBuffer				= (),
+	
+
+	'()' <- database,
+	
+	CreatePacking_SQL1 = (
+		"INSERT INTO " DB_PREFIX "PACKING (Id, IdOrder, Comments, IdSender, DateCreate, DateDelivery, NbPallet, IdState, OriginPacking) 
+		select "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y2""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND", "
+			SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y2""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND", "
+			SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y2""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND","
+			"' ', "
+			SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),"
+			"'"dateDeliveryBuffer"', 1, '0','S'
+		from 
+		(select (round(mid(max(p.Id),6,3))) as N from " DB_PREFIX "PACKING p where mid(p.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y2""SQL_FORMATDATE_M"')"SQL_CONCATEND" and p.Id> "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" 
+		UNION ALL 
+		select distinct 0 as N from " DB_PREFIX "PACKING p0 
+		) IDCM"
+	),
+
+	CreatePacking_SQL2 = (
+		"INSERT INTO " DB_PREFIX "PALLET (IdPacking, NoPallet, Quantity, QuantityStock, QuantityReal, QuantityDefective, DatePreparation, DateDelivery, IdState) 
+		select pc.Id, 1, 0,0,0,0, "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y2""SQL_FORMATDATE_M"')"SQL_CONCATEND", '"dateDeliveryBuffer"', '0'
+		from " DB_PREFIX "PACKING pc
+		where pc.Id=pc.IdOrder and pc.Comments=pc.Id and pc.DateCreate="SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"') 
+		and not exists (select 1 from " DB_PREFIX "PALLET pl where pl.IdPacking=pc.Id and pl.NoPallet=1) "
+	),
+	
+	(SQL : CreatePacking_SQL1), 
+	(SQL : CreatePacking_SQL2), 	
+	
+	database <- '()',
+),

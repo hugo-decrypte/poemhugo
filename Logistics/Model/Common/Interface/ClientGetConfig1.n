@@ -1,0 +1,146 @@
+/********************************************************/
+/*							*/
+/*		    ClientGetConfig.n 			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+
+'()' => (
+
+	clientConfig = ('Work Directory' "Boot/" directoryClubLogin "/Client.cfg"),
+
+
+	'()' <- [clientConfig],
+
+	"Parameter" = (),
+
+	% Parameters
+	GoogleMapsKey			:: "",
+%	GoogleMapsPassword		:: "",
+
+	HereMapsKey			:: "",
+%	HereMapsPassword		:: "",
+
+	ChatGPTKey			:: "",
+%	ChatGPTPassword			:: "",
+
+
+	maxSitePacketSiteTable		:: 0,
+	maxSite1PacketSiteSiteTable	:: 0,
+
+
+	"GoogleMapsKey"			= (),
+	GoogleMapsKey			= (),
+%	"GoogleMapsPassword"		= (),
+%	GoogleMapsPassword		= (),
+
+	"HereMapsKey"			= (),
+	HereMapsKey			= (),
+%	"HereMapsPassword"		= (),
+%	HereMapsPassword		= (),
+
+	"ChatGPTKey"			= (),
+	ChatGPTKey			= (),
+%	"ChatGPTPassword"		= (),
+%	ChatGPTPassword			= (),
+
+
+	"maxSitePacketSiteTable"	= (),
+	maxSitePacketSiteTable		= (),
+
+	"maxSitePacketSiteSiteTable"	= (),
+	maxSitePacketSiteSiteTable	= (),
+
+
+
+	% PROGRAM SQL
+
+
+	"Program" = (),
+
+	PROGRAM = [1,()],
+	ARGUMENT = [1, ()],
+
+	\forall p \in PROGRAM (
+		permissionProgram_{p}	= (),
+		idProgram_{p}		= (),
+		httpProgram_{p}		= (),
+
+		ArgumentProgram_{p} \subset ARGUMENT,
+		ArgumentProgram_{p} = [1,()],
+
+		\forall a \in ArgumentProgram_{p} (
+			nameArgumentProgram_{p,a} :: "",
+			sqlArgumentProgram_{p,a} :: "",
+
+			nameArgumentProgram_{p,a} = (),
+			sqlArgumentProgram_{p,a} = (),
+		),
+	),
+
+	[clientConfig] <- '()',
+),
+
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	% Parameters
+	@ ("------Parameter\n"),
+	@ ("GoogleMapsKey" "\n"),
+	@ (GoogleMapsKey "\n"),
+%	@ ("GoogleMapsPassword" "\n"),
+%	@ (GoogleMapsPassword "\n"),
+
+	@ ("HereMapsKey" "\n"),
+	@ (HereMapsKey "\n"),
+%	@ ("HereMapsPassword" "\n"),
+%	@ (HereMapsPassword "\n"),
+
+	@ ("ChatGPTKey" "\n"),
+	@ (ChatGPTKey "\n"),
+%	@ ("ChatGPTPassword" "\n"),
+%	@ (ChatGPTPassword "\n"),
+
+
+	@ ("maxSitePacketSiteTable" "\n"),
+	@ (maxSitePacketSiteTable "\n"),
+	@ ("maxSitePacketSiteSiteTable" "\n"),
+	@ (maxSitePacketSiteSiteTable "\n"),
+
+
+	% Programs
+	@ ("------Program\n"),
+	@ (#PROGRAM "\n"),
+
+	\forall p \in PROGRAM (
+		@ (permissionProgram_{p} "\n" idProgram_{p} "\n" httpProgram_{p} "\n" #ArgumentProgram_{p} "\n"),
+
+		\forall a \in ArgumentProgram_{p} (
+			@ ("\"" nameArgumentProgram_{p,a}  "\"\n"),	% JZ 0711
+
+			sqlArgumentProgram_{p,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentProgram_{p,a} "\n"),
+			),
+		),
+	),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+
+	( message : '.'),
+),
+

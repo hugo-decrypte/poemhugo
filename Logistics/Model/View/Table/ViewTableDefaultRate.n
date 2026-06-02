@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableDefaultRate.n     	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableDefaultRate.n"],
+
+'@' => (
+	tableDefaultRate("DEFAULTRATE", TAG_TABLE,"DEFAULTRATE",true,"", TAG_TABLE_DEFAULT_RATE, "",	""), 	% JZ 0926 A
+	tableDefaultRate("DEFAULTRATE", TAG_TABLE,"DEFAULTRATE",true,"", TAG_TABLE_DEFAULT_RATE, "Menu",	""), 
+),

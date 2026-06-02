@@ -1,0 +1,86 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableOrderForTour.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableOrderForTour>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableOrderForTour" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+
+
+
+		@ VIEWSQL,
+
+
+		@ ("SELECT O.Id AS ID, O.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("		 pt.City as PTDELIVERY,\\\n"),
+		@ ("		 O.DateOrder as DATEORDER, O.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("		 (select "SQL_CONCAT"trim(LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"ID"SQL_CONCATWITH"')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.ID=O.IdState and s.Category='ORDER') as STATEORDER,\\\n"),
+		@ ("		 "SQL_FORMATNUM"(O.Quantity,"SQL_FORMATSCALE0")      AS QUANTITY,\\\n"),
+		@ ("		 "SQL_FORMATNUM"(O.QuantityRest,"SQL_FORMATSCALE0")  AS QUANTITYREST,\\\n"),
+		@ ("		 1 as ORD,\\\n"),
+		@ ("		 '(255 255 255)' AS LINERGB \\\n"),
+		@ ("	 FROM " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "CLIENT cl, " DB_PREFIX "POINTDELIVERY pt \\\n"),
+		@ ("	 WHERE O.IdClient=cl.Id \\\n"),
+		@ ("		  and pt.IdClient=O.IdClient and pt.IdPoint=O.IdPointDelivery\\\n"),
+		@ ("		  and (O.DateDelivery is NULL or O.DateDelivery<='0' or O.DateDelivery='(/*DATETOUR*/)' )\\\n"),
+		@ ("		 and not exists (select 1 from " DB_PREFIX "DELIVERY d where d.Id='D'+O.Id and O.QuantityRest>0)\\\n"),
+		@ ("		 and not exists (select 1 from " DB_PREFIX "DELIVERY d where d.Id='D'+O.Id and d.IdTour is not NULL and d.IdTour>' ' ) \\\n"),
+		@ ("	  \\\n"),
+
+		@ ("	 UNION ALL SELECT O.Id AS ID, O.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("		  pt.City as PTDELIVERY,\\\n"),
+		@ ("		 O.DateOrder as DATEORDER, O.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("		 (select "SQL_CONCAT"trim(LABEL)"SQL_CONCATWITH"'('"SQL_CONCATWITH"ID"SQL_CONCATWITH"')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.ID=O.IdState and s.Category='ORDER') as STATEORDER,\\\n"),
+		@ ("		 "SQL_FORMATNUM"(O.Quantity,"SQL_FORMATSCALE0")      AS QUANTITY,\\\n"),
+		@ ("		 "SQL_FORMATNUM"(O.QuantityRest,"SQL_FORMATSCALE0")  AS QUANTITYREST,\\\n"),
+		@ ("		 0 as ORD,\\\n"),
+		@ ("		 " SQL_CASEWHEN "O.IdState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='ORDER')" SQL_THEN "(select Color from " DB_PREFIX "STATE s where s.Id=O.IdState and s.CATEGORY='ORDER')" SQL_ELSE "\\\n"),
+		@ ("		  '(220 220 255)'" SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("	 FROM " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "CLIENT cl, " DB_PREFIX "POINTDELIVERY pt \\\n"),
+		@ ("	 WHERE O.IdClient=cl.Id \\\n"),
+		@ ("		   and pt.IdClient=O.IdClient and pt.IdPoint=O.IdPointDelivery\\\n"),
+		@ ("		  and exists (select 1 from " DB_PREFIX "DELIVERY d where d.Id='D'+O.Id and d.IdTour=(/*IDTOUR*/) ) \\\n"),
+		@ ("	 ORDER BY ORD, PTDELIVERY, ID\n\n"),
+
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableOrderProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2TableDeliveryMenu.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2PrintOrder.n"],
+		
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrder2EditOrder.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrderForTour2EditOnView.n"],	% JZ 0924
+
+
+				
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

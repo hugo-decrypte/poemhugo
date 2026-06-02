@@ -1,0 +1,27 @@
+%==================================================%
+%                                                  %
+%           	Logistics                %
+%                                                  %
+%  		   DataClient.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+@ ("Data CLIENT 'Client' CLIENT "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[2;(string,IDCLIENT," TAG_CLIENT_ID ",,15.0.80,0);(string,LABELCLIENT,Identité Client,,100.0.100,0);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT cl.id AS IDCLIENT,\
+  "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELCLIENT \
+ FROM " DB_PREFIX "CLIENT cl, " DB_PREFIX "POINTDELIVERY p \
+ WHERE p.IdClient=cl.Id \
+ ORDER BY cl.Id\"\n\n\n"),
+ 
+
+
+

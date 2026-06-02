@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   DeleteDepot.n	   	   %
+%                                                  %
+%    (c)2000. Enginest. All rights reserved.       %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+
+'()' => (
+	nbDepotSelected	= (),
+	nbParameterSelected	= (),
+
+	IdDepotSelected	:: {""},
+
+	\forall i \in [1, nbDepotSelected](
+		idDepotSelected_{i}	:: "",
+		idDepotSelected_{i}	= (),
+	),
+
+	IdDepotSelected = \{ \forall i \in [1, nbDepotSelected] idDepotSelected_{i} \},
+
+
+	'()' <- database,
+
+	%(SQL : "DELETE FROM " DB_PREFIX "DEPOT WHERE id IN (" concatSetQuoted(IdDepotSelected) ")\n"),
+
+	(SQL : SQL_DeleteDepotIdIn concatSetQuoted(IdDepotSelected) ")\n"), % bai 0815
+
+
+	sqlOperationLog := TAG_DELETE_DEPOT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

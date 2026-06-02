@@ -1,0 +1,186 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableDeliveryMenu2EditOnView.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+%======================================================================================================
+%
+% Data TOUR
+@ ("Data TOUR Tour TOUR DB 0 '[FIND={ID,NAMEDRIVER}]'   [DOUBLECLICK=] \\\n"),
+@ ("\"[9;(string,ID,No Tournée,,20.0.50,0);\\\n"),
+@ ("(string,NAMEDRIVER,Chauffeur,,50.0.150,0);\\\n"),
+@ ("(string,IDVEHICLE,Véhicule,,15.0.170,0);\\\n"),
+@ ("(string,DATETOURSTR," TAG_TOUR_DATE ",,15.0.50,0);\\\n"),
+@ ("(string,WEIGHT,Poids,,8.2.50,0);\\\n"),
+@ ("(string,VOLUME,Volume,,8.2.50,0);\\\n"),
+@ ("(string,NBPALLET,Nb Palette,,8.0.50,0);\\\n"),
+@ ("(string,STATE," TAG_STATE ",,50.0.80,0);\\\n"),
+@ ("(string,DRIVERVEHICLEDATETOUR,Chauffeur V hicule Date,,50.0.80,0);\\\n"),
+@ ("(color,LINERGB,(R G B),,13.0.0);]\" \\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT\\\n"),
+@ (" t.idTour AS ID,\\\n"),
+@ (" t.idDriver AS IDDRIVER, dr.Name as NAMEDRIVER,\\\n"),
+@ (" t.idVehicle AS IDVEHICLE,\\\n"),
+@ (" t.idAgency AS IDAGENCY,\\\n"),
+@ (" format(t.DateTour, '####-##-##') as DATETOURSTR,\\\n"),
+@ (" format(t.Tonnage,'#0.0') as WEIGHT,\\\n"),
+@ (" format(t.Volume,'#0.0') as VOLUME,\\\n"),
+@ (" format(t.NbPallet,'#0') as NBPALLET,\\\n"),
+@ (" (select LABEL from (/*DBOWNER*/)" DB_PREFIX "STATE s where s.Id=t.State and s.CATEGORY='TOUR') as STATE,\\\n"),
+@ (" trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00') as DRIVERVEHICLEDATETOUR,\\\n"),
+@ (" IIF(t.State in (select s.Id from (/*DBOWNER*/)" DB_PREFIX "STATE s where s.CATEGORY='TOUR'),(select Color from (/*DBOWNER*/)" DB_PREFIX "STATE s where s.Id=t.State and s.CATEGORY='TOUR'),\\\n"),
+@ ("   '(255 255 255)') AS LINERGB \\\n"),
+@ ("FROM (/*DBOWNER*/)" DB_PREFIX "TOUR t, (/*DBOWNER*/)" DB_PREFIX "DRIVER dr, (/*DBOWNER*/)" DB_PREFIX "DELIVERY d \\\n"),
+@ ("WHERE t.IdClub=dr.IdClub and t.IdDriver=dr.Id and d.IdClub=t.IdClub and d.DateDelivery=t.DateTour\\\n"),
+@ (" and (t.State is NULL or t.State<>'9')\\\n"),
+@ ("  and (d.IdDelivery in (select ld.IdDelivery from (/*DBOWNER*/)" DB_PREFIX "LINEDELIVERY ld where ld.IdClub='(/*CLUBID*/)' and ld.(/*OWNERSUBOBJ*/) in ((/*IDSUBOBJ*/)) ) or 'XXX' in ((/*IDSUBOBJ*/)) )\\\n"),
+@ ("  and (d.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)) ) \\\n"),
+@ ("  and (d.IdTour is NULL or d.IdTour<=' ') \\\n"),
+@ ("  and d.IdClub='(/*CLUBID*/)' \\\n"),
+@ ("Order BY t.IdTour desc\"\n\n"),
+
+
+%======================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddDeliveryToTour ",
+
+% Caption
+@ ("'Add Delivery To Tour' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ 1,
+
+% Label
+@ (" 'Ajout dans Tournée' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+@ ("'{/*Input(Ajouter [/*DELIVERY.NAMECLIENT*/] dans tournée1;\\\n"),
+@ ("(string,DRIVERDATE,Chauffeur-V hicule/Date,,100." inputWidth ",0,,[/*TOUR.DRIVERVEHICLEDATETOUR*/]);\\\n"),
+@ (")*/}'\\\n"),
+@ ("\"Update (/*DBOWNER*/)" DB_PREFIX "DELIVERY d, (/*DBOWNER*/)" DB_PREFIX "TOUR t\\\n"),
+@ ("   set d.IdTour=t.IdTour \\\n"),
+@ ("  WHERE (d.IdTour is NULL or d.IdTour<=' ')\\\n"),
+@ ("   and t.IdClub=d.IdClub and t.DateTour=d.DateDelivery\\\n"),
+@ ("   and  t.IdClub='(/*CLUBID*/)' and trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00')= '[/*DRIVERDATE*/]'\\\n"),
+@ ("   and d.IdDelivery= '[/*DELIVERY.ID*/]' \"\\\n"),
+@ ("\"Update (/*DBOWNER*/)" DB_PREFIX "TOUR t set t.Tonnage=0, Volume=0, NbPallet=0 \\\n"),
+@ ("  WHERE t.IdClub='(/*CLUBID*/)' and trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00')= '[/*DRIVERDATE*/]' \"\\\n"),
+@ ("\"Update (((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "LINEDELIVERY ld on d.IdClub=ld.IdClub and d.IdDelivery=ld.IdDelivery)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "ARTICLE A on A.IdClub=ld.IdClub and A.ID=ld.IdArticle\\\n"),
+@ (" set t.Tonnage=t.Tonnage + ld.Quantity*A.Weight\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00')= '[/*DRIVERDATE*/]' and A.Weight is not NULL \"\\\n"),
+@ ("\"Update (((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "LINEDELIVERY ld on d.IdClub=ld.IdClub and d.IdDelivery=ld.IdDelivery)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "ARTICLE A on A.IdClub=ld.IdClub and A.ID=ld.IdArticle\\\n"),
+@ (" set t.Volume=t.Volume + ld.Quantity*A.Volume\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00')= '[/*DRIVERDATE*/]' and A.Volume is not NULL \"\\\n"),
+@ ("\"Update ((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ (" set t.NbPallet=t.NbPallet + d.NbPallet\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and trim(t.IdDriver)+'-'+trim(t.IdVehicle)+' / '+ format(t.DateTour, '0000-00-00')= '[/*DRIVERDATE*/]' and d.NbPallet is not NULL \"\n\n\n"),
+
+
+%======================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveDeliveryFromTour ",
+
+% Caption
+@ (" '" TAG_REMOVE_DELIVERY_FROM_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ 2,
+
+% Label
+@ (" '" TAG_REMOVE_DELIVERY_FROM_TOUR "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+@ ("\"Update (/*DBOWNER*/)" DB_PREFIX "DELIVERY d\\\n"),
+@ ("   set d.IdTour=NULL \\\n"),
+@ ("  WHERE d.IdClub='(/*CLUBID*/)' and d.IdTour = '[/*DELIVERY.IDTOUR*/]'\\\n"),
+@ ("   and d.IdDelivery= '[/*DELIVERY.ID*/]' \"\\\n"),
+@ ("\Update (/*DBOWNER*/)" DB_PREFIX "TOUR t set t.Tonnage=0, Volume=0, NbPallet=0 \\\n"),
+@ ("  WHERE t.IdClub='(/*CLUBID*/)' and t.IdTour='[/*DELIVERY.IDTOUR*/]' \"\\\n"),
+@ ("\Update (((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "LINEDELIVERY ld on d.IdClub=ld.IdClub and d.IdDelivery=ld.IdDelivery)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "ARTICLE A on A.IdClub=ld.IdClub and A.ID=ld.IdArticle\\\n"),
+@ (" set t.Tonnage=t.Tonnage + ld.Quantity*A.Weight\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and t.IdTour='[/*DELIVERY.IDTOUR*/]' and A.Weight is not NULL \"\\\n"),
+@ ("\\\n"),
+@ ("\"Update (((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "LINEDELIVERY ld on d.IdClub=ld.IdClub and d.IdDelivery=ld.IdDelivery)\\\n"),
+@ ("  inner join (/*DBOWNER*/)" DB_PREFIX "ARTICLE A on A.IdClub=ld.IdClub and A.ID=ld.IdArticle\\\n"),
+@ (" set t.Volume=t.Volume + ld.Quantity*A.Volume\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and t.IdTour='[/*DELIVERY.IDTOUR*/]' and A.Volume is not NULL \"\\\n"),
+@ ("\"Update ((/*DBOWNER*/)" DB_PREFIX "TOUR t inner join (/*DBOWNER*/)" DB_PREFIX "DELIVERY d on t.IdClub=d.IdClub and t.IdTour=d.IdTour)\\\n"),
+@ (" set t.NbPallet=t.NbPallet + d.NbPallet\\\n"),
+@ (" WHERE t.IdClub='(/*CLUBID*/)' and t.IdTour='[/*DELIVERY.IDTOUR*/]' and d.NbPallet is not NULL \"\n\n\n"),

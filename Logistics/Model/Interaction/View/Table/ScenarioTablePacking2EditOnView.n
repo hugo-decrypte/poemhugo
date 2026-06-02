@@ -1,0 +1,338 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTablePacking2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "CreatePacking ",
+
+% Caption
+@ (" '" TAG_INSERT_PACKING "' "),	% JZ 0906
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+CreatePacking_Input = (
+	"{/*Input(" TAG_INSERT_PACKING ";1;\\\n"
+	"(date,DATEDELIV," TAG_DATE_INPUT ",[/*PACKING.DATEINPUT*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	" )*/}'\\\n"
+),
+CreatePacking_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "PACKING (Id, IdOrder, Comments, IdSender, DateCreate, DateDelivery, NbPallet, IdState, OriginPacking) \
+	select "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND",\
+	"SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND",\
+	"SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"SQL_CONCATEND", ' ',\
+	"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), [/*DATEDELIV*/], 1, '0','S'\
+	from \
+	(select (round(mid(max(p.Id),6,3))) as N from " DB_PREFIX "PACKING p where mid(p.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and p.Id> "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" \
+	UNION ALL \
+	select distinct 0 as N from " DB_PREFIX "PACKING p0 \
+	) IDCM\"\\\n"
+),
+
+CreatePacking_SQL2 = (
+	"\"INSERT INTO " DB_PREFIX "PALLET (IdPacking, NoPallet, Quantity, QuantityStock, QuantityReal, QuantityDefective, DatePreparation, DateDelivery, IdState) \
+	select pc.Id, 1, 0,0,0,0, "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND", [/*DATEDELIV*/], '0'\
+	from " DB_PREFIX "PACKING pc\
+	where pc.Id=pc.IdOrder and pc.Comments=pc.Id and pc.DateCreate="SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"') \
+	and not exists (select 1 from " DB_PREFIX "PALLET pl where pl.IdPacking=pc.Id and pl.NoPallet=1) \"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\CreatePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+		@ CreatePacking_Input,
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" CreatePacking_Input),
+		@ CreatePacking_SQL1,
+		@ CreatePacking_SQL2,
+),
+@ ("\n\n"),
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyPacking ",
+
+% Caption
+@ (" '" TAG_UPDATE_PACKING "' "),	% JZ 0906
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdatePacking_Input = (
+	"{/*Input(MCM;" TAG_UPDATE_PACKING " [/*PACKING.ID*/];4;\\\n"
+	"(date,DATEINPUT," TAG_DATE_INPUT ",[/*PACKING.DATEINPUT*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(string,IDSENDER," TAG_SENDER ",[/*PACKING.NAMESENDER*/],50." inputWidth ",0,1,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*PACKING.COMMENTS*/],50." inputWidth ",0,0,);\\\n"
+	"(string,STATE," TAG_STATE ",[/*PACKING.STATE*/],50." inputWidth ",0,0,[/*STATE.LABELSTATE*/]);\\\n"
+	" )*/}'\\\n"
+),
+
+UpdatePacking_SQL1 = (
+	"\"Update " DB_PREFIX "PACKING set \
+		DateDelivery=[/*DATEINPUT*/],\
+		IdSender='[/*IDSENDER*/]',\
+		Comments='[/*COMMENTS*/]'\
+	where Id = '[/*PACKING.ID*/]'\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdatePacking_SQL2 = (
+		"\"Update " DB_PREFIX "PACKING p, " DB_PREFIX "STATE s\
+		set p.IdState=s.Id\
+		where p.Id = '[/*PACKING.ID*/]'\
+		and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='SUPPLY'\"\\\n"
+	),
+
+	UpdatePacking_SQL3 = (
+		"\"Update " DB_PREFIX "PRODUCT A \
+		set A.QuantityStock=0\
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0\
+			where lp0.IdPacking = '[/*PACKING.ID*/]' )\"\\\n"
+	),
+
+	UpdatePacking_SQL4 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct \
+		set A.QuantityStock=A.QuantityStock + lp.QuantityStock\
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0\
+			where lp0.IdPacking = '[/*PACKING.ID*/]' )\
+			and exists (select 1 from " DB_PREFIX "PACKING pk where pk.Id=lp.IdPacking and pk.IdState not in ('0','9') )\"\\\n"
+	),
+
+	UpdatePacking_SQL5 = (
+		"\"Update " DB_PREFIX "PACKING P set\
+		Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0 \
+		WHERE P.Id = '[/*PACKING.ID*/]' \"\\\n"
+	),
+
+	UpdatePacking_SQL6 = (
+		"\"Update " DB_PREFIX "PACKING P inner join " DB_PREFIX "PALLET_PRODUCT lp on P.Id=lp.IdPacking set\
+		P.Quantity=P.Quantity+lp.Quantity,\
+		P.QuantityReal=P.QuantityReal+lp.QuantityReal,\
+		P.QuantityStock=P.QuantityStock+lp.QuantityStock,\
+		P.QuantityDefective=P.QuantityDefective+lp.QuantityDefective \
+		WHERE P.Id = '[/*PACKING.ID*/]' \"\n\n"
+	),
+
+	;
+
+	UpdatePacking_SQL2 = (
+		"\"Update " DB_PREFIX "PACKING \
+		set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='SUPPLY')\
+		where p.Id = '[/*PACKING.ID*/]'	\"\\\n"
+	),
+
+	UpdatePacking_SQL3 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+			set QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdProduct)\
+		WHERE Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0\
+			where lp0.IdPacking = '[/*PACKING.ID*/]' )\
+			and exists (select 1 from " DB_PREFIX "PACKING pk where pk.Id=lp.IdPacking and pk.IdState not in ('0','9') )\"\\\n"
+	),
+
+	UpdatePacking_SQL4 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantityStock=0\
+		WHERE QuantityStock is NULL and Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking = '[/*PACKING.ID*/]' )\"\\\n"
+	),
+
+	UpdatePacking_SQL5 = (
+		"\"Update " DB_PREFIX "PACKING set\
+			Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),\
+			QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),\
+			QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),\
+			QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking)\
+		WHERE Id = '[/*PACKING.ID*/]' \"\\\n"
+	),
+	UpdatePacking_SQL6 = (
+		"\"Update " DB_PREFIX "PACKING set\
+		Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0 \
+		WHERE Quantity is NULL and Id = '[/*PACKING.ID*/]' \"\n\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePACKING;1;(string,ID))*/} \\\n"),
+		@ UpdatePacking_Input,
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdatePacking_Input),
+		@ UpdatePacking_SQL1,
+		@ UpdatePacking_SQL2,
+		@ UpdatePacking_SQL3,
+		@ UpdatePacking_SQL4,
+		@ UpdatePacking_SQL5,
+		@ UpdatePacking_SQL6,
+),
+@ ("\n\n"),
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeletePacking ",
+
+% Caption
+@ (" '" TAG_DELETE_PACKING "' "),	% JZ 0906
+%@ ("'Delete Packing' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_DELETE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+%@ ("_ "),
+@ ("'Attention! Vider et supprimer en premier temps les palettes.' "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeletePacking_SQL1 = (
+	"\"Delete from " DB_PREFIX "PACKING \
+	where (IdState is NULL or IdState<='0')\
+	and not exists (select 1 from " DB_PREFIX "PALLET pl where pl.IdPacking=Id)\
+	and Id IN ('[/*PACKING.ID*/]')\"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\DeletePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePACKING;1;(string,ID))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ DeletePacking_SQL1,
+),
+.
+
+
+
+

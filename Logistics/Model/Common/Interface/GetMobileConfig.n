@@ -1,0 +1,458 @@
+%==================================================%
+%                                                  %
+% 		GetMobileConfig.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	mobileConfig = ('Work Directory' "Boot/" directoryClub_{clubId_{idClubLogin}} "/Mobile.cfg"),
+
+
+
+	% Mobile Config
+	mobileConfigFile = [mobileConfig],
+
+
+
+	'()' <- mobileConfigFile,
+
+	% Static NCL programs
+	() = "Variable",
+	Variable = [1,()],
+
+	\forall v \in Variable (
+		idVariable_{v} 	:: "",
+		sqlVariable_{v} :: "",
+
+		idVariable_{v} 	= (),
+		sqlVariable_{v} = (),
+	),
+
+
+	% Data format
+	() = "Format",
+	Format = [1,()],
+
+	\forall f \in Format (
+		idFormat_{f} 	:: "",
+		idFormat_{f} 	= (),
+	),
+
+
+
+	% HereMapsKey
+	() = "HereMapsKey",
+	HereMapsKey :: "",
+	HereMapsKey = (),
+
+
+
+	% Static NCL programs
+	() = "Static",
+	Static = [1,()],
+	ArgumentStatic = [1, ()],
+
+	\forall s \in Static (
+		permissionStatic_{s} 	:: "",
+		idStatic_{s} 		:: "",
+		nameStatic_{s} 		:: "",
+		httpStatic_{s} 		:: "",
+
+		permissionStatic_{s}	= (),
+		idStatic_{s}		= (),
+		nameStatic_{s}		= (),
+		httpStatic_{s}		= (),
+
+		ArgumentStatic_{s} \subset ArgumentStatic,
+		ArgumentStatic_{s} = [1,()],
+
+		\forall a \in ArgumentStatic_{s} (
+			idArgumentStatic_{s,a} :: "",
+			sqlArgumentStatic_{s,a} :: "",
+
+			idArgumentStatic_{s,a} = (),
+			sqlArgumentStatic_{s,a} = (),
+		),
+	),
+
+
+
+	% Dynamic NCL programs
+	() = "Program",
+	Program = [1,()],
+	ArgumentProgram = [1, ()],
+
+	\forall p \in Program (
+		permissionProgram_{p}	:: "",
+		nameProgram_{p} 	:: "",
+		httpProgram_{p}		:: "",
+
+		permissionProgram_{p}	= (),
+		nameProgram_{p}		= (),
+		httpProgram_{p}		= (),
+
+
+		ArgumentProgram_{p} \subset ArgumentProgram,
+		ArgumentProgram_{p} = [1,()],
+
+		\forall a \in ArgumentProgram_{p} (
+			idArgumentProgram_{p,a} :: "",
+			sqlArgumentProgram_{p,a} :: "",
+
+			idArgumentProgram_{p,a} = (),
+			sqlArgumentProgram_{p,a} = (),
+		),
+	),
+
+
+
+	% Database Field SQL
+	() = "SQL",
+	SQL_TABLE	= [1,()],
+	FIELD		= [1, ()],
+
+
+	\forall t \in SQL_TABLE (
+		idTableSqlTable_{t}	= (),
+		keySqlTable_{t}		= (),
+		orderBySqTable_{t}	= () : "\n",
+
+
+
+
+
+
+		FilterSqlTable_{t} \subset FIELD,
+		FilterSqlTable_{t} = [1, ()],
+
+		\forall f \in FilterSqlTable_{t} (
+			%idFilterSqlTable_{t,f}	:: "",
+			sqlFilterSqlTable_{t,f}	:: "",
+
+			%idFilterSqlTable_{t,f}	= (),
+			sqlFilterSqlTable_{t,f}	= (),
+		),
+
+
+
+		sqlEditTable_{t}	:: "",
+		sqlInsertTable_{t}	:: "",
+
+		sqlEditTable_{t}	= (),
+		sqlInsertTable_{t}	= (),
+
+
+
+		FieldSqlTable_{t} \subset FIELD,
+		FieldSqlTable_{t} = [1, ()],
+
+
+		\forall f \in FieldSqlTable_{t} (
+			idFieldSqlTable_{t,f} :: "",
+
+			sqlReadFieldTable_{t,f} :: "",
+			sqlEditFieldTable_{t,f} :: "",
+			sqlInsertFieldTable_{t,f} :: "",
+
+
+			idFieldSqlTable_{t,f} = (),
+
+			() = "Default",
+			sqlDefaultFieldTable_{t,f} = (),
+
+			() = "Read",
+			sqlReadFieldTable_{t,f} = (),
+
+			() = "Edit",
+			sqlEditFieldTable_{t,f} = (),
+
+			() = "Insert",
+			sqlInsertFieldTable_{t,f} = (),
+		),
+	),
+
+
+
+	% Database Field ALIAS
+	() = "Alias",
+	ALIAS_TABLE	= [1,()],
+	ENUMERATION	= [1, ()],
+
+	\forall t \in ALIAS_TABLE (
+		idTableAliasTable_{t} = (),
+
+		FieldAliasTable_{t} \subset [1, 10],
+		FieldAliasTable_{t} = [1,()],
+
+		\forall f \in FieldAliasTable_{t} (
+			idFieldAliasTable_{t,f} :: "",
+			idFieldAliasTable_{t,f} = (),
+
+			typeFieldAliasTable_{t,f} :: "",
+			typeFieldAliasTable_{t,f} = (),
+
+			() = "Edit",
+			EnumEditFieldAliasTable_{t,f} \subset ENUMERATION,
+
+			? typeFieldAliasTable_{t,f} (
+			"enum" :
+				EnumEditFieldAliasTable_{t,f} = [1,()],
+
+				\forall e \in EnumEditFieldAliasTable_{t,f} (
+					valueEnumEditFieldAliasTable_{t,f,e} :: 0,
+					aliasEnumEditFieldAliasTable_{t,f,e} :: "",
+
+					valueEnumEditFieldAliasTable_{t,f,e} = (),
+					aliasEnumEditFieldAliasTable_{t,f,e} = (),
+				),
+				;
+
+			"date", "time", "datetime", "duration", "latitude", "longitude", "barcode", "string", "int", "float":
+				EnumEditFieldAliasTable_{t,f} = {},
+
+				editableFieldAliasTable_{t,f} :: "",
+				editableFieldAliasTable_{t,f} = (),
+			),
+
+
+
+			() = "Insert",
+			EnumInsertFieldAliasTable_{t,f} \subset ENUMERATION,
+
+			? typeFieldAliasTable_{t,f} (
+			"enum" :
+				EnumInsertFieldAliasTable_{t,f} = [1,()],
+
+				\forall e \in EnumInsertFieldAliasTable_{t,f} (
+					valueEnumInsertFieldAliasTable_{t,f,e} :: 0,
+					aliasEnumInsertFieldAliasTable_{t,f,e} :: "",
+
+					valueEnumInsertFieldAliasTable_{t,f,e} = (),
+					aliasEnumInsertFieldAliasTable_{t,f,e} = (),
+				),
+				;
+
+			"date", "time", "datetime", "duration", "latitude", "longitude", "barcode", "string", "int", "float":
+				EnumInsertFieldAliasTable_{t,f} = {},
+
+				editableFieldAliasInsertTable_{t,f} :: "",
+				editableFieldAliasInsertTable_{t,f} = (),
+			),
+		),
+	),
+
+	mobileConfigFile <- '()',
+),
+
+
+
+'@' => (
+	( TAG_USER_ID_IS idUserLogin : ),
+	( TAG_USER_CLUB_IS idClubLogin : ),
+
+	( TAG_USER_SERVER_IS serverIpLogin ":" serverPortLogin : ),
+
+
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+
+	% Server parameters
+	@ ("------Server\n"),
+
+	@ (serverIpLogin "\n"),
+	@ (serverPortLogin "\n"),
+
+
+
+	% Variables
+	@ ("------Variable\n"),
+	@ (#Variable "\n"),
+	\forall v \in Variable (
+		@ (idVariable_{v} "\n" sqlVariable_{v} "\n"),
+	),
+
+
+	% Data format
+	@ ("------Permission\n"),
+	@ (permissionLogin "\n"),
+
+
+	% Data format
+	@ ("------Format\n"),
+	@ (#Format "\n"),
+	\forall f \in Format (
+		@ (idFormat_{f} "\n"),
+	),
+
+
+
+
+	% HereMapsKey
+	@ ("------HereMapsKey\n"),
+	@ (HereMapsKey "\n"),
+
+
+
+	% Static Programs
+	@ ("------Static\n"),
+	@ (#Static "\n"),
+
+	\forall s \in Static (
+		@ (permissionStatic_{s} "\n" idStatic_{s} "\n" nameStatic_{s} "\n" httpStatic_{s} "\n" #ArgumentStatic_{s} "\n"),
+
+		\forall a \in ArgumentStatic_{s} (
+			@ (idArgumentStatic_{s,a}  "\n"),
+
+			sqlArgumentStatic_{s,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentStatic_{s,a} "\n"),
+			),
+		),
+	),
+
+
+
+	% Dynamic Programs
+	@ ("------Program\n"),
+	@ (#Program "\n"),
+
+	\forall p \in Program (
+		@ (permissionProgram_{p} "\n" nameProgram_{p} "\n" httpProgram_{p} "\n" #ArgumentProgram_{p} "\n"),
+
+		\forall a \in ArgumentProgram_{p} (
+			@ (idArgumentProgram_{p,a}  "\n"),
+
+			sqlArgumentProgram_{p,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentProgram_{p,a} "\n"),
+			),
+		),
+	),
+
+
+
+	% DB table composite primary key
+	@ ("------SQL\n"),
+	@ (#SQL_TABLE "\n"),
+
+	\forall t \in SQL_TABLE (
+		@ (idTableSqlTable_{t} "\n" keySqlTable_{t} "\n" orderBySqTable_{t} "\n"),
+
+
+		@ (#FilterSqlTable_{t} "\n"),
+
+		\forall f \in FilterSqlTable_{t} (
+			@ (sqlFilterSqlTable_{t,f} "\n"),
+			%@ (idFilterSqlTable_{t,f} "\n" sqlFilterSqlTable_{t,f} "\n"),
+		),
+
+
+
+
+		@ ("\"" sqlEditTable_{t} "\"\n"),
+		@ ("\""sqlInsertTable_{t} "\"\n"),
+
+
+
+
+		@ (#FieldSqlTable_{t} "\n"),
+
+		\forall f \in FieldSqlTable_{t} (
+			@ (idFieldSqlTable_{t,f} "\n"),
+
+
+			@ ("Default" "\n"),
+		 	sqlDefaultFieldTable_{t,f} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlDefaultFieldTable_{t,f} "\n"),
+			),
+
+
+			@ ("Read" "\n"),
+		 	sqlReadFieldTable_{t,f} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlReadFieldTable_{t,f} "\n"),
+			),
+
+
+			@ ("Edit" "\n"),
+		 	sqlEditFieldTable_{t,f} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlEditFieldTable_{t,f} "\n"),
+			),
+
+
+			@ ("Insert" "\n"),
+		 	sqlInsertFieldTable_{t,f} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlInsertFieldTable_{t,f} "\n"),
+			),
+		),
+	),
+
+
+
+	% DB Field alias
+	@ ("------Alias\n"),
+	@ (#ALIAS_TABLE "\n"),
+
+	\forall t \in ALIAS_TABLE (
+		@ (idTableAliasTable_{t} "\n" #FieldAliasTable_{t} "\n"),
+
+		\forall f \in FieldAliasTable_{t} (
+			@ (idFieldAliasTable_{t,f} "\n" typeFieldAliasTable_{t,f} "\n"),
+
+
+
+			@ ("Edit" "\n"),
+			? typeFieldAliasTable_{t,f} (
+			"enum" :
+				@ (#EnumEditFieldAliasTable_{t,f} "\n"),
+
+				\forall e \in EnumEditFieldAliasTable_{t,f} (
+					@ (valueEnumEditFieldAliasTable_{t,f,e} "\n"),
+					@ (aliasEnumEditFieldAliasTable_{t,f,e} "\n"),
+				),
+				;
+
+			"date", "time", "datetime", "duration", "latitude", "longitude", "barcode", "string", "int", "float":
+				@ (editableFieldAliasTable_{t,f} "\n"),
+			),
+
+
+
+			@ ("Insert" "\n"),
+			? typeFieldAliasTable_{t,f} (
+			"enum" :
+				@ (#EnumInsertFieldAliasTable_{t,f} "\n"),
+
+				\forall e \in EnumInsertFieldAliasTable_{t,f} (
+					@ (valueEnumInsertFieldAliasTable_{t,f,e} "\n"),
+					@ (aliasEnumInsertFieldAliasTable_{t,f,e} "\n"),
+				),
+				;
+
+			"date", "time", "datetime", "duration", "latitude", "longitude", "barcode", "string", "int", "float":
+				@ (editableFieldAliasInsertTable_{t,f} "\n"),
+			),
+		),
+	),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+),
+

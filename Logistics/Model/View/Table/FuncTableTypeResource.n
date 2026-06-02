@@ -1,0 +1,170 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableTypeResource.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableTypeResource>(id,type,aliasTable,bestfit,doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		viewFile = ("TableTypeResource" (idUserPostfix = "" ? "" : "_") postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+/*
+		% View Object	
+		@ ("View "),
+
+		% ID	
+		@ ("ViewTableTypeResource "),
+
+		% Caption	
+		@ ("'" title "' "), 
+
+		% Title	
+		@ ("'" title "' "),
+
+		% Color(R G B)
+		@ " 255 255 255 ",
+
+		% Icon	
+		@ ("_ "),
+
+		% Rect(X Y SX SY )	
+		@ ("0 0 0 0 "),
+
+		% Margin	
+		@ ("5 5 5 5 "),
+
+		% [Option items]
+		@ ("'[TRACELEVEL=0;"),
+		@ ("TRACEFILE=;"),
+		@ ("TOOLBAR=0;"),
+		@ ("FLIPVERTICALLY=0;"),
+		@ ("FLIPHORIZONTALLY=0;"),
+		@ ("NATURESCALE=0;"),
+		@ ("BESTFIT=1;"),
+		@ ("SCROLLBAR=1;"),
+		@ ("SHOWNAME=1;"),
+		@ ("ZOOMOBJECT=;"),
+		@ ("CURRENTPAGE=1;"),
+		@ ("CLOSEEVENT=0;"),
+		@ ("BKGROUNDCOLOR="tableTitleFillColor";"),
+		@ ("SCREENCOLOR="tableTitleFillColor";"),
+		@ ("PATHLINEWIDTH=9;"),
+		@ ("PATHLINECOLOR=(0 0 0);"),
+		@ ("PATHARROWWIDTH=15;"),
+		@ ("PATHARROWCOLOR=(255 0 0);"),
+		@ ("POEMSERVER=;"),
+		@ ("MAPLOGFILE=;"), 
+		@ ("MATRIXCRITERION=Distance;"),
+		@ ("MATRIXCOMPUTERADIUS=0.5;"),
+		@ ("SPEEDKMHOUR=50;"),
+		@ ("STRAIGHTDISTANCERATIO=1.4;"),
+		@ ("SITEINTRADISTANCE=;"),
+		@ ("MATRIXMAXCOMPUTEWIDTH=;"),
+		@ ("NEIGHBOURHOOD=;"),
+		@ ("MATRIXFILENAME=;"),
+		@ ("MATRIXDIRECTORY=;GLOBALVARIABLE=0]'"),
+		@ "\n\n",
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTypeResource2EditTypeResource.n"],
+
+				
+
+		@ ("Table tableTYPERESOURCE _ _ 0 0  " tableWidth "  600 \\\n"), 
+*/
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+/*
+		% [Data source options]:
+		@ ("\"[DATAOBJ=TYPERESOURCE; FillColor=LINERGB]\"\n\n"),
+
+		@ ("Data TYPERESOURCE '" TAG_RESOURCE_TYPE "' TYPERESOURCE "),
+
+		@ typeDataUser,
+
+		% FIND AND DOUBLECLICK
+		@ (" 0 \'[FIND={"),
+
+		\forall i \in FieldSelected (
+			@ aliasField_{i},
+
+			i < \sup FieldSelected => @ ",",
+		),
+
+		@ "}]\' ",
+		
+		doubleclick <> "" => (
+			@ ("  [DOUBLECLICK=" doubleclick "] \\\n"),
+			;
+			@ ("  [DOUBLECLICK=_] \\\n"),
+		),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[" #FieldSelected ";"),
+
+		\forall i \in FieldSelected
+			@ ("(" typeField_{i} "," aliasField_{i} "," nameField_{i} "," formatField_{i} ");"),
+*/
+
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+		@ ("SELECT	t.idClub						AS IDCLUB, \
+				t.id 							AS IDTYPEVEHICLE, \
+				IIF(t.minQuantity IS NULL,0,t.minQuantity)		AS MINQUANTITY, \
+				IIF(t.maxQuantity IS NULL,0,t.maxQuantity)		AS MAXQUANTITY, \
+				IIF(t.timeLoadingUnit IS NULL,0,t.timeLoadingUnit)	AS TIMELOADINGUNIT, \
+				IIF(t.timeUnloadingUnit IS NULL,0,t.timeUnloadingUnit)	AS TIMEUNLOADINGUNIT, \
+				IIF(t.costDay IS NULL,0,t.costDay)			AS COSTDAY, \
+				IIF(t.costNight IS NULL,0,t.costNight)			AS COSTNIGHT, \
+				IIF(t.costUnit IS NULL,0,t.costUnit)			AS COSTUNIT, \
+				IIF(t.costKilometer IS NULL,0,t.costKilometer)		AS COSTKILOMETER, \
+				IIF(t.timeFixed IS NULL,0,t.timeFixed)			AS TIMEFIXED, \
+				IIF(t.minResource IS NULL,0,t.minResource)		AS MINVEHICLE, \
+				IIF(t.maxResource IS NULL,0,t.maxResource)		AS MAXVEHICLE, \
+				IIF(t.maxTour IS NULL,0,t.maxTour)			AS MAXTOUR, \
+				IIF(t.maxWeight IS NULL,0,t.maxWeight)			AS MAXWEIGHT, \
+				IIF(t.maxVolume IS NULL,0,t.maxVolume)			AS MAXVOLUME, \
+				'"RGB_WHITE"' 		AS LINERGB \
+			FROM 	" DB_PREFIX "TYPERESOURCE t \
+			WHERE idClub='(/*CLUBID*/)' \
+			ORDER BY t.id\n\n\n"),
+				
+/*
+	    	@("SELECT t.id AS IDTYPEVEHICLE,\
+				t.name AS NAME,\
+				t.idCategoryResource AS IDCATEGORYRESOURCE,\
+				(SELECT c.name FROM "DB_PREFIX "CATEGORYRESOURCE c WHERE t.idCategoryResource=c.id) AS NAMECATEGORYRESOURCE,\
+				" SQL_TypeStateName " AS NAMESTATE,\
+				" SQL_TypeStateColor " AS LINERGB \
+			FROM " DB_PREFIX "TYPERESOURCE t \
+	 		ORDER BY t.state DESC,t.id\"\n\n\n"),*/
+
+	 	
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTypeResource2EditTypeResource.n"],
+
+				
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

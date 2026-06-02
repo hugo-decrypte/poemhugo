@@ -1,0 +1,74 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeletePallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 		:: "",
+		noObjSelectedBuffer_{i} 		:: 0,
+		
+		idObjSelectedBuffer_{i}			= (),
+		noObjSelectedBuffer_{i} 		= (),
+	
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	
+	NOOBJSELECTEDBUFFER = \{\forall i \in [1, nbSelected] noObjSelectedBuffer_{i}\}, 
+
+	
+
+	'()' <- database,
+	\forall i \in [1, nbSelected] 
+		DeletePallet_SQL1_{i}=(
+			"Delete from " DB_PREFIX "PALLET p
+			where not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PlPr where PlPr.IdPacking=p.IdPacking and PlPr.NoPallet=p.NoPallet)
+			and p.IdPacking='" idObjSelectedBuffer_{i} "' and p.NoPallet="noObjSelectedBuffer_{i}" "
+	),
+
+	databaseType = "ACCESS" => (
+
+		DeletePallet_SQL2=(
+			"update " DB_PREFIX "PACKING pc set NbPallet=0 where pc.Id in ("IDOBJSELECTEDBUFFER")"
+		),
+		DeletePallet_SQL3=(
+			"update " DB_PREFIX "PACKING pc inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pc.Id set pc.NbPallet=pc.NbPallet+1 where pc.Id IN ("IDOBJSELECTEDBUFFER")"
+		),
+		;
+
+		DeletePallet_SQL2=(
+			"update " DB_PREFIX "PACKING set NbPallet=(select count(1) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) where Id  IN ("IDOBJSELECTEDBUFFER")"
+		),
+		DeletePallet_SQL3=(
+			"update " DB_PREFIX "PACKING set NbPallet=0 where Id  IN ("IDOBJSELECTEDBUFFER") and NbPallet is NULL "
+		),
+	),
+	("DeletePallet_SQL3=" DeletePallet_SQL3 : ),
+
+	\forall i \in [1, nbSelected] 
+		(SQL : DeletePallet_SQL1_{i}), 
+	(SQL : DeletePallet_SQL2), 	
+	(SQL : DeletePallet_SQL3),
+	
+	database <- '()',
+),

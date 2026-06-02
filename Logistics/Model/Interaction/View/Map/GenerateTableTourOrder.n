@@ -1,0 +1,25 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	GenerateTableTourOrder.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Input\View\ReadOrderVehicleByTourSelected.n"],	
+['Work Directory'  "Model\Input\Plan\ReadPlanDate.n"],
+
+['Work Directory' "Model\View\Table\FuncTableTourOrder.n"],
+
+['Work Directory' "Model\Input\View\ReadTourSelected.n"],
+
+
+'@' => (
+	
+	tableTourOrder("TOURORDER",TAG_TABLE,"TOURORDER",true, IdTourSelected, "EditTourOrder",TAG_ROUTE_SHEET,"Menu",""),
+
+	
+),
+
+

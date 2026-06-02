@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing   	           %
+%                                                  %
+% 		ViewTableTourOrder.n               %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableTourOrder.n"],
+
+
+'@' => (
+	tableTourOrder("",TAG_TABLE,"TOURORDER",true, {}, "EditTourOrder",TAG_ROUTE_SHEET,"",""),
+
+),
+

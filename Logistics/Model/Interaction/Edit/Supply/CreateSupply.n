@@ -1,0 +1,91 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreateSupply.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	labelSupplyBuffer				:: "",
+	dateDeliveryBuffer				:: 0,
+	dateLimitBuffer					:: 0,
+
+	
+	labelSupplyBuffer				= (),
+	dateDeliveryBuffer				= (),
+	dateLimitBuffer					= (),
+
+	'()' <- database,
+
+AddSupply_SQL1 = (
+	"INSERT INTO " DB_PREFIX "SUPPLY (Id, DateSupply, DateDelivery, DateLimit, IdState, Comments) 
+	select "SQL_CONCAT"'S'"
+			SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+			SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"
+			SQL_CONCATEND", "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), '"dateDeliveryBuffer"', '"dateLimitBuffer"', '0', "
+			SQL_CONCAT"'S'"
+			SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+			SQL_CONCATWITH""SQL_FORMATNUM"(max(N)+1,"SQL_FORMATSCALE0")"
+			SQL_CONCATEND"
+	from 
+	(select (round("SQL_SUBSTRING"(max(S.Id),6,3))) as N from " DB_PREFIX "SUPPLY S where "SQL_SUBSTRING"(S.Id,1,5)= "
+		SQL_CONCAT"'S'"
+		SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"
+		SQL_CONCATEND" and S.Id>"SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND"
+		UNION ALL 
+		select distinct 0 as N from " DB_PREFIX "Agency 
+	) IDO"
+),
+
+databaseType = "ACCESS" => (
+
+	AddSupply_SQL2 = (
+		"UPDATE " DB_PREFIX "SUPPLY S, " DB_PREFIX "SUPPLIER SR 
+		SET S.IdSupplier=SR.Id
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and "SQL_CONCAT"trim(SR.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(SR.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '"labelSupplyBuffer"'"
+	),
+	AddSupply_SQL3 = (
+		"UPDATE " DB_PREFIX "SUPPLY S, " DB_PREFIX "USER u 
+		SET S.IdAgency=u.IdAgency
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and u.Id='(/*USERID*/)'"
+	),
+	AddSupply_SQL4 = (
+		"UPDATE " DB_PREFIX "SUPPLY S 
+		SET S.Comments=' '
+		where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.Comments=S.Id and S.IdAgency is not NULL and S.IdAgency>' '"
+	),
+	;
+
+	AddSupply_SQL2 = (
+		"UPDATE " DB_PREFIX "SUPPLY SET 
+			IdSupplier=(select SR.Id from " DB_PREFIX "SUPPLIER SR 
+				where "SQL_SUBSTRING"(S.Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and S.CommentS.Id and "SQL_CONCAT"trim(SR.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(SR.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '"labelSupplyBuffer"'
+			)"
+	),
+	AddSupply_SQL3 = (
+		"UPDATE " DB_PREFIX "SUPPLY  
+		SET IdAgency=(select u.IdAgency from " DB_PREFIX "USER u where u.Id='(/*USERID*/)')
+		where "SQL_SUBSTRING"(Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and Comments=Id "
+	),
+	AddSupply_SQL4 = (
+		"UPDATE " DB_PREFIX "SUPPLY 
+		SET Comments=' '
+		where "SQL_SUBSTRING"(Id,1,5)= "SQL_CONCAT"'S'"SQL_CONCATWITH""SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATE_Y""SQL_FORMATDATE_M"')"SQL_CONCATEND" and Comments=Id and IdAgency is not NULL and IdAgency>' '"
+	),
+),	
+
+	
+	(SQL : AddSupply_SQL1), 
+	(SQL : AddSupply_SQL2), 
+	(SQL : AddSupply_SQL3),
+	(SQL : AddSupply_SQL4),
+	
+	
+	database <- '()',
+),

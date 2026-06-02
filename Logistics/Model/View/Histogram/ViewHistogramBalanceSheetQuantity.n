@@ -1,0 +1,18 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	ViewHistogramBalanceSheetQuantity.n	%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+['Work Directory' "Model\View\Histogram\FuncHistogramBalanceSheetQuantity.n"],
+
+'@' => (
+	histogramBalanceSheetQuantity("MONTHLYQUANTITY",true, TAG_MONTH,TAG_PIECES, "","", {},TAG_MONTHLY_QUANTITY,""),	% JZ 1022
+	
+
+	('hh:mm:ss' "  " TAG_MONTHLY_QUANTITY TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ),
+),

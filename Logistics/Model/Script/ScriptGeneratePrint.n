@@ -1,0 +1,20 @@
+/******************************************************/
+/*	          ERP			              */
+/*	        ScriptGeneratePrint.n                 */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+['Work Directory' "Model\Common\Config\ReadDatabase.n"],
+
+serverPrintPath = serverPrintPath,	% JZ 0908
+
+
+'@' => (
+	[['Work Directory'  "Model\Print\GeneratePrint.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+),
+

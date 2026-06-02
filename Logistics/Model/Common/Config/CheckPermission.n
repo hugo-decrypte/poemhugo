@@ -1,0 +1,28 @@
+%==================================================%
+%                                                  %
+%            Vehicle Routing	 	           %
+%                                                  %
+%		CheckPermission.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+
+.
+
+'()' => (
+	'()' <- database,  
+ 
+	(SQL : SQL_SelectLogIdUserT2NullClubIs idClubLogin "' " SQL_AndWhereLogPermissionGeq STATE_WRITE),	% Write user active on server
+
+	IdUserGeqWrite :: {""},
+	IdUserGeqWrite = \{ \forall i \in [1, ()] () \},
+
+	(IdUserGeqWrite TAG_WRITE_ALREADY_ACTIVE_WITH_PERMISSION "'" TAG_WRITE "'" :
+		IdUserGeqWrite = {} || idUserLogin \in IdUserGeqWrite,
+	),
+
+	database <- '()',
+),
+

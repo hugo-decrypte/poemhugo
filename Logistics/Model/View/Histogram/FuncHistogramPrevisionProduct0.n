@@ -1,0 +1,86 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	 FuncHistogramPrevisionProduct.n	%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+<histogramPrevisionProduct>(aliasHistogram, labelX,labelY, labelLegend,colorLegend, IdSheetSelected, title, postfix0)	% JZ 1022
+(
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+
+
+		viewFile = ("HistogramPrevisionProduct" postfix ".view"),
+
+
+		[viewDirectory viewFile] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderHistogram.n"],
+
+
+		% Script item
+		@ (" 0 '[TIPINFO=[/*NAMEMONTH*/] :  [/*Y*/] 000 ]'  '_' \\\n"), 
+
+
+		% Fields item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[5;(string,X,"	TAG_MONTH	",,10,0);\\\n"),
+		@ ("(float,Y," 		TAG_QUANTITY 	",,,,," float_y_axis ");\\\n"),
+		@ ("(int,Y1," 		TAG_QUANTITY 	",,,,," int_y_axis ");\\\n"),
+		@ ("(string,NAMEMONTH,"	TAG_MONTH	",,15,0);\\\n"),
+		@ ("(string,COST,"	TAG_TURNOVER	",,10,0);\\\n"),
+		@ ("(string,WEIGHT,"	TAG_WEIGHT	",,10,0);\\\n"),
+		@ ("(color,C_1," 	TAG_COLOR 	",,,,RGB);]\" \\\n"),
+
+
+		% Data
+		@ VIEWSQL,
+
+		dateMonth :: "",
+		SQL_AXIS_MONTH :: "",
+		? databaseType (
+			"ACCESS" :
+				dateMonth	= ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				SQL_AXIS_MONTH	= (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 12-M.NoMonth, "SQL_CURRENTDATE"),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+				;
+
+			"SQLSERVER" :
+				dateMonth	= ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				SQL_AXIS_MONTH	= (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 12-M.NoMonth, "SQL_CURRENTDATE"),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+				;
+
+			"MYSQL" :
+				dateMonth	= ("date_Add("SQL_CURRENTDATE", INTERVAL -M.NoMonth MONTH)"), 
+				SQL_AXIS_MONTH	= (SQL_FORMATDATE"(date_Add("SQL_CURRENTDATE", INTERVAL 12-M.NoMonth MONTH),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"), 
+				;
+
+			"ORACLE" :
+				dateMonth 	= ("ADD_MONTHS("SQL_CURRENTDATE",-M.NoMonth)"),
+				SQL_AXIS_MONTH	= (SQL_FORMATDATE"(ADD_MONTHS("SQL_CURRENTDATE",12-M.NoMonth),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+		),
+
+		@ ("SELECT "SQL_AXIS_MONTH "  as X,\\\n"),
+		@ ("\t\t int(sum(DP.QuantityReal)/1000) as Y,\\\n"),
+		@ ("\t\t int(sum(DP.QuantityReal)) as Y1,\\\n"),
+
+		@ ("'" RGB_Y1_RATE1 "' AS C_1,\\\n"),
+
+		@ ("\t\t M.NoMonth as NOMONTH,\\\n"),
+		@ ("\t\t M.NameFR as NAMEMONTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*P.PriceUnit), "SQL_FORMATSCALE2") as COST,\\\n"),
+		@ ("\t\t int(sum(DP.QuantityReal*P.Weight)+0.5) as WEIGHT,\\\n"),
+		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM (/*DBOWNER*/)" DB_PREFIX "PRODUCT P, (/*DBOWNER*/)" DB_PREFIX "DELIVERY_PRODUCT DP, (/*DBOWNER*/)" DB_PREFIX "DELIVERY D , (/*DBOWNER*/)" DB_PREFIX "MONTHLABEL M  \\\n"),
+ 		@ ("\t WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\\\n"),
+		@ ("\t\t AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \\\n"),
+		@ ("\t GROUP BY M.NoMonth, M.NameFR \\\n"),
+		@ ("\t ORDER BY "SQL_AXIS_MONTH " \"\n\n"),
+
+		'@' <- [viewDirectory viewFile],
+	),
+),

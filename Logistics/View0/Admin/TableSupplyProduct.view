@@ -1,0 +1,66 @@
+View ViewTableSUPPLYPRODUCT 'Produits provision' 'Produits provision'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableSUPPLYPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Produits provision;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Centere,Center,Center,Left,Left,Left}]"\
+"[DATAOBJ=SUPPLYPRODUCT;FILLCOLOR=LINERGB]"
+
+Data SUPPLYPRODUCT 'Produits provision' SUPPLYPRODUCT HTTPSQL 0 '[FIND={IDSUPPLY,IDPRODUCT,DESIGNATION,QUANTITY,QUANTITYREAL,QUANTITYREST,PRICE,AMOUNTHT,DATESUPPLY,DATEDELIVERY,DATELIMIT,NAMESUPPLIER,COMMENTS,COMMENTS1}]'   [DOUBLECLICK=EditSupplyProduct] \
+"[14;(string,IDSUPPLY,Provision,,12,,);(string,IDPRODUCT,Produit,,10,,);(string,DESIGNATION,Désignation,,15,,);(int,QUANTITY,Quantité,,10,,);(int,QUANTITYREAL,Qté livrée,,12,,);(int,QUANTITYREST,Qté reste,,12,,);(float,PRICE,Prix unitaire,,15,,);(string,AMOUNTHT,Montant HT(€),,18,,);(date,DATESUPPLY,Date devis,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEDELIVERY,Date livraison,,18,,YYYY-MM-DD|DD/MM/YYYY);(date,DATELIMIT,Date limite,,15,,YYYY-MM-DD|DD/MM/YYYY);(string,NAMESUPPLIER,Fournisseur,,15,,);(string,COMMENTS,Commentaire,,18,,);(string,COMMENTS1,Commentaire sup,,20,,);(string,IDSUPPLIER,ID Fournisseur,,15.0.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT S.id AS IDSUPPLY, SP.idSupplier AS IDSUPPLIER,\
+		 (select Name from SUPPLIER SR where SR.Id=SP.IdSupplier) as NAMESUPPLIER,\
+		 SP.idProduct AS IDPRODUCT,\
+		 P.Designation as DESIGNATION,\
+		 SP.Quantity AS QUANTITY,\
+		 SP.QuantityReal AS QUANTITYREAL,\
+		 SP.Quantity-SP.QuantityReal+0 AS QUANTITYREST,\
+		 SP.PriceUnit AS PRICE,\
+		 format(SP.Quantity*SP.PriceUnit,'0.00') AS AMOUNTHT,\
+		 SP.DateSupply as DATESUPPLY,\
+		 SP.DateDelivery as DATEDELIVERY,\
+		 SP.DateLimit as DATELIMIT,\
+		 SP.Comments AS COMMENTS,\
+		 SP.Comments1 AS COMMENTS2,\
+		 '(255 255 255)' AS LINERGB \
+	 FROM SUPPLY S, SUPPLY_PRODUCT SP, PRODUCT P \
+	 WHERE S.Id=SP.IdSupply and SP.IdProduct=P.Id\
+		  and (SP.IdSupply in ((/*IDSUPPLY*/)) or 'XXX' in ((/*IDSUPPLY*/)))\
+		  and (SP.IdProduct in ((/*IDPRODUCT*/)) or 'XXX' in ((/*IDPRODUCT*/))) \
+	 ORDER BY SP.IdSupply, SP.IdProduct"
+
+Script TableOffer  'Offres fournisseur' _ 21 'Offres' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOfferSupplier.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ={/*Selected(tableSUPPLY;1;(string,NAMESUPPLIER))*/};OWNEROBJ=idSupplier;IDOBJ={/*Selected(tableSUPPLY;1;(string,IDSUPPLIER))*/};IDPRODUCT={/*Selected(tableSUPPLY;1;(string,IDPRODUCT))*/}]"
+
+Script EditSupplyProduct  'Editer' _ 1 'Editer' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE SUPPLY_PRODUCT&IdSupply in ({/*selected(tableSUPPLY;1;(string,IDSUPPLY))*/}) and IdProduct in ({/*selected(tableSUPPLY;1;(string,IDPRODUCT))*/})" \
+Reload _ _ _ _ 
+
+
+Script Modify 'Modify selection' _ 61 'Modifier' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateSupplyProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;2;(string,IDSUPPLY);(string,IDPRODUCT))*/}  \
+{/*Input(Modifier;3;\
+(string,QUANTITY,Quantité,[/*SUPPLY.QUANTITY*/],5.0.580,1);\
+(string,PRICE,Prix unitaire,[/*SUPPLY.PRICE*/],5.0.580,1);\
+(date,DATEDELIVERY,Date livraison,[/*SUPPLY.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script SetProductToPacking  'Mettre produits à packing' _ 62 'Mettre produits à packing' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\SetToPacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;2;(string,IDSUPPLY);(string,IDPRODUCT))*/} \
+{/*Input(Mettre produits à packing;3;\
+(string,IDPACKING,ID Packing*,,10.0.580,0);\
+(string,NOPALLET,No. palette,0,5.0.580,1);\
+(string,QUANTITY,Quantité,[/*SUPPLY.QUANTITYREST*/],5.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+

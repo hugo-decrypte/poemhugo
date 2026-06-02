@@ -1,0 +1,64 @@
+View ViewTableSheet 'Spreadsheet' 'Spreadsheet'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;]'
+
+Script EditSheet  'Editer' _ 1 'Editer' _ 'tableSHEET' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE SHEET&category IN ({/*selected(tableSHEET;1;(string,CATEGORY))*/}) AND id IN ({/*selected(tableSHEET;1;(string,ID))*/}) AND line IN ({/*selected(tableSHEET;1;(int,LINE))*/}) AND 'V'+CSTR(column) IN ({/*selected(tableSHEET;1;(string,[_FIELDID_]))*/})"\
+Reload _ _ _ _ 
+
+
+Script InsertCell  'Créer cellule' _ 2 'Créer cellule' _ 'tableSHEET' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Common\Sheet\Interaction\InsertCell.n'\
+ '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*selected(tableSHEET;4;(string,CATEGORY);(string,ID);(int,LINE);(string,[_FIELDID_]);)*/} \
+{/*Input(Créer cellule;1;(string,VALUE,Valeur,,30.0.580,,);)*/}' \
+Reload _ _ _ _
+
+Script SolveFormula 'Résoudre la formule' _ 13 'Résoudre la formule' _ 'tableSHEET' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Common\Sheet\Solver\SheetSolving.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*selected(tableSHEET;3;string,ID;(int,LINE);(string,[_FIELDID_]))*/}' \
+Reload _ _ _ _
+
+Table tableSHEET _ _ 0 0 800 600 \
+"[]" - \
+"[TITLE=Spreadsheet;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[COLUMNNUMBER=1; MULTILINES=3;FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(192 192 255),(255 140 0),(255 140 0),(192 192 255),(165 165 255),(165 165 255)};\
+ALIGNTEXT={Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Left,Right,Right}]"\
+"[DATAOBJ=SHEET;FILLCOLOR=LINERGB]"
+
+Data SHEET 'Spreadsheet' SHEET HTTPSQL 0 '[FIND={V1,V2,V3,V4,V5,V6,V7,V8,V9,V10,V11,V12,V13,V14,V15,V16,V17,V18,V19,V20}]'   [DOUBLECLICK=EditSheet] \
+"[20;(string,V1,Length,,10,,);(string,V2,Width,,10,,);(string,V3,Height,,10,,);(string,V4,Quantity,,10,,);(string,V5,Weight,,10,,);(string,V6,Volume,,10,,);(string,V7,Temperature,,10,,);(string,V8,Pression,,10,,);(string,V9,Humidity,,10,,);(string,V10,Visibility,,10,,);(string,V11,Heat,,10,,);(string,V12,Speed,,10,,);(string,V13,Time,,10,,);(string,V14,Mileage,,10,,);(string,V15,Quote,,10,,);(string,V16,Cost,,10,,);(string,V17,Penalty,,10,,);(string,V18,Indices,,10,,);(string,V19,Revenue,,10,,);(string,V20,Profit,,10,,);(color,LINERGB,,,13.0.0);(string,CATEGORY,CATEGORY,,,20,0);(string,ID,ID,,,20,0);(int,LINE,LINE,,,20,0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT s.category AS CATEGORY,\
+				s.id AS ID,\
+				s.line AS LINE,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=1)	AS V1,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=2)	AS V2,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=3)	AS V3,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=4)	AS V4,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=5)	AS V5,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=6)	AS V6,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=7)	AS V7,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=8)	AS V8,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=9)	AS V9,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=10)	AS V10,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=11)	AS V11,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=12)	AS V12,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=13)	AS V13,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=14)	AS V14,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=15)	AS V15,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=16)	AS V16,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=17)	AS V17,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=18)	AS V18,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=19)	AS V19,\
+				(SELECT s1.value FROM SHEET s1 WHERE s1.category='1' AND s1.id=s.id AND s1.line=s.line AND s1.column=20)	AS V20,\
+				'(255 255 255)' AS LINERGB \
+			FROM (SELECT DISTINCT category,id,line FROM SHEET\
+			WHERE category='1') s \
+			ORDER BY s.category,s.id,s.line"
+
+
+Data SHEET2 'SHEET' SHEET HTTPSQL 0 _ _ \
+"[2;(string,CATEGORY,CATEGORY,,255,0);(string,ID,ID,,255,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT DISTINCT a.category 	AS CATEGORY,\
+			a.id 		AS ID\
+	FROM SHEET a\
+	ORDER BY a.category,a.id"
+

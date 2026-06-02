@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		ClearBackup.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\\Interaction\\Backup\\ClearBackup0.n"],	
+

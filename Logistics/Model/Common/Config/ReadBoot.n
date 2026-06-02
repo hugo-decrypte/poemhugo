@@ -1,0 +1,71 @@
+%==================================================%
+%                                                  %
+%		ReadBoot.n	  	   	   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+'()' => (
+	serverPortLogin	:: "",
+	idUserLogin 	:: "",
+
+	serverPortLogin	= (),
+	idUserLogin	= (),
+
+
+	% Boot
+	bootConfig = ('Work Directory' "Boot\Boot.cfg"),
+	[bootConfig],
+
+
+	% Database
+	( TAG_DATABASE_ERROR :
+		database = [databaseName : databaseUser : databasePassword],
+	),
+
+
+	idClubLogin	:: "",
+	serverIP	:: "",
+	serverPort	:: "",
+
+
+	% user
+	'()' <- database,
+
+
+	? databaseType (
+	"SQLSERVER", "ORACLE":	% JZ 0723
+		sqlSelectIpPort = (
+			"SELECT CLUB.id,CLUB.directory,CLUB.ip,CLUB.port FROM CLUB,[USER] WHERE [USER].id='"
+			idUserLogin "' AND [USER].idClub=CLUB.id"
+		),
+		;
+
+		:
+		sqlSelectIpPort = (
+			"SELECT c.id,c.directory,c.ip,c.port FROM " DB_PREFIX "CLUB c," DB_PREFIX "USER u WHERE u.id='"
+			idUserLogin "' AND u.idClub=c.id"),
+	),
+
+
+
+	(SQL : sqlSelectIpPort ),
+
+	_ = (),
+
+	idClubLogin		= (),
+	directoryClubLogin	= (),
+
+	serverIP		= (),
+	serverPort		= (),
+
+	database <- '()',
+
+
+
+
+	(TAG_INVALID_USER_IS idUserLogin "\n" : idUserLogin \in IDUSER),
+	%(TAG_INVALID_PORT_IS serverPortLogin "\n" : serverPort = serverPortLogin),
+
+),
+

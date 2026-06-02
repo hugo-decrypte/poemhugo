@@ -1,0 +1,41 @@
+# ─── Binaires compilés ───────────────────────────────────────────────────────
+*.exe
+*.dll
+*.pdb
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+
+# ─── Cache applicatif ────────────────────────────────────────────────────────
+Cache/
+embedding_cache.json
+
+# ─── Paramètres locaux Claude Code (chemins machine-spécifiques) ─────────────
+.claude/settings.local.json
+
+# ─── Artefacts de build Visual Studio ────────────────────────────────────────
+*.baml
+*.vsidx
+*.g.cs
+*.g.i.cs
+*.cache
+*.suo
+*.Up2Date
+*.resources
+*.props
+*.targets
+*.lref
+.vs/
+**/obj/
+**/bin/
+**/venv/
+
+# ─── Fichiers volumineux (> 100 MB, limite GitHub) ───────────────────────────
+*.mdb
+*.shp
+*.dbf
+
+# ─── Fichiers contenant des secrets (clés API) ───────────────────────────────
+**/Client.cfg
+**/Client0.cfg
+Logistics/Doc/AccountsHereGoogleOpenAI.txt

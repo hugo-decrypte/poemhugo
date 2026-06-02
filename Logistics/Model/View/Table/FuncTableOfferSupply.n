@@ -1,0 +1,51 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableOfferSupply.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableOfferSupply>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableOfferSupply" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT os.idSupplier AS IDSUPPLIER,\\\n"),
+		@ ("\t\t (select Name from " DB_PREFIX "SUPPLIER sr where sr.Id=s.IdSupplier) as NAMESUPPLIER,\\\n"),
+		@ ("\t\t os.idProduct AS IDPRODUCT,\\\n"),
+		@ ("\t\t a.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t os.PriceUnit AS PRICE,\\\n"),
+		@ ("\t\t os.Comments AS COMMENTS,\\\n"),
+		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "OFFERSUPPLIER os, " DB_PREFIX "SUPPLIER s, " DB_PREFIX "PRODUCT a \\\n"),
+		@ ("\t WHERE s.Id=os.IdSupplier and os.IdProduct=a.Id\\\n"),
+		@ ("\t AND (os.IdSupplier in ((/*IDSUPPLIER*/)) or 'XXX' in ((/*IDSUPPLIER*/)))\\\n"),
+		@ ("\t AND (os.IdProduct in ((/*IDPRODUCT*/)) or 'XXX' in ((/*IDPRODUCT*/))) \\\n"),
+		@ ("\t ORDER BY os.IdSupplier, os.IdProduct\"\n\n\n"), 
+	
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOfferSupply2EditSupply.n"],
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

@@ -1,0 +1,78 @@
+%==================================================%
+%                                                  %
+%  		FuncTableUser.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableUser>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableUser" postfix),
+
+
+
+		sqlResourceColor = (
+			SQL_CASEWHEN "u.id='(/*USERID*/)'" SQL_THEN "'" RGB_CRITICAL "'" SQL_ELSE "'" RGB_WHITE "'" SQL_CASEEND
+		),
+
+
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB,,,13.0.0)]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+
+		@("SELECT "SQL_ClubNameIdIs"u.idClub)	AS NAMECLUB, \
+				u.id 		AS IDUSER, \
+				u.name 		AS NAMEUSER, \
+				(SELECT " DB_PREFIX "RESOURCE.id FROM " SQL_TABLE_RESOURCE " WHERE " DB_PREFIX "RESOURCE.id=u.idResource) AS IDRESOURCE, \
+				(SELECT " DB_PREFIX "RESOURCE.name FROM " SQL_TABLE_RESOURCE " WHERE " DB_PREFIX "RESOURCE.id=u.idResource) AS NAMERESOURCE, \
+				" SQL_AliasCategoryIs "'PERMISSION' AND al.id=u."SQL_FIELD_PERMISSION")	AS PERMISSIONUSER, \
+				'xxxxxxxx' 	AS PASSWORDUSER, \
+				u.comments 	AS COMMENTS, \
+				" sqlResourceColor "	AS LINERGB \
+		   FROM " SQL_TABLE_USER " u \\\n"),
+
+
+		related = "User" => (
+			@ (" WHERE " SQL_ViewUserIs "u.id\\\n"),
+			;
+			@ (" WHERE " SQL_ViewUserVisibleClubIs "u.idClub AND (" SQL_UserWritePermissionOrIdIs "u.id))\\\n"),
+		),
+
+		@ "ORDER BY u.id,u.idClub\"\n\n",
+
+
+
+
+		related <> "Log" =>
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableUser2EditUser.n"],
+
+		
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

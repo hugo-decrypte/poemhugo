@@ -1,0 +1,54 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+% ScenarioTableClient2TablealanceSheetRevenueMenu.n%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableBalanceSheetRevenueProduct ",	% JZ 1021
+
+% Caption
+@ (" '" TAG_REVENUES "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_BALANCE_REVENUE,
+
+% Label
+@ (" '" TAG_REVENUES "' "),	
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableBalanceSheetRevenueProduct_Menu.view" OPENTABLE_END),	% JZ 1021
+
+@ (TABLE_ARGUMENTS "IDCOLOR=(250 250 250);OWNEROBJ=IdClient;IDOBJ={/*Selected(tableCLIENT;1;(string,ID))*/};FAMILY='XXX';TITLEOBJ=" TAG_FOR_CLIENT " {/*Selected(tableCLIENT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX']\"\n\n"),
+

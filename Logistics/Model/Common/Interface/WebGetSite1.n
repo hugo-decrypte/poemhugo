@@ -1,0 +1,112 @@
+/********************************************************/
+/*							*/
+/*			WebGetSite1.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+
+'()' => (
+	%nameSite1 :: "",
+	nameSite2 :: "",
+	idSite1 :: "",
+	idSite2 :: "",
+
+	latitudeSite1	:: 0.0,
+	longitudeSite1	:: 0.0,
+
+	latitudeSite2	:: 0.0,
+	longitudeSite2	:: 0.0,
+
+
+	%nameSite1 = (),
+	nameSite2 = (),
+
+
+
+	TYPEDEPOT = "1",
+
+
+	'()' <- database,
+
+
+	sqlReadSite = (
+		"SELECT id FROM "DB_PREFIX "SITE WHERE idTypeSite='" TYPEDEPOT
+		"' UNION ALL SELECT id FROM "DB_PREFIX "SITE WHERE name='" nameSite2 "'"),
+ 
+	( SQL: sqlReadSite),
+
+	() = 2 => (
+		idSite1	= (),
+		idSite2	= (),
+		;
+
+		idSite1	= "",
+		idSite2	= "",
+	),
+
+
+
+
+	sqlReadlatitudelongitude = (
+		"SELECT latitude,longitude FROM "DB_PREFIX "SITE WHERE id='" idSite1 "'
+		UNION ALL SELECT latitude,longitude FROM "DB_PREFIX "SITE WHERE id='" idSite2 "'"),
+ 
+	( SQL: sqlReadlatitudelongitude),
+
+
+	() = 2 => (
+		latitudeSite1	= (),
+		longitudeSite1	= (),
+
+		latitudeSite2	= (),
+		longitudeSite2	= (),
+		;
+
+		latitudeSite1	= 0.0,
+		longitudeSite1	= 0.0,
+
+		latitudeSite2	= 0.0,
+		longitudeSite2	= 0.0,
+	),
+
+
+
+	database <- '()',
+),
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ (	"'" idSite1 			"'  "
+		\underline{latitudeSite1}	"  "
+		\underline{longitudeSite1}	"  \n"
+
+		"'" idSite2			"'  "
+		\underline{latitudeSite2}	"  "
+		\underline{longitudeSite2}	"  \n"
+	),
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+
+	( message : '.'),
+),
+
+
+.
+
+ '21361'  47.806407928466796875  3.154819965362548829  
+ '22590'  47.964118957519531250  3.485109806060791016  
+
+
+

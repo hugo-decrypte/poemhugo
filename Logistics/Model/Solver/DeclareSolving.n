@@ -1,0 +1,86 @@
+/****************************************************/
+/*              Vehicle Routing              	    */
+/*                                                  */
+/*		DeclareSolving.n   	            */
+/*                                                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE             */
+/* All rights reserved                              */
+/****************************************************/
+
+% Routing key variables for solution
+\forall o \in SOURCEORDERSINK (
+	tourOrder_{o} \in TOUR,
+
+	t1Order_{o} :: defaultDateTime,
+	t2Order_{o} :: defaultDateTime,			% special for inactive tours
+
+	t1Order_{o} >= t1,
+	t2Order_{o} >= t1,
+
+	dateOrder_{o} \in Date \cup \{ dateInactive \},
+
+	TimeOrder_{o} \subset HORIZON_sink,
+	TimeOrder_{o} = [t1Order_{o},t2Order_{o}],	% time from o to next
+				
+	siteOrder_{o} \in SITE,
+
+
+	timeServiceOrder_{o}	:: defaultTime,
+	timeToNextOrder_{o}	:: defaultTime,
+
+	mileageOrder_{o}	:: 0,
+),
+
+
+
+% Tour level
+\forall t \in TOUR (
+	site1Tour_{t}		:: 0,
+	site2Tour_{t}		:: 0,
+
+	t1Tour_{t}		:: defaultDateTime,
+	t2Tour_{t}		:: defaultDateTime,
+
+
+	costTour_{t}		:: 0.0,
+	receiptsTour_{t}	:: 0.0,
+
+	quantityTour_{t}	:: 0,
+	weightTour_{t}		:: 0.0,
+	volumeTour_{t}		:: 0.0,
+
+	%TimeTour_{t} 		:: HORIZON_sink,
+
+	SourceOrderSinkTour_{t}	:: {},
+	SourceOrderTour_{t}	:: {},
+
+	OrderTour_{t}		:: {},
+	SourceOrderTour_{t}	:: {},
+	SourceOrderSinkTour_{t}	:: {},
+),
+
+
+
+
+\forall o \in SOURCEORDER
+	nextOrder_{o} \in ORDERSINK,
+
+\forall o \in ORDERSINK
+	prevOrder_{o} \in SOURCEORDER,
+
+
+\forall v \in RESOURCE
+	TourActiveVehicle_{v} :: TOUR,
+
+
+%OrderSelected = {},
+
+
+profit :: 0.0,
+cost :: 0.0,
+nbVehicleActive :: 0,
+nbTourActive :: 0,
+mileage :: 0,
+worktime :: defaultTime,
+makespan :: defaultTime,
+

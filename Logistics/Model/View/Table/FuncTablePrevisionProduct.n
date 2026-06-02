@@ -1,0 +1,122 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTablePrevisionProduct.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu  
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tablePrevisionProduct>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)	% JZ 1013
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		%postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : (related)),
+		viewFile = ("TablePrevisionProduct" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+		dateMonth :: "",
+		? databaseType (
+			"ACCESS" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"SQLSERVER" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"MYSQL" :
+				dateMonth = ("date_Add("SQL_CURRENTDATE", INTERVAL -M.NoMonth MONTH)"), 
+				;
+
+			"ORACLE" :
+				dateMonth = ("ADD_MONTHS("SQL_CURRENTDATE",-M.NoMonth)"),
+		),
+		
+
+
+
+		% WP : \t\t pour mieux lire le view 
+		\forall i \in [1,12] (
+			qtyMonth_{i}	= ("sum(" SQL_CASEWHEN "Val.NoM=" i SQL_THEN " Val.Q" SQL_ELSE " 0" SQL_CASEEND") as QTY" i),
+			costMonth_{i}	= (SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM="i SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST" i),
+			weightMonth_{i}	= ("sum("SQL_CASEWHEN"Val.NoM="i SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT" i),
+		),
+
+		@ ("SELECT  Val.ID as ID, Val.ID as REFERENCE,Val.DIVISION as NAMECLUB,\\\n"),
+		@ ("\t\t Val.PU as PRICE,\\\n"),
+ 		@ ("\t\t sum(Val.Q) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(Val.C), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t int(sum(Val.W)+0.5) as WEIGHT,\\\n"),
+
+		\forall i \in [1,12] (
+			@ ("\t\t " qtyMonth_{i} ", " costMonth_{i} ", " weightMonth_{i} ",\\\n"),
+		),
+
+ 		@ ("\t\t Val.DES as DESIGNATION,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM  \\\n"),
+ 		@ ("\t\t (select P.idClub as DIVISION,P.ID as ID, P.Reference as REF, P.PriceUnit as PU, P.designation as DES,\\\n"),
+ 		@ ("\t\t		13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \\\n"),
+ 		@ ("\t\t	from " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M \\\n"),
+ 		@ ("\t\t	WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\\\n"),
+		@ ("\t\t 		AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND p.idClub='(/*CLUBID*/)' AND p.selected='1' \\\n"),
+ 		@ ("\t\t	GROUP BY P.ID, P.Reference, P.designation, P.PriceUnit, P.Weight, M.NoMonth,P.idClub, P.selected\\\n"),
+ 		@ ("\t\t ) Val\\\n"),
+ 		@ ("\t GROUP BY Val.ID, Val.REF,Val.PU, Val.DES, Val.DIVISION\\\n"),
+
+
+		@ ("\t UNION SELECT '" TAG_TOTAL "' as ID, 'ZZZ' as REFERENCE, '' as NAMECLUB,\\\n"),
+		@ ("\t\t 0 as PRICE,\\\n"),
+ 		@ ("\t\t sum(Val.Q) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(Val.C), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t int(sum(Val.W)+0.5) as WEIGHT,\\\n"),
+
+		\forall i \in [1,12] (
+			@ ("\t\t " qtyMonth_{i} ", " costMonth_{i} ", " weightMonth_{i} ",\\\n"),
+		),
+
+ 		@ ("\t\t ' ' as DESIGNATION,\\\n"),
+ 		@ ("\t\t '(220 220 255 )' as LINERGB \\\n"),
+ 		@ ("\t FROM \\\n"),
+ 		@ ("\t\t (select 13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \\\n"),
+ 		@ ("\t\t	from " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M \\\n"),
+ 		@ ("\t\t	WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\\\n"),
+		@ ("\t\t 		AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND p.idClub='(/*CLUBID*/)' AND p.selected='1' \\\n"),
+ 		@ ("\t\t	GROUP BY M.NoMonth\\\n"),
+ 		@ ("\t\t ) Val\\\n"),
+
+		@ ("\t ORDER BY REFERENCE \"\n\n"),
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

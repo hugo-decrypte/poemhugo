@@ -1,0 +1,27 @@
+%==================================================%
+%                                                  %
+%            	  Routing	    	           %
+%                                                  %
+% 		WriteLog.n			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+(SQL :	"UPDATE	" DB_PREFIX "LOG SET idClub='" idClubActive
+		"',operation='" sqlOperationLog
+		"',t2='" 'yyyy-mm-dd hh:mm:ss'
+		"',comments='" TAG_OPERATION_SUCCESSFUL
+	"' WHERE " SQL_FIELD_PERMISSION "='" STATE_WRITE "' AND t1='" timeLog "' AND t2 IS NULL"
+),
+
+
+/*
+(SQL :	SQL_UpdateLog
+	SQL_SetLogIdClubToBe		idClubActive "'"
+	SQL_AndLetLogOperationBe	sqlOperationLog "'"
+	SQL_AndLetLogT2Be		'yyyy-mm-dd hh:mm:ss' "'"
+	SQL_AndLetLogMessageBe		TAG_OPERATION_SUCCESSFUL "' "
+	SQL_WhereLogT2NullAndPermissionIs "'" STATE_WRITE "'" SQL_AndWhereLogT1Is timeLog "'"
+),
+*/

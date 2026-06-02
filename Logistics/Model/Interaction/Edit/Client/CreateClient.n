@@ -1,0 +1,74 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreateClient.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	idClientBuffer				:: "",
+	nameClientBuffer			:: "",
+	addressInvoiceBuffer		:: "",
+	addressSupInvoiceBuffer		:: "",
+	postcodeBuffer				:: "",
+	cityBuffer					:: "",
+	countryBuffer				:: "",
+	vatcodeBuffer				:: "",
+	siretBuffer					:: "",
+	idPointDeliveryBuffer		:: "",
+	nameClientDeliveryBuffer	:: "",
+	addressDeliveryBuffer		:: "",
+	addressSupDeliveryBuffer	:: "",
+	postcodeDeliveryBuffer		:: "",
+	cityDeliveryBuffer			:: "",
+	countryDeliveryBuffer		:: "",
+	agencyNameBuffer			:: "",
+	bankaccountBuffer			:: "",
+
+	
+	idClientBuffer				= (),
+	nameClientBuffer			= (),
+	addressInvoiceBuffer		= (),
+	addressSupInvoiceBuffer		= (),
+	postcodeBuffer				= (),
+	cityBuffer					= (),
+	countryBuffer				= (),
+	vatcodeBuffer				= (),
+	siretBuffer					= (),
+	idPointDeliveryBuffer		= (),
+	nameClientDeliveryBuffer	= (),
+	addressDeliveryBuffer		= (),
+	addressSupDeliveryBuffer	= (),
+	postcodeDeliveryBuffer		= (),
+	cityDeliveryBuffer			= (),
+	countryDeliveryBuffer		= (),
+	agencyNameBuffer			= (),
+	bankaccountBuffer			= (),
+
+	'()' <- database,
+	
+	CreateClient_SQL1=(
+		"INSERT INTO " DB_PREFIX "CLIENT (IdClub, Id, Name, Address, AddressSup, City, PostCode, Country, codeTax, establishment, IdAgency, BankAccount) 
+		select '(/*CLUBID*/)', '"idClientBuffer"', '"nameClientBuffer"', '"addressInvoiceBuffer"', '"addressSupInvoiceBuffer"','"cityBuffer"','"postcodeBuffer"','"countryBuffer"', '"vatcodeBuffer"','"siretBuffer"',ay.Id, b.Id
+		from " DB_PREFIX "AGENCY ay, " DB_PREFIX "BANKACCOUNT b 
+		where ay.Name='"agencyNameBuffer"' and b.Name='"bankaccountBuffer"'"
+	),
+	CreateClient_SQL2=(
+		"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) 
+		select '"idClientBuffer"','"idPointDeliveryBuffer"', '"nameClientDeliveryBuffer"', '"addressDeliveryBuffer"', '"addressSupDeliveryBuffer"','"cityDeliveryBuffer"','"postcodeDeliveryBuffer"','"countryDeliveryBuffer"'
+		from " DB_PREFIX "CLIENT cl 
+		where cl.ID='"idClientBuffer"' and '"idPointDeliveryBuffer"'>' '"
+	),
+	
+	(SQL : CreateClient_SQL1), 
+	(SQL : CreateClient_SQL2), 
+	
+	
+	database <- '()',
+),

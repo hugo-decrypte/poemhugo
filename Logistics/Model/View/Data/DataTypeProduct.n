@@ -1,0 +1,25 @@
+%==================================================%
+%                                                  %
+%           	Logistics               	   %
+%                                                  %
+%  		   DataTypeProduct.n 		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+@ ("Data TYPEPRODUCT 'Type Produit' TYPEPRODUCT "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[2;(string,IDTYPE,Statut ID,,15.0.80,0);(string,LABELTYPE," TAG_LABEL ",,50.0.300,0);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT tp.Id AS IDTYPE,\
+ "SQL_CONCAT"trim(name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELTYPE \
+	 FROM " DB_PREFIX "TYPEPRODUCT tp \
+	 ORDER BY tp.Id\"\n\n"),
+
+
+

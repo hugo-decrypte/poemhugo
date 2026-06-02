@@ -1,0 +1,72 @@
+%==================================================%
+%                                                  %
+%            	 Vehicle Routing  	           %
+%                                                  %
+%  		FuncTableLog.n 	                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableLog>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableLog" postfix),
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+	
+		@ ("(color,LINERGB,,,13.0.0);(string,IDCLUBLOG," TAG_CLUB ",,10,0)]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+		sqlLogColor = (
+			SQL_CASEWHEN "l.t2 IS NULL AND (l.idUser=u.id OR l." SQL_FIELD_PERMISSION ">'" STATE_READ "')"
+			SQL_THEN "'" RGB_CRITICAL "'" SQL_ELSE "'" RGB_WHITE "'" SQL_CASEEND
+		),
+
+
+		@("SELECT l.idClub	AS IDCLUBLOG,\
+			 c.name			AS NAMECLUBLOG,\
+			 l.idUser		AS IDUSERLOG,\
+			 u.name			AS NAMEUSERLOG,\
+			 l.ip			AS IPLOG,\
+			 l.t1			AS T1LOG,\
+			 l.t2			AS T2LOG,\
+			 l.operation		AS OPERATIONLOG,\
+			 l.comments		AS MESSAGELOG, \
+			 " SQL_AliasCategoryIs "'PERMISSION' AND al.id=l."SQL_FIELD_PERMISSION") AS PERMISSIONLOG, \
+			 " sqlLogColor 	" AS LINERGB \
+		  FROM   " DB_PREFIX "LOG l," DB_PREFIX "CLUB c," SQL_TABLE_USER " u \
+		  WHERE l.idClub=c.id AND l.idUser=u.id"),
+
+
+		related = "User" => (
+			@ (" AND " SQL_ViewUserIs "u.id\\\n"),
+			;
+			@ (" AND " SQL_ViewUserVisibleClubIs "u.idClub AND (" SQL_UserWritePermissionOrIdIs "u.id))\\\n"),
+		),
+
+
+		@ "ORDER BY 11,1,6 DESC,7 DESC,3 \"\n\n", % LINERGB,idClub,t1,t2,idUser
+
+
+
+
+
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableLog2EditLog.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),
+

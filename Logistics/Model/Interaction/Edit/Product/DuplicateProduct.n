@@ -1,0 +1,50 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DuplicateProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idProductSelectedBuffer	::"",
+	idProductBuffer			:: "",
+	
+	idProductSelectedBuffer	= (),
+	idProductBuffer			= (),
+	
+
+
+	'()' <- database,
+
+	DuplicateProduct_SQL1=(
+		"INSERT INTO " DB_PREFIX "PRODUCT (Id, Family, Designation,DesignationTech, TypeProduct,Category, PriceUnit, PurchasePrice,WeightUnity, LengthUnity, Length,Height,Width,Depth,Volume,Weight, IdState) 
+		select '"idProductBuffer"', p.Family, p.Designation,p.DesignationTech, p.TypeProduct, Category, PriceUnit, PurchasePrice,p.WeightUnity, p.LengthUnity, p.Length,p.Height,p.Width,p.Depth,p.Volume,p.Weight, '0'
+		from " DB_PREFIX "PRODUCT p
+		where p.Id ='"idProductSelectedBuffer"'"
+	),
+
+	DuplicateProduct_SQL2=(
+		"INSERT INTO " DB_PREFIX "PRODUCT_COMPONENT (IdProduct,IdSubProduct, Quantity,PriceUnit, OrderByLength, OrderByHeight, OrderByWidth, OrderByDepth, LengthByPiece,HeightByPiece, WidthByPiece, DepthByPiece, VolumeByPiece) 
+		select '"idProductBuffer"', pc.IdSubProduct, pc.Quantity,pc.PriceUnit, pc.OrderByLength, pc.OrderByHeight, pc.OrderByWidth, pc.OrderByDepth, pc.LengthByPiece,pc.HeightByPiece, pc.WidthByPiece, pc.DepthByPiece, pc.VolumeByPiece
+		from " DB_PREFIX "PRODUCT_COMPONENT pc
+		where pc.IdProduct ='"idProductSelectedBuffer"'"
+	),
+
+	(SQL : DuplicateProduct_SQL1), 
+	(SQL : DuplicateProduct_SQL2),
+	
+	
+
+	database <- '()',
+),

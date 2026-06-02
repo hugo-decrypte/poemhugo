@@ -1,0 +1,3 @@
+Pour build la version pour le client
+Générer une version Release sur visual studio
+Supprimer Libraries

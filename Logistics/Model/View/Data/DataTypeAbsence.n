@@ -1,0 +1,48 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataTypeAbsence.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: ABSENCE
+@ "Data ",
+
+% ID
+@ ("TYPEABSENCE '"),	
+
+% Caption
+@ "TYPEABSENCE",
+%@ TAG_ABSENCE,
+
+% Group
+@ "' TYPEABSENCE ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,ID,ID,,255,0);(string,NAME,NAME,,255,0);]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT DISTINCT a.id 		AS ID,\
+		          a.name 	AS NAME\
+			FROM " DB_PREFIX "TYPEABSENCE a\
+			WHERE state='" STATE_ACTIVE "' \
+			ORDER BY a.id\"\n\n"),
+
+

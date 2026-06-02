@@ -1,0 +1,114 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		GenerateMenu.n		           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	menuConfig = ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\Menu.cfg"),
+
+
+	'()' <- [menuConfig],
+
+	nbMenu = (),
+	maxMenu0 = (),
+	
+	\forall b \in [1,nbMenu] (
+		idBuffer_{b} 	:: "",
+		nameBuffer_{b} 	:: "",
+		typeBuffer_{b} 	:: "",
+		colorBuffer_{b} :: "",
+
+		b		= (),
+		idBuffer_{b} 	= (),
+		nameBuffer_{b} 	= (),
+		typeBuffer_{b} 	= (),
+		colorBuffer_{b} = (),
+
+		nbMenuBuffer_{b} =< maxMenu0,
+		nbMenuBuffer_{b} = (),
+
+		\forall i \in [1,nbMenuBuffer_{b}] (
+			selectedMenuBuffer_{b,i} 	:: "",
+			selectedMenuBuffer_{b,i} 	= () ,
+		),		
+		\forall i \in [1,nbMenuBuffer_{b}] (	
+			nameMenuBuffer_{b,i} 		:: "",
+			nameMenuBuffer_{b,i} 		= () ,
+		),
+		
+	),
+
+	[menuConfig] <- '()',
+),
+
+
+'@' => (
+	SQL_UpdateFieldSetNameToBe	= "UPDATE FIELD f SET f.name='",
+	SQL_AndLetFieldSelectedBe	= ",f.selected",
+
+
+
+	sqlFile <- '@',
+
+	@ (SQL_DeleteMenu "\n"),
+	%@ ("DELETE FROM " DB_PREFIX "MENU m\n"),
+
+	\forall b \in [1,nbMenu] (
+		@ SQL_InsertIntoMenuIdNameTypeColor,
+
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (SQL_AndInsertIntoMenuSelected 	(i > 9 ? "" : "0") i ),
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (SQL_AndInsertIntoMenuName 		(i > 9 ? "" : "0") i ),
+		@ (")VALUES('" ),
+
+/*
+		@ ("INSERT INTO "DB_PREFIX "MENU(id,name,type,color"),
+
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (",selected" 	(i > 9 ? "" : "0") i ),
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (",name" 	(i > 9 ? "" : "0") i ),
+*/
+
+		@ (idBuffer_{b} "','" &[nameBuffer_{b}] "','" &[typeBuffer_{b}] "','" colorBuffer_{b} "'"),
+
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (",'"selectedMenuBuffer_{b,i} "'"),
+		
+		\forall i \in [1,nbMenuBuffer_{b}]
+			@ (",'"&[nameMenuBuffer_{b,i}] 	"'"),
+		@ (")\n"),
+		
+	),
+
+
+	% Speical for MENU table's FIELD setting
+	@ (SQL_UpdateFieldSetNameToBe TAG_MENU "'"),
+
+	\forall i \in [2,\max_{b \in [1,nbMenu]}{nbMenuBuffer_{b}}](
+		@ (SQL_AndLetFieldSelectedBe 	(i > 9 ? "" : "0") i "='T'"),
+	),
+	@ (" " SQL_WhereFieldAliasIsMenu "\n"),
+
+
+/*
+	@ ("UPDATE " DB_PREFIX "FIELD SET name='"TAG_MENU"'"),
+
+	\forall i \in [2,\max_{b \in [1,nbMenu]}{nbMenuBuffer_{b}}](
+		@ (",selected" 	(i > 9 ? "" : "0") i "='T'"),
+	),
+	@ (" WHERE id='MENU'\n"),
+*/
+
+
+	'@' <- sqlFile,
+
+	% ExecuteSql
+	[['Work Directory' "Model\Common\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+
+),

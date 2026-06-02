@@ -1,0 +1,612 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableProductForPackingPallet2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddProductToPallet ",
+
+% Caption
+@ (" '" TAG_INCREMENT_QUANTITY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INCREMENT_QUANTITY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORPACKING' ", 	% JZ 1018
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+% Instruction... (When Count>0)
+
+%% Script AddProductToPallet 'Add Product To Packing Pallet' _ 1 'Quantité + 1' _ 'tablePRODUCTFORPACKING' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \
+
+
+dateExpiration :: "",
+? databaseType (
+	"ACCESS" : 
+		dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"SQLSERVER" :
+		dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"MYSQL" :
+%%		dateExpiration = (SQL_FORMATDATE"(Date_Add("SQL_CURRENTDATE", INTERVAL NbDaysExpiration DAY),'"SQL_FORMATDATESTR"')" ),
+		dateExpiration = (SQL_FORMATDATE"(AddDate("SQL_CURRENTDATE", NbDaysExpiration),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"ORACLE" :
+		dateExpiration = (SQL_FORMATDATE"("SQL_CURRENTDATE"+ NbDaysExpiration,'"SQL_FORMATDATESTR"')" ),
+),
+
+databaseType = "ACCESS" => (
+	AddProductToPallet_SQL1 = (
+		"\"INSERT INTO " DB_PREFIX "PALLET_PRODUCT (IdPacking, NoPallet, IdProduct, Quantity, QuantityReal, QuantityStock, QuantityDefective, WeightNet, Comments, DateCreate, DateExpiration) \
+			select PL.IdPacking, PL.NoPallet, '[/*PRODUCT.IDPRODUCT*/]', 0, 0, 0,0, 0, ' ', "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), " SQL_CASEWHEN "A.NbDaysExpiration is not NULL and A.NbDaysExpiration>0" SQL_THEN ""dateExpiration"" SQL_CASEEND "NULL)\
+			from " DB_PREFIX "PALLET PL, " DB_PREFIX "PRODUCT a\
+			WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \
+			and a.Id ='[/*PRODUCT.IDPRODUCT*/]' \
+			and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet and lp.IdProduct='[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToPallet_SQL2 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT a on a.Id=lp.IdProduct\
+		set lp.Quantity=lp.Quantity+a.QuantityPackaging, lp.QuantityReal=lp.QuantityReal+a.QuantityPackaging, lp.QuantityStock=lp.QuantityStock+a.QuantityPackaging, \
+		lp.WeightNet=lp.WeightNet+lp.Quantity*a.Weight \
+		WHERE lp.IdPacking in ((/*IDPACKING*/)) and lp.NoPallet in ((/*NOPALLET*/)) \
+		and lp.IdProduct='[/*PRODUCT.IDPRODUCT*/]' \"\\\n"
+	),
+%% PALLET : qty
+	AddProductToPallet_SQL3 = (
+		"\"Update " DB_PREFIX "PALLET PL set PL.Quantity=0, PL.QuantityReal=0, PL.QuantityStock=0, PL.WeightNet=0 \
+		WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	AddProductToPallet_SQL4 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PALLET PL on lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet \
+			set PL.Quantity=PL.Quantity+lp.Quantity, PL.QuantityReal = PL.QuantityReal + lp.QuantityReal,\
+			PL.QuantityStock = PL.QuantityStock + lp.QuantityStock, PL.QuantityDefective = PL.QuantityDefective + lp.QuantityDefective,\
+			PL.WeightNet=PL.WeightNet+lp.WeightNet\
+			WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+%% PRODUCT
+	AddProductToPallet_SQL5 = (
+		"\"Update " DB_PREFIX "PRODUCT A set a.QuantityStock=0\
+			WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)) )\"\\\n"
+	),
+		
+	AddProductToPallet_SQL6 = (
+		"\"Update (" DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking) inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct \
+			set a.QuantityStock=a.QuantityStock + lp.QuantityStock\
+			WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)))\
+			and pk.IdState not in ('0','9') \"\\\n"
+	),
+%% PACKING
+	AddProductToPallet_SQL7 = (
+		"\"Update " DB_PREFIX "PACKING set Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0, WeightNet=0 \
+			WHERE Id in ((/*IDPACKING*/)) \"\\\n"
+	),
+	AddProductToPallet_SQL8 = (
+		"\"Update " DB_PREFIX "PACKING pk inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pk.Id set\
+			pk.Quantity=pk.Quantity+pl.Quantity, \
+			pk.QuantityReal=pk.QuantityReal+pl.QuantityReal, \
+			pk.QuantityStock=pk.QuantityStock+pl.QuantityStock, \
+			pk.QuantityDefective=pk.QuantityDefective+pl.QuantityDefective, \
+			pk.WeightNet=pk.WeightNet+pl.WeightNet \
+		WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	),
+
+;
+
+	AddProductToPallet_SQL1 = (
+		"\"INSERT INTO " DB_PREFIX "PALLET_PRODUCT (IdPacking, NoPallet, IdProduct, Quantity, QuantityReal, QuantityStock, QuantityDefective, WeightNet, Comments, IdZone,IdRow,IdColumn, DateCreate, DateExpiration) \
+	  select PL.IdPacking, PL.NoPallet, '[/*PRODUCT.IDPRODUCT*/]', 0, 0, 0,0, 0, ' ',\
+	   PL.IdZone,PL.IdRow,PL.IdColumn,\
+		"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),\
+	   (" SQL_CASEWHEN " A.NbDaysExpiration is not NULL and A.NbDaysExpiration>0" SQL_THEN " "dateExpiration" " SQL_ELSE "NULL" SQL_END ")\
+	  from " DB_PREFIX "PALLET PL, " DB_PREFIX "PRODUCT A\
+	  WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \
+	   and A.Id ='[/*PRODUCT.IDPRODUCT*/]' \
+	   and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet and lp.IdProduct='[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToPallet_SQL2 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct\
+		set lp.Quantity=lp.Quantity+A.QuantityPackaging, lp.QuantityReal=lp.QuantityReal+A.QuantityPackaging, lp.QuantityStock=lp.QuantityStock+A.QuantityPackaging, \
+		   lp.WeightNet=lp.WeightNet+lp.Quantity*A.Weight \
+		 WHERE lp.IdPacking in ((/*IDPACKING*/)) and lp.NoPallet in ((/*NOPALLET*/)) \
+		   and lp.IdProduct='[/*PRODUCT.IDPRODUCT*/]' \"\\\n"
+	),
+ %% PALLET : qty
+	AddProductToPallet_SQL3 = (
+		"\"Update " DB_PREFIX "PALLET set\
+		   Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		   QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		   QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		   QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		   WeightNet=(select sum(lp.WeightNet) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet) \
+		 WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+%% PRODUCT : qty
+	AddProductToPallet_SQL4 = (
+		"\"Update " DB_PREFIX "PRODUCT set QuantityStock=\
+		(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking \
+		where PRODUCT.Id=lp.IdProduct and pk.IdState not in ('0','9') )\
+		WHERE Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0\
+		where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)))\"\\\n"
+	),
+
+%% PACKING : qty
+	AddProductToPallet_SQL5 = (
+		"\"Update " DB_PREFIX "PACKING set\
+		   Quantity=(select sum(pl.Quantity) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityReal=(select sum(pl.QuantityReal) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityStock=(select sum(pl.QuantityStock) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityDefective=(select sum(pl.QuantityDefective) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   WeightNet=(select sum(pl.WeightNet) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) \
+		 WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	 ),
+
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Parking\AddProductToPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ AddProductToPallet_SQL1,
+		@ AddProductToPallet_SQL2,
+		@ AddProductToPallet_SQL3,
+		@ AddProductToPallet_SQL4,
+		@ AddProductToPallet_SQL5,
+		databaseType = "ACCESS" => (
+			@ AddProductToPallet_SQL6,
+			@ AddProductToPallet_SQL7,
+			@ AddProductToPallet_SQL8,
+		),
+),
+
+
+%==========================================================================================
+%
+@ "// modify the number of packs of all articles selected in pallet ; add the article into pallet if it is not in the pallet\n",
+@ "// update quantity in Pallet, Product\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyProductQty ",
+
+% Caption
+@ (" '" TAG_UPDATE_PRODUCT_QUANTITY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE_PRODUCT_QUANTITY "' "),	% JZ 0926 B
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORPACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+% Instruction... (When Count>0)
+UpdateProductNbPaquet_Input = (
+	"{/*Input(" TAG_UPDATE_PRODUCT_QUANTITY ";1;\\\n"
+	"(int,QTY," TAG_QUANTITY ",1,10." inputWidth ",0);\\\n"
+	")*/}\\\n"
+),
+
+UpdateProductNbPaquet_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "PALLET_PRODUCT (IdPacking, NoPallet, IdProduct, Quantity, QuantityReal, QuantityStock, QuantityDefective, WeightNet, Comments, DateCreate, DateExpiration) \
+	select PL.IdPacking, PL.NoPallet, '[/*PRODUCT.IDPRODUCT*/]', 0, 0, 0,0, 0, ' ',\
+	"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),\
+	(" SQL_CASEWHEN " A.NbDaysExpiration is not NULL and A.NbDaysExpiration>0" SQL_THEN " "dateExpiration" " SQL_ELSE "NULL" SQL_CASEEND ")\
+	from " DB_PREFIX "PALLET PL, " DB_PREFIX "PRODUCT A\
+	WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \
+	and A.Id in ('[/*PRODUCT.IDPRODUCT*/]') \
+	and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet and lp.IdProduct='[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateProductNbPaquet_SQL2 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT a on a.Id=lp.IdProduct\
+			set lp.Quantity=[/*QTY*/]*a.QuantityPackaging,\
+			lp.QuantityReal=[/*QTY*/]*a.QuantityPackaging,\
+			lp.QuantityStock=[/*QTY*/]*a.QuantityPackaging,\
+			lp.WeightNet=[/*QTY*/]*a.Weight \
+		WHERE lp.IdPacking in ((/*IDPACKING*/)) and lp.NoPallet in ((/*NOPALLET*/)) \
+		and lp.IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+
+	%% PALLET : qty
+	UpdateProductNbPaquet_SQL3 = (
+		"\"Update " DB_PREFIX "PALLET PL set PL.Quantity=0, PL.QuantityReal=0, PL.QuantityStock=0, PL.WeightNet=0 \
+		WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	UpdateProductNbPaquet_SQL4 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PALLET PL on lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet \
+			set PL.Quantity=PL.Quantity+lp.Quantity, PL.QuantityReal = PL.QuantityReal + lp.QuantityReal,\
+			PL.QuantityStock = PL.QuantityStock + lp.QuantityStock, PL.QuantityDefective = PL.QuantityDefective + lp.QuantityDefective,\
+			PL.WeightNet=PL.WeightNet+lp.WeightNet\
+			WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	%% PRODUCT
+	UpdateProductNbPaquet_SQL5 = (
+		"\"Update " DB_PREFIX "PRODUCT A set a.QuantityStock=0\
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)) )\"\\\n"
+	),
+	UpdateProductNbPaquet_SQL6 = (
+		"\"Update (" DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking) inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct \
+		set a.QuantityStock=a.QuantityStock + lp.QuantityStock\
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)))\
+		and pk.IdState not in ('0','9') \"\\\n"
+	),
+	%% PACKING
+	UpdateProductNbPaquet_SQL7 = (
+		"\"Update " DB_PREFIX "PACKING set Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0, WeightNet=0 \
+		WHERE Id in ((/*IDPACKING*/)) \"\\\n"
+	),
+	UpdateProductNbPaquet_SQL8 = (
+		"\"Update " DB_PREFIX "PACKING pk inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pk.Id set\
+		   pk.Quantity=pk.Quantity+pl.Quantity, \
+		   pk.QuantityReal=pk.QuantityReal+pl.QuantityReal, \
+		   pk.QuantityStock=pk.QuantityStock+pl.QuantityStock, \
+		   pk.QuantityDefective=pk.QuantityDefective+pl.QuantityDefective, \
+		   pk.WeightNet=pk.WeightNet+pl.WeightNet \
+		 WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	),
+
+	;
+
+	UpdateProductNbPaquet_SQL2 = (
+		"\"Update " DB_PREFIX "PALLET_PRODUCT set \
+			Quantity=(select [/*QTY*/]*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),\
+			QuantityReal=(select [/*QTY*/]*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),\
+			QuantityStock=(select [/*QTY*/]*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),\
+			WeightNet=(select [/*QTY*/]*P.Weight from " DB_PREFIX "PRODUCT P where id=idProduct) \
+			WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) \
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	UpdateProductNbPaquet_SQL3 = (
+		"\"Update " DB_PREFIX "PALLET set\
+		Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		WeightNet=(select sum(lp.WeightNet) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet) \
+		WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	UpdateProductNbPaquet_SQL4 = (
+		"\"Update " DB_PREFIX "PRODUCT set QuantityStock=\
+		(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking \
+			where PRODUCT.Id=lp.IdProduct and pk.IdState not in ('0','9') )\
+		WHERE Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0\
+			where lp0.IdPacking in ((/*IDPACKING*/)) and lp0.NoPallet in ((/*NOPALLET*/)))\"\\\n"
+	),
+
+	UpdateProductNbPaquet_SQL5 = (
+		"\"Update " DB_PREFIX "PACKING set\
+		   Quantity=(select sum(pl.Quantity) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityReal=(select sum(pl.QuantityReal) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityStock=(select sum(pl.QuantityStock) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   QuantityDefective=(select sum(pl.QuantityDefective) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		   WeightNet=(select sum(pl.WeightNet) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) \
+		 WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	),
+
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePalletProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductNbPaquet_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductNbPaquet_Input),
+		@ ("'\\\n"),
+		@ UpdateProductNbPaquet_SQL1,
+		@ UpdateProductNbPaquet_SQL2,
+		@ UpdateProductNbPaquet_SQL3,
+		@ UpdateProductNbPaquet_SQL4,
+		@ UpdateProductNbPaquet_SQL5,
+		databaseType = "ACCESS" => (
+			@ UpdateProductNbPaquet_SQL6,
+			@ UpdateProductNbPaquet_SQL7,
+			@ UpdateProductNbPaquet_SQL8,
+		),
+),
+
+
+%==========================================================================================
+%
+@ "// remove all articles selected from the pallet\n",
+@ "// update quantity in Pallet, Product\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveProduct ",
+
+% Caption
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORPACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+% Instruction... (When Count>0)
+DeleteProductFromPallet_SQL1=(
+	"\"Delete from " DB_PREFIX "PALLET_PRODUCT \
+	WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \
+	and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdPacking=PALLET_PRODUCT.IdPacking and DP.NoPallet=PALLET_PRODUCT.NoPallet and DP.IdProduct=PALLET_PRODUCT.IdProduct) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	%% PALLET : qty
+	DeleteProductFromPallet_SQL2=(
+		"\"Update " DB_PREFIX "PALLET PL set PL.Quantity=0, PL.QuantityReal=0, PL.QuantityStock=0, PL.WeightNet=0 \
+		WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	DeleteProductFromPallet_SQL3=(
+		"\"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PALLET PL on lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet \
+			set PL.Quantity=PL.Quantity+lp.Quantity, PL.QuantityReal = PL.QuantityReal + lp.QuantityReal,\
+			PL.QuantityStock = PL.QuantityStock + lp.QuantityStock, PL.QuantityDefective = PL.QuantityDefective + lp.QuantityDefective,\
+			PL.WeightNet=PL.WeightNet+lp.WeightNet\
+			WHERE PL.IdPacking in ((/*IDPACKING*/)) and PL.NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	%% PRODUCT
+	DeleteProductFromPallet_SQL4=(
+		"\"Update " DB_PREFIX "PRODUCT A set a.QuantityStock=0\
+			WHERE A.Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+	),
+	
+	DeleteProductFromPallet_SQL5=(
+		"\"Update (" DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking) inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct \
+			set a.QuantityStock=a.QuantityStock + lp.QuantityStock\
+			WHERE A.Id in ('[/*PRODUCT.IDPRODUCT*/]')\
+			and pk.IdState not in ('0','9') \"\\\n"
+	),
+	%% PACKING
+	DeleteProductFromPallet_SQL6=(
+		"\"Update " DB_PREFIX "PACKING set Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0, WeightNet=0 \
+	 WHERE Id in ((/*IDPACKING*/)) \"\\\n"
+	),
+	DeleteProductFromPallet_SQL7=(
+		"\"Update " DB_PREFIX "PACKING pk inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pk.Id set\
+		pk.Quantity=pk.Quantity+pl.Quantity, \
+		pk.QuantityReal=pk.QuantityReal+pl.QuantityReal, \
+		pk.QuantityStock=pk.QuantityStock+pl.QuantityStock, \
+		pk.QuantityDefective=pk.QuantityDefective+pl.QuantityDefective, \
+		pk.WeightNet=pk.WeightNet+pl.WeightNet \
+		WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	),
+
+	;
+
+	DeleteProductFromPallet_SQL2=(
+		"\"Update " DB_PREFIX "PALLET set\
+		Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), \
+		WeightNet=(select sum(lp.WeightNet) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet) \
+		WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) \"\\\n"
+	),
+	DeleteProductFromPallet_SQL3=(
+		"\"Update " DB_PREFIX "PRODUCT set QuantityStock=\
+		(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking \
+		 where PRODUCT.Id=lp.IdProduct and pk.IdState not in ('0','9') )\
+	  WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+	),
+	
+	DeleteProductFromPallet_SQL4=(
+		"\"Update " DB_PREFIX "PACKING set\
+		Quantity=(select sum(pl.Quantity) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		QuantityReal=(select sum(pl.QuantityReal) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		QuantityStock=(select sum(pl.QuantityStock) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		QuantityDefective=(select sum(pl.QuantityDefective) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), \
+		WeightNet=(select sum(pl.WeightNet) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) \
+		WHERE Id in ((/*IDPACKING*/)) \"\n\n\n"
+	),
+
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\RemoveProductFromPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ DeleteProductFromPallet_SQL1,
+		@ DeleteProductFromPallet_SQL2,
+		@ DeleteProductFromPallet_SQL3,
+		@ DeleteProductFromPallet_SQL4,
+		databaseType = "ACCESS" => (
+			@ DeleteProductFromPallet_SQL5,
+			@ DeleteProductFromPallet_SQL6,
+			@ DeleteProductFromPallet_SQL7,
+		),
+),
+
+%==========================================================================================
+%
+@ "// modify the expiration date of the article selected in pallet\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyDateExpiration ",
+
+% Caption
+@ (" '" TAG_UPDATE_DATE_EXPD "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" '" TAG_UPDATE_DATE_EXPD "' "),	% JZ 0926 B
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORPACKING' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+% Instruction... (When Count>0)
+UpdateProductPalletDateExpiration_Input = (
+	"{/*Input(" TAG_UPDATE_DATE_EXPD ";1;\\\n"
+	"(date,DATEEXPIRATION," TAG_DATE_EXPD ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+
+UpdateProductPalletDateExpiration_SQL1 = (
+	"\"Update " DB_PREFIX "PALLET_PRODUCT \
+		set DateExpiration=[/*DATEEXPIRATION*/]\
+		WHERE IdPacking in ((/*IDPACKING*/)) and NoPallet in ((/*NOPALLET*/)) and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\product\UpdateProductPalletDateExpiration.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductPalletDateExpiration_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductPalletDateExpiration_Input ),
+		@ ("'\\\n"),
+		@ UpdateProductPalletDateExpiration_SQL1,
+),

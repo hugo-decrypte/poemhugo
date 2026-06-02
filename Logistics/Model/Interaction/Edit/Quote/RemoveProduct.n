@@ -1,0 +1,127 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeleteProductForQuote.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idQuoteBuffer :: "",
+	
+	idQuoteBuffer = (),
+	
+
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+
+
+	'()' <- database,
+	
+	DeleteFProductForQuote_SQL1 = (
+		"Delete from " DB_PREFIX "QUOTE_PRODUCT "
+		" WHERE IdQuote in ("idQuoteBuffer") "
+		"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+	),
+
+	databaseType = "ACCESS" => (
+		%% price referece, VAT
+		DeleteFProductForQuote_SQL2 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct "
+			"   set QP.PriceUnitReference=P.PriceUnit, QP.IdVAT=P.IdVAT  "
+			"  WHERE QP.IdQuote in ("idQuoteBuffer") "
+			"   and QP.IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+
+		%% price
+		DeleteFProductForQuote_SQL3 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct  "
+			"  set QP.PriceUnit=P.PriceUnit "
+			"  WHERE (QP.PriceUnit is NULL or QP.PriceUnit<=0) and QP.IdQuote in ("idQuoteBuffer")"
+		),
+
+		%% amount HT
+		DeleteFProductForQuote_SQL4 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP set QP.AmountHT=QP.Quantity*QP.PriceUnit*(100.0-QP.Discount)/100.0 "
+			"  WHERE QP.IdQuote in ("idQuoteBuffer") "
+			"   and QP.IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+
+		%% quote qty, amount HT
+		DeleteFProductForQuote_SQL5 = (
+			"Update " DB_PREFIX "QUOTE q set "
+			"   q.Quantity=0, "
+			"   q.AmountHT=0  "
+			"  WHERE q.Id in ("idQuoteBuffer")"
+		),
+		DeleteFProductForQuote_SQL6 = (
+			"Update " DB_PREFIX "QUOTE q inner join " DB_PREFIX "QUOTE_PRODUCT QP on q.Id=QP.IdQuote set "
+			"   q.Quantity=q.Quantity+QP.Quantity, "
+			"   q.AmountHT=q.AmountHT+QP.AmountHT  "
+			"  WHERE q.Id in ("idQuoteBuffer")"
+		),
+
+	;
+		DeleteFProductForQuote_SQL2 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT set  "
+			"   PriceUnitReference=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct),  "
+			"   IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct)  "
+			"  WHERE IdQuote in ("idQuoteBuffer") "
+			"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+		DeleteFProductForQuote_SQL3 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT  "
+			"  set PriceUnit=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct)  "
+			"  WHERE (PriceUnit is NULL or PriceUnit<=0) and IdQuote in ("idQuoteBuffer")"
+		),
+		DeleteFProductForQuote_SQL4 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT set AmountHT=Quantity*PriceUnit*(100.0-Discount)/100.0 "
+			"  WHERE IdQuote in ("idQuoteBuffer") "
+			"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+		DeleteFProductForQuote_SQL5 = (
+			"Update " DB_PREFIX "QUOTE set "
+			"   Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote), "
+			"   AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote)  "
+			"  WHERE Id in ("idQuoteBuffer")"
+		),
+		DeleteFProductForQuote_SQL6 = (
+			"Update " DB_PREFIX "QUOTE set "
+			"   Quantity=0, "
+			"   AmountHT=0  "
+			"  WHERE Id in ("idQuoteBuffer") and Quantity is NULL "
+		),
+	),
+
+	(SQL : DeleteFProductForQuote_SQL1), 
+	(SQL : DeleteFProductForQuote_SQL2), 
+	(SQL : DeleteFProductForQuote_SQL3), 
+	(SQL : DeleteFProductForQuote_SQL4), 
+	(SQL : DeleteFProductForQuote_SQL5), 
+	(SQL : DeleteFProductForQuote_SQL6), 
+
+	
+	
+	database <- '()',
+),

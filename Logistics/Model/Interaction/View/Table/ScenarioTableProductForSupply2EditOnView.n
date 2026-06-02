@@ -1,0 +1,695 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableProductForSupply2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddProductToSupply ",
+
+% Caption
+@ (" '" TAG_INCREMENT_QUANTITY "' "),	% JZ 0926 B
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INCREMENT_QUANTITY "' "),	% JZ 0926 B
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+AddProductToSupply_SQL1 = (
+	" \"INSERT INTO " DB_PREFIX "SUPPLY_PRODUCT (IdSupply, IdProduct, Quantity, Comments, DateSupply, DateDelivery) \
+	select s.Id, prd.Id, 0, ' ', s.DateSupply, s.DateDelivery\
+	from " DB_PREFIX "SUPPLY s, " DB_PREFIX "PRODUCT prd\
+	WHERE s.Id in ((/*IDSUPPLY*/)) \
+	and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]') \
+	and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=s.Id and ls.IdProduct=prd.Id) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	AddProductToSupply_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT ls inner join " DB_PREFIX "PRODUCT prd on prd.Id=ls.IdProduct\
+		set ls.Quantity=ls.Quantity+prd.QuantityPackaging \
+		WHERE ls.IdSupply in ((/*IDSUPPLY*/)) \
+		and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToSupply_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT ls inner join " DB_PREFIX "PRODUCT prd on prd.Id=ls.IdProduct\
+		set ls.PriceUnit=prd.PurchasePrice \
+		WHERE ls.IdSupply in ((/*IDSUPPLY*/)) \
+			and ls.PriceUnit is NULL\
+		and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+	),
+
+	AddProductToSupply_SQL4 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) \"\\\n"
+	),
+	AddProductToSupply_SQL5 = (
+		"\"Update " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.IdSupply=s.Id set\
+		s.Quantity=s.Quantity+ls.Quantity,\
+		s.AmountHT=s.AmountHT+ls.Quantity*ls.PriceUnit\
+		WHERE s.Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+
+	AddProductToSupply_SQL6 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n\n"
+	),
+	AddProductToSupply_SQL7 = (
+		"\"Update " DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "SUPPLY_PRODUCT ls on prd.Id=ls.IdProduct\
+			set prd.QuantitySupplied=prd.QuantitySupplied+ls.Quantity\
+		WHERE prd.Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	;
+
+	AddProductToSupply_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT set \
+			Quantity=Quantity+(select QuantityPackaging from " DB_PREFIX "PRODUCT where Id=IdProduct)\
+		WHERE IdSupply in ((/*IDSUPPLY*/)) \
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToSupply_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT set \
+			PriceUnit=(select prd.PurchasePrice from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+		WHERE IdSupply in ((/*IDSUPPLY*/)) \
+			and PriceUnit is NULL\
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+
+	AddProductToSupply_SQL4 = (
+		"\"Update " DB_PREFIX "SUPPLY set\
+			Quantity=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id),\
+			AmountHT=(select sum(ls.Quantity*ls.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id)\
+		WHERE Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+	AddProductToSupply_SQL5 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) and Quantity is NULL\"\\\n"
+	),
+	AddProductToSupply_SQL6 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where Id=ls.IdProduct)\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToSupply_SQL7 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') and QuantitySupplied is NULL\"\n\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\AddProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDSUPPLY*/)  {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/}' \\\n"),
+
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+		@ AddProductToSupply_SQL1,
+		@ AddProductToSupply_SQL2,
+		@ AddProductToSupply_SQL3,
+		@ AddProductToSupply_SQL4,
+		@ AddProductToSupply_SQL5,
+		@ AddProductToSupply_SQL6,
+		@ AddProductToSupply_SQL7,
+),
+
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyProductQty ",
+
+% Caption
+@ (" '" TAG_UPDATE_PRODUCT_QUANTITY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE_PRODUCT_QUANTITY "' "),	% JZ 0926 B
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% JZ 0926 B
+
+% Instruction... (When Count>0)
+UpdateProductQuantity_Input = (
+	"{/*Input(" TAG_UPDATE_PRODUCT_QUANTITY ";1;\\\n"
+	"(int,QTY," TAG_QUANTITY ",1,10." inputWidth ",0);\\\n"
+	")*/}\\\n"
+),
+UpdateProductQuantity_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "SUPPLY_PRODUCT (IdSupply, IdProduct, Quantity, Comments, DateSupply, DateDelivery) \
+	select s.Id, prd.Id, 0, ' ', s.DateSupply, s.DateDelivery\
+	from " DB_PREFIX "SUPPLY s, " DB_PREFIX "PRODUCT prd\
+	WHERE s.Id in ((/*IDSUPPLY*/)) \
+	and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\
+	and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=s.Id and ls.IdProduct=prd.Id) \"\\\n"
+),
+
+UpdateProductQuantity_SQL2 = (
+	"\"Update " DB_PREFIX "SUPPLY_PRODUCT set\
+		Quantity=[/*QTY*/] \
+	WHERE IdSupply in ((/*IDSUPPLY*/)) \
+		and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateProductQuantity_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT ls inner join " DB_PREFIX "PRODUCT prd on prd.Id=ls.IdProduct\
+		set ls.PriceUnit=prd.PurchasePrice \
+		WHERE ls.IdSupply in ((/*IDSUPPLY*/)) \
+			and ls.PriceUnit is NULL\
+		and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+	),
+
+	UpdateProductQuantity_SQL4 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) \"\\\n"
+	),
+	UpdateProductQuantity_SQL5 = (
+		"\"Update " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.IdSupply=s.Id set\
+		s.Quantity=s.Quantity+ls.Quantity,\
+		s.AmountHT=s.AmountHT+ls.Quantity*ls.PriceUnit\
+		WHERE s.Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+
+	UpdateProductQuantity_SQL6 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n\n"
+	),
+	UpdateProductQuantity_SQL7 = (
+		"\"Update " DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "SUPPLY_PRODUCT ls on prd.Id=ls.IdProduct\
+			set prd.QuantitySupplied=prd.QuantitySupplied+ls.Quantity\
+		WHERE prd.Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	;
+
+	UpdateProductQuantity_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY_PRODUCT set \
+			PriceUnit=(select prd.PurchasePrice from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+		WHERE IdSupply in ((/*IDSUPPLY*/)) \
+			and PriceUnit is NULL\
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+
+	UpdateProductQuantity_SQL4 = (
+		"\"Update " DB_PREFIX "SUPPLY set\
+			Quantity=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id),\
+			AmountHT=(select sum(ls.Quantity*ls.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id)\
+		WHERE Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+	UpdateProductQuantity_SQL5 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) and Quantity is NULL\"\\\n"
+	),
+	UpdateProductQuantity_SQL6 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where Id=ls.IdProduct)\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	UpdateProductQuantity_SQL7 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') and QuantitySupplied is NULL\"\n\n\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDSUPPLY*/) {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductQuantity_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductQuantity_Input),
+		@ ("'\\\n"),
+		@ UpdateProductQuantity_SQL1,
+		@ UpdateProductQuantity_SQL2,
+		@ UpdateProductQuantity_SQL3,
+		@ UpdateProductQuantity_SQL4,
+		@ UpdateProductQuantity_SQL5,
+		@ UpdateProductQuantity_SQL6,
+		@ UpdateProductQuantity_SQL7,
+),
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveProduct ",
+
+% Caption
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_REMOVE_PRODUCT "' "),	% JZ 0926 A
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+RemoveProductFromSupply_SQL1 = (
+	"\"Delete from " DB_PREFIX "SUPPLY_PRODUCT \
+	WHERE IdSupply in ((/*IDSUPPLY*/)) \
+	and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	RemoveProductFromSupply_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) \"\\\n"
+	),
+	RemoveProductFromSupply_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.IdSupply=s.Id set\
+		s.Quantity=s.Quantity+ls.Quantity,\
+		s.AmountHT=s.AmountHT+ls.Quantity*ls.PriceUnit\
+		WHERE s.Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+
+	RemoveProductFromSupply_SQL4 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n\n"
+	),
+	RemoveProductFromSupply_SQL5 = (
+		"\"Update " DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "SUPPLY_PRODUCT ls on prd.Id=ls.IdProduct\
+			set prd.QuantitySupplied=prd.QuantitySupplied+ls.Quantity\
+		WHERE prd.Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	;
+
+	RemoveProductFromSupply_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY set\
+			Quantity=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id),\
+			AmountHT=(select sum(ls.Quantity*ls.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id)\
+		WHERE Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+	RemoveProductFromSupply_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) and Quantity is NULL\"\\\n"
+	),
+	RemoveProductFromSupply_SQL4 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where Id=ls.IdProduct)\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	RemoveProductFromSupply_SQL5 = (
+		"\"Update " DB_PREFIX "PRODUCT \
+		set QuantitySupplied=0\
+		WHERE Id in ('[/*PRODUCT.IDPRODUCT*/]') and QuantitySupplied is NULL\"\n\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\RemoveProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDSUPPLY*/) {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ RemoveProductFromSupply_SQL1,
+		@ RemoveProductFromSupply_SQL2,
+		@ RemoveProductFromSupply_SQL3,
+		@ RemoveProductFromSupply_SQL4,
+		@ RemoveProductFromSupply_SQL5,
+),
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyPrice ",
+
+% Caption
+@ ("'Modify Price' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" 'Modifier Prix' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+UpdateProductPrice_Input = (
+	"{/*Input(MP;Modifier Prix;1;\\\n"
+	"(string,PRICE,Prix Commande,[/*PRODUCT.PRICE*/],8.4.580,0,);\\\n"
+	")*/}\\\n"
+),
+UpdateProductPrice_SQL1 = (
+	"\"Update " DB_PREFIX "SUPPLY_PRODUCT set \
+		PriceUnit=[/*PRICE*/]\
+	WHERE IdSupply in ((/*IDSUPPLY*/))\
+		and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+),
+databaseType = "ACCESS" => (
+
+	UpdateProductPrice_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) \"\\\n"
+	),
+	UpdateProductPrice_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.IdSupply=s.Id set\
+		s.Quantity=s.Quantity+ls.Quantity,\
+		s.AmountHT=s.AmountHT+ls.Quantity*ls.PriceUnit\
+		WHERE s.Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+	;
+
+	UpdateProductPrice_SQL2 = (
+		"\"Update " DB_PREFIX "SUPPLY set\
+			Quantity=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id),\
+			AmountHT=(select sum(ls.Quantity*ls.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id)\
+		WHERE Id in ((/*IDSUPPLY*/))\"\\\n"
+	),
+	UpdateProductPrice_SQL3 = (
+		"\"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 \
+		WHERE Id in ((/*IDSUPPLY*/)) and Quantity is NULL\"\\\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateProductPrice.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDSUPPLY*/) {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductPrice_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductPrice_Input),
+		@ ("'\\\n"),
+		@ UpdateProductPrice_SQL1,
+		@ UpdateProductPrice_SQL2,
+		@ UpdateProductPrice_SQL3,
+),
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyDateDelivery ",
+
+% Caption
+@ (" '" TAG_UPDATE_DELIVERY_DATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW5,
+
+% Label
+@ (" '" TAG_UPDATE_DELIVERY_DATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+UpdateProductDateDelivery_Input = (
+	"{/*Input(MDD;" TAG_UPDATE_DELIVERY_DATE ";1;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*PRODUCT.DATEDELIVERY*/],10." inputWidth ",0,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+UpdateProductDateDelivery_SQL1 = (
+	"\"Update " DB_PREFIX "SUPPLY_PRODUCT set\
+		DateDelivery='[/*DATEDELIVERY*/]'\
+	WHERE IdSupply in ((/*IDSUPPLY*/))\
+	and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateProductDateDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*IDSUPPLY*/) {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductDateDelivery_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductDateDelivery_Input),
+		@ ("'\\\n"),
+		@ UpdateProductDateDelivery_SQL1,
+),
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyComment ",
+
+% Caption
+@ ("'" TAG_UPDATE_COMMENT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW6,
+
+% Label
+@ (" '" TAG_UPDATE_COMMENT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+UpdateProductComment_Input = (
+	"{/*Input(MCM;" TAG_UPDATE_COMMENT ";1;\\\n"
+	" (string,COMMENTS," TAG_COMMENT ",[/*PRODUCT.COMMENTS*/],100." inputWidth ",0,,);\\\n"
+	")*/}\\\n"
+),
+UpdateProductComment_SQL1 = (
+	"\"Update " DB_PREFIX "SUPPLY_PRODUCT set\
+		Comments='[/*COMMENTS*/]'\
+	WHERE IdSupply in ((/*IDSUPPLY*/))\
+		and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateProductComment.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*IDSUPPLY*/) {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/} \\\n"),
+		@ UpdateProductComment_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductComment_Input),
+		@ ("'\\\n"),
+		@ UpdateProductComment_SQL1,
+),
+
+
+
+

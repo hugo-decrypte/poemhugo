@@ -1,0 +1,261 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  	    	FuncTableSheet.n                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableSheet>(id,type,aliasTable,bestfit, doubleclick,title,category)
+(	
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+
+	%============================
+	'()' => (
+		'()' <- database,
+
+		sqlSelSheetField = ( "SELECT DISTINCT t." SQL_FIELD_COLUMN ",t.name,t.color,al.name
+			FROM " DB_PREFIX "SHEET s," DB_PREFIX "TYPESHEET t," DB_PREFIX "ALIAS al
+			WHERE t.category=s.category AND t." SQL_FIELD_COLUMN "=s." SQL_FIELD_COLUMN " AND t.category='" category
+				"' AND al.category='ALIGNMENT' AND al.id=t.alignment
+			ORDER BY t." SQL_FIELD_COLUMN ",t.name"),
+
+		%("sqlSelSheetField= " sqlSelSheetField : ),
+
+		(SQL: sqlSelSheetField), 
+
+		nbField = (),
+		nbField =< maxFieldTable,
+
+		\forall i \in [1,nbField] (
+			columnColumnField_{i}		:: 0,
+
+			nameColumnField_{i}		:: "",
+			rgbColumnField_{i}		:: "",
+			alignmentColumnField_{i}	:: "",
+
+			columnColumnField_{i}		= (),
+
+			nameColumnField_{i}		= (),
+			rgbColumnField_{i}		= (),
+			alignmentColumnField_{i}	= (),
+		),
+
+		database <- '()',
+	),
+	%============================
+
+
+	("nbField= " nbField : ),
+
+
+	'@' => (
+		viewFile = "TableSheet",
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		% View Object	
+		@ ("View "),
+
+		% ID	
+		@ ("ViewTableSheet "),
+
+		% Caption	
+		@ ("'" TAG_TABLE_SHEET "' "),
+
+		% Title	
+		@ ("'" TAG_TABLE_SHEET "' "),
+
+		% Color(R G B)
+		@ " 255 255 255 ",
+
+		% Icon	
+		@ ("_ "),
+
+		% Rect(X Y SX SY )	
+		@ ("0 0 0 0 "),
+
+		% Margin	
+		@ ("5 5 5 5 "),
+
+
+		% [Option items]
+		@ ("'[TRACELEVEL=0;"),
+		@ ("TRACEFILE=;"),
+		@ ("TOOLBAR=0;"),
+		@ ("FLIPVERTICALLY=0;"),
+		@ ("FLIPHORIZONTALLY=0;"),
+		@ ("NATURESCALE=0;"),
+		@ ("BESTFIT=1;"),
+		@ ("SCROLLBAR=1;"),
+		@ ("SHOWNAME=1;"),
+		@ ("ZOOMOBJECT=;"),
+		@ ("CURRENTPAGE=1;"),
+		@ ("CLOSEEVENT=0;"),
+		@ ("BKGROUNDCOLOR="	tableTitleFillColor";"),
+		@ ("SCREENCOLOR="	tableTitleFillColor";"),
+		@ ("PATHLINEWIDTH=9;"),
+		@ ("PATHLINECOLOR=(0 0 0);"),
+		@ ("PATHARROWWIDTH=15;"),
+		@ ("PATHARROWCOLOR=(255 0 0);"),
+		@ ("POEMSERVER=;"),
+		@ ("MAPLOGFILE=;"), 
+		@ ("MATRIXCRITERION=Distance;"),
+		@ ("MATRIXCOMPUTERADIUS=0.5;"),
+		@ ("SPEEDKMHOUR=50;"),
+		@ ("STRAIGHTDISTANCERATIO=1.4;"),
+		@ ("SITEINTRADISTANCE=;"),
+		@ ("MATRIXMAXCOMPUTEWIDTH=;"),
+		@ ("NEIGHBOURHOOD=;"),
+		@ ("MATRIXFILENAME=;"),
+		@ ("MATRIXDIRECTORY=;]'"),
+		@ "\n\n",
+
+
+
+
+		% Date FILTER by input
+		%@ ("'{/*Input(" TAG_SHEET ";2;(string,FILTERCATEGORY," TAG_CATEGORY ",[/*SHEET2.CATEGORY*/],10." inputWidth",,,[/*SHEET2.CATEGORY*/]);(string,FILTERID," TAG_ID ",[/*SHEET2.ID*/],10,,,[/*SHEET2.ID*/]);)*/}'\n\n"),
+
+
+
+
+		['Work Directory' "Model\Common\Sheet\Interaction\ScenarioTableSheet2EditSheet.n"],
+		['Work Directory' "Model\Common\Sheet\Interaction\ScenarioTableSheet2Formula.n"],
+
+
+
+
+
+		@ ("Table tableSHEET _ _ 0 0 800 600 \\\n"),
+
+		['Work Directory' "Model\Common\View\HeaderSheet.n"],
+
+
+/*
+		%['Work Directory' "Model\Common\View\FieldTable.n"],
+		@ "ALIGNTEXT={",
+		\forall i \in FieldSelected (
+			@ alignmentColumnField_{i},
+			i < \sup FieldSelected => @ ",",
+		),
+		@ "}];\\\n",
+
+		@ "COLUMNFILL={",
+		\forall i \in FieldSelected (
+			@ rgbColumnField_{i},
+			i < \sup FieldSelected => @ ",",
+		),
+		@ "}\"\\\n",
+
+
+		% [Data source options]:
+		@ ("[DATAOBJ=SHEET;FILLCOLOR=LINERGB]\n\n"),
+
+
+
+		@ ("Data SHEET '" TAG_SHEET "' SHEET "),
+
+	
+		@ typeDataUser,
+		
+		@ (" 0 _  [DOUBLECLICK=EditSheet] \\\n"),
+
+		
+
+		@ ("\"[" nbColumn";"),
+
+		\forall i \in FieldSelected
+			@ ("(" typeField_{i} "," aliasField_{i} "," (nameField_{i} = "" ? nameColumnField_{i} : nameField_{i}) "," formatField_{i} ");"),
+*/
+
+
+
+		@ ("(color,LINERGB,,,13.0.0);(string,CATEGORY,CATEGORY,,,20,0);(string,ID,ID,,,20,0);(int,LINE,LINE,,,20,0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+
+		sqlSelectSheetValue = (
+			"(SELECT s1.value FROM " DB_PREFIX "SHEET s1 WHERE s1.category='" category "' AND s1.id=s.id AND s1.line=s.line"
+		),
+
+
+	       @("SELECT s.category AS CATEGORY,\
+				s.id AS ID,\
+				s.line AS LINE,\
+				" sqlSelectSheetValue " AND s1.column=1)	AS V1,\
+				" sqlSelectSheetValue " AND s1.column=2)	AS V2,\
+				" sqlSelectSheetValue " AND s1.column=3)	AS V3,\
+				" sqlSelectSheetValue " AND s1.column=4)	AS V4,\
+				" sqlSelectSheetValue " AND s1.column=5)	AS V5,\
+				" sqlSelectSheetValue " AND s1.column=6)	AS V6,\
+				" sqlSelectSheetValue " AND s1.column=7)	AS V7,\
+				" sqlSelectSheetValue " AND s1.column=8)	AS V8,\
+				" sqlSelectSheetValue " AND s1.column=9)	AS V9,\
+				" sqlSelectSheetValue " AND s1.column=10)	AS V10,\
+				" sqlSelectSheetValue " AND s1.column=11)	AS V11,\
+				" sqlSelectSheetValue " AND s1.column=12)	AS V12,\
+				" sqlSelectSheetValue " AND s1.column=13)	AS V13,\
+				" sqlSelectSheetValue " AND s1.column=14)	AS V14,\
+				" sqlSelectSheetValue " AND s1.column=15)	AS V15,\
+				" sqlSelectSheetValue " AND s1.column=16)	AS V16,\
+				" sqlSelectSheetValue " AND s1.column=17)	AS V17,\
+				" sqlSelectSheetValue " AND s1.column=18)	AS V18,\
+				" sqlSelectSheetValue " AND s1.column=19)	AS V19,\
+				" sqlSelectSheetValue " AND s1.column=20)	AS V20,\
+				'" RGB_WHITE "' AS LINERGB \
+			FROM (SELECT DISTINCT category,id,line FROM " DB_PREFIX "SHEET\
+			WHERE category='" category "') s \
+			ORDER BY s.category,s.id,s.line\"\n\n\n"),     
+
+
+
+		['Work Directory' "Model\View\Data\DataSheet2.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+
+	),
+),
+
+
+.
+
+
+
+/*@("SELECT DISTINCT s.idLine AS ID, \
+			IIF(s.idFormula01 IS NULL OR s.idFormula01='" TAG_EMPTY_STRING "',s.name01,s.idFormula01) AS Name01, s.type01 AS Type01, IIF(s.name01 IS NULL OR s.name01='" TAG_EMPTY_STRING "','',s.value01) AS Value01, s.idFormula01 AS IDFORMULA01, \
+			IIF(s.idFormula02 IS NULL OR s.idFormula02='" TAG_EMPTY_STRING "',s.name02,s.idFormula02) AS Name02, s.type02 AS Type02, IIF(s.name02 IS NULL OR s.name02='" TAG_EMPTY_STRING "','',s.value02) AS Value02, s.idFormula02 AS IDFORMULA02, \
+			IIF(s.idFormula03 IS NULL OR s.idFormula03='" TAG_EMPTY_STRING "',s.name03,s.idFormula03) AS Name03, s.type03 AS Type03, IIF(s.name03 IS NULL OR s.name03='" TAG_EMPTY_STRING "','',s.value03) AS Value03, s.idFormula03 AS IDFORMULA03, \
+			IIF(s.idFormula04 IS NULL OR s.idFormula04='" TAG_EMPTY_STRING "',s.name04,s.idFormula04) AS Name04, s.type04 AS Type04, IIF(s.name04 IS NULL OR s.name04='" TAG_EMPTY_STRING "','',s.value04) AS Value04, s.idFormula04 AS IDFORMULA04, \
+			IIF(s.idFormula05 IS NULL OR s.idFormula05='" TAG_EMPTY_STRING "',s.name05,s.idFormula05) AS Name05, s.type05 AS Type05, IIF(s.name05 IS NULL OR s.name05='" TAG_EMPTY_STRING "','',s.value05) AS Value05, s.idFormula05 AS IDFORMULA05, \
+			IIF(s.idFormula06 IS NULL OR s.idFormula06='" TAG_EMPTY_STRING "',s.name06,s.idFormula06) AS Name06, s.type06 AS Type06, IIF(s.name06 IS NULL OR s.name06='" TAG_EMPTY_STRING "','',s.value06) AS Value06, s.idFormula06 AS IDFORMULA06, \
+			IIF(s.idFormula07 IS NULL OR s.idFormula07='" TAG_EMPTY_STRING "',s.name07,s.idFormula07) AS Name07, s.type07 AS Type07, IIF(s.name07 IS NULL OR s.name07='" TAG_EMPTY_STRING "','',s.value07) AS Value07, s.idFormula07 AS IDFORMULA07, \
+			IIF(s.idFormula08 IS NULL OR s.idFormula08='" TAG_EMPTY_STRING "',s.name08,s.idFormula08) AS Name08, s.type08 AS Type08, IIF(s.name08 IS NULL OR s.name08='" TAG_EMPTY_STRING "','',s.value08) AS Value08, s.idFormula08 AS IDFORMULA08, \
+			IIF(s.idFormula09 IS NULL OR s.idFormula09='" TAG_EMPTY_STRING "',s.name09,s.idFormula09) AS Name09, s.type09 AS Type09, IIF(s.name09 IS NULL OR s.name09='" TAG_EMPTY_STRING "','',s.value09) AS Value09, s.idFormula09 AS IDFORMULA09, \
+			IIF(s.idFormula10 IS NULL OR s.idFormula10='" TAG_EMPTY_STRING "',s.name10,s.idFormula10) AS Name10, s.type10 AS Type10, IIF(s.name10 IS NULL OR s.name10='" TAG_EMPTY_STRING "','',s.value10) AS Value10, s.idFormula10 AS IDFORMULA10, \
+			'" RGB_WHITE "' AS LINERGB */
+
+	@("SELECT DISTINCT s.idLine AS IDLINE, \
+			IIF(s.nameFormula01 IS NULL OR s.nameFormula01='" TAG_EMPTY_STRING "',s.name01,s.nameFormula01) AS Name01, s.type01 AS Type01, IIF(s.name01 IS NULL OR s.name01='" TAG_EMPTY_STRING "','',s.value01) AS Value01, s.idFormula01 AS IDFORMULA01, \
+			IIF(s.nameFormula02 IS NULL OR s.nameFormula02='" TAG_EMPTY_STRING "',s.name02,s.nameFormula02) AS Name02, s.type02 AS Type02, IIF(s.name02 IS NULL OR s.name02='" TAG_EMPTY_STRING "','',s.value02) AS Value02, s.idFormula02 AS IDFORMULA02, \
+			IIF(s.nameFormula03 IS NULL OR s.nameFormula03='" TAG_EMPTY_STRING "',s.name03,s.nameFormula03) AS Name03, s.type03 AS Type03, IIF(s.name03 IS NULL OR s.name03='" TAG_EMPTY_STRING "','',s.value03) AS Value03, s.idFormula03 AS IDFORMULA03, \
+			IIF(s.nameFormula04 IS NULL OR s.nameFormula04='" TAG_EMPTY_STRING "',s.name04,s.nameFormula04) AS Name04, s.type04 AS Type04, IIF(s.name04 IS NULL OR s.name04='" TAG_EMPTY_STRING "','',s.value04) AS Value04, s.idFormula04 AS IDFORMULA04, \
+			IIF(s.nameFormula05 IS NULL OR s.nameFormula05='" TAG_EMPTY_STRING "',s.name05,s.nameFormula05) AS Name05, s.type05 AS Type05, IIF(s.name05 IS NULL OR s.name05='" TAG_EMPTY_STRING "','',s.value05) AS Value05, s.idFormula05 AS IDFORMULA05, \
+			IIF(s.nameFormula06 IS NULL OR s.nameFormula06='" TAG_EMPTY_STRING "',s.name06,s.nameFormula06) AS Name06, s.type06 AS Type06, IIF(s.name06 IS NULL OR s.name06='" TAG_EMPTY_STRING "','',s.value06) AS Value06, s.idFormula06 AS IDFORMULA06, \
+			IIF(s.nameFormula07 IS NULL OR s.nameFormula07='" TAG_EMPTY_STRING "',s.name07,s.nameFormula07) AS Name07, s.type07 AS Type07, IIF(s.name07 IS NULL OR s.name07='" TAG_EMPTY_STRING "','',s.value07) AS Value07, s.idFormula07 AS IDFORMULA07, \
+			IIF(s.nameFormula08 IS NULL OR s.nameFormula08='" TAG_EMPTY_STRING "',s.name08,s.nameFormula08) AS Name08, s.type08 AS Type08, IIF(s.name08 IS NULL OR s.name08='" TAG_EMPTY_STRING "','',s.value08) AS Value08, s.idFormula08 AS IDFORMULA08, \
+			IIF(s.nameFormula09 IS NULL OR s.nameFormula09='" TAG_EMPTY_STRING "',s.name09,s.nameFormula09) AS Name09, s.type09 AS Type09, IIF(s.name09 IS NULL OR s.name09='" TAG_EMPTY_STRING "','',s.value09) AS Value09, s.idFormula09 AS IDFORMULA09, \
+			IIF(s.nameFormula10 IS NULL OR s.nameFormula10='" TAG_EMPTY_STRING "',s.name10,s.nameFormula10) AS Name10, s.type10 AS Type10, IIF(s.name10 IS NULL OR s.name10='" TAG_EMPTY_STRING "','',s.value10) AS Value10, s.idFormula10 AS IDFORMULA10, \
+			'" RGB_WHITE "' AS LINERGB \
+		FROM " DB_PREFIX "SHEET s \
+		WHERE s.idClub IN " IDCLUBVIEW " AND s.category=" SHEET_TECHNIQUE "\n\n"),
+

@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableBalanceSheetWeight.n     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableBalanceSheetWeight.n"],
+
+'@' => (
+	tableBalanceSheetWeight("BALANCEWEIGHT",TAG_TABLE,"BALANCEWEIGHT",true,"", TAG_MONTHLY_WEIGHT), 
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

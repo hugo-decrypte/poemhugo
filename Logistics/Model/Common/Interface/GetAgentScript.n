@@ -1,0 +1,82 @@
+/********************************************************/
+/*							*/
+/*		GetAgentScript.n		        */
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+
+'()' => (
+
+	agentConfig = ('Work Directory' "Boot/" directoryClubLogin "/Agent.cfg"),
+
+
+	'()' <- [agentConfig],
+
+
+	"Agent" = (),
+
+	AGENT = [1,()],
+	ARGUMENT = [1, ()],
+
+	\forall p \in AGENT (
+		permissionAgent_{p}	= (),
+		idAgent_{p}		= (),
+		httpAgent_{p}		= (),
+
+		ArgumentAgent_{p} \subset ARGUMENT,
+		ArgumentAgent_{p} = [1,()],
+
+		\forall a \in ArgumentAgent_{p} (
+			nameArgumentAgent_{p,a} :: "",
+			sqlArgumentAgent_{p,a} :: "",
+
+			nameArgumentAgent_{p,a} = (),
+			sqlArgumentAgent_{p,a} = (),
+		),
+	),
+
+
+	[agentConfig] <- '()',
+),
+
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	% Agents
+	@ ("------Agent\n"),
+	@ (#AGENT "\n"),
+
+	\forall p \in AGENT (
+		@ (permissionAgent_{p} "\n" idAgent_{p} "\n" httpAgent_{p} "\n" #ArgumentAgent_{p} "\n"),
+
+		\forall a \in ArgumentAgent_{p} (
+			@ ("\"" nameArgumentAgent_{p,a}  "\"\n"),
+
+			sqlArgumentAgent_{p,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentAgent_{p,a} "\n"),
+			),
+		),
+	),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+!!,
+
+	( message : '.'),
+),
+

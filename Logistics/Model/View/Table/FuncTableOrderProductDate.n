@@ -1,0 +1,67 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  	FuncTableOrderProductDate.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableOrderProductDate>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+
+	'@' => (
+		%postfix = (postfix0 = "" ? "" : idUserLogin),
+		postfix = (postfix0 = "" ? "" : "Menu"),
+		viewFile = ("TableOrderProductDate" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+		
+		@ VIEWSQL,
+		
+
+		@ ("SELECT\\\n"),
+ 		@ ("\t\t O.Id AS ID, O.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t PR.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t PR.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t OP.Quantity as QUANTITY,\\\n"),
+		@ ("\t\t OP.QuantityRest as QUANTITYREST,\\\n"),
+		@ ("\t\t OP.QuantityDelivered as QUANTITYDELIVERY,\\\n"),
+		@ ("\t\t PR.QuantityStock as QUANTITYSTOCK,\\\n"),
+		@ ("\t\t PR.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t OP.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t PR.Weight*OP.Quantity as WEIGHT,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "OP.QuantityRest>PR.QuantityStock and OP.QuantityRest>0" SQL_THEN "'Stock insuffisant'" SQL_ELSE "\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "OP.QuantityRest<OP.Quantity and OP.QuantityRest>0" SQL_THEN "'Livrée partielle'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "OP.QuantityRest=0" SQL_THEN "'Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t   'A livrer'" SQL_CASEEND " " SQL_CASEEND "" SQL_CASEEND " AS STATE, \\\n"),
+		@ ("\t\t " SQL_CASEWHEN "OP.QuantityRest>PR.QuantityStock and OP.QuantityRest>0" SQL_THEN "'(255 160 160)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "OP.QuantityRest<OP.Quantity and OP.QuantityRest>0" SQL_THEN "'(255 255 160)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "OP.QuantityRest=0" SQL_THEN "'(120 255 160)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   '(255 250 250)' " SQL_CASEEND " " SQL_CASEEND " " SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "CLIENT CL, " DB_PREFIX "ORDER_PRODUCT_DATE OP, " DB_PREFIX "PRODUCT PR \\\n"),
+		@ ("\t WHERE O.IdClient=CL.Id and O.Id=OP.IdOrder and PR.Id=OP.IdProduct\\\n"),
+		@ ("\t AND (O.Id in ((/*IDORDER*/)) or 'XXX' in ((/*IDORDER*/)) )\\\n"),
+		@ ("\t AND ( (OP.QuantityRest>0 and O.IdState<>'9' and OP.IdProduct in ((/*IDPRODUCT*/)) ) or 'XXX' in ((/*IDPRODUCT*/)) )\\\n"),
+		@ ("\t ORDER BY  PR.Id, OP.DateDelivery, O.Id\"\n\n"), 
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOrderProductDate2EditOrder.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

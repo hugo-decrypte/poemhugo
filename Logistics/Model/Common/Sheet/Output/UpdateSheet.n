@@ -1,0 +1,114 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		UpdateSheet.n        	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Query
+\forall l \in LineColumnProgrammed (
+	\forall c \in ColumnProgrammedFloatLine_{l} -> (
+		\min	#f_{l,c},
+	)
+	f_{l,c} = ?,
+
+	\forall c \in ColumnProgrammedIntLine_{l} -> (
+		\min	#{\Delta{i_{l,c}}},
+	)
+	i_{l,c} = ? (=>),
+
+	\forall c \in ColumnProgrammedSetLine_{l} -> (
+		\min	#{\Delta{S_{l,c}}},
+	)
+	S_{l,c} = ?,
+),
+
+
+% Output
+'@' => (
+	% Uninstantiated warning
+	\forall l \in LineColumnProgrammed (
+		ColumnUninstantiatedNumLine_{l} \subset ColumnProgrammedLine_{l},
+		ColumnUninstantiatedSetLine_{l} \subset ColumnProgrammedLine_{l},
+
+		ColumnUninstantiatedNumLine_{l} = \{
+			\forall c \in ColumnProgrammedFloatLine_{l} \cup ColumnProgrammedIntLine_{l}
+			(#f_{l,c} >= threasholdUnknown ? c : 0)
+		\} \setminus 0,
+
+		ColumnUninstantiatedSetLine_{l} = \{
+			\forall c \in ColumnProgrammedSetLine_{l}
+			(#{\Delta{S_{l,c}}} <> 0 ? c : 0)
+		\}
+		\setminus 0,		
+	),
+
+	UninstantiatedNum = \bigcup_{l \in LineColumnProgrammed}{
+		\{ \forall c \in ColumnUninstantiatedNumLine_{l} `f_{l,c}` \}
+	},
+	UninstantiatedSet = \bigcup_{l \in LineColumnProgrammed}{
+		\{ \forall c \in ColumnUninstantiatedSetLine_{l} `S_{l,c}` \}
+	},
+
+	UninstantiatedNum <> {} => (
+		TAG_UNINSTANTIATED_NUM UninstantiatedNum : !!
+	),
+	UninstantiatedSet <> {} => (
+		TAG_UNINSTANTIATED_SET UninstantiatedSet : !!
+	),
+
+
+	% Pre-output
+	\forall l \in LineColumnProgrammed (
+		\forall c \in ColumnProgrammedFloatLine_{l} \cup ColumnProgrammedIntLine_{l} \cup ColumnProgrammedSetLine_{l}
+			resultColumnLine_{l,c} :: "",
+
+		\forall c \in ColumnProgrammedFloatLine_{l}
+			resultColumnLine_{l,c} := (
+				"parameter='"
+				(c \in ColumnUninstantiatedNumLine_{l} ? TAG_EMPTY_STRING : f_{l,c}[15,3])
+				(c <> \sup ColumnProgrammedFloatLine_{l} ? "'," : "'")
+			),
+
+		\forall c \in ColumnProgrammedIntLine_{l}
+			resultColumnLine_{l,c} := (
+				"parameter='"
+				(c \in ColumnUninstantiatedNumLine_{l} ? TAG_EMPTY_STRING : (i_{l,c} ""))
+				(c <> \sup ColumnProgrammedIntLine_{l} ? "'," : "'")
+			),
+
+		\forall c \in ColumnProgrammedSetLine_{l}
+			resultColumnLine_{l,c} := (
+				"parameter='"
+				(c \in ColumnUninstantiatedNumLine_{l} ? TAG_EMPTY_STRING : (S_{l,c} ""))
+				(c <> \sup ColumnProgrammedSetLine_{l} ? "'," : "'")
+			),
+
+		resultLine_{l} = (
+			valueFloatLine_{l}
+			(valueFloatLine_{l} <> "" && valueIntLine_{l} <> "" ? "," : "")
+			valueIntLine_{l}
+			(valueIntLine_{l} <> "" && valueSetLine_{l} <> "" ? "," : "")
+			valueSetLine_{l}
+		),
+	),
+
+
+	% Output
+	database <- '@',
+
+
+	\forall l \in LineColumnProgrammed
+	\forall c \in ColumnProgrammedFloatLine_{l} \cup ColumnProgrammedIntLine_{l} \cup ColumnProgrammedSetLine_{l} (
+		sqlUpdateColumnLine_{l,c} = (
+			"UPDATE " DB_PREFIX "SHEET set " resultColumnLine_{l,c}
+			" WHERE idClub IN " IDDOMCLUBLOGIN " AND category='" SHEET_TECHNIQUE "' AND id='001' AND line=" l " AND column=" c
+		),
+
+		(SQL : sqlUpdateColumnLine_{l,c}),
+	),
+
+	'@' <- database,
+),

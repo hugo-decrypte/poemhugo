@@ -1,0 +1,16 @@
+<service>
+  <id>PoemServer3</id>
+  <name>PoemServer3</name>
+  <description>A service for PoemServer</description>
+  <executable>%BASE%\..\..\PoemServer64.exe</executable>
+  <startmode>Automatic</startmode>
+  <onfailure action="restart" delay="1000" />
+  <logpath>%BASE%\log</logpath>
+  <log mode="none"/>
+<arguments>"C:\POEM\ERP\Boot\pms\ERP91.pms"</arguments>
+<serviceaccount>
+  <username>.\toto</username>
+  <password>toto</password>
+  <allowservicelogon>true</allowservicelogon>
+</serviceaccount>
+</service>

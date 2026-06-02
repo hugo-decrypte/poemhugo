@@ -1,0 +1,91 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTablePacking.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tablePacking>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TablePacking" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TablePacking" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(int,QUANTITY,Quantité déclarée,,8.0.80,1);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		dateToShow :: "",
+		NbDaysToShow = 10,
+		? databaseType (
+			"ACCESS" : 
+				dateToShow = ("DateAdd("SQL_DATEPART_DAY", "NbDaysToShow", "SQL_CURRENTDATE")" ),
+			;
+
+			"SQLSERVER" :
+				dateToShow = ("DateAdd("SQL_DATEPART_DAY", "NbDaysToShow", "SQL_CURRENTDATE")" ),
+			;
+
+			"MYSQL" :
+				dateToShow = ("AddDate("SQL_CURRENTDATE", "NbDaysToShow")" ),
+			;
+
+			"ORACLE" :
+				dateToShow = ("("SQL_CURRENTDATE"+ "NbDaysToShow")" ),
+		),
+
+		@ ("SELECT p.id AS ID, \\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"exists (select Name from " DB_PREFIX "COMPANY where Id=p.IdSender)"SQL_THEN" (select Name from " DB_PREFIX "COMPANY where Id=p.IdSender)"SQL_ELSE" p.IdSender"SQL_CASEEND" as NAMESENDER,\\\n"),
+ 		@ ("\t\t p.DateCreate as DATEPACKING,\\\n"),
+ 		@ ("\t\t p.DateDelivery as DATEINPUT,\\\n"),
+ 		@ ("\t\t p.NbPallet AS NBPALLET,\\\n"),
+ 		@ ("\t\t p.Quantity AS QUANTITY,\\\n"),
+ 		@ ("\t\t p.QuantityReal AS QUANTITYREAL,\\\n"),
+ 		@ ("\t\t p.QuantityStock AS QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t p.QuantityDefective AS QUANTITYDEFECTIVE,\\\n"),
+ 		@ ("\t\t p.WeightNet AS WEIGHTNET,\\\n"),
+ 		@ ("\t\t p.WeightGlobal AS WEIGHTGLOBAL,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"p.comments is NULL or p.comments<=' ', ' ', p.comments) as COMMENTS,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"exists (select 1 from " DB_PREFIX "STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY')"SQL_THEN" (select "SQL_CONCAT"trim(LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY'), p.idState"SQL_CASEEND" as STATE,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"exists (select 1 from " DB_PREFIX "STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY')"SQL_THEN" (select Color from " DB_PREFIX "STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY')"SQL_ELSE"\\\n"),
+   		@ ("\t\t '(200 200 160)' ) AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PACKING p \\\n"),
+		@ ("\t WHERE ("SQL_FORMATNUM"(p.DateDelivery,"SQL_FORMATSCALE0")>"SQL_FORMATDATE"("dateToShow", '"SQL_FORMATDATESTR"') or p.DateDelivery<='0' or p.DateDelivery is NULL or p.idState<>'9')\\\n"),
+   		@ ("\t AND OriginPacking='S'\\\n"),
+		@ ("\t ORDER BY p.id\"\n\n\n"), 
+
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTablePacking2EditPacking.n"],	% HZ 0911
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePacking2TablePallet.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePacking2PrintPalletNote.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePacking2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePacking2TableState.n"],
+		
+
+
+		%=================================
+		['Work Directory' "Model\View\Data\DataState.n"],
+		%=================================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

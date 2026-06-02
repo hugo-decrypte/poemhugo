@@ -1,0 +1,57 @@
+%==================================================%
+%                                                  %
+%           	Depot Optimization                 %
+%                                                  %
+%  		   DataSite2.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: SITE2
+@ "Data ",
+
+% ID
+@ ("SITE2 '"),%li 0411
+
+% Caption
+@ TAG_DATA_SITE2,
+
+% Group
+@ "' SITE2 ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[3;(string,IDSITE,IDSITE,,255,0);"), 
+@ ("(string,NAMESITE,NAMESITE,,255,0);"),
+@ ("(string,IDNAMESITE,IDNAMESITE,,255,0)]\"\\\n"),%li 0411	
+
+? databaseType (	%li 0411
+		"ACCESS","SQLSERVER" :
+			sqlIdNameSite = ("s.id+'" stringLinkSymbol "'+s.name"),
+			;
+		"ORACLE" :			
+			sqlIdNameSite = ("s.id||'" stringLinkSymbol "'||s.name"),
+			;
+		"MYSQL" :
+			sqlIdNameSite = ("CONCAT(s.id,'" stringLinkSymbol "',s.name)"),
+		), 
+
+@ VIEWSQL,
+
+@ ("SELECT 	s.id			AS IDSITE, \
+			s.name 			AS NAMESITE, \
+			"sqlIdNameSite"		AS IDNAMESITE \
+		FROM	" DB_PREFIX "SITE s \
+		ORDER BY s.id\"\n\n"),
+

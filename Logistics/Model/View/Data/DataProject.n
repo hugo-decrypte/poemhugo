@@ -1,0 +1,46 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataProject.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: PROJECT
+@ "Data ",
+
+% ID
+@ ("DATAPROJECT '"),	
+
+% Caption
+@ TAG_PROJECT,
+
+% Group
+@ "' PROJECT ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field 
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,ID,ID,,255,0);"), 
+@ ("(string,NAME,NAME,,255,0)]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT p.id AS ID, p.name AS NAME \
+	FROM " DB_PREFIX "PROJECT p \
+	ORDER BY p.id\"\n\n"),
+

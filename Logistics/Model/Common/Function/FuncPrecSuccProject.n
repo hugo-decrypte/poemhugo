@@ -1,0 +1,34 @@
+%===============================================%
+%						%
+%			Scheduling		%
+%						%
+%		FuncPrecSuccProject.n		%
+%						%
+% (c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+<SuccessorProject>(Project)	% Zhou 0917
+(
+	Project \subset PROJECT,
+
+	Succ = \bigcup_{o \in Project}{SuccProject_{o}},
+	Succ <> {} => (
+		SuccessorProject = SuccessorProject(Succ) \cup Succ,
+		;
+		SuccessorProject = {},
+	),
+),
+
+
+
+<PredecessorProject>(Project)
+(
+	Project \subset PROJECT,
+
+	Prec = \bigcup_{o \in Project}{PrecProject_{o}},
+	Prec <> {} => (
+		PredecessorProject = PredecessorProject(Prec) \cup Prec,
+		;
+		PredecessorProject = {},
+	),
+),

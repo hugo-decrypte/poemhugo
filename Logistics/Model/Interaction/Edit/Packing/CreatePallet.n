@@ -1,0 +1,71 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreatePallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbParameter	= (),
+	
+	nbSelected	= (),
+	
+	idPackingSelectedBuffer 	:: "",
+	
+	
+	idPackingSelectedBuffer	= (),
+	
+
+	
+	'()' <- database,
+	
+	CreatePallet_SQL1=(
+		"INSERT INTO " DB_PREFIX "PALLET (IdPacking, NoPallet, WeightPallet, Quantity, QuantityStock, QuantityReal, QuantityDefective, DatePreparation, DateDelivery, IdState) "
+		"select pc.Id, max(N)+1, 30, 0, 0, 0, 0, "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),  "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"'), '0' "
+		"from " DB_PREFIX "PACKING pc, "
+		"	(select min(pl.NoPallet) as N, pl.IdPacking as IDP from " DB_PREFIX "PALLET pl where pl.IdPacking='"idPackingSelectedBuffer"'"
+		"	and not exists (select 1 from " DB_PREFIX "PALLET pl0 where pl0.IdPacking=pl.IdPacking and pl0.NoPallet=pl.NoPallet+1) "
+		"	group by pl.IdPacking"
+		"	UNION ALL "
+		"	select distinct 0 as N, ' ' as IDP from " DB_PREFIX "PALLET pl0 where not exists (select 1 from " DB_PREFIX "PALLET pl where pl.IdPacking ='"idPackingSelectedBuffer"' ) "
+		"	) IDCM "
+		"where pc.Id ='"idPackingSelectedBuffer"' "
+		"group by pc.Id "
+	),
+
+	databaseType = "ACCESS" => (
+
+		CreatePallet_SQL2=(
+			"update " DB_PREFIX "PACKING pc set NbPallet=0 where pc.Id ='"idPackingSelectedBuffer"'"
+		),
+		CreatePallet_SQL3=(
+			"update " DB_PREFIX "PACKING pc inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pc.Id set pc.NbPallet=pc.NbPallet+1 where pc.Id ='"idPackingSelectedBuffer"'"
+		),
+		;
+
+		CreatePallet_SQL2=(
+			"update " DB_PREFIX "PACKING set NbPallet=(select count(1) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) where Id ='"idPackingSelectedBuffer"'"
+		),
+		CreatePallet_SQL3=(
+			"update " DB_PREFIX "PACKING set NbPallet=0 where Id ='"idPackingSelectedBuffer"' and NbPallet is NULL "
+		),
+	),
+
+	("CreatePallet_SQL1=" CreatePallet_SQL1 : ), 
+	(SQL : CreatePallet_SQL1), 
+
+	("CreatePallet_SQL2=" CreatePallet_SQL2 : ), 
+	(SQL : CreatePallet_SQL2), 
+
+	("CreatePallet_SQL3=" CreatePallet_SQL3 : ),
+	(SQL : CreatePallet_SQL3),
+	
+
+	database <- '()',
+),

@@ -1,0 +1,54 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableQuote2TableState.n	%  
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableState ",
+
+% Caption
+@ (" '" TAG_QUOTE_STATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_STATE,
+
+% Label
+@ (" '" TAG_TABLE_STATE "' "),	% JZ 0911
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableState_Menu.view" OPENTABLE_END),	% JZ 0926 A : TableState_Menu
+
+@ (TABLE_ARGUMENTS "CATEGORY='QUOTE';TITLEOBJ=" TAG_QUOTE "]\"\n\n"),
+

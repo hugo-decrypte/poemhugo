@@ -1,0 +1,35 @@
+View ViewTableRESOURCESHIFT 'Horaires travail personnalisés' 'Horaires travail personnalisés'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableRESOURCESHIFT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Horaires travail personnalisés;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Center,Center}]"\
+"[DATAOBJ=RESOURCESHIFT;FILLCOLOR=LINERGB]"
+
+Data RESOURCESHIFT 'Horaires travail personnalisés' RESOURCESHIFT HTTPSQL 0 '[FIND={NAMECLUB,IDRESOURCE,NAMEDAYSTART,NAMEDAYEND,NAMESHIFT,NAMESTATE}]'   [DOUBLECLICK=EditResourceShift] \
+"[6;(string,NAMECLUB,Division,,10,,);(string,IDRESOURCE,Véhicule,,10,,);(string,NAMEDAYSTART,Jour début,,10,,);(string,NAMEDAYEND,Jour fin,,10,,);(string,NAMESHIFT,Tranche horaire,,20,,);(string,NAMESTATE,Etat,,10,,);(color,LINERGB,,,13.0.0);(string,IDRESOURCE,,,);(string,DAYSTART,,,);(string,IDSHIFT,,,);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT r.idClub 							AS IDCLUB,\
+			(SELECT clb.name FROM CLUB clb WHERE clb.id=r.idClub) 					AS NAMECLUB, \
+			rr.idResource 							AS IDRESOURCE,\
+			r.name 								AS NAMERESOURCE,\
+			rr.dayStart 							AS DAYSTART,\
+			rr.dayEnd 							AS DAYDAYEND,\
+			(SELECT al.name FROM ALIAS al WHERE al.category='CALENDAR' AND al.field='weekday' AND al.id=rr.dayStart)	AS NAMEDAYSTART,\
+			(SELECT al.name FROM ALIAS al WHERE al.category='CALENDAR' AND al.field='weekday' AND al.id=rr.dayEnd)		AS NAMEDAYEND,\
+			rr.idShift							AS IDSHIFT,\
+			s.name								AS NAMESHIFT,\
+			rr.state 							AS STATE,\
+			(SELECT al.name FROM ALIAS al WHERE al.category='ACTIVITY' AND al.field='state' AND al.id=rr.state) AS NAMESTATE,\
+			IIF(rr.idResource=(select u.idResource FROM USER u WHERE u.id='(/*USERID*/)'),'(255 140 0)', (SELECT al.color FROM ALIAS al WHERE al.category='RESOURCE' AND al.field='category' AND al.id=r.idTypeResource))						AS LINERGB \
+			FROM RESOURCE_SHIFT rr, RESOURCE r, SHIFT s\
+			WHERE s.id=rr.idShift AND r.id=rr.idResource AND EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=r.idClub AND ( usr.permission>='1' OR usr.idResource=r.id))  ORDER BY rr.idResource, rr.dayStart"
+
+
+Script EditResourceShift 'Editer' _ 1 'Editer' _ 'tableRESOURCESHIFT' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'  WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=(/*USERID*/),PWD=(/*PASSWORD*/),PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE RESOURCE_SHIFT&idResource in ({/*selected(tableRESOURCESHIFT;1;(string,IDRESOURCE))*/}) AND dayStart in ({/*selected(tableRESOURCESHIFT;1;(string,DAYSTART))*/}) "\
+Reload _ _ _ _ 
+
+

@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableOrder.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOrder.n"],
+
+'@' => (
+	tableOrder("CLIENTORDER",TAG_TABLE,"ORDER",true,"TableOrderProduct",TAG_ORDER,	"",	""),
+	tableOrder("CLIENTORDER",TAG_TABLE,"ORDER",true,"TableOrderProduct","(/*TITLEOBJ*/)",	"Menu",	""),	% JZ 1018
+),

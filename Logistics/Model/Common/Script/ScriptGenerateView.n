@@ -1,0 +1,46 @@
+/************************************************/
+/*	   ScriptGenerateView.n			*/
+/*						*/
+/* Copyright (C) 2000 ENGINEST			*/
+/* All rights reserved.				*/
+/************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+%['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+
+
+'@' => (
+	%['Work Directory' "Model\Common\SQL\SqlUser.n"],
+	%[['Work Directory' "Model\Common\Script\ScriptFormatTable.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	\forall i \in IdRelatedClubLogin
+		IdUserClubId_{i} = \{
+			\forall u \in USER (idClubUser_{u} = i ? idUser_{u} : "")
+		\} \setminus "",
+
+
+	DirectoryRelatedClubLogin = \{
+		\forall i \in IdRelatedClubLogin
+		directoryClub_{clubId_{i}}
+	\},
+
+	\forall d \in DirectoryRelatedClubLogin (
+		IdRelatedClubDirectory_{d} = \{
+			\forall i \in IdRelatedClubLogin (
+				directoryClub_{clubId_{i}} = d ? i : ""
+			)
+		\} \setminus "",
+	),
+
+	IdClubRelatedDirectory = \{ \forall d \in DirectoryRelatedClubLogin \inf IdRelatedClubDirectory_{d} \},
+
+	\forall idClubActive \in IdClubRelatedDirectory
+		[['Work Directory'  "Model\View\GenerateView.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+),
+

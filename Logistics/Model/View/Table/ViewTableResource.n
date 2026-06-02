@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+% 		ViewTableResource.n                %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableResource.n"],
+
+'@' => (
+	tableResource("RESOURCE",TAG_TABLE,"RESOURCE",true,  defaultDate,defaultDate, "EditResource", 	TAG_TABLE_TRUCK,	"",		""), % JZ 1022
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_PERSONNEL TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

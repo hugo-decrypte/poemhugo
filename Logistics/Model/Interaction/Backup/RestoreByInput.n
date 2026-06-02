@@ -1,0 +1,36 @@
+%==================================================%
+%						   %
+%            	  Scheduling    	           %
+%						   %
+% 		   RestoreByInput.n        	   %
+%                                                  %	
+%(c)2000. Enginest. All rights reserved.           %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'()' => (
+	(TAG_NO_SNAPSHOT :
+		nameSnapshot <> "",
+	),
+
+	'()' <- database, 
+/*
+	databaseType = "SQLSERVER" =>(
+		(SQL : "SELECT id FROM [" DB_BACKUP "] WHERE name='" nameSnapshot "' AND idClub='" idClubLogin "'"),
+		;
+		(SQL : "SELECT id FROM " DB_BACKUP " WHERE name='" nameSnapshot "' AND idClub='" idClubLogin "'"),
+	),
+*/
+
+	(SQL :SQL_SelectBackupIdNameIs nameSnapshot "' " SQL_AndWhereBackupClubIs idClubLogin "'"), % Zhou 0831
+
+	nbSnapshot = (),
+	idBackup = (),
+
+	database <- '()',
+),
+
+['Work Directory' "Model\\Interaction\\Backup\\Restore.n"],
+

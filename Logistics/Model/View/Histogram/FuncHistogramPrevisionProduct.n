@@ -1,0 +1,68 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	 FuncHistogramPrevisionProduct.n	%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+<histogramPrevisionProduct>(aliasHistogram,bestfit, labelX,labelY, labelLegend,colorLegend, IdSheetSelected, title, postfix0)	% JZ 1022
+(
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("HistogramPrevisionProduct" postfix ".view"),
+
+
+		sqlDateMonth :: "",
+		sqlAxisMonth :: "",
+
+		? databaseType (
+			"ACCESS" :
+				sqlDateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				sqlAxisMonth = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 12-M.NoMonth, "SQL_CURRENTDATE"),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+				;
+
+			"SQLSERVER" :
+				sqlDateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				sqlAxisMonth = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 12-M.NoMonth, "SQL_CURRENTDATE"),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+				;
+
+			"MYSQL" :
+				sqlDateMonth = ("date_Add("SQL_CURRENTDATE", INTERVAL -M.NoMonth MONTH)"), 
+				sqlAxisMonth = (SQL_FORMATDATE"(date_Add("SQL_CURRENTDATE", INTERVAL 12-M.NoMonth MONTH),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"), 
+				;
+
+			"ORACLE" :
+				sqlDateMonth = ("ADD_MONTHS("SQL_CURRENTDATE",-M.NoMonth)"),
+				sqlAxisMonth = (SQL_FORMATDATE"(ADD_MONTHS("SQL_CURRENTDATE",12-M.NoMonth),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"),
+		),
+
+
+		sqlDataHistogram = (
+			"SELECT	format(DateAdd('m',-M.NoMonth,Date()),'YYYY-MM')	AS X_1,\
+				" sqlAxisMonth " 					AS X_2,\
+				int(sum(DP.QuantityReal*DP.PriceUnit)/1000)		AS Y_1,\
+				int(sum(DP.QuantityReal* P.PriceUnit)/1000)		AS Y_2,\
+				'" RGB_Y1_RATE1 "' 					AS C_1,\
+				'" RGB_Y2_RATE1 "' 					AS C_2,\
+				'" RGB_WHITE "' 					AS LINERGB \
+		  	FROM "	DB_PREFIX "PRODUCT P,"
+				DB_PREFIX "DELIVERY_PRODUCT DP,"
+				DB_PREFIX "DELIVERY D, "
+				DB_PREFIX "MONTHLABEL M,"
+				DB_PREFIX "MONTHLABEL M0 \
+ 			WHERE 	DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\
+				AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("sqlDateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \
+				AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("sqlDateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \
+				AND M.NoMonth<=11 \
+				AND M0.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \
+			GROUP BY M.NoMonth,M0.NoMonth, M0.NameFR \
+			ORDER BY (format(max(DP.DateDelivery),'YYYY-MM'))"
+		),
+
+
+
+		['Work Directory' "Model\Common\View\HistogramBar2.n"],
+	),
+),

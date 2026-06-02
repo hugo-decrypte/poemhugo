@@ -1,0 +1,18 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ViewTableFormula.n        	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Sheet\View\FuncTableFormula.n"],
+
+'@' => (
+	tableFormula("FORMULA",TAG_TABLE,"FORMULA",true,"EditFormula",""), 	% JZ 1018
+
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_FORMULA TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

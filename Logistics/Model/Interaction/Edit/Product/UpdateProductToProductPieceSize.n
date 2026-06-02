@@ -1,0 +1,71 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductToProductPieceSize.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idProductBuffer :: "",
+	
+	
+	idProductBuffer = (),
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjBuffer_{i} 		:: "",
+		idObjBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "',"),
+			;
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJBUFFER :: "",
+	IDOBJBUFFER = [\forall i \in [1, nbSelected] strIdObjBuffer_{i}],
+	
+	lengthByPieceBuffer :: "",    %Jianyang : problème with float !!!
+	widthByyPieceBuffer :: "",
+	heightyPieceBuffer 	:: "",
+	depthyPieceBuffer 	:: "",
+	volumeyPieceBuffer 	:: "",
+	
+	lengthByPieceBuffer = (),
+	widthByyPieceBuffer = (),
+	heightyPieceBuffer 	= (),
+	depthyPieceBuffer 	= (),
+	volumeyPieceBuffer 	= (),
+		   
+
+	'()' <- database,
+	
+
+	UpdateProductToProductPieceSize_SQL1 = (
+		"Update " DB_PREFIX "PRODUCT_COMPONENT SET
+			   LengthByPiece="lengthByPieceBuffer",
+			   HeightByPiece="heightyPieceBuffer",
+			   WidthByPiece= "widthByyPieceBuffer",
+			   DepthByPiece= "depthyPieceBuffer",
+			   VolumeByPiece="volumeyPieceBuffer" 
+		  WHERE IdProduct in ("idProductBuffer")
+		   and IdSubProduct in ("IDOBJBUFFER") "
+	),
+
+	(SQL : UpdateProductToProductPieceSize_SQL1), 
+	
+	
+	database <- '()',
+),

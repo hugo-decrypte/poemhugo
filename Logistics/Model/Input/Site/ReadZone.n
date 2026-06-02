@@ -1,0 +1,34 @@
+/******************************************************/
+/*	        Vehicle Routing 	              */
+/*	                                              */
+/*		ReadZone.n   			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	'()' <- database,
+
+	(SQL: "SELECT z.id,z.name FROM " DB_PREFIX "ZONE z ORDER BY z.id"), % Chen 0726
+
+	nbZone	= (),
+	ZONE	= [1, nbZone],
+
+	\forall z \in ZONE (
+		idZone_{z}		:: "",
+		nameZone_{z}		:: "",
+
+		idZone_{z}		= (),
+		nameZone_{z}		= (),
+	),
+
+	database <- '()',
+
+	IDZONE = \{ \forall z \in ZONE idZone_{z} \},
+
+	\forall i \in IDZONE (
+		zoneId_{i} \in ZONE,
+		idZone_{zoneId_{i}} = i,
+	),
+),

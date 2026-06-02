@@ -1,0 +1,239 @@
+/******************************************************/
+/*	                                              */
+/*		WriteTSP.n			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+\forall i \in [1, #SourceOrderSinkTSP]
+	orderIdx_{i} \in SourceOrderSinkTSP,
+
+orderIdx_{1} = source,
+\forall i \in [1, #SourceOrderTSP]
+	orderIdx_{i+1} = nextOrder_{orderIdx_{i}},
+
+\forall o \in SourceOrderSinkTSP
+	idxOrder_{o} \in [1, #SourceOrderSinkTSP],
+
+\forall i \in [1, #SourceOrderSinkTSP]
+	idxOrder_{orderIdx_{i}} = i,
+
+
+
+
+database <- '@',
+
+
+% DELETE
+(SQL : "DELETE FROM OPT_PLAN p WHERE p.idTour='" idTourTSP "'"),
+(SQL : "DELETE FROM OPT_TOUR t WHERE t.id='" idTourTSP "'"),
+
+
+
+\forall o \in SourceOrderSinkTSP (
+	idSiteNextOrder_{o} :: "",
+	idOrderNextOrder_{o} :: "",
+
+	mileagePlanOrder_{o} :: 0,
+	costPlanOrder_{o} :: 0.0,
+),
+
+
+\forall o \in SourceTSP
+	costPlanOrder_{o} = mileageOrder_{o} * costKilometerTypeVehicle_{typeVehicleTSP},
+
+\forall o \in SinkTSP
+	costPlanOrder_{o} = 0.0,
+
+\forall o \in OrderTSP (
+	%costKilometerOrder_{o} = mileageOrder_{o} * costUnitKilometer,
+	%costKilometerOrder_{o} = (mileageOrder_{prevOrder_{o}} + mileageOrder_{o}) * costUnitKilometer,
+
+	costPlanOrder_{o} = quantityOrder_{o} * costUnitTSP + mileageOrder_{o} * costKilometerTypeVehicle_{typeVehicleTSP},
+),
+
+
+\forall o \in SourceOrderTSP (
+	% change data format
+	idSiteNextOrder_{o} = idSite_{siteOrder_{nextOrder_{o}}},
+	idOrderNextOrder_{o} = idOrder_{nextOrder_{o}},
+
+	mileagePlanOrder_{o} = mileageOrder_{o},
+),
+
+timeServiceOrder_{sink} = 0,
+timeToNextOrder_{sink} = 0,
+
+idSiteNextOrder_{sink} = "",
+idOrderNextOrder_{sink} = "",
+
+t1Order_{sink} = t2Order_{prevOrder_{sink}} + 1,
+t2ServiceOrder_{sink} = t1Order_{sink},
+t2Order_{sink} = t1Order_{sink},
+
+mileagePlanOrder_{sink} = 0,
+
+
+\forall o \in SourceOrderSinkTSP (
+	(SQL :	"INSERT INTO OPT_PLAN (idClub,idResource,tourResource,idx,idTour,idOrder,idOrderNext,idSite1,idSite2,t1Service,t2Service,t2,timeService,timeRoute,quantity,mileage,cost,receipts) VALUES ('"
+		idClubActive 				"','"
+
+		idVehicleTSP 				"',"
+		idxTourVehicleTSP			","
+
+		idxOrder_{o}				",'"
+		idTourTSP 				"','"
+
+		idOrder_{o} 				"','"
+		idOrderNextOrder_{o} 			"','"
+
+		idSite_{siteOrder_{o}}			"','"
+		idSiteNextOrder_{o}			"','"
+
+		%TimeWin0Order_{o}			"','"
+
+		t1Order_{o}				"','"
+		t2ServiceOrder_{o}			"','"
+		t2Order_{o}				"',"
+
+		timeServiceOrder_{o}[""]		","
+		timeToNextOrder_{o}[""]			","
+
+		quantityOrder_{o}			","
+		mileagePlanOrder_{o}			","
+
+		\underline{costPlanOrder_{o}}		","
+		\underline{receiptsOrder_{o}}		")")
+),
+
+
+% OrderTSP
+\forall o \in OrderTSP (
+	(SQL : "UPDATE OPT_ORDER o SET o.state='" STATE_PLANNED "' WHERE o.id='" idOrder_{o} "'"),
+	
+	(SQL :	"UPDATE OPT_ORDER o "
+		"SET o.state='"		STATE_PLANNED
+		"',o.cost="		\underline{costPlanOrder_{o}}
+		",o.idResource='"	idVehicleTSP
+		"',o.tourResource="	idxTourVehicleTSP
+		",o.t1='"		t1Order_{o} 
+		"',o.t2='"		t2Order_{o} 
+		"' WHERE o.id='"	idOrder_{o} "'")
+),
+
+
+
+% TOUR
+rateQuantity	= (quantityTSP / maxQuantityTSP) * 100,
+rateWeight	= (weightTSP / maxWeightTSP) * 100,
+rateVolume	= (volumeTSP / maxVolumeTSP) * 100,
+
+
+timeService :: 0,
+timeRoute :: 0,
+
+timeService = \sum_{o \in SourceOrderTSP}{timeServiceOrder_{o}},
+timeRoute = \sum_{o \in SourceOrderTSP}{timeToNextOrder_{o}},
+
+%cost = \sum_{o \in SourceOrderTSP}{costPlanOrder_{o}},
+%cost = quantityTSP * costUnitTSP + mileage * costKilometerTypeVehicle_{typeVehicleTSP},
+
+
+
+(SQL :	"INSERT INTO OPT_TOUR(idClub,id,idResource,tourResource,idSite1,idSite2,nbOrder,t1,t2,timeService,timeRoute,makespan,mileage,cost,receipts,quantity,weight,volume,rateQuantity,rateWeight,rateVolume) VALUES ('"
+	idClubActive			"','"
+
+	idTourTSP 			"','"
+	idVehicleTSP	 		"',"
+	idxTourVehicleTSP		",'"
+
+	idSite_{siteOrder_{source}}	"','"
+	idSite_{siteOrder_{sink}}	"',"
+
+	#OrderTSP			",'"
+
+	\inf TimeActive			"','"
+	\sup TimeActive			"',"
+
+	timeService			","
+	timeRoute			","
+	makespan[""]			","
+
+	mileage				","
+
+	\underline{cost}		","
+
+	\underline{receiptsTSP}		","
+	\underline{quantityTSP}		","
+	\underline{weightTSP}		","
+	\underline{volumeTSP}		","
+
+	\underline{rateQuantity}	","
+	\underline{rateWeight}		","
+	\underline{rateVolume}		")"
+),
+
+nbTourVehilce		= nbTourVehilce_1 + 1,
+nbOrderVehicle		= sumNbOrderVehilce_1 + #OrderTSP,
+
+mileageVehilce		= sumMileageVehilce_1 + mileage,
+timeServiceVehilce	= sumTimeServiceVehilce_1 + timeService,
+timeRouteVehilce	= sumTimeRouteVehilce_1 + (worktime - timeService),
+makespanVehilce		= sumMakespanVehilce_1 + makespan,
+
+
+quantityPlanVehicle 	= sumQuantityVehilce_1 + quantityTSP,
+weightPlanVehicle 	= sumWeightVehilce_1 + weightTSP,
+volumePlanVehicle 	= sumVolumeVehilce_1 + volumeTSP,
+
+rateQuantityVehicle	= (quantityPlanVehicle / (maxQuantityTSP*nbTourVehilce)) * 100,
+rateWeightVehicle	= (weightPlanVehicle / (maxWeightTSP*nbTourVehilce)) * 100,
+rateVolumeVehicle	= (volumePlanVehicle / (maxVolumeTSP*nbTourVehilce)) * 100,
+
+
+(SQL :	"UPDATE " DB_PREFIX
+	"RESOURCE SET state='" 	STATE_PLANNED "'"
+
+	",nbTour="		nbTourVehilce
+	",nbOrder="		\underline{nbOrderVehicle}
+
+	",quantity="		\underline{quantityPlanVehicle}
+	",weight="		\underline{weightPlanVehicle}
+	",volume="		\underline{volumePlanVehicle}
+
+	",rateQuantity="	\underline{rateQuantityVehicle}
+	",rateWeight="		\underline{rateWeightVehicle}
+	",rateVolume="		\underline{rateVolumeVehicle}
+
+	",mileage="		\underline{mileageVehilce}
+
+	",timeService="		\underline{timeServiceVehilce}
+	",timeRoute="		\underline{timeRouteVehilce}
+	",makespan="		\underline{makespanVehilce}
+
+ 	" WHERE id='" idVehicleTSP "'"),
+
+
+'@' <- database,
+
+
+
+
+
+boundMileageTSP > mileage || boundWorktimeTSP > worktime || boundMakespanTSP > makespan =>
+
+('hh:mm:ss' TAG_TAB_2 idTourTSP " " 
+	TAG_SOLUTION	'Solution Count' ": "
+
+	TAG_DISTANCE	TAG_OPTIMIZED_TO boundMileageTSP  " -> " mileage "; "
+	TAG_WORKTIME	TAG_OPTIMIZED_TO boundWorktimeTSP " -> " worktime "; "
+	TAG_MAKESPAN	TAG_OPTIMIZED_TO boundMakespanTSP " -> " makespan
+
+	%TAG_PROFIT	TAG_OPTIMIZED_TO profit "; "
+	%TAG_COST	TAG_OPTIMIZED_TO cost "; "
+
+	: '@'
+),
+
+

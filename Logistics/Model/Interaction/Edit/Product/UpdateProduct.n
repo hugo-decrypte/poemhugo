@@ -1,0 +1,148 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idProductSelectedBuffer		:: "",
+	designationBuffer			:: "",
+	designationTechBuffer		:: "",
+	
+	familyBuffer				:: "",
+	typeBuffer					:: "",
+	priceBuffer					:: 0.0,
+	weightBuffer				:: 0.0,
+	
+	
+	
+	idProductSelectedBuffer		= (),
+	designationBuffer			= (),
+	designationTechBuffer		= (),
+	familyBuffer				= (),
+	typeBuffer					= (),
+	priceBuffer					= (),
+	weightBuffer				= (),
+	
+	("priceBuffer=" priceBuffer : ),
+	("weightBuffer=" weightBuffer : ),
+
+	'()' <- database,
+
+	UpdateProduct_SQL1=(
+		"UPDATE " DB_PREFIX "PRODUCT p SET " 
+		"Designation='"designationBuffer"',"
+		"DesignationTech='"designationTechBuffer"',"
+		"Weight="weightBuffer[1..10]","
+		"PriceUnit=" priceBuffer[1..8]
+		" where p.Id ='"idProductSelectedBuffer"'"
+	),
+	("UpdateProduct_SQL1=" UpdateProduct_SQL1 : ),
+
+%% 		"PriceUnit=" priceBuffer:(2,10)
+
+	databaseType = "ACCESS" => (
+
+		UpdateProduct_SQL2=(
+			"UPDATE " DB_PREFIX "PRODUCT p, " DB_PREFIX "FAMILYPRODUCT f 
+				SET p.Family=f.ID, p.Category=f.Category
+			where p.Id ='"idProductSelectedBuffer"'
+				and "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='"familyBuffer"'"
+		),
+
+		UpdateProduct_SQL3=(
+			"UPDATE " DB_PREFIX "PRODUCT p, " DB_PREFIX "TYPEPRODUCT tp 
+				SET p.TypeProduct=tp.ID
+			where p.Id ='"idProductSelectedBuffer"'
+				and "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='"typeBuffer"'"
+		),
+
+		UpdateProduct_SQL4=(
+			"Update " DB_PREFIX "PRODUCT p set 
+			  p.PriceUnit=0, 
+			  p.Weight=0 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id and pc0.IdSubProduct='"idProductSelectedBuffer"')"
+		),
+
+		UpdateProduct_SQL5=(
+			"Update (" DB_PREFIX "PRODUCT p inner join " DB_PREFIX "PRODUCT_COMPONENT pc on p.Id=pc.IdProduct)
+				inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct SET 
+			 p.PriceUnit = p.PriceUnit + sp.PriceUnit*pc.Quantity, 
+			 p.Weight    = p.Weight + sp.Weight*pc.Quantity 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id and pc0.IdSubProduct='"idProductSelectedBuffer"')"
+		),
+		UpdateProduct_SQL6=(
+			"Update " DB_PREFIX "PRODUCT p set 
+			  p.PriceUnit=0, 
+			  p.Weight=0 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id)"
+		),
+		UpdateProduct_SQL7=(
+			"Update (" DB_PREFIX "PRODUCT p inner join " DB_PREFIX "PRODUCT_COMPONENT pc on p.Id=pc.IdProduct)
+				inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct SET 
+			 p.PriceUnit = p.PriceUnit + sp.PriceUnit*pc.Quantity, 
+			 p.Weight    = p.Weight + sp.Weight*pc.Quantity 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id)"
+		),
+		;
+
+		CreateProduct_SQL2=(
+			"Update " DB_PREFIX "PRODUCT set  
+				Family=(select f.ID from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"familyBuffer"'), 
+				Category=(select f.Category from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"familyBuffer"')
+			WHERE Id ='"idProductSelectedBuffer"' "
+		),
+		CreateProduct_SQL3=(
+			"UPDATE " DB_PREFIX "PRODUCT set
+				TypeProduct=select tp.ID from " DB_PREFIX "TYPEPRODUCT tp where "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='"typeBuffer"')
+			where Id ='"idProductSelectedBuffer"' "
+		),
+
+		UpdateProduct_SQL4=(
+			"Update " DB_PREFIX "PRODUCT set 
+				PriceUnit=(select sum(sp.PriceUnit*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct), 
+				Weight=(select sum(sp.Weight*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT where IdProduct=Id and IdSubProduct='"idProductSelectedBuffer"')"
+		),
+
+		UpdateProduct_SQL5=(
+			"Update " DB_PREFIX "PRODUCT set 
+			  PriceUnit=(select sum(sp.PriceUnit*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct), 
+			  Weight=(select sum(sp.Weight*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id)"
+		),
+		UpdateProduct_SQL6=(
+			"Update " DB_PREFIX "PRODUCT set 
+			  PriceUnit=(select sum(sp.PriceUnit*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct), 
+			  Weight=(select sum(sp.Weight*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id)"
+		),
+		UpdateProduct_SQL7=(
+			"Update " DB_PREFIX "PRODUCT set 
+			  PriceUnit=(select sum(sp.PriceUnit*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct), 
+			  Weight=(select sum(sp.Weight*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id)"
+		),
+	),
+
+	(SQL : UpdateProduct_SQL1), 
+	(SQL : UpdateProduct_SQL2),
+	(SQL : UpdateProduct_SQL3),
+	(SQL : UpdateProduct_SQL4),
+	(SQL : UpdateProduct_SQL5),
+	(SQL : UpdateProduct_SQL6),
+	(SQL : UpdateProduct_SQL7),
+	
+	database <- '()',
+),

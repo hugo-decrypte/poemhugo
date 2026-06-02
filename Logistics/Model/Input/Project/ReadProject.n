@@ -1,0 +1,103 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ReadProject.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Input\Project\ReadProject0.n"],
+
+'()' => (
+	\forall i \in IDPROJECT
+		projectId_{i} :: 0,
+
+	\forall o \in PROJECT
+		projectId_{idProject_{o}} = o,
+
+
+
+	\forall o \in PROJECT (
+		Prec0Project_{o} = \{
+			\forall i \in IDPROJECT \cap IdPrec0Project_{o} projectId_{i}
+		\},
+
+		Succ0Project_{o} = \{
+			\forall i \in IDPROJECT \cap IdSucc0Project_{o} projectId_{i}
+		\},
+		ExclusiveProject_{o} = \{
+			\forall i \in IDPROJECT \cap IdExclusive0Project_{o} projectId_{i}
+		\},
+	),
+
+
+	\forall o \in PROJECT (
+		IdPrecProject_{o} = IdPrec0Project_{o},
+		IdSuccProject_{o} = IdSucc0Project_{o},
+
+		% To make Prec and Succ symmetrical
+		Prec1Project_{o} = \{ \forall i \in PROJECT (o \in Succ0Project_{i} ? i : 0) \} \setminus 0,
+		Succ1Project_{o} = \{ \forall i \in PROJECT (o \in Prec0Project_{i} ? i : 0) \} \setminus 0,
+
+		PrecProject_{o} = Prec0Project_{o} \cup Prec1Project_{o},
+		SuccProject_{o} = Succ0Project_{o} \cup Succ1Project_{o},
+		%SuccProject_{o} = (Succ0Project_{o} \cup Succ1Project_{o}) \setminus ProjectLaunched,
+	),
+
+
+
+	existsPrecSuccProject == \bigcup_{o \in PROJECT}{Prec0Project_{o} \cup Succ0Project_{o}} <> {},
+
+
+	PRODUCTPROJECT = \{ \forall o \in PROJECT productProject_{o} \},
+	%TYPEPRODUCTPROJECT = \{ \forall p \in PRODUCTPROJECT typeProduct_{p} \},
+
+
+	% IdProjectExcessed
+	IdProjectExcessed = 
+	\{ \forall o \in PROJECT (excessPlanProject_{o} > 0 ? idProject_{o} : "") \} \setminus "",
+
+	nbProjectExcessedPrevious = #IdProjectExcessed,
+
+	excessPlan = \sum_{o \in PROJECT}{excessPlanProject_{o}},
+
+
+
+	%minDateProject :: '20000101',
+	%maxDateProject :: '20000101',
+
+	minDateProject = \min_{o \in ProjectPlanned}{date1Project_{o}},
+	maxDateProject = \max_{o \in ProjectPlanned}{date2PlanProject_{o}},
+
+	ProjectPlanned = {} -> minDateProject = date1,
+	ProjectPlanned = {} -> maxDateProject = date2,
+
+
+
+	time1ScheduleProject = \min_{o \in PROJECT}{t1Project_{o}}[timeFormat],
+	%date1ScheduleProject = \min_{o \in PROJECT}{t1Project_{o}}[dateFormat],
+
+	time2ScheduleProject = \max_{o \in PROJECT}{t2Project_{o}}[timeFormat],
+	date2ScheduleProject = \max_{o \in PROJECT}{t2Project_{o}}[dateFormat],
+
+	PROJECT = {} => (
+		time1ScheduleProject = defaultTime,
+		time2ScheduleProject = defaultTime,
+		date2ScheduleProject = defaultDate,
+	),
+
+
+	%\forall o \in PROJECT
+	%	typeProcessProject_{o} = typeProcessId_{idTypeProcessProject_{o}},
+	%ProjectTask2Cost = \{ \forall o \in PROJECT (typeProcessProject_{o} <> 0 ? o : 0) \} \setminus 0,
+	%ruleTypeProcessSuccessorCost == ProjectTask2Cost <> {},
+
+
+	ruleProjectStrictDeadline ==
+		ruleProjectStrictDeadline0 || \bigvee_{o \in PROJECT}{strictProject_{o}},
+
+
+
+
+),

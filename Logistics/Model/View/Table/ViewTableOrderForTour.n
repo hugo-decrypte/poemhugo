@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableOrderForTour.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOrderForTour.n"],
+
+'@' => (
+	tableOrderForTour("ORDERFORTOUR",TAG_TABLE,"ORDERFORTOUR",true,"", "(/*TITLEOBJ*/)", ""),	% JZ 0924
+	% Check "TableOrderForTour.view" for open view file operation
+),

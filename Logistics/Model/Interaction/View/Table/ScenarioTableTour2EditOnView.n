@@ -1,0 +1,180 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTableTour2EditOnView.n					%
+%														%
+% 	(c)2000 Enginest. All rights reserved.				%
+%=======================================================%
+@ "// 0	Cré 	\n",
+@ "// 1	Validée	\n",
+@ "// 2	Livrée	\n",
+@ "// 3	Facturée\n",	
+@ "// 4	Quantité erronée	quantité  prévue et quantité  réelle sont difé rentes ou quantité défecteuse positive\n",
+@ "// 6	Refacturée	Factueré la partie trop livrée ou faire un avoir\n",
+@ "// 9	Terminée\n",
+
+
+
+%======================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "CreateTour ",
+
+% Caption
+@ (" '" TAG_INSERT_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+CreateTour_Input = (
+	"{/*Input(" TAG_INSERT_TOUR ";3;\\\n"
+	"(string,NAMEDRIVER,Chauffeur,,50." inputWidth ",0,,[/*DRIVER.NAMEDRIVER*/]);\\\n"
+	"(string,IMMATRIC,Véhicule,,50." inputWidth ",0,,[/*VEHICLE.IMMATRIC*/]);\\\n"
+	"(date,DATETOUR," TAG_TOUR_DATE ",[/*DRIVER.TOMORROW*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+
+CreateTour_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "TOUR (Id, IdDriver, IdVehicle, DateTour, Quantity, Tonnage, Volume, NbPallet, IdAgency, IdState) \
+	  select '[/*DATETOUR*/]'+"SQL_FORMATNUM"(" SQL_CASEWHEN "N is NULL" SQL_THEN "0" SQL_ELSE "N" SQL_CASEEND "+1,"SQL_FORMATSCALE0") as ID, dr.Id, v.Id, [/*DATETOUR*/], 0,0,0,0, v.IdAgency, '0' as State \
+	  from\
+	   (select max(N0) as N from\
+		(select (mid(max(t.Id),9,2)+0) as N0 from " DB_PREFIX "TOUR t where t.Id like '[/*DATETOUR*/]'+'%' union all\
+		 select 0 as N0 from " DB_PREFIX "TOUR t where not exists (select 1 from " DB_PREFIX "TOUR t0 where t0.Id like '[/*DATETOUR*/]'+'%')\
+		)) tabID,\
+		" DB_PREFIX "DRIVER dr, " DB_PREFIX "VEHICLE v\
+	  where trim(dr.LastName) + ', ' + dr.FirstName = '[/*NAMEDRIVER*/]'\
+	   and v.Immatric='[/*IMMATRIC*/]'\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\CreateTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ CreateTour_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ ("'" CreateTour_Input),
+		@ ("'\\\n"),
+		@ CreateTour_SQL1,
+),
+
+
+
+%======================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyTour ",
+
+% Caption
+@ (" '" TAG_UPDATE_TOUR "' "),
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateTour_Input = (
+	"{/*Input(" TAG_UPDATE_TOUR ";2;\\\n"
+	"(date,DATETOUR," TAG_TOUR_DATE ",[/*TOUR.DATETOUR*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(time,TIMESTART," TAG_T1 ",[/*TOUR.T1*/],8." inputWidth ",1,HHMM);\\\n"
+	")*/}\\\n"
+),
+UpdateTour_SQL1 = (
+	"\"UPDATE " DB_PREFIX "TOUR \
+	  set TimeStart=[/*TIMESTART*/],\
+	   T1="SQL_CONCAT"mid(T1,1,11)"SQL_CONCATWITH"format([/*TIMESTART*/],'"defaultTime"')"SQL_CONCATEND",\
+	   DateTour=[/*DATETOUR*/]\
+	  where ID='[/*TOUR.ID*/]'\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\UpdateTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableTOUR;1;(string,ID))*/}  \\\n"),
+		@ UpdateTour_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ ("'" UpdateTour_Input),
+		@ ("'\\\n"),
+		@ UpdateTour_SQL1,
+),

@@ -1,0 +1,291 @@
+%==================================================%
+%                                                  %
+%            	Routing 	          	   %
+%                                                  %
+%		WriteBufferTSP.n                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+
+timeService :: 0,
+timeRoute :: 0,
+
+timeService = \sum_{o \in SourceOrderTSP}{timeServiceOrder_{o}},
+timeRoute = \sum_{o \in SourceOrderTSP}{timeToNextOrder_{o}},
+
+
+
+
+% Incrementally assign values to global tour varibals
+OrderTourPlan_{tourTSP} = OrderTSP,
+SourceOrderTourPlan_{tourTSP} = SourceOrderTSP,
+
+quantityTourPlan_{tourTSP} = quantityTSP,
+weightTourPlan_{tourTSP} = weightTSP,
+volumeTourPlan_{tourTSP} = volumeTSP,
+
+receiptsTourPlan_{tourTSP} = receiptsTSP,
+
+
+
+t1TourPlan_{tourTSP} = \inf Time,
+t2TourPlan_{tourTSP} = \sup Time,
+
+mileageTourPlan_{tourTSP} = mileage,
+timeServiceTourPlan_{tourTSP} = timeService,
+timeRouteTourPlan_{tourTSP} = timeRoute,
+
+worktimeTourPlan_{tourTSP} = worktime,
+makespanTourPlan_{tourTSP} = makespan,
+
+costTourPlan_{tourTSP} 	= cost,
+
+
+
+mileagePlan =
+\sum_{t \in TourActiveBuffer : t =< tourTSP}{mileageTourPlan_{t}} +
+\sum_{t \in TourActiveBuffer : t > tourTSP}{mileageTourBuffer_{t}},
+
+worktimePlan =
+\sum_{t \in TourActiveBuffer : t =< tourTSP}{worktimeTourPlan_{t}} +
+\sum_{t \in TourActiveBuffer : t > tourTSP}{worktimeTourBuffer_{t}},
+
+makespanPlan =
+\sum_{t \in TourActiveBuffer : t =< tourTSP}{makespanTourPlan_{t}} +
+\sum_{t \in TourActiveBuffer : t > tourTSP}{makespanTourBuffer_{t}},
+
+
+
+
+% Incrementally assign values to global order varibals
+\forall o \in SourceOrderTSP (
+	timeServiceOrderPlan_{o}	= timeServiceOrder_{o},
+	timeToNextOrderPlan_{o}		= timeToNextOrder_{o},
+
+	nextOrderPlan_{o}		= nextOrder_{o},
+	
+	t1OrderPlan_{o}			= t1Order_{o},
+	t2OrderPlan_{o}			= t2Order_{o},
+
+	timeServiceOrderPlan_{o}	= timeServiceOrder_{o},
+	timeToNextOrderPlan_{o}		= timeToNextOrder_{o},
+
+	mileageOrderPlan_{o}		= mileageOrder_{o},
+	receiptsOrderPlan_{o}		= receiptsOrder_{o},
+),
+
+
+
+solutionBuf <- '@',
+
+@ "Relaxation\n",
+@ (TourToRelaxBuffer "  " Swap_oBuffer "  "Swap_iBuffer  "  " tour_oBuffer "  " tour_iBuffer "\n"),
+%@ (Swap_oRelaxed "  " TourToRelaxBuffer "  " Swap_oBuffer "  "Swap_iBuffer  "  " tour_oBuffer "  " tour_iBuffer "\n"),
+
+
+@ "Objectives\n",
+@ (\overline{profitBuffer} "  "),	% ????????
+@ (\underline{costBuffer} "  "),
+
+@ (nbVehicleBuffer "  "),
+@ (nbTourBuffer "  "),
+
+
+
+@ (mileagePlan "  "),
+
+@ (worktimePlan "  "),
+@ (makespanPlan "\n\n"),
+
+
+
+@ "Vehicle\n",
+@ (VehicleActiveBuffer "  " SourceActiveBuffer "  " SourceActiveOrderBuffer "  " SourceOrderSinkActiveBuffer "\n\n"),
+
+
+
+@ "TourActive\n",
+@ (TourActiveBuffer "\n"),
+
+\forall t \in TourActiveBuffer (
+	@ (Swap_oRelaxedTourBuffer_{t} "  "),
+
+	@ (idSite1TourBuffer_{t} "  "),
+	@ (idSite2TourBuffer_{t} "  "),
+
+
+	@ (OrderTourPlan_{t} "  "),
+
+	t =< tourTSP => (
+		@ (\underline{quantityTourPlan_{t}} "  "),
+		@ (\underline{weightTourPlan_{t}} "  "),
+		@ (\underline{volumeTourPlan_{t}} "  "),
+
+		@ (\underline{receiptsTourPlan_{t}} "  "),
+
+		@ (\underline{costTourPlan_{t}} "  "),
+
+
+		@ (mileageTourPlan_{t} "  "),
+
+		@ (t1TourPlan_{t} "  "),
+		@ (t2TourPlan_{t} "  "),
+
+		@ (timeServiceTourPlan_{t} "  "),
+		@ (timeRouteTourPlan_{t} "\n"),
+
+		; 
+
+
+		@ (\underline{quantityTourBuffer_{t}} "  "),
+		@ (\underline{weightTourBuffer_{t}} "  "),
+		@ (\underline{volumeTourBuffer_{t}} "  "),
+
+		@ (\underline{receiptsTourBuffer_{t}} "  "),
+
+		@ (\underline{costTourBuffer_{t}} "  "),
+
+
+		@ (mileageTourBuffer_{t} "  "),
+
+		@ (t1TourBuffer_{t} "  "),
+		@ (t2TourBuffer_{t} "  "),
+
+		@ (timeServiceTourBuffer_{t} "  "),
+		@ (timeRouteTourBuffer_{t} "\n"),
+	),
+),
+@ "\n\n",
+
+
+%tourTSP = \sup TourRelaxed => (
+%	92 = \sum_{t \in TourActiveBuffer}{quantityTourPlan_{t}},
+%),
+
+\forall t \in TourActiveBuffer (
+	t =< tourTSP => (
+		\forall o \in SourceOrderTourPlan_{t} (
+			@ (idOrderBuffer_{o} "  "),
+
+			@ (nextOrderPlan_{o} "  "),
+	
+			@ (\underline{t1OrderPlan_{o}} "  "),
+			@ (\underline{t2OrderPlan_{o}} "  "),
+
+			@ (timeServiceOrderPlan_{o} "  "),
+			@ (timeToNextOrderPlan_{o} "  "),
+
+			@ (mileageOrderPlan_{o} "  "),
+
+			@ (receiptsOrderPlan_{o} "  "),
+		),
+		;
+
+
+		\forall o \in SourceOrderTourPlan_{t} (
+			@ (idOrderBuffer_{o} "  "),
+			@ (nextOrderBuffer_{o} "  "),
+	
+			@ (\underline{t1OrderBuffer_{o}} "  "),
+			@ (\underline{t2OrderBuffer_{o}} "  "),
+
+			@ (timeServiceOrderBuffer_{o} "  "),
+			@ (timeToNextOrderBuffer_{o} "  "),
+
+			@ (mileageOrderBuffer_{o} "  "),
+
+			@ (receiptsOrderBuffer_{o} "  "),
+		),
+	),
+	@ "\n",
+),
+@ "\n",
+
+
+
+
+@ "ORDER\n",
+@ (ORDER "\n"),
+\forall o \in ORDER (
+	strictTimeOrderBuffer_{o}	:: true,
+
+	idShiftOrderBuffer_{o}		:: "",
+	t1Service0OrderBuffer_{o}	:: defaultDateTime,
+	t2Service0OrderBuffer_{o}	:: defaultDateTime,
+	timeFixed0OrderBuffer_{o}	:: 0,
+
+	quantityOrderBuffer_{o}		:: 0,
+	weightOrderBuffer_{o}		:: 0.0,
+	volumeOrderBuffer_{o}		:: 0.0,
+
+	priorityOrderBuffer_{o}		:: 0,
+
+
+
+	@ (strictTimeOrderBuffer_{o} "  "),
+
+	@ ("\"" idShiftOrderBuffer_{o} "\"  "),
+	@ (t1Service0OrderBuffer_{o} "  "),
+	@ (t2Service0OrderBuffer_{o} "  "),
+	@ (timeFixed0OrderBuffer_{o} "  "),
+
+	@ (quantityOrderBuffer_{o} "  "),
+	@ (weightOrderBuffer_{o} "  "),
+	@ (volumeOrderBuffer_{o} "  "),
+
+	@ (priorityOrderBuffer_{o} "\n"),
+),
+@ "\n\n",
+
+
+@ "tour/site\n",
+\forall o \in SourceOrderSinkActiveBuffer (
+	@ (o "  "),
+	@ (tourOrderBuffer_{o} "  "),
+	@ (idSiteOrderBuffer_{o} "  "),
+),
+@ "\n\n",
+
+
+@ "VehicleActive\n",
+\forall v \in VehicleActiveBuffer (
+	@ (tour2ActiveVehicleBuffer_{v} "  "),
+
+	@ (nbDayVehicleBuffer_{v} "  "),
+	@ (nbNightVehicleBuffer_{v} "  "),
+
+	@ makespanVehicleBuffer_{v} : "",
+	@ "  ",
+
+	\forall d \in DateVehicle_{v} (
+		@ timeActiveDateVehicleBuffer_{v,d} : "",	% ????????
+		@ "  ",
+
+		@ makespanDateVehicleBuffer_{v,d} : "",
+		@ "  ",
+	),
+	@ "\n",
+),
+@ "\n\n",
+
+
+%!!,
+
+
+/*
+@ "ImprovementIfTourOrder\n",
+\forall t \in TourActiveBuffer (
+	\forall o \in ORDER (
+		@ (0 "  "),
+	),
+	@ "\n",
+),
+@ "\n\n",
+*/
+
+'@' <- solutionBuf,
+
+
+

@@ -1,0 +1,77 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateQuote.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 		:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	
+	
+	dateDeliveryBuffer			:: 0,
+	dateValidBuffer				:: 0,
+	commentBuffer				:: "",
+	stateBuffer					:: "",
+	
+	dateDeliveryBuffer			= (),
+	dateValidBuffer				= (),
+	commentBuffer				= (),
+	stateBuffer					= (),
+	
+	
+
+	'()' <- database,
+
+databaseType = "ACCESS" => (
+
+	UpdateQuote_SQL1 = (
+		"UPDATE " DB_PREFIX "QUOTE q, " DB_PREFIX "STATE s
+			set q.DateDelivery='"dateDeliveryBuffer"',
+			q.DateValid='"dateValidBuffer"',
+			q.Comments='"commentBuffer"',
+			q.IdState=s.Id
+		WHERE q.Id in ( "IDOBJSELECTEDBUFFER" ) 
+		AND "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='QUOTE'"
+	),
+	;
+
+	UpdateQuote_SQL1 = (
+		"Update " DB_PREFIX "QUOTE set
+			DateDelivery='"dateDeliveryBuffer"',
+			DateValid='"dateValidBuffer"',
+			Comments='"commentBuffer"',
+			IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='QUOTE')
+		where Id in ( "IDOBJSELECTEDBUFFER" ) "
+	),
+),
+
+
+
+	(SQL : UpdateQuote_SQL1), 
+	
+	
+	database <- '()',
+),

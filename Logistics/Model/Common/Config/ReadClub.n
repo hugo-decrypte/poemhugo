@@ -1,0 +1,80 @@
+%===============================================%
+%						%
+%            	  Vehicle Routing    	       	%
+%						%
+%		ReadClub.n			%
+%						%
+%  (c)2000. Enginest. All rights reserved.     	%
+%===============================================%
+
+['Work Directory' "Model\Common\Config\ReadDatabase.n"],
+
+'()' => (
+	'()' <- database,
+
+
+	(SQL : "SELECT id,directory,ip,port FROM " DB_PREFIX "CLUB"),
+
+	CLUB = [1,()],
+
+	\forall c \in CLUB (
+		idClub_{c}		:: "",
+		%nameClub_{c}		:: "",
+		directoryClub_{c}	:: "",
+		ipClub_{c}		:: "",
+		portClub_{c}		:: "",
+
+		idClub_{c}		= (),
+		%nameClub_{c}		= (),
+		directoryClub_{c}	= (),
+		ipClub_{c}		= (),
+		portClub_{c}		= (),
+	),
+
+
+
+	(SQL : "SELECT idClub,idClubRelated FROM " DB_PREFIX "CLUB_CLUB"),
+
+	CLUBCLUB = [1,()],
+
+	\forall i \in CLUBCLUB (
+		idClubIdx_{i}		:: "",
+		idClubRelatedIdx_{i}	:: "",
+
+		idClubIdx_{i}		= (),
+		idClubRelatedIdx_{i}	= (),
+	),
+
+
+	database <- '()',
+
+
+
+
+	% Club
+	IDCLUB	= \{ \forall c \in CLUB idClub_{c} \},
+
+
+
+	\forall i \in IDCLUB (
+		clubId_{i} \in CLUB,
+		idClub_{clubId_{i}} = i,	
+	),
+
+
+
+	% Related Clubs
+	\forall c \in CLUB
+		IdRelatedClub_{c} :: IDCLUB,
+
+	ClubClubClub = \{ \forall i \in CLUBCLUB clubId_{idClubIdx_{i}} \},
+
+	\forall c \in CLUB \setminus ClubClubClub
+		IdRelatedClub_{c} = {},
+
+	\forall i \in CLUBCLUB
+		IdRelatedClub_{clubId_{idClubIdx_{i}}} = \{
+			\forall j \in CLUBCLUB (idClubIdx_{i} = idClubIdx_{j} ? idClubRelatedIdx_{j} : "")
+		\} \setminus "",
+
+),

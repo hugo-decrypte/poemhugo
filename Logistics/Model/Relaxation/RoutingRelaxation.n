@@ -1,0 +1,52 @@
+%==================================================%
+%                                                  %
+%                Routing 	                   %
+%                                                  %
+%               RoutingRelaxation.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+['Work Directory' "Model\Relaxation\FuncRelaxation.n"],
+
+
+
+solutionDebug	= [bufSolution : _],
+backupBuf	= [bufBackup   : _],
+
+( TAG_NO_SOLUTION :
+	initRelaxation(solutionBuf, mileageLoop_{0}),
+),
+
+
+\forall loop \in LoopRelaxation (
+%!!,
+
+	( TAG_RELAXATION_TERMINATED :
+		relaxSolution(
+			loop, solutionBuf, maxBacktrack,
+
+			Swap_oLoop_{loop-1}, Swap_iLoop_{loop-1}, tour_oLoop_{loop-1}, tour_iLoop_{loop-1},
+			mileageNotRelaxedLoop_{loop-1}),
+	),
+
+
+	% Backup solution by pool copy
+	backupBuf <- solutionBuf,
+
+
+	reoptimize(
+		loop, solutionBuf, TAG_MILEAGE,
+		maxBacktrack, maxTime, stepCost,stepTime,stepDistance,
+
+		{}, Swap_oLoop_{loop-1}, Swap_iLoop_{loop-1}, tour_oLoop_{loop-1}, tour_iLoop_{loop-1},
+		mileageLoop_{loop-1}, mileageNotRelaxedLoop_{loop-1}, mileageLoop_{loop}
+	),
+
+
+	% Restore solution by pool copy
+	mileageLoop_{loop} >= mileageLoop_{loop-1} => (
+		solutionBuf <- backupBuf,
+	),
+),

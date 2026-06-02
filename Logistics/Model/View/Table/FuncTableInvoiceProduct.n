@@ -1,0 +1,56 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableInvoiceProduct.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableInvoiceProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+	%['Work Directory' "Model\Common\Config\ReadMenu.n"],
+
+	'@' => (
+
+		postfix = (postfix0 = "" ? "" : "Menu"),
+		viewFile = ("TableInvoiceProduct"  postfix),
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT \\\n"),
+		@ ("\t\t d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t  a.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t  a.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t  ld.QuantityReal AS QUANTITYREAL,\\\n"),
+		@ ("\t\t  ld.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t  format(ld.QuantityReal*ld.PriceUnit, '0.00') as AMOUNTHT,\\\n"),
+		@ ("\t\t  format(ld.DateDelivery, '####/##/##') as DATEDELIV,\\\n"),
+		@ ("\t\t  format(a.Weight*ld.Quantity,'0.0') as WEIGHT,\\\n"),
+		@ ("\t\t  '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM (/*DBOWNER*/)" DB_PREFIX "DELIVERY d, (/*DBOWNER*/)" DB_PREFIX "CLIENT cl, (/*DBOWNER*/)" DB_PREFIX "DELIVERY_PRODUCT ld, (/*DBOWNER*/)PRODUCT a \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id and d.Id=ld.IdDelivery\\\n"),		
+		@ ("\t AND a.Id=ld.IdProduct\\\n"),
+		@ ("\t AND d.Id in ((/*IDDELIVERY*/)) \\\n"),
+		@ ("\t ORDER BY d.Id\"\n\n\n"),
+ 		
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInvoiceProduct2EditInvoiceProduct.n"],	
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

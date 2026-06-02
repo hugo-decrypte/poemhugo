@@ -1,0 +1,172 @@
+/********************************************************/
+/*	             	Scheduling			*/
+/*							*/
+/*			Test.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	id = (),
+	name = (),
+),
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+	@ ("Test Program(" id ", " name ") successful"),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	(message : !!),
+),
+
+
+
+.
+
+
+
+- BUFFER:
+89 000
+63
+TAG_SOFTWARE
+TAG_SOFTWARE_COPYRIGHT
+TAG_LOGIN
+TAG_LOGOUT
+TAG_USER
+TAG_PASSWORD
+TAG_UPDATE_PASSWORD
+TAG_CURRENT_PASSWORD
+TAG_NEW_PASSWORD
+TAG_CONFIRM_PASSWORD
+TAG_OK
+TAG_CANCEL
+TAG_EXIT
+TAG_SUCCEEDED
+TAG_FAILED
+TAG_SETTINGS
+TAG_DEFAULT
+TAG_COLOR
+TAG_PERMISSION
+TAG_BACKGROUND
+TAG_TEXT
+TAG_BUTTON
+TAG_READ
+TAG_WRITE
+TAG_ADMIN
+TAG_DATABASE_SETTINGS
+TAG_MAPS
+TAG_SEARCH
+TAG_DELETE
+TAG_EDIT
+TAG_SAVE
+TAG_DEPOT
+TAG_ORDER
+TAG_ORDER_ITINERARY
+TAG_RESOURCE
+TAG_TOUR
+TAG_TOUR_ITINERARY
+TAG_PROGRAM
+TAG_PROGRAM1
+TAG_PROGRAM2
+TAG_PROGRAM3
+TAG_PROGRAM4
+TAG_PROGRAM5
+TAG_PROGRAM6
+RGB_BACKGROUND
+RGB_TEXT
+RGB_BUTTON
+SQL_Field
+SQL_SelectField
+SQL_Tour
+SQL_Order
+SQL_Depot
+SQL_SelectDepotId
+SQL_SelectResourceId
+SQL_SelectOrderId
+SQL_SelectResourceTour
+SQL_OrderByResourceTour
+NCL_Program1
+NCL_Program2
+NCL_Program3
+NCL_Program4
+NCL_Program5
+NCL_Program6
+
+
+- MESSAGE:
+TMS
+TMS. Copyright 2023 ENGINEST. All rights reserved.
+LOGIN
+LOGOUT
+User
+Password
+Modify Password
+Current Password
+New Password
+Confirm Password
+OK
+Cancel
+Exit
+Succeded
+Failed
+Settings
+Default
+Colors
+Permission
+Background
+Text
+Button
+Read
+Write
+Admin
+Database settings
+Maps
+Search
+Delete
+Edit
+Save
+Depot
+Order
+Project Itinerary
+Vehicle
+Tour
+Tour Itinerary
+Program
+Import
+Compute
+Reoptimize Defect
+TSP Optimize
+""
+""
+255 255 255
+0 0 0
+234 234 234
+APS_FIELD
+SELECT * FROM APS_FIELD WHERE alias NOT IN ('FIELD', 'MENU') ORDER BY idx;
+APS_TOUR
+APS_ORDER
+APS_DEPOT
+SELECT APS_DEPOT.id FROM APS_DEPOT ORDER BY APS_DEPOT.id;
+SELECT APS_TOUR.idResource FROM APS_TOUR ORDER BY APS_TOUR.idResource;
+SELECT APS_ORDER.id FROM APS_ORDER ORDER BY APS_ORDER.id;
+SELECT APS_TOUR.tourResource FROM APS_TOUR WHERE APS_TOUR.idResource = '
+' ORDER BY APS_TOUR.tourResource;
+NCL:RUN?PROGRAM=Model/Interface/ImportData.n&DIRECTORY=./&CONFIG=ncl.cfg&TraceLevel=1
+NCL:RUN?PROGRAM=Model/Script/ScriptGenerateSolution.n&DIRECTORY=./&CONFIG=ncl.cfg&TraceLevel=1&BUFFER=80 000 "Optimize Planned+Candidate Orders"
+NCL:RUN?PROGRAM=Model/Interface/Test.n&DIRECTORY=./&CONFIG=ncl.cfg&TraceLevel=1&BUFFER=80 000 "Reoptimize Orders"
+NCL:RUN?PROGRAM=Model/Interface/ScriptTSP.n&DIRECTORY=./&CONFIG=ncl.cfg&TraceLevel=1&BUFFER=80 000 "Reoptimize Orders"
+""
+""

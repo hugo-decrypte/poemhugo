@@ -1,0 +1,128 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   EditSite.n		   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+'()' => (
+	aliasTable	= "SITE",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],
+
+'()' => (
+	idSite0Buffer		:: "",
+
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	(TAG_ONLY_ONE_TO_EDIT : nbSelected = 1),
+
+	idSite0Buffer		= (),
+
+
+	idSiteBuffer				:: "",
+	nameSiteBuffer				:: "",
+	typeSiteBuffer				:: "",
+	xSiteBuffer				:: 0,
+	ySiteBuffer				:: 0,
+	longitudeSiteBuffer			:: 0.0, % bai 0705
+	latitudeSiteBuffer			:: 0.0,
+
+	"IDSITE" \in IdFieldSelected => ( 
+		idSiteBuffer			= (),
+		;
+		idSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"NAMESITE" \in IdFieldSelected => (
+		nameSiteBuffer			= (),
+		;
+		nameSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"TYPESITE" \in IdFieldSelected => (
+		typeSiteBuffer			= (),
+		;
+		typeSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"XSITE" \in IdFieldSelected => (
+		xSiteBuffer			= (),
+		;
+		xSiteBuffer			= 0, 
+	),
+	"YSITE" \in IdFieldSelected => (
+		ySiteBuffer			= (),
+		;
+		ySiteBuffer			= 0, 
+	),
+	"LONGITUDESITE" \in IdFieldSelected => ( % bai 0705
+		longitudeSiteBuffer		= (),
+		;
+		longitudeSiteBuffer		= 0.0, 
+	),
+	"LATITUDESITE" \in IdFieldSelected => (
+		latitudeSiteBuffer		= (),
+		;
+		latitudeSiteBuffer		= 0.0, 
+	),
+
+
+
+	'()' <- database,
+
+	sqlIdSite = ( % Zhou 0822
+		"IDSITE" \in IdFieldSelected ? (SQL_AndLetSiteIdBe idSiteBuffer "' "):				""
+	),
+	sqlNameSite = (
+		"NAMESITE" \in IdFieldSelected ? (SQL_AndLetSiteNameBe nameSiteBuffer "' "):			""
+	),
+	sqlTypeSite = (
+		"TYPESITE" \in IdFieldSelected ? (SQL_AndLetSiteTypeBe typeSiteBuffer "' "):			""
+	),
+	sqlXSite = (
+		"XSITE" \in IdFieldSelected ? (SQL_AndLetSiteXBe xSiteBuffer " "):				""
+	),
+	sqlYSite = (
+		"YSITE" \in IdFieldSelected ? (SQL_AndLetSiteYBe ySiteBuffer " "):				""
+	),
+	sqlLongitudeSite = ( % bai 0705
+		"LONGITUDESITE" \in IdFieldSelected ? (SQL_AndLetSiteLongitudeBe \overline{longitudeSiteBuffer} " "):	""
+	),
+	sqlLatitudeSite = (
+		"LATITUDESITE" \in IdFieldSelected ? (SQL_AndLetSiteLatitudeBe \overline{latitudeSiteBuffer} " "):	""
+	),
+
+	(SQL :  SQL_UpdateSiteSet
+		sqlIdSite
+		sqlNameSite
+		sqlTypeSite
+		sqlXSite
+		sqlYSite
+		sqlLongitudeSite
+		sqlLatitudeSite
+		SQL_WhereSiteIdIs idSite0Buffer "'"),
+/*
+	(SQL :  "UPDATE	" DB_PREFIX "SITE s	SET"
+		sqlIdSite
+		sqlNameSite
+		sqlTypeSite
+		sqlXSite
+		sqlYSite
+		sqlLongitudeSite
+		sqlLatitudeSite
+		" WHERE id='" idSite0Buffer "'"),
+*/
+
+	sqlOperationLog := TAG_EDIT_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

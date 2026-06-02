@@ -1,0 +1,112 @@
+%==================================================%
+%                                                  %
+% 		DataFormat.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+\forall i \in [1, #ExcelTable] (
+	ExcelTable[i][idxTableExcel_{i}] = "=",
+
+	idTableExcel_{i} = ExcelTable[i][1..(idxTableExcel_{i}-1)],
+	nameTableExcel_{i} = ExcelTable[i][(idxTableExcel_{i}+1)..#{ExcelTable[i]}],
+),
+
+NameExcelTable = \{ \forall i \in [1, #ExcelTable] nameTableExcel_{i} \},
+
+
+\forall e \in NameExcelTable
+	idxExcelName_{e} \in [1, #NameExcelTable],
+
+\forall i \in [1, #NameExcelTable]
+	idxExcelName_{nameTableExcel_{i}} = i,
+
+
+
+
+ListTableExcel = [\forall i \in [1, #ExcelTable] ("'" nameTableExcel_{i} "' ")][-\infty..-2],
+ListTableDB = [\forall i \in [1, #ExcelTable] ("'" idTableExcel_{i} "' ")][-\infty..-2],
+
+
+
+%( TAG_DATA_ERROR :
+	'()' <- [dataFormat],
+
+
+	ExcelSheetNumberPrefix 	= () : "=",
+
+	nbTable	= () : ";",
+	TABLE 	= [1, nbTable],
+
+	\forall t \in TABLE (
+		nameTable_{t}	:: "",
+
+		ExcelSheetNamePrefix	= () : "=",
+		nameTable_{t}		= () : ";",
+
+		Field0Table_{t}		= [1, ()],
+		""			= () : ";",	% Skip ;
+
+		LineTable_{t}		= [1, ()],
+		""			= () : ";",	% Skip ;
+
+		Field0Table_{t} \subset [1,maxFieldTable],
+
+		\forall f \in Field0Table_{t} (
+			nameFieldTable_{t,f} :: "",
+			nameFieldTable_{t,f} = () : ";",
+		),
+		\forall f \in Field0Table_{t} (
+			idFieldTable_{t,f} :: "",
+			idFieldTable_{t,f} = () : ";",
+		),
+		\forall f \in Field0Table_{t} (
+			type0FieldTable_{t,f} :: "",
+			type0FieldTable_{t,f} = () : ";",
+		),
+
+
+		\forall f \in Field0Table_{t} (
+			keyFieldTable_{t,f} == type0FieldTable_{t,f}[-3..-1] = "key",
+
+			keyFieldTable_{t,f} => (
+				typeFieldTable_{t,f} = type0FieldTable_{t,f}[1..#type0FieldTable_{t,f}-4],
+				;
+				typeFieldTable_{t,f} = type0FieldTable_{t,f},
+			),
+		),
+	),
+
+	[dataFormat] <- '()',
+
+
+
+	\forall t \in TABLE (
+		idTable_{t} = idTableExcel_{idxExcelName_{nameTable_{t}}},
+
+
+		FieldTable_{t} \subset Field0Table_{t},
+
+		FieldTable_{t} = \{
+			\forall f \in Field0Table_{t}
+			(idFieldTable_{t,f} <> "" && typeFieldTable_{t,f} <> "" ? f : 0)
+		\} \setminus 0,
+
+		KeyTable_{t} = \{
+			\forall f \in FieldTable_{t}
+			(keyFieldTable_{t,f} ? f : 0)
+		\} \setminus 0,
+
+
+		\forall f \in FieldTable_{t} (
+			%dateFieldTable_{t,f} :: defaultDate,
+			%datetimeFieldTable_{t,f} :: defaultDateTime,
+
+			delimiterFieldTable_{t,f} = (
+				typeFieldTable_{t,f} = "float" || typeFieldTable_{t,f} = "int" ? "" : "'"
+			),
+		),
+	),
+%),
+

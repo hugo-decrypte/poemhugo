@@ -1,0 +1,65 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		DataObjective.n  		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0819
+% Data: CLUB
+@ "Data ",
+
+% ID
+@ "ObjectiveCurrent '",
+
+% Caption
+@ TAG_DATA_CLUB,
+
+% Group
+@ "' OBJECTIVECURRENT ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Script item "[Scripts when delete, insert or update]"
+%@ ("\"[DSN=" databaseName ";USR=" databaseUser";PWD=" databasePassword";]\" \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ "\"[1;(string,ValueCurrent,ValueCurrent,,,,);]\"\\\n",
+
+@ VIEWSQL,
+
+@(SQL_SelectRuleValueTypeIs TAG_OBJECTIVE "' " SQL_AndWhereRuleSelectedIs STATE_SELECTED " " sql_AND_CLUB_RULE " \"\n\n"),
+
+
+	% bai 0819
+% Data: CLUB
+@ "Data ",
+
+% ID
+@ "ObjectiveSelected '",
+
+% Caption
+@ TAG_DATA_CLUB,
+
+% Group
+@ "' OBJECTIVESELECTED ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Script item "[Scripts when delete, insert or update]"
+%@ ("\"[DSN=" databaseName ";USR=" databaseUser";PWD=" databasePassword";]\" \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ "\"[1;(string,ValueSelected,ValueSelected,,,,);]\"\\\n",
+
+@ VIEWSQL,
+
+@(SQL_SelectRuleValueTypeIs TAG_OBJECTIVE "' " sql_AND_CLUB_RULE " \"\n\n"),
+

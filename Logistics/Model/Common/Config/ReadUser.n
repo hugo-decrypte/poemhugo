@@ -1,0 +1,49 @@
+%==================================================%
+%                                                  %
+%		Vehicle Routing   	           %
+%                                                  %
+%		ReadUser.n	  		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadClub.n"],
+
+'()' => (
+	'()' <- database,
+
+	(SQL : "SELECT idClub,id,"SQL_FIELD_PERMISSION",password FROM " SQL_TABLE_USER " ORDER BY idClub,id"), %li 0815
+
+	USER = [1,()],
+	\forall u \in USER (
+		idClubUser_{u}		:: "",
+		idUser_{u}		:: "",
+		%nameUser_{u}		:: "",
+		permissionUser_{u} 	:: "",
+		passwordUser_{u}	:: "",
+		%idResourceUser_{u}	:: "",
+
+		idClubUser_{u}		= (),
+		idUser_{u}		= (),
+		%nameUser_{u}		= (),
+		permissionUser_{u}	= (),
+		passwordUser_{u}	= (),
+		%idResourceUser_{u}	= (),
+	),
+
+	\forall u \in USER (
+		( TAG_INVALID_CLUB_IS idClubUser_{u} :
+			idClubUser_{u} \in IDCLUB,
+		),
+	),
+
+	database <- '()',
+
+
+	IDUSER = \{ \forall u \in USER idUser_{u} \},
+
+	\forall i \in IDUSER (
+		userId_{i} \in USER,
+		idUser_{userId_{i}} = i,
+	),
+),

@@ -1,0 +1,42 @@
+%==================================================%
+%                                                  %
+%            		ERP		 	   %
+%                                                  %
+%		ReadSelectedDate.n                 %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	%%%% month info
+	nbSelected = (),
+	( "nb Selected : " nbSelected : ),
+
+	nbParameter = (),
+	( "nb parameters : " nbParameter : ),
+
+	Selected = [1, nbSelected],
+	\forall i \in Selected (
+		dateStartSelected_{i}	:: defaultDate,
+		dateEndSelected_{i}	:: defaultDate,
+
+		dateStartSelected_{i}	= (),
+
+		nbParameter = 1 => (
+			dateEndSelected_{i} = dateStartSelected_{i},
+			;
+			dateEndSelected_{i} = (),
+		),
+	),
+
+	dateStartPlanning	= \min_{i \in Selected}{dateStartSelected_{i}},
+	dateEndPlanning		= \max_{i \in Selected}{dateEndSelected_{i}},
+
+	( "dateStartPlanning : " dateStartPlanning : ),
+	( "dateEndPlanning : " dateEndPlanning : ),
+
+
+
+	DATE = [dateStartPlanning, dateEndPlanning],
+),
+

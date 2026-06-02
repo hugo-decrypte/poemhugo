@@ -1,0 +1,88 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/* 		FuncTableOptTour.n    		      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/ 
+
+
+<tableTour>(id,type,aliasTable,bestfit, doubleclick, title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableOptTour" postfix),
+
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		% Icon
+		%@ (" \"" 'Work Directory' "Icon\VehicleBlue.ico\" "),	% JZ 1105
+
+		@ ("(color,LINERGB,color,,13.0.0);]\" \\\n"),
+		
+
+
+		SQL_DataTourTable = (
+			"SELECT	t.id AS IDTOUR, \
+				t.idResource AS IDVEHICLE, \
+				t.tourResource AS TOURVEHICLE, \
+				v.idTypeResource AS IDTYPEVEHICLE, \
+				t.idSite1 AS IDSITE1, \
+				t.idSite2 AS IDSITE2, \
+				t.t1 AS T1, \
+				t.t2 AS T2, \
+				t.nbOrder AS NBORDER, \
+				t.mileage AS MILEAGE, \
+				t.timeService AS TIMESERVICE, \
+				t.timeRoute AS TIMEROUTE, \
+				t.timeService+t.timeRoute AS WORKTIME, \
+				t.makespan AS MAKESPAN, \
+				t.cost AS COST,  \
+				t.receipts AS RECEIPTS,  \
+				t.quantity AS QUANTITY,  \
+				t.weight AS WEIGHT,  \
+				t.volume AS VOLUME,  \
+				t.rateQuantity AS QUANTITYRATE,  \
+				t.rateWeight AS WEIGHTRATE,  \
+				t.rateVolume AS VOLUMERATE,  \
+				'" RGB_WHITE "'  AS LINERGB  \
+			FROM OPT_TOUR t," DB_PREFIX "RESOURCE v \
+			WHERE t.idResource=v.id AND " SQL_ViewUserVisibleClubIs "t.idClub) \
+			ORDER BY t.idResource,t.tourResource\"\n\n"),
+
+
+	     	@ (VIEWSQL SQL_DataTourTable),
+
+
+
+		related = "OpenMap" =>
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableOptTour2TableTourOrder.n"],
+			
+		% Map
+		['Work Directory' "Model\Interaction\View\Map\ScenarioTableTour2MapVehicle.n"],
+		
+		related = "OpenMap" =>
+			['Work Directory' "Model\Interaction\View\Map\ScenarioTableTour2MapVehicleByDate.n"],
+		
+		['Work Directory' "Model\Interaction\Solver\Tour\ScenarioTableTour2TSP.n"],
+
+		related = "OpenMap" => 
+			['Work Directory' "Model\View\Data\DataDatePlan.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

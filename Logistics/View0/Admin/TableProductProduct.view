@@ -1,0 +1,187 @@
+View ViewTablePRODUCTPRODUCT 'Composants' 'Composants'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCTPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Composants;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right}]"\
+"[DATAOBJ=PRODUCTPRODUCT;FILLCOLOR=LINERGB]"
+
+Data PRODUCTPRODUCT 'Composants' PRODUCTPRODUCT HTTPSQL 0 '[FIND={IDSUBPRODUCT,FAMILY,DESIGNATION,QUANTITY,PRICE,AMOUNTHT}]'   [DOUBLECLICK=] \
+"[6;(string,IDSUBPRODUCT,ID,,10,,);(string,FAMILY,Famille,,10,,);(string,DESIGNATION,Désignation,,20,,);(float,QUANTITY,Quantité,,10,,);(float,PRICE,Prix unitaire,,10,,);(float,AMOUNTHT,Montant HT(€),,10,,);(float,LENGTHBYPIECE,Longueur/Pièce,,8.3.50,1);\
+(float,HEIGHTBYPIECE,Hauteur/Pièce,,8.3.50,1);\
+(float,WIDTHBYPIECE,Largeur/Pièce,,8.3.50,1);\
+(float,DEPTHBYPIECE,Profondeur/Pièce,,8.3.50,1);\
+(float,VOLUMEBYPIECE,Volume/Pièce,,8.3.50,1);\
+(int,ORDBYLENGTH,Ordre/Longueur,,3.0.50,1);\
+(int,ORDBYHEIGHT,Ordre/Hauteur,,3.0.50,1);\
+(int,ORDBYWIDTH,Ordre/Largeur,,3.0.50,1);\
+(int,ORDBYDEPTH,Ordre/Profondeur,,3.0.50,1);\
+(string,COMMENTS,Commentaire,,20.0.100,1);\
+(float,PURCHASEPRICE,Prix Achat,,10.4.50,0);\
+(string,IDPARENT,Parent,,50.0.20,1);\
+(color,LINERGB,(255 255 255),,13.0.0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				' ' as IDPARENT,\
+				' ' as BEPARENT,\
+				NULL as QUANTITY,\
+				' ' as COMMENTS,\
+				\
+				format(P.PriceUnit,'0.0000') as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				' ' as AMOUNTHT,\
+				\
+				NULL as ORDBYLENGTH,\
+				NULL as ORDBYHEIGHT,\
+				NULL as ORDBYWIDTH,\
+				NULL as ORDBYDEPTH,\
+				NULL as LENGTHBYPIECE,\
+				NULL as HEIGHTBYPIECE,\
+				NULL as WIDTHBYPIECE,\
+				NULL as DEPTHBYPIECE,\
+				NULL as VOLUMEBYPIECE,\
+				0 as INPRODUCT,\
+				IIF(P.IdState in (select s.ID from STATE s where s.CATEGORY='PRODUCT') , (select s.COLOR from STATE s where s.CATEGORY='PRODUCT' and s.ID=P.IdState) , '(255 255 255)' ) AS LINERGB \
+			FROM PRODUCT P \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and (P.Id not in ((/*IDPRODUCT*/)) )\
+			and P.TypeProduct<>'F'\
+			and P.IdState not in ('0','9')\
+			and P.Id not in (select PC.IdSubProduct from PRODUCT_COMPONENT PC where PC.IdProduct in ((/*IDPRODUCT*/)) ) \
+			UNION ALL \
+			SELECT \
+				P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				PC.IdSubProduct as IDPARENT,\
+				'0' as BEPARENT,\
+				ROUND(PC.Quantity) as QUANTITY,\
+				PC.Comments as COMMENTS,\
+				\
+				format(P.PriceUnit,'0.0000') as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				format(P.PriceUnit*PC.Quantity, '0.00') as AMOUNTHT,\
+				\
+				ROUND(PC.OrderByLength) as ORDBYLENGTH,\
+				ROUND(PC.OrderByHeight) as ORDBYHEIGHT,\
+				ROUND(PC.OrderByWidth)  as ORDBYWIDTH,\
+				ROUND(PC.OrderByDepth)  as ORDBYDEPTH,\
+				format(PC.LengthByPiece,'0') as LENGTHBYPIECE,\
+				format(PC.HeightByPiece,'0') as HEIGHTBYPIECE,\
+				format(PC.WidthByPiece,'0')  as WIDTHBYPIECE,\
+				format(PC.DepthByPiece,'0')  as DEPTHBYPIECE,\
+				format(PC.VolumeByPiece,'0') as VOLUMEBYPIECE,\
+				1 as INPRODUCT,\
+				'(150 150 255)' AS LINERGB \
+			FROM PRODUCT P \
+			inner join PRODUCT_COMPONENT PC on PC.IdSubProduct=P.Id \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and (PC.IdProduct in ((/*IDPRODUCT*/)) )\
+			UNION ALL \
+			SELECT \
+				P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				PC.IdProduct as IDPARENT,\
+				'2' as BEPARENT,\
+				ROUND(PC.Quantity) as QUANTITY,\
+				PC.Comments as COMMENTS,\
+				\
+				format(P.PriceUnit,'0.0000') as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				format(P.PriceUnit*PC.Quantity, '0.00') as AMOUNTHT,\
+				\
+				ROUND(PC.OrderByLength) as ORDBYLENGTH,\
+				ROUND(PC.OrderByHeight) as ORDBYHEIGHT,\
+				ROUND(PC.OrderByWidth)  as ORDBYWIDTH,\
+				ROUND(PC.OrderByDepth)  as ORDBYDEPTH,\
+				format(PC.LengthByPiece,'0') as LENGTHBYPIECE,\
+				format(PC.HeightByPiece,'0') as HEIGHTBYPIECE,\
+				format(PC.WidthByPiece,'0')  as WIDTHBYPIECE,\
+				format(PC.DepthByPiece,'0')  as DEPTHBYPIECE,\
+				format(PC.VolumeByPiece,'0') as VOLUMEBYPIECE,\
+				1 as INPRODUCT,\
+				'(150 150 180)' AS LINERGB \
+			FROM PRODUCT P \
+			inner join PRODUCT_COMPONENT PC on PC.IdSubProduct=P.Id \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and PC.IdProduct in (select PC1.IdSubProduct from PRODUCT_COMPONENT PC1 where PC1.IdProduct in ((/*IDPRODUCT*/)) )\
+			ORDER BY INPRODUCT desc, IDPARENT, BEPARENT, IDSUBPRODUCT, Family, DESIGNATION"
+
+
+
+//1. add a pack of article selected ; add the article into command if it is not in the command
+// by double clic
+// LengthByPiece,   HeightByPiece,   WidthByPiece,DepthByPiece,   VolumeByPiece
+Script AddProductToProduct  'Ajouter produit' _ 61  'Ajouter produit' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\AddProductToProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+'\
+Reload _ _ _
+
+// 2. modify the quantity of all components selected ; add the product into components if it is not in the product
+// update quantity in components, Product
+Script  ModifyProductQty 'Modifier quantité' _ 62  'Modifier quantité' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductToProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+{/*Input(MQTY;Modifier quantité;1;\
+(int,QTY,Quantité,[/*PRODUCTPRODUCT.QUANTITY*/],10.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// 3. Romove all products selected from components if it is in the product
+// update quantity in Product, Product
+Script RemoveProduct  'Enlever produit' _ 63  'Enlever produit' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ "Attention, Vous devez d'abord enlever ses composants et qu'il n'est composant d'autre produit."\
+ '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\RemoveProductFromProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+'\
+Reload _ _ _
+
+////// 5. Modify comments of components selected in product
+
+Script ModifyComments  'Modifier commentaire' _ 64 'Modifier commentaire' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductToProductComment.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+{/*Input(Modifier commentaire sur produit [/*PRODUCTPRODUCT.IDSUBPRODUCT*/];1;\
+(string,COMMENTS,Commentaire,[/*PRODUCTPRODUCT.COMMENTS*/],100.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// 7. modify measures by quantity
+Script ModifyMeasuresByPiece 'Modifier mesure par pièce' _ 65 'Modifier mesure par pièce' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductToProductPieceSize.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+{/*Input(MMQTY;Modifier mesure par pièce;5;\
+(float,LENGTHBYPIECE,Longueur par pièce,[/*PRODUCTPRODUCT.LENGTHBYPIECE*/],10.3.580,1);\
+(float,WIDTHBYPIECE,Largeur par pièce,[/*PRODUCTPRODUCT.WIDTHBYPIECE*/],10.3.580,1);\
+(float,HEIGHTBYPIECE,Hauteur par pièce,[/*PRODUCTPRODUCT.HEIGHTBYPIECE*/],10.3.580,1);\
+(float,DEPTHBYPIECE,Profondeur par pièce,[/*PRODUCTPRODUCT.DEPTHBYPIECE*/],10.3.580,1);\
+(float,VOLUMEBYPIECE,Volume par pièce,[/*PRODUCTPRODUCT.VOLUMEBYPIECE*/],10.3.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// 8. modify orders of pieces in each direction (length, width, height, depth)
+Script ModifyOrders 'Modifier ordres' _ 66 'Modifier ordres' _ 'tablePRODUCTPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductToProductPieceOrdre.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDPRODUCT*/) {/*Selected(tablePRODUCTPRODUCT;1;(string,IDSUBPRODUCT))*/} \
+{/*Input(ModOrd;Modifier ordres;4;\
+(int,ORDBYLENGTH,Ordre / longueur ,[/*PRODUCTPRODUCT.ORDBYLENGTH*/],10.3.580,1);\
+(int,ORDBYWIDTH,Ordre / largeur,[/*PRODUCTPRODUCT.ORDBYWIDTH*/],10.3.580,1);\
+(int,ORDBYHEIGHT,Ordre / hauteur,[/*PRODUCTPRODUCT.ORDBYHEIGHT*/],10.3.580,1);\
+(int,ORDBYDEPTH,Ordre / profondeur,[/*PRODUCTPRODUCT.ORDBYDEPTH*/],10.3.580,1);\
+)*/}\
+'\
+Reload _ _ _
+

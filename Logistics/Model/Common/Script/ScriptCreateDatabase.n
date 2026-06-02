@@ -1,0 +1,429 @@
+/********************************************************/
+/*	             ERP RH				*/
+/*							*/
+/*		ScriptCreateDatabase.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+'()' => (
+	% Boot program
+	bootConfig = ('Work Directory' "Boot\Boot.cfg"),
+	[bootConfig],
+),
+
+
+['Work Directory' "Model\Common\Config\ReadDatabase.n"],
+
+['Work Directory' "Model\Common\Config\DefineDatabaseTable.n"],
+
+
+'@' => (
+	database <- '@',
+		(SQL : CreateField),
+	%	(SQL : PrimaryKeyField),
+
+		(SQL : CreateFieldMobile),
+	%	(SQL : PrimaryKeyFieldMobile),
+
+	'@' <- database,
+)
+
+.
+
+
+
+'@' => (
+
+	database <- '@',
+
+
+	%(SQL : "drop TABLE " DB_PREFIX "Formula"),
+	(SQL : CreateFormula),
+	/*
+	%	(SQL : "drop TABLE " DB_PREFIX "Job"),
+
+	%	(SQL : "drop TABLE " DB_PREFIX "Task"),
+
+	%	(SQL : "drop TABLE " DB_PREFIX "Project_GroupResource"),
+	%	(SQL : "drop TABLE " DB_PREFIX "Project_Job"),
+	%	(SQL : "drop TABLE " DB_PREFIX "Project_Task"),
+	%	(SQL : "drop TABLE " DB_PREFIX "Project_Project"),
+		(SQL : "drop TABLE " DB_PREFIX "Project"),
+
+		(SQL : "drop TABLE " DB_PREFIX "Product"),
+
+
+
+%% //////// 2025.02.17 add tables about PROCESS
+
+		(SQL : "drop TABLE " DB_PREFIX "Process_Process"),
+		(SQL : "drop TABLE " DB_PREFIX "Process_TypeResource_TypeSite"),
+		(SQL : "drop TABLE " DB_PREFIX "ProcessJob_TypeResource"),
+		(SQL : "drop TABLE " DB_PREFIX "Process_TypeResource"),
+		(SQL : "drop TABLE " DB_PREFIX "Process"),
+
+
+%%% tables for RESOURCE
+
+		(SQL : "drop TABLE " DB_PREFIX "Contract"),
+
+		(SQL : "drop TABLE " DB_PREFIX "Event"),
+
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Absence"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Activity"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Date"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Process"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Product"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Site"),
+
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Resource"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Shift"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_Task"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource_TypeResource"),
+%% 2025.02.18 add table RESOURCE_TYPESITE
+		(SQL : "drop TABLE " DB_PREFIX "Resource_TypeSite"),
+		(SQL : "drop TABLE " DB_PREFIX "Resource"),
+
+
+		(SQL : "drop TABLE " DB_PREFIX "CategoryResource"),
+		(SQL : "drop TABLE " DB_PREFIX "GroupResource"),
+
+		(SQL : "drop TABLE " DB_PREFIX "TypeAbsence"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeProcess"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeResource"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeRisk"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeSheet"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeSite"),
+		(SQL : "drop TABLE " DB_PREFIX "TypeTrip"),
+
+%% USER
+		(SQL : "drop TABLE " DB_PREFIX SQL_TABLE_USER ),
+
+%% 2025.02.18 add table STEP
+%% primary key to define
+		(SQL : "drop TABLE " DB_PREFIX "Step"),
+
+		(SQL : "drop TABLE " DB_PREFIX "Client"),
+	*/
+
+/* 
+*/
+		(SQL : CreateAgency ),
+	%	(SQL : PrimaryKeyAgency),
+
+
+		(SQL : CreateAlias),
+	%	(SQL : PrimaryKeyAlias),
+
+		(SQL : CreateCalendar),
+	%	(SQL : PrimaryKeyCalendar),
+
+		(SQL : CreateIcon),
+	%	(SQL : PrimaryKeyIcon),
+
+		(SQL : CraeteClub),
+	%	(SQL : PrimaryKeyClub),
+
+		(SQL : CreateClubClub),
+	%	(SQL : PrimaryKeyClubClub),
+
+		(SQL : CreateConfig),
+	%	(SQL : PrimaryKeyConfig),
+
+
+%%% Table MENU : with primary key
+		(SQL : CreateMenu),
+	%	(SQL : PrimaryKeyMenu),
+		(SQL : CreateLog),
+	%	(SQL : PrimaryKeyLog),
+
+
+		(SQL : CreateFormula),
+	%	(SQL : PrimaryKeyFormula),
+
+		(SQL : CreateClient),
+	%	(SQL : PrimaryKeyClient),
+
+%%%%%%%% reference tables for RESOURCE
+		(SQL : CreateCategoryResource),
+	%	(SQL : PrimaryKeyCategoryResource),
+
+		(SQL : CreateGroupResource),
+	%	(SQL : PrimaryKeyGroupResource),
+
+
+	%	(SQL : "drop TABLE " DB_PREFIX "Resource_Absence"),
+
+	%	(SQL : "drop TABLE " DB_PREFIX "TypeAbsence"),
+		(SQL : CreateTypeAbsence),
+	%	(SQL : PrimaryKeyTypeAbsence),
+
+
+	%	(SQL : "drop TABLE " DB_PREFIX "TypeProcess"),
+		(SQL : CreateTypeProcess),
+	%	(SQL : PrimaryKeyTypeProcess),
+
+		(SQL : CreateTypeResource),
+	%	(SQL : PrimaryKeyTypeResource),
+
+%% 2025.02.18 primary key to define : category, id ?
+	%	(SQL : "drop TABLE " DB_PREFIX "TypeSheet"),
+		(SQL : CreateTypeSheet),
+	%	(SQL : PrimaryKeyTypeSheet),
+
+		(SQL : CreateTypeSite),
+	%	(SQL : PrimaryKeyTypeSite),
+
+		(SQL : CreateTypeTrip),
+	%	(SQL : PrimaryKeyTypeTrip),
+
+		(SQL : CreateTypeRisk),
+	%	(SQL : PrimaryKeyTypeRisk),
+
+
+		(SQL : CreateRule),
+	%	(SQL : PrimaryKeyRule),
+
+		(SQL : CreateSheet),
+	%	(SQL : PrimaryKeySheet),
+
+		(SQL : CreateShift),
+	%	(SQL : PrimaryKeyShift),
+
+		(SQL : CreateSite),
+	%	(SQL : PrimaryKeySite),
+	%	(SQL : ForeignKeySite_Type),
+
+
+		(SQL : CreateSiteSite),
+	%	(SQL : PrimaryKeySiteSite),
+	%	(SQL : ForeignKeySiteSite_Site1),
+	%	(SQL : ForeignKeySiteSite_Site2),
+
+
+%%% tables for RESOURCE
+		(SQL : CreateResource),
+	%	(SQL : PrimaryKeyResource),
+	%	(SQL : ForeignKeyResourceCategory),
+	%	(SQL : ForeignKeyResourceType),
+	%	(SQL : ForeignKeyResourceGroup),
+	%	(SQL : ForeignKeyResourceAgency),
+
+		(SQL : CreateResourceAbsence),
+	%	(SQL : PrimaryKeyResourceAbsence),
+	%	(SQL : ForeignKeyResourceAbsence_Resource),
+	%	(SQL : ForeignKeyResourceAbsence_TypeAbs),
+
+%% 2025.02.17 add dayTime 
+		(SQL : CreateResourceActivity),
+	%	(SQL : PrimaryKeyResourceActivity),
+	%	(SQL : ForeignKeyResourceActivity_Res),
+
+		(SQL : CreateResourceDate),
+	%	(SQL : PrimaryKeyResourceDate),
+	%	(SQL : ForeignKeyResDat_Res),
+	%	(SQL : ForeignKeyResDat_TypeProc),
+	%	(SQL : ForeignKeyResDat_TypeTrip),
+
+		(SQL : CreateContract),
+	%	(SQL : PrimaryKeyContract),
+	%	(SQL : ForeignKeyContract_Resource),
+	%	(SQL : ForeignKeyContract_CategRes),
+	%	(SQL : ForeignKeyContract_TypeRes),
+
+		(SQL : CreateEvent),
+	%	(SQL : PrimaryKeyEvent),
+	%	(SQL : ForeignKeyEvent_Resource),
+	%	(SQL : ForeignKeyEvent_TypeProc),
+	%	(SQL : ForeignKeyEvent_TypeTrip),
+
+
+
+%% //////// 2025.02.17 add tables about PROCESS
+		(SQL : CreateProcess),
+	%	(SQL : PrimaryKeyProcess),
+	%	(SQL : ForeignKeyProcess_TypePrcess),
+
+		(SQL : CreateProcessProcess),
+	%	(SQL : PrimaryKeyProcessProcess),
+	%	(SQL : ForeignKeyProcessProcess_Process1),
+	%	(SQL : ForeignKeyProcessProcess_Process2),
+
+		(SQL : CreateProcessTypeResourceTypeSite),
+	%	(SQL : PrimaryKeyProcessTypeResTypeSite),
+	%	(SQL : ForeignKeyProcessTypeResTypeSite_Process),
+	%	(SQL : ForeignKeyProcessTypeResTypeSite_TypeRes),
+	%	(SQL : ForeignKeyProcessTypeResTypeSite_TypeSite),
+
+		(SQL : CreateProcessJobTypeResource),
+	%	(SQL : PrimaryKeyProcessJobTypeResource),
+	%	(SQL : ForeignKeyProcessJobTypeRes_Process),
+	%	(SQL : ForeignKeyProcessJobTypeRes_TypeRes),
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% PROCESSJOB_TYPERESOURCE replace ? PROCESS_TYPERESOURCE
+%% PROCESS_TYPERESOURCE_TYPESITE replae ? PROCESS_TYPERESOURCE
+%% %%%%%%%%%%%%%%%%%%%%%
+
+		(SQL : CreateProcessTypeResource),
+	%	(SQL : PrimaryKeyProcessTypeResource),
+	%	(SQL : ForeignKeyProcessTypeRes_Process),
+	%	(SQL : ForeignKeyProcessTypeRes_TypeRes),
+
+%% idTypeProcess = > idProcess
+		(SQL : CreateProduct),
+	%	(SQL : PrimaryKeyProduct),
+	%	(SQL : ForeignKeyProduct_Process),
+
+%% 2025.02.17 tables PROJECT
+		(SQL : CreateProject),
+	%	(SQL : PrimaryKeyProject),
+	%	(SQL : ForeignKeyProject_Client),
+	%	(SQL : ForeignKeyProject_Product),
+	%	(SQL : ForeignKeyProject_Product),
+
+		(SQL : CreateProjectGroupResource),
+	%	(SQL : PrimaryKeyProjectGroupResource),
+	%	(SQL : ForeignKeyProjectGrpRes_Project),
+	%	(SQL : ForeignKeyProjectGrpRes_GrpRes),
+
+		(SQL : CreateProjectJob),
+	%	(SQL : PrimaryKeyProjectJob),
+	%	(SQL : ForeignKeyProjectJob_Project),
+	%	(SQL : ForeignKeyProjectJob_Process),
+
+		(SQL : CreateProjectProject),
+	%	(SQL : PrimaryKeyProjectProject),
+	%	(SQL : ForeignKeyProjectProject_Project1),
+	%	(SQL : ForeignKeyProjectProject_Project2),
+
+		(SQL : CreateProjectTask),
+	%	(SQL : PrimaryKeyProjectTask),
+	%	(SQL : ForeignKeyProjectTask_Project),
+	%	(SQL : ForeignKeyProjectTask_Process),
+%% //////////////////
+
+%% 2025.02.17 add table JOB
+		(SQL : CreateJob),
+	%	(SQL : PrimaryKeyJob),
+	%	(SQL : ForeignKeyJob_Project),
+	%	(SQL : ForeignKeyJob_Process),
+
+%% 2025.02.22 change table JOB : replace primary key (id) by (idProject,idProcess)
+	%	(SQL : CreateJob1),
+	%	(SQL : PrimaryKeyJob),
+	%	(SQL : ForeignKeyJob_Project),
+	%	(SQL : ForeignKeyJob_Process),
+
+
+%% 2025.02.18 checkTime = > extendedTime
+		(SQL : CreateResourceProcess),
+	%	(SQL : PrimaryKeyResourceProcess),
+	%	(SQL : ForeignKeyResProc_Res),
+	%	(SQL : ForeignKeyResProc_Proc),
+	%	(SQL : ForeignKeyResProc_TypeRes),
+
+		(SQL : CreateResourceProduct),
+	%	(SQL : PrimaryKeyResourceProduct),
+	%	(SQL : ForeignKeyResourceProduct_Res),
+	%	(SQL : ForeignKeyResourceProduct_Prd),
+
+		(SQL : CreateResourceResource),
+	%	(SQL : PrimaryKeyResourceResource),
+	%	(SQL : ForeignKeyResourceResource_Res1),
+	%	(SQL : ForeignKeyResourceResource_Res2),
+
+		(SQL : CreateResourceShift),
+	%	(SQL : PrimaryKeyResourceShift),
+	%	(SQL : ForeignKeyResourceShift_Res),
+
+		(SQL : CreateGroupResourceSite),
+	%	(SQL : PrimaryKeyGroupResourceSite),
+	%	(SQL : ForeignKeyGroupResourceSite_GR),
+	%	(SQL : ForeignKeyGroupResourceSite_Site),
+
+%% 2025.02.18 add table GROUPRESOURCE_TIMELINE
+		(SQL : CreateGroupResourceTimeline),
+	%	(SQL : PrimaryKeyGroupResourceTimeline),
+	%	(SQL : ForeignKeyGrpResourceTimeline_GR),
+
+
+%% 2025.02.18 add table RESOURCE_SITE
+		(SQL : CreateResourceSite),
+	%	(SQL : PrimaryKeyResourceSite),
+	%	(SQL : ForeignKeyResourceSite_Res),
+	%	(SQL : ForeignKeyResourceSite_Site),
+	
+
+%% old version 
+	%%	(SQL : CreateResourceTaskOld),
+
+%% 2025.02.18  version to define primary key
+%% Job = Process of type job ?
+%% Task = Process of type task ?
+%% primary key = idResource, idProject, idProcessJob, idProcess(task)
+%% not need ? :
+%%	idJob	VARCHAR(60),
+%%	idTask	VARCHAR(100),
+%%	nameProcess	VARCHAR(30),
+%%	nameJob	VARCHAR(30),
+%%	nameResource	VARCHAR(30),
+%%	nameTypeResource	VARCHAR(30),
+
+		(SQL : CreateResourceTask),
+	%	(SQL : PrimaryKeyResourceTask),
+	%	(SQL : ForeignKeyResTask_Res),
+	%	(SQL : ForeignKeyResTask_Project),
+	%	(SQL : ForeignKeyResTask_ProcessJob),
+	%	(SQL : ForeignKeyResTask_ProcessTask),
+
+		(SQL : CreateResourceTypeResource),
+	%	(SQL : PrimaryKeyResourceTypeResource),
+	%	(SQL : ForeignKeyResTypeRes_Res),
+	%	(SQL : ForeignKeyResTypeRes_TypeRes),
+
+%% 2025.02.18 add table RESOURCE_TYPESITE
+		(SQL : CreateResourceTypeSite),
+	%	(SQL : PrimaryKeyResourceTypeSite),
+	%	(SQL : ForeignKeyResTypeSite_Res),
+	%	(SQL : ForeignKeyResTypeSite_TypeSite),
+
+
+
+%% 2025.02.18 add table STEP
+%% primary key to define
+		(SQL : CreateStep),
+
+%%%%
+
+%% JOB  = PROJECT + PROCESS(type job) ?
+%% TASK = PROJECT + PROCESS(type task) ?
+%% primary key = idProject, idJob(idProcessJob : process type job), idProcess(process type task)
+%% not need :
+%%	idJob	VARCHAR(60), replace by idProcessJob
+%%	idTypeProcess	VARCHAR(20),
+
+
+		(SQL : CreateTask),
+	%	(SQL : PrimaryKeyTask),
+	%	(SQL : ForeignKeyTask_Project),
+	%	(SQL : ForeignKeyTask_Task),
+	%	(SQL : ForeignKeyTask_Job),
+
+%% 2025.02.22 change primary key (id) to (idProject,idProcessJob,idProcess)
+	%	(SQL : CreateTaskNew),
+	%	(SQL : PrimaryKeyTask),
+	%	(SQL : ForeignKeyTask_Project),
+	%	(SQL : ForeignKeyTask_Task),
+	%	(SQL : ForeignKeyTask_Job),
+
+
+
+		(SQL : CreateUser),
+	%	(SQL : PrimaryKeyUser),
+
+	'@' <- database,
+),

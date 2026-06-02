@@ -1,0 +1,105 @@
+%==================================================%
+%                                                  %
+%            	  Gestion Stock    	           %
+%                                                  %
+%  	FuncTableArticleForSupplu.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductForSupply>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableProductForSupply" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableProductForSupply"  postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		@ ("(float,WEIGHT,Poids,,8.2.50,0);\\\n"),
+		@ ("(float,WEIGHTPACKAGE,Poids/Paquet,,8.2.50,0);\\\n"),
+		@ ("(date,DATESUPPLY, Date Appro,,10.0.80,1,YYYY-MM-DD);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT P.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t P.Designation as DESIGNATION,\\\n"),
+ 		@ ("\t\t P.Family as FAMILY,\\\n"),
+ 		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+ 		@ ("\t\t P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t  " SQL_CASEWHEN "P.QuantitySupplied is NULL" SQL_THEN "0" SQL_ELSE "P.QuantitySupplied" SQL_CASEEND " as QUANTITYSUPPLIED,\\\n"),
+ 		@ ("\t\t  P.QuantityOrdered as QUANTITYORDERED,\\\n"),
+ 		@ ("\t\t  P.PriceUnit as SALEPRICE,\\\n"),
+ 		@ ("\t\t  P.PurchasePrice as PURCHASEPRICE,\\\n"),
+ 		@ ("\t\t  P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t  "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t  ' ' as NBPACKAGE,\\\n"),
+ 		@ ("\t\t  ' ' as QUANTITY,\\\n"),
+ 		@ ("\t\t  ' ' as PRICE,\\\n"),
+ 		@ ("\t\t  ' ' as DATESUPPLY,\\\n"),
+ 		@ ("\t\t  ' ' as DATEDELIVERY,\\\n"),
+ 		@ ("\t\t  ' ' as COMMENTS,\\\n"),
+ 		@ ("\t\t  0 as INORDER,\\\n"),
+ 		@ ("\t\t  ' ' AS STATE,\\\n"),
+ 		@ ("\t\t  '(255 255 255)' AS LINERGB \\\n"),
+ 		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+ 		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+ 		@ ("\t AND P.TypeProduct<>'F'\\\n"),
+ 		@ ("\t AND P.Id not in (select ls.Idproduct from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply in ((/*IDSUPPLY*/)))\\\n"),
+ 		@ ("\t UNION ALL \\\n"),
+ 		@ ("\t SELECT \\\n"),
+ 		@ ("\t\t  P.Id as IDPRODUCT,\\\n"),
+ 		@ ("\t\t  P.Designation as DESIGNATION,\\\n"),
+ 		@ ("\t\t  P.Family as FAMILY,\\\n"),
+ 		@ ("\t\t  P.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+ 		@ ("\t\t  P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t  "SQL_CASEWHEN"P.QuantitySupplied is NULL"SQL_THEN" 0"SQL_ELSE" P.QuantitySupplied"SQL_CASEEND" as QUANTITYSUPPLIED,\\\n"),
+ 		@ ("\t\t  P.QuantityOrdered as QUANTITYORDERED,\\\n"),
+ 		@ ("\t\t  P.PriceUnit as SALEPRICE,\\\n"),
+ 		@ ("\t\t  P.PurchasePrice as PURCHASEPRICE,\\\n"),
+ 		@ ("\t\t  P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t  "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t  " SQL_CASEWHEN "(ls.Quantity/P.QuantityPackaging)="SQL_FORMATNUM"(ls.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")"SQL_THEN" "SQL_FORMATNUM"(ls.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")"SQL_ELSE" format(ls.Quantity/P.QuantityPackaging,'0.#')"SQL_CASEEND" as NBPACKAGE,\\\n"),
+ 		@ ("\t\t  "SQL_FORMATNUM"(ls.Quantity,"SQL_FORMATSCALE0") as QUANTITY,\\\n"),
+ 		@ ("\t\t  ls.PriceUnit as PRICE,\\\n"),
+ 		@ ("\t\t  ls.DateSupply as DATESUPPLY,\\\n"),
+ 		@ ("\t\t  ls.DateDelivery as DATEDELIVERY,\\\n"),
+ 		@ ("\t\t  ls.Comments as COMMENTS,\\\n"),
+ 		@ ("\t\t  1 as INORDER,\\\n"),
+ 		@ ("\t\t  "SQL_CASEWHEN"(ls.Quantity/P.QuantityPackaging)>"SQL_FORMATNUM"(ls.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")"SQL_THEN"  'Paquet incomplet'"SQL_ELSE" '' "SQL_CASEEND" AS STATE,\\\n"),
+ 		@ ("\t\t  "SQL_CASEWHEN"(ls.Quantity/P.QuantityPackaging)>"SQL_FORMATNUM"(ls.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")"SQL_THEN" '(255 255 160)'"SQL_ELSE"\\\n"),
+ 		@ ("\t\t   "SQL_CASEWHEN"ls.Quantity=0 "SQL_THEN" '(200 200 200)'"SQL_ELSE"\\\n"),
+ 		@ ("\t\t    '(150 150 255)'"SQL_CASEEND""SQL_CASEEND" AS LINERGB \\\n"),
+ 		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+ 		@ ("\t\t  inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.Idproduct=P.Id \\\n"),
+ 		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+ 		@ ("\t AND (ls.IdSupply in ((/*IDSUPPLY*/)) ) \\\n"),
+ 		@ ("\t ORDER BY INORDER desc, Family, DESIGNATION, IDPRODUCT \"\n\n"), 
+
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForSupply2TableOfferSupplier.n"],
+		
+
+		%=====================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForSupply2EditOnView.n"],
+		%=====================
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

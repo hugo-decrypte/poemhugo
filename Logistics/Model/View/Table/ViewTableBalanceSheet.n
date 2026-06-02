@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableBalanceSheet.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableBalanceSheet.n"],
+
+'@' => (
+	tableBalanceSheet("BALANCESHEET", TAG_TABLE,"BALANCESHEET",true,"",TAG_TABLE_BALANCE_SHEET),
+),

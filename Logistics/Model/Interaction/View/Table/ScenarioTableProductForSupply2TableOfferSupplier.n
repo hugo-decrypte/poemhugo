@@ -1,0 +1,53 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%  ScenarioTableArticleForSupply2TableOfferSupplier.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableOfferSupplier",	% JZ 0922
+
+% Caption
+@ (" '" TAG_DETAIL_ORDER_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_SUPPLIER,
+
+% Label
+@ (" '" TAG_DETAIL_ORDER_PRODUCT "' "),	% JZ 0906
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFORSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableOfferSupplier.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS "IDCOLOR=(250 250 250);TITLEOBJ=" TAG_FOR_PRODUCT " {/*Selected(tablePRODUCTFORSUPPLY;1;(string,IDPRODUCT))*/};OWNEROBJ=IdProduct;IDOBJ={/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/}]\"\n\n"),

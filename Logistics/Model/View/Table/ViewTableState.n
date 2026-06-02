@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableState.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableState.n"],
+
+'@' => (
+	tableState("STATE",TAG_TABLE,"STATE",true,"EditState",TAG_TABLE_STATE,"",	""),
+	tableState("STATE",TAG_TABLE,"STATE",true,"EditState",TAG_TABLE_STATE,"Menu",""),	% JZ 1020
+),

@@ -1,0 +1,19 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		FuncSubString.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<leftSubstr>(str,separator)
+(
+	'()' => (
+		str :: "",
+		str[n] = separator,
+		%str[n] = "-",
+
+		leftSubstr = str[1..n-1],
+	),
+),

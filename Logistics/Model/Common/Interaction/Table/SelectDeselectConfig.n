@@ -1,0 +1,83 @@
+%==================================================%
+%                                                  %
+% 		 SelectDeselectConfig.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	nbSelected = (),
+	nbParam    = (),
+	
+	\forall i \in [1, nbSelected] (
+		idSelectedBuffer_{i} :: "",
+		idSelectedBuffer_{i} = (),
+		
+		i < nbSelected =>(
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "',"),
+			;
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDSELECTED :: "",
+	IDSELECTED = [\forall i \in [1, nbSelected] strIdSelectedBuffer_{i}],
+	
+
+	sqlConfigSelected = (
+		"UPDATE " DB_PREFIX "CONFIG c SET c.selected="
+			SQL_CASEWHEN "c.selected IS NULL OR c.selected='" STATE_FALSE "'"
+				SQL_THEN "'" STATE_TRUE "'"
+				SQL_ELSE "'" STATE_FALSE "'"
+			SQL_CASEEND
+	),
+
+
+	'()' <- database,
+
+	(SQL : sqlConfigSelected " WHERE c.id IN (" IDSELECTED ") AND " SQL_UserVisibleClubIs "c.idClub)"),
+
+	database <- '()',
+),
+
+
+
+.
+
+
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+
+
+'()' => (
+	nbBuffer 	 :: 0,
+	nbParameter 	:: 0,
+
+	nbBuffer 	= (),
+	nbParameter 	= (),
+
+	idBuffer 	:: "",
+	nameBuffer 	:: "",
+	clubBuffer 	:: "",
+	
+	idBuffer 	= (),
+	nameBuffer 	= (),
+	idClubBuffer 	= (),
+
+
+
+	'()' <- database,
+
+	(SQL : "SELECT selected FROM " DB_PREFIX "CONFIG WHERE id='" idBuffer "' AND name='" nameBuffer "' AND idClub='" idClubBuffer "'"), 
+
+	1 = (),
+	strSelectedField = (() = ("'" STATE_TRUE "'") ? ("'" STATE_FALSE "'") : ("'" STATE_TRUE "'")),
+
+	(SQL : "UPDATE	" DB_PREFIX "CONFIG SET selected='" strSelectedField "' WHERE id='" idBuffer "' AND name='" nameBuffer "' AND idClub='" idClubBuffer "'"), 
+
+	database <- '()',
+),

@@ -1,0 +1,539 @@
+%===================================================%
+%                                   				%
+%            	  ERP		    					%
+%                     								%
+%  	 			PrintDelivery.n 		 			%
+%													%
+% (c)2000. Enginest. All rights reserved.     		%
+%===================================================%
+
+
+'@' => (
+
+	printFile = "/PrintDelivery",
+	[serverPrintPath printFile ".ini"] <- '@',
+
+	("printFile=" serverPrintPath printFile ".ini" : ),
+
+
+@ ("//////////////////////////////////////////// \n"),
+@ ("////////////////////////////////////////////\n"),
+@ ("// PARAMETRES\n"),
+@ ("//\"DataPrint.exe\" \"DIR/PoemPrint/PrintDelivery.ini\" \"[DSN=; DBUSR=; DBPWD=; OWNER=; DEVICENAME=Microsoft Print to PDF; OUTPUT=Delivery.pdf; XMLFILE=OrderTmp.txt]\" \"11020170131\" \n"),
+@ ("// {/*PARAM0*/}  \"PoemPrint.exe\" \n"),
+@ ("// {/*PARAM1*/}  \" \" file  INI\n"),
+@ ("// {/*PARAM2*/}  \"[DSN= ; DBUSR= ; DBPWD=; OWNER= ; DEVICENAME= ; OUTPUT= ; XMLFILE= ]\"  les options separes par ;\n"),
+@ ("// {/*PARAM3*/}  picture directury\n"),
+@ ("// {/*PARAM4*/}  code Delivery  \n"),
+@ ("// {/*PARAM5*/}  code user\n"),
+@ ("//DSN=\n"),
+@ ("//USR= \n"),
+@ ("//PWD= \n"),
+@ ("//OWNER= \n"),
+
+@ ("\n\n"),
+
+@ ("[HEADER]\n"),
+@ ("VERSION=1.0\n"),
+@ ("TITLE=Bon de livraison\n"),
+
+
+ ['Work Directory' "Model\Print\PrintHeaderFooter.n"],
+
+/*
+HEADER1=Picture(200 60 490 185, PICTURE1)
+
+// Label compagny
+
+// adress
+
+// post code, city
+//Tél.  : 
+//Email : 
+
+
+// TITLE
+
+// order no
+// delivery date
+// Reference
+
+HEADER16=Line(110  400, 2000  400, PEN1);
+*/
+
+
+
+% [FOOTER]
+/*
+// Line
+// PAGENUM
+// compagny registre info 
+
+// bank info 
+
+// print date time
+
+*/
+
+
+@ ("[BACKGROUND]\n"),
+@ ("\n\n"),
+
+@ ("
+[CONFIG]
+
+PRINTERTYPE=1
+//DEVICENAME=PDF Architect Driver ;  Microsoft Print to PDF
+//DEVICENAME=PDFCreator
+//DEVICENAME=WIN2PDF
+//DEVICENAME=Microsoft XPS Document Writer
+//OUTPUT=c:/DataPrint/Delivery.xps
+//OUTPUT=c:/DataPrint/Delivery.pdf
+//OUTPUT={/*PARAM4*/}
+
+DEBUG=0
+TRACEDATA=1
+TRACESYS=1
+TRACESCRIPT=1
+TRACEFILE={/*PARAM3*/}TracePrintDelivery.log
+
+DOCNAME=Bon de livraison
+PAGESIZE=A4
+//LANDSCAPEMODE= ( 0 : portrai; 1 : paysage)
+LANDSCAPEMODE=0
+
+PAGEWIDTH= 2100
+PAGEHEIGHT= 2970
+MARGIN=100 450 100 100
+PAGENUMER=AUTO
+PAGEBREAK=AUTO
+\n"),
+@ ("\n\n"),
+
+
+%% [STYLE]
+ ['Work Directory' "Model\Print\PrintStyleConfig.n"],
+
+
+
+@ ("[PICTURE]
+PICTURECOUNT=1
+PICTURE1={/*PARAM3*/}Logo.jpg
+//PICTURE1={/*PARAM4*/}Logo.bmp
+//PICTURE1=D:\GestionStock/Logo.bmp
+\n\n"),
+
+@ ("
+[DATA]
+//DSN=
+//USR=
+//PWD=
+//OWNER=
+PWD={/*PARAM6*/}
+\n\n"),
+
+
+@ ("DATACOUNT=6\n\n"),
+
+
+%//////////////
+%// agency info used in HEADER and FOOTER
+%DATA1=MY_ADRESS
+%NAME1=MYADRESS
+
+ ['Work Directory' "Model\Print\PrintMyInfosData.n"],
+
+
+@ ("\n\n"),
+
+
+
+@ ("
+//////////////
+DATA2=SEL_OBJ
+NAME2=Objet
+
+SQL2=SELECT 
+SQL2_1=   D.Id as CODEDELIVERY, 
+SQL2_2=   D.IdAgency as CODEAGENCY, 
+SQL2_3=   CL.Id as CODECLIENT, 
+SQL2_4=   CL.BankAccount as BANKACCOUNT, 
+SQL2_5=   CL.Country as COUNTRY, 
+SQL2_6=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Bon de livraison  '" SQL_ELSE "'Delivery   '" SQL_CASEEND "  as TITLEDOC,
+SQL2_7=  " SQL_CASEWHEN "CL.Country in ('France','FRANCE')" SQL_THEN "'Livraison No : '" SQL_ELSE "'Delivery no : '" SQL_CASEEND " as TITLECODEOBJ,
+SQL2_8=  D.Id as CODEOBJ,
+SQL2_9=  " SQL_CASEWHEN "CL.Country in ('France','FRANCE')" SQL_THEN "'Date de Livraison : '" SQL_ELSE "'Delivery date : '" SQL_CASEEND " as TITLEDATEOBJ,
+SQL2_10=  " SQL_CASEWHEN "CL.Country in ('France','FRANCE')"
+				 SQL_THEN " " SQL_CONCAT " " SQL_SUBSTRING "(D.DateDelivery,9,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,6,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,1,4)" SQL_CONCATEND " "
+				 SQL_ELSE " " SQL_CONCAT " " SQL_SUBSTRING "(D.DateDelivery,1,4)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,6,2)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,9,2)" SQL_CONCATEND " "
+			     SQL_CASEEND " as DATEOBJ,
+SQL2_11=  " SQL_CASEWHEN "CL.Country in ('France','FRANCE')" SQL_THEN "'Client No : '" SQL_ELSE "'Client No : '" SQL_CASEEND " as TITLEREFERENCEOBJ,
+SQL2_12=  D.IdClient as REFERENCEOBJ,
+SQL2_13=   D.IdClub as CODECLUB
+SQL2_14= FROM {/*OWNER*/}DELIVERY D left join {/*OWNER*/}CLIENT CL on CL.Id=D.IdClient
+SQL2_15= WHERE D.ID in ({/*PARAM4*/})
+\n\n"),
+
+@ ("\n"),
+
+
+
+
+%% INSTR2, 4
+@ ("
+// ADDRESS DELIVERY
+DATA3=ADDRESS_DELIV
+NAME3=AddressDeliv
+
+SQL3=SELECT DISTINCT
+SQL3_1=   " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Adresse de livraison'" SQL_ELSE "'Shipping adress'" SQL_CASEEND " as TitleAdressDeliv, 
+SQL3_2=   PT.NameClient as PtDeliv, 
+SQL3_3=   PT.Address as AddresDeliv, 
+SQL3_4=   PT.AddressSup as AddresSupDeliv, 
+SQL3_5=   " SQL_CONCAT "TRIM(PT.PostCode)" SQL_CONCATWITH "'   '" SQL_CONCATWITH "PT.City" SQL_CONCATEND " as PostCodeCityDeliv, 
+SQL3_6=   " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "' '" SQL_ELSE "CL.Country" SQL_CASEEND " as CountryDeliv,
+SQL3_7=   D.Id as IdDelivery,
+SQL3_8=   " SQL_CASEWHEN "CL.Country='France'"
+				 SQL_THEN " " SQL_CONCAT " " SQL_SUBSTRING "(D.DateDelivery,9,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,6,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,1,4)" SQL_CONCATEND " "
+				 SQL_ELSE " " SQL_CONCAT " " SQL_SUBSTRING "(D.DateDelivery,1,4)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,6,2)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(D.DateDelivery,9,2)" SQL_CONCATEND " "
+			     SQL_CASEEND " as DateDelivery,
+SQL3_9=   D.IdPacking as Packing,
+SQL3_10=  (select IdSender from PACKING P where P.Id=D.IdPacking) as Sender,
+SQL3_11=  " SQL_CONCAT "" SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'" TAG_FOLLOWED_BY " : '" SQL_ELSE "'Followed by: '" SQL_CASEEND "" SQL_CONCATWITH "" SQL_CASEWHEN "D.FollowedBy is NULL" SQL_THEN "' '" SQL_ELSE "D.FollowedBy" SQL_CASEEND "" SQL_CONCATEND " as FollowedBy
+SQL3_12= FROM {/*OWNER*/}DELIVERY D , {/*OWNER*/}CLIENT CL, {/*OWNER*/}POINTDELIVERY PT
+SQL3_13= WHERE CL.Id=D.IdClient 
+SQL3_14=  AND PT.IdClient=D.IdClient AND PT.IdPoint=D.IdPointDelivery
+SQL3_15= AND D.Id='{/*CODEDELIVERY*/}'
+\n"),
+@ ("\n"),
+
+
+@ ("
+//////////////
+DATA4=INFO_DELIVERY
+NAME4=InfoDelivery
+
+SQL4=SELECT DISTINCT
+SQL4_1=   " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "PACKING" SQL_ELSE "' '" SQL_CASEEND " as C1, 
+SQL4_2=   " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "PALLET" SQL_ELSE "' '" SQL_CASEEND " as C2, 
+SQL4_3=   " SQL_CASEWHEN "CmdSup=0" SQL_THEN "PRODUCT" SQL_ELSE "' '" SQL_CASEEND " as C3, 
+SQL4_4=   " SQL_CASEWHEN "CmdSup=0" SQL_THEN "DescriArticle" SQL_ELSE "' '" SQL_CASEEND " as C4,
+SQL4_5=   Cmd,
+SQL4_6=   QTY,
+SQL4_7=   NW as C7, 
+SQL4_8=   " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "GW" SQL_ELSE "' '" SQL_CASEEND " as C8,
+SQL4_9=   " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "L" SQL_ELSE "' '" SQL_CASEEND " as C9, 
+SQL4_10=  " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "W" SQL_ELSE "' '" SQL_CASEEND " as C10, 
+SQL4_11=  " SQL_CASEWHEN "SamePal+CmdSup=0" SQL_THEN "H" SQL_ELSE "' '" SQL_CASEEND " as C11, V as C12, QtyPackage as C13, NbPackage as C14
+SQL4_12= FROM (SELECT
+SQL4_13=   DP.IdPacking as PACKING, 
+SQL4_14=   DP.IdDelivery as IdDelivery, 
+SQL4_15=   DP.NoPalletDelivery as PALLET, 
+SQL4_16=   PRD.ID as PRODUCT, 
+SQL4_17=   PRD.Designation as DescriArticle,
+SQL4_18=   DP.IdOrder as Cmd,
+SQL4_19=   " SQL_FORMATNUM "(DP.Quantity,"SQL_FORMATSCALE0") as QTY,
+SQL4_20=   " SQL_FORMATNUM "(PRD.QuantityPackaging,"SQL_FORMATSCALE0") as QtyPackage,
+SQL4_21=   " SQL_FORMATNUM "(" SQL_CASEWHEN "PRD.QuantityPackaging is not NULL and PRD.QuantityPackaging>0" SQL_THEN "DP.Quantity/PRD.QuantityPackaging" SQL_ELSE "1" SQL_CASEEND ","SQL_FORMATSCALE0") as NbPackage,
+SQL4_22=   " SQL_FORMATNUM "(PRD.Weight*DP.Quantity,"SQL_FORMATSCALE2") as NW, 
+SQL4_23=   " SQL_CASEWHEN "P.WeightGlobal is not NULL and P.WeightGlobal>0" SQL_THEN "" SQL_FORMATNUM "(P.WeightGlobal,"SQL_FORMATSCALE1") " SQL_ELSE SQL_CASEWHEN " D.WeightPallet is NULL" SQL_THEN "'PN + 30'" SQL_ELSE " "SQL_CONCAT"'PN + '"SQL_CONCATWITH" " SQL_FORMATNUM "(D.WeightPallet,"SQL_FORMATSCALE1")"SQL_CONCATEND" " SQL_CASEEND " " SQL_CASEEND " as GW,
+SQL4_24=   round(P.Length,0) as L, 
+SQL4_25=   round(P.Width,0) as W, 
+SQL4_26=   round(P.Height,0) as H,
+SQL4_27=   " SQL_FORMATNUM "(PRD.Volume*DP.Quantity,"SQL_FORMATSCALE2") as V, 
+
+SQL4_28=   " SQL_CASEWHEN "PL_PR.NoLot is not NULL and PL_PR.NoLot>' '" SQL_THEN "PL_PR.NoLot" SQL_ELSE " "SQL_FORMATDATE"(PL_PR.DateCreate,'"SQL_FORMATDATESTR"')" SQL_CASEEND " as NoLot,
+SQL4_29=   " SQL_CASEWHEN "PL_PR.DateExpiration is not NULL and PL_PR.DateExpiration>'0'" SQL_THEN " "SQL_FORMATDATE "(PL_PR.DateExpiration,'"SQL_FORMATDATESTR"')" SQL_ELSE "' '" SQL_CASEEND " as DateExpiration,
+
+SQL4_30=   " SQL_CASEWHEN "exists (select 1 from DELIVERY_PRODUCT DP1 
+SQL4_31=        where DP1.IdDelivery=DP.IdDelivery AND DP1.NoPalletDelivery=DP.NoPalletDelivery AND DP1.IdProduct=DP.IdProduct AND DP1.IdOrder<DP.IdOrder) 
+SQL4_32=    " SQL_THEN "1" SQL_ELSE "0" SQL_CASEEND "  as CmdSup,
+SQL4_33=   " SQL_CASEWHEN "exists (select 1 from DELIVERY_PRODUCT DP1 
+SQL4_34=        where DP1.IdDelivery=DP.IdDelivery AND DP1.NoPalletDelivery=DP.NoPalletDelivery AND (DP1.IdProduct<DP.IdProduct or DP1.IdOrder<DP.IdOrder))
+SQL4_35=    " SQL_THEN "1" SQL_ELSE "0" SQL_CASEEND "  as SamePal
+SQL4_36= FROM ((({/*OWNER*/}DELIVERY D inner join {/*OWNER*/}DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)
+SQL4_37=   inner join {/*OWNER*/}PRODUCT PRD on PRD.ID=DP.IdProduct)
+SQL4_38=   left join {/*OWNER*/}PALLET P on P.IdPacking=DP.IdDelivery AND P.NoPallet=DP.NoPalletDelivery)
+SQL4_39=   left join {/*OWNER*/}PALLET_PRODUCT PL_PR on PL_PR.IdPacking=DP.IdPacking and PL_PR.NoPallet=DP.NoPallet and PL_PR.IdProduct=DP.IdProduct
+SQL4_40= WHERE PRD.TypeProduct='P'
+SQL4_41=   AND DP.IdDelivery='{/*CODEDELIVERY*/}'
+SQL4_42= ORDER BY DP.NoPalletDelivery, DP.IdProduct, DP.IdOrder, PL_PR.DateCreate) t
+
+\n"),
+@ ("\n"),
+
+
+@ ("
+// ORDER in DELIVERY
+DATA5=INFO_ORDERS
+NAME5=INFOORDERS
+
+SQL5=SELECT DISTINCT
+SQL5_1=   DP.IdPacking as C1,
+SQL5_2=   ' ' as C2,
+SQL5_3=   ' ' as C3,
+SQL5_4=   ' ' as C4,
+SQL5_5=   DP.IdOrder as CMD5,
+SQL5_6=   DP.Quantity as QTY6,
+SQL5_7=   ' ' as C7,
+SQL5_8=   ' ' as C8,
+SQL5_9=   ' ' as C9,
+SQL5_10=   ' ' as C10,
+SQL5_11=   ' ' as C11
+SQL5_12= FROM {/*OWNER*/}DELIVERY_PRODUCT DP
+SQL5_13= WHERE DP.IdDelivery='{/*CODEDELIVERY*/}'
+SQL5_14=   AND DP.IdPacking='{/*PACKING*/}' AND DP.NoPalletDelivery={/*PALETTE*/} AND DP.IdProduct='{/*PRODUCT*/}' 
+SQL5_15=   AND DP.IdOrder>= (select min(DP1.IdOrder) from {/*OWNER*/}DELIVERY_PRODUCT DP1
+SQL5_16=      WHERE DP1.IdDelivery='{/*CODEDELIVERY*/}'
+SQL5_17=       AND DP1.IdPacking='{/*PACKING*/}' AND DP1.NoPalletDelivery={/*PALETTE*/} AND DP1.IdProduct='{/*PRODUCT*/}'
+SQL5_18=    )
+SQL5_19= ORDER BY DP.IdOrder
+
+\n"),
+@ ("\n"),
+
+
+
+@ ("
+// TOTAL DELIVERY
+DATA6=LINE_TOTAL
+NAME6=LINETOTAL
+
+SQL6=SELECT DISTINCT
+SQL6_1=   'TOTAL' as Col1, 
+SQL6_2=   sum(QTY_C9) as Col2,
+SQL6_3=   " SQL_FORMATNUM "(sum(C10)," SQL_FORMATSCALE1 ") as Col3,
+SQL6_4=   " SQL_FORMATNUM "(sum(C11)," SQL_FORMATSCALE1 ") as Col4,
+SQL6_5=   " SQL_FORMATNUM "(sum(C12)," SQL_FORMATSCALE1 ") as Col5,
+SQL6_6=   " SQL_FORMATNUM "(sum(C13)," SQL_FORMATSCALE0 ") as Col6,
+SQL6_7=   " SQL_FORMATNUM "(sum(C14)," SQL_FORMATSCALE0 ") as Col7
+SQL6_8=  FROM (SELECT DP.IdPacking, DP.NoPalletDelivery,
+SQL6_9=   sum(DP.Quantity) as QTY_C9,
+SQL6_10=  sum(PRD.Weight*DP.Quantity) as C10, 
+SQL6_11=  sum(PRD.Volume*DP.Quantity) as C11,
+SQL6_12=  sum(PRD.Weight*DP.Quantity)+ " SQL_CASEWHEN "D.WeightPallet is NULL" SQL_THEN "30" SQL_ELSE "min(D.WeightPallet)" SQL_CASEEND " as C12,
+SQL6_13=  sum(PRD.QuantityPackaging) as C13,
+SQL6_14=  sum(" SQL_CASEWHEN "PRD.QuantityPackaging is not NULL and PRD.QuantityPackaging>0" SQL_THEN "DP.Quantity/PRD.QuantityPackaging" SQL_ELSE "1" SQL_CASEEND ") as C14
+SQL6_15= FROM (({/*OWNER*/}DELIVERY D inner join {/*OWNER*/}DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)
+SQL6_16=  inner join {/*OWNER*/}PRODUCT PRD on PRD.ID=DP.IdProduct) 
+SQL6_17=  LEFT JOIN {/*OWNER*/}PALLET PL on PL.IdPacking=DP.IdPacking AND PL.NoPallet=DP.NoPalletDelivery
+SQL6_18=WHERE PRD.TypeProduct<>'F'
+SQL6_19=   AND D.Id='{/*CODEDELIVERY*/}'
+SQL6_20=GROUP BY DP.IdPacking, DP.NoPalletDelivery, PL.WeightGlobal, D.WeightPallet) t
+\n"),
+@ ("\n"),
+
+
+
+@ ("
+[TABLE]
+
+TABLECOUNT=1
+
+TABLE1=Table(DATAOBJ=DATA5; RECT=(0 0 1900 _); FONT=FONT5; TEXT_COLOR=(100 0 0); BORDERHORZ=; BORDERVERT=; LINEHORZ=; LINEVERT=;
+TABLE1_1=TITLE=\"Produits Client\"; FONT_TITLE=FONT9; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;CY_TITLE=0;
+TABLE1_2=CY_HORZHDR=0; FONT_HORZHDR=FONT9; ALIGN_HORZHDR=ALIGN5; COLOR_HORZHDR=COLOR2; 
+TABLE1_3=CX_VERTHDR=0; FONT_VERTHDR=; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR2; 
+TABLE1_4=CY_ROW=50;
+TABLE1_5=FIELDCOUNT=11; 
+TABLE1_6=NAMES=(\"Mark\", \"pale\", \"Art\", \"desc\", \"Command\", \"Qty\", \"NW\", \"GW\", \"L\", \"W\", \"H\"); 
+TABLE1_7=WIDTHES=(150, 110, 190, 550, 180, 130, 140, 150, 100, 100, 100); 
+TABLE1_8=FONTS=(FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9); 
+TABLE1_9=TEXTALIGNS=(ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2); 
+TABLE1_10=TEXTCOLORS=(COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1); 
+TABLE1_11=FILLCOLORS=(COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5, COLOR5); 
+TABLE1_12=FIELDS=(DATA5.1, DATA5.2, DATA5.3, DATA5.4, DATA5.5, DATA5.6, DATA5.7, DATA5.8, DATA5.9, DATA5.10, DATA5.11); 
+TABLE1_13=)
+\n"),
+@ ("\n"),
+
+
+@ ("
+[XML]
+
+FILE={/*XMLFILE*/}
+XMLCOUNT =0
+XML1=|\"NOM_PDF {/*OUTPUT*/}\"
+XML2=|\"NUM_FAX1 {/*DATA1.1*/}\"
+XML3=|\"NUM_FAX2 {/*DATA1.2*/}\"
+XML4=|\"CODE_FACT {/*DATA1.3*/}\"
+XML5=|\"MAIL1_RAPPORT {/*DATA1.6*/}\"
+XML6=|\"MAIL2_RAPPORT {/*DATA1.7*/}\"
+XML7=|\"TYPE_RAPPORT {/*DATA1.8*/}\"
+\n"),
+@ ("\n"),
+
+
+@ ("
+[SQL]
+SQLCOUNT=0
+
+//SQL1=UPDATE {/*OWNER*/}Delivery D set State='2' where D.[IdDelivery]={/*PARAM3*/} and (State<'2' or State is NULL)
+\n"),
+@ ("\n"),
+
+
+@ ("[SCRIPT]\n"),
+@ ("\n"),
+
+
+@ ("
+DATAOBJ=DATA2
+\n"),
+@ ("\n"),
+
+
+@ ("
+INSTRCOUNT=9
+\n"),
+@ ("\n"),
+
+
+@ ("//INSTR1=StartDoc\n"),
+@ ("\n"),
+
+@ ("
+INSTR1=StartPage 1
+\n"),
+
+@ ("
+// table  adresses livraisons 
+INSTR2=Table(DATAOBJ=DATA3; RECT=10 0 _ _; BORDERHORZ=; BORDERVERT=; LINEHORZ=; LINEVERT=; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR2_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=60;
+INSTR2_2=TITLE=\"TOUR INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR2_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR2_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR2_5=FIELDCOUNT=6;
+INSTR2_6=FIELD1=[NAME=\"Tit\",  RECT=(300    0  1900  80),  FONT=4, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.1];
+INSTR2_7=FIELD2=[NAME=\"Nom\",  RECT=(300  100  1900 160),  FONT=5, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.2];
+INSTR2_8=FIELD3=[NAME=\"Add\",  RECT=(300  160  1900 220),  FONT=5, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.3];
+INSTR2_9=FIELD4=[NAME=\"Ad1\",  RECT=(300  220  1900 280),  FONT=5, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.4];
+INSTR2_10=FIELD5=[NAME=\"CPC\", RECT=(300  280  1900 340),  FONT=5, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.5];
+INSTR2_11=FIELD6=[NAME=\"CTR\", RECT=(300  340  1900 400),  FONT=5, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA3.6];
+INSTR2_12=)
+\n"),
+@ ("\n"),
+
+@ ("/////////////////////////////////////////////////////////////////////\n"),
+
+@ ("
+INSTR3=Line(0  420, 1900  420, PEN1); 
+\n"),
+@ ("\n"),
+
+
+@ ("
+/////////////////////////////////////////////////////////////
+// table headers infos delivery 
+INSTR4=TableEx(DATAOBJ=DATA3; RECT=0 460 2700 540; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR4_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=80;
+INSTR4_2=TITLE=\"Delivery INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR4_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR4_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+
+INSTR4_5=FIELDCOUNT=15;
+INSTR4_6=NAMES=(
+INSTR4_7=FIELD1=[NAME=\"No palette\",     RECT=(0     0    90  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"No\"];
+INSTR4_8=FIELD2=[NAME=\"No palette\",     RECT=(0    40   100  80),  FONT=16,ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"Palette\"];
+INSTR4_9=FIELD3=[NAME=\"Article\",        RECT=(90    0   400  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Article\"];
+INSTR4_10=FIELD4=[NAME=\"Description\",   RECT=(400   0  1100  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Description\"];
+INSTR4_11=FIELD5=[NAME=\"Order\",         RECT=(1100  0  1280  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Commande\"];
+INSTR4_12=FIELD6=[NAME=\"Quantity(PCS)\", RECT=(1280  0  1420  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Quantit \"];
+INSTR4_13=FIELD7=[NAME=\"Quantity(PCS)\", RECT=(1280 40  1420  80),  FONT=9, ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"(PCS)\"];
+INSTR4_14=FIELD8=[NAME=\"N.W.(KGS)\",     RECT=(1420  0  1560  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Poids net\"];
+INSTR4_15=FIELD9=[NAME=\"N.W.(KGS)\",     RECT=(1420 40  1560  80),  FONT=9, ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"(KG)\"];
+INSTR4_16=FIELD10=[NAME=\"Volume\",       RECT=(1560  0  1700  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Volume\"];
+INSTR4_17=FIELD11=[NAME=\"Volume\",       RECT=(1560 40  1700  80),  FONT=9, ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"(L)\"];
+INSTR4_18=FIELD12=[NAME=\"QtyColis\",     RECT=(1700  0  1800  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1, BPEN=, TEXT=\"Qté/\"];
+INSTR4_19=FIELD13=[NAME=\"QtyColis\",     RECT=(1700 40  1800  80),  FONT=9, ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"Colis\"];
+INSTR4_20=FIELD14=[NAME=\"NbColis\",      RECT=(1800  0  1900  40),  FONT=9, ALIGN=6, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1,TPEN=1, BPEN=, TEXT=\"Nb\"];
+INSTR4_21=FIELD15=[NAME=\"NbColis\",      RECT=(1800 40  1900  80),  FONT=9, ALIGN=4, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1,TPEN=,  BPEN=, TEXT=\"Colis\"];
+INSTR4_22=)
+\n"),
+@ ("\n"),
+
+
+@ ("
+////////////////////////////////////////////////
+// table infos 
+INSTR5=Table(DATAOBJ=DATA4; RECT=0 540 1900 _; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR5_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=50;
+INSTR5_2=TITLE=\"PRODUCT INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR5_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR5_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR5_5=FIELDCOUNT=9;
+INSTR5_6=NAMES=(
+INSTR5_7=FIELD1=[NAME=\"Palette\",  RECT=(0    0    90  50),  FONT=9,  ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.2];
+INSTR5_8=FIELD2=[NAME=\"Article\",  RECT=(90   0   400  50),  FONT=9 , ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.3, MARGIN=(5 5 5 5)];
+INSTR5_9=FIELD3=[NAME=\"Descrip\",  RECT=(400  0  1100  50),  FONT=16, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.4, MARGIN=(5 5 5 5)];
+INSTR5_10=FIELD4=[NAME=\"Order\",   RECT=(1100 0  1280  50),  FONT=9,  ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.5];
+INSTR5_11=FIELD5=[NAME=\"Quantity\",RECT=(1280 0  1420  50),  FONT=9,  ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.6, MARGIN=(5 5 5 5)];
+INSTR5_12=FIELD6=[NAME=\"N.W.(KG)\",RECT=(1420 0  1560  50),  FONT=9,  ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.7, MARGIN=(5 5 5 5)];
+INSTR5_13=FIELD7=[NAME=\"Volume\",  RECT=(1560 0  1700  50),  FONT=9,  ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.12, MARGIN=(5 5 5 5)];
+INSTR5_14=FIELD8=[NAME=\"QtyColis\",RECT=(1700 0  1800  50),  FONT=9,  ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=1, OBJ=DATA4.13, MARGIN=(5 5 5 5)];
+INSTR5_15=FIELD9=[NAME=\"NbColis\", RECT=(1800 0  1900  50),  FONT=9,  ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1,TPEN=1,  BPEN=1, OBJ=DATA4.14, MARGIN=(5 5 5 5)];
+INSTR5_16=)
+\n"),
+@ ("\n"),
+
+
+@ ("
+////
+INSTR6=SetTopOfPage;
+////
+\n"),
+@ ("\n"),
+
+
+@ ("
+// delivery total
+
+// table infos 
+INSTR7=TableEx(DATAOBJ=DATA6; RECT=0 0 1900 60; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR7_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=60;
+INSTR7_2=TITLE=\"TOTAL INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR7_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR7_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR7_5=FIELDCOUNT=10;
+INSTR7_6=NAMES=(
+INSTR7_7=FIELD1=[NAME=\"Palette\",  RECT=(0    0    90  60),  FONT=10, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR7_8=FIELD2=[NAME=\"Article\",  RECT=(90   0   400  60),  FONT=10, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, OBJ=DATA6.1, MARGIN=(5 5 5 5)];
+INSTR7_9=FIELD3=[NAME=\"G.W\",      RECT=(400  0   680  60),  FONT=10, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, TEXT=\"Poids brut (KG)\"];
+INSTR7_10=FIELD4=[NAME=\"G.W.\",    RECT=(680  0  1100  60),  FONT=10, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,   RPEN=,  TPEN=1,  BPEN=, OBJ=DATA6.5, MARGIN=(5 5 10 5)];
+INSTR7_11=FIELD5=[NAME=\"Order\",   RECT=(1100 0  1280  60),  FONT=10, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR7_12=FIELD6=[NAME=\"Quantity\",RECT=(1280 0  1420  60),  FONT=10, ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, OBJ=DATA6.2, MARGIN=(5 5 5 5)];
+INSTR7_13=FIELD7=[NAME=\"N.W.(KG)\",RECT=(1420 0  1560  60),  FONT=10, ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, OBJ=DATA6.3, MARGIN=(5 5 5 5)];
+INSTR7_14=FIELD8=[NAME=\"Volume\",  RECT=(1560 0  1700  60),  FONT=10, ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, OBJ=DATA6.4, MARGIN=(5 5 5 5)];
+INSTR7_15=FIELD9=[NAME=\"Colis\",   RECT=(1700 0  1800  60),  FONT=10, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=,  TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR7_16=FIELD10=[NAME=\"Colis\",  RECT=(1800 0  1900  60),  FONT=10, ALIGN=8, TCOLOR=1, FCOLOR=4, LPEN=1,  RPEN=1, TPEN=1,  BPEN=, OBJ=DATA6.7, MARGIN=(5 5 5 5)];
+
+INSTR7_17=)
+\n"),
+@ ("\n"),
+
+@ ("
+INSTR8=EndPage
+\n"),
+@ ("\n"),
+
+
+@ ("
+//INSTR10=SQL
+//INSTR10_1=SQL1=UPDATE {/*OWNER*/}Delivery D set State='2' where D.[IdDelivery]={/*PARAM3*/} and (State<'2' or State is NULL)
+
+//INSTR10_1=SQL1=UPDATE 
+//INSTR10_2=SQL1=SET KM=12345 
+//INSTR10_3=SQL1=WHERE ID='{/*DATA1.1.1*/}'
+//INSTR10_4=SQL2=UPDATE TOURNEE SET DUREE=12345 WHERE ID='{/*DATA1.1.1*/}'
+
+//INSTR11=EndDoc
+
+//INSTR12=XML
+\n"),
+@ ("\n"),
+
+
+	'@' <- [serverPrintPath printFile ".ini"], 
+
+),
+

@@ -1,0 +1,22 @@
+/******************************************************/
+/*	          	Routing	             	      */
+/*                                                    */
+/*	         	PredictRouting.n              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+% Pre-Query conclusion
+loop = 0 && 'Search Count' = 0 => (
+	nbVehicleAtLeast := \underline{#VehicleActive},
+	nbTourAtLeast := \underline{#TourActive},
+
+	('hh:mm:ss' TAG_TAB_1 TAG_VEHICLE_AT_LEAST nbVehicleAtLeast "  " TAG_TOUR_AT_LEAST nbTourAtLeast : true ),
+
+
+	(TAG_SEPARATION_LINE : true ),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_SOLVING : true),
+),
+

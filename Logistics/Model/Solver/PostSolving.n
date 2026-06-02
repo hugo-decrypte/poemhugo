@@ -1,0 +1,30 @@
+%==================================================%
+%             	    PostSolving.n    	   	   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+
+% Attention: failure may occur at parsing. PostSolving may be not reached
+? resultLoop_{0} (
+	'optimal solution proved',
+
+	'all solutions found',
+	'approximate solution found',
+	'stopped with solution':
+
+%!!,
+		(resultLoop_{0} : '.'),
+		;
+
+	'stopped without solution':
+		(TAG_STOPPED_NO_SOLUTION : false),
+		;
+
+	'no solution exists':
+		(TAG_NO_SOLUTION : false),
+		;
+
+	:
+		(resultLoop_{0} : false),
+),

@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%           	Logistics			   %
+%                                                  %
+%  		DataVehicle.n 			   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: VEHICLE
+@ "Data ",
+
+% ID
+@ ("VEHICLE '"),
+
+% Caption
+@ ("Vehicle"),
+
+% Group
+@ "' VEHICLE ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,IDVEHICLE,Camion ID,,15.0.80,0);(string,IMMATRIC,Immatriculation,,50.0.300,0);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT v.id AS IDVEHICLE, \
+	      v.Immatric as IMMATRIC \
+	FROM " DB_PREFIX "VEHICLE v \
+	ORDER BY v.Id\"\n\n\n"),
+

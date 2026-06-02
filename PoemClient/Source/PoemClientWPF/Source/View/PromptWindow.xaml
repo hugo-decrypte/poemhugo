@@ -1,0 +1,206 @@
+﻿<Window x:Class="PoemClient.Source.View.PromptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PoemClient.Source.View"
+        mc:Ignorable="d"
+        Title="Assistante" Width="492" SizeToContent="Height"
+        Closing="PromptClosing"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#F4F4F9"
+        FontFamily="Segoe UI"
+        Topmost="True">
+
+    <Window.Resources>
+
+        <Style x:Key="RoundedComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="toggleButton"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="border"
+                                                Background="#FFFFFF"
+                                                BorderBrush="#E0E0E0"
+                                                BorderThickness="1"
+                                                CornerRadius="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                                <Path Grid.Column="1" Data="M 0 0 L 4 4 L 8 0 Z"
+                                                      Fill="#888888" VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#90CAF9"/>
+                                                <Setter TargetName="border" Property="Background" Value="#F0F8FF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              Margin="12,0,30,0"
+                                              VerticalAlignment="Center"
+                                              IsHitTestVisible="False"/>
+                            <Popup x:Name="PART_Popup"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                   MinWidth="{TemplateBinding ActualWidth}">
+                                <Border Background="#FFFFFF"
+                                        BorderBrush="#E0E0E0"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Margin="0,2,0,0">
+                                    <ScrollViewer MaxHeight="200">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <StackPanel Margin="20">
+
+        <!-- Zone de texte -->
+        <Border x:Name="PromptBorder"
+                Background="#FFFFFF"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                CornerRadius="8"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="44"/>
+                    <ColumnDefinition Width="44"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Champ texte + placeholder -->
+                <Grid Grid.Column="0">
+                    <TextBox x:Name="Prompt"
+                             Height="70"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Padding="12,10"
+                             FontSize="14"
+                             TextWrapping="Wrap"
+                             VerticalContentAlignment="Top"
+                             VerticalScrollBarVisibility="Auto"
+                             Foreground="#222222" Margin="0,0,10,0">
+
+                    </TextBox>
+                </Grid>
+
+                <!-- Bouton micro -->
+                <Button x:Name="Speech"
+                        Grid.Column="1"
+                        Click="MonBoutonImage_Click"
+                        Cursor="Hand"
+                        Width="32" Height="32"
+                        VerticalAlignment="Center"
+                        Margin="2,0,10,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="MicBorder"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#E0E0E0"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                <Image x:Name="Image"
+                                       Source="{Binding Voice1Icon}"
+                                       Stretch="Uniform"
+                                       Margin="5"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="MicBorder" Property="Background" Value="#E3F2FD"/>
+                                    <Setter TargetName="MicBorder" Property="BorderBrush" Value="#90CAF9"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="MicBorder" Property="Background" Value="#BBDEFB"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Bouton envoi -->
+                <Button x:Name="Confirm"
+                        Grid.Column="2"
+                        Click="ConfirmPrompt"
+                        Cursor="Hand"
+                        Width="32" Height="32"
+                        VerticalAlignment="Center"
+                        Margin="2,0,10,0"
+                        FontWeight="Normal">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border"
+                                Background="#FFFFFF"
+                                BorderBrush="#E0E0E0"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <TextBlock Text="➤"
+                                    FontSize="14"
+                                    Foreground="#555555"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#90CAF9"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#BBDEFB"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#E0E0E0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+            </Grid>
+        </Border>
+
+        <!-- Footer : ComboBox uniquement -->
+        <ComboBox x:Name="AiModelSelector"
+                  Style="{StaticResource RoundedComboBox}"
+                  ItemsSource="{Binding LanguagesAI}"
+                  SelectionChanged="AISelectionChanged"
+                  SelectedItem="{Binding SelectedFrom, Mode=OneWay}"/>
+
+    </StackPanel>
+</Window>

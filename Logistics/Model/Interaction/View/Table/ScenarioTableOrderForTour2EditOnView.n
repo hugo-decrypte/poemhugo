@@ -1,0 +1,277 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableOrderForTour2EditOnView.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+%================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddOrderToTour ",
+
+% Caption
+@ ("'" TAG_ORDER_TO_ADD_FOR_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_ORDER_TO_ADD "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDERFORTOUR' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+%% create delivery if not exists
+AddOrderToTour_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "DELIVERY\\\n"
+	"(IdClub, IdDelivery, IdClient, IdPointDelivery, IdTour, DateDelivery, IdAgency, Quantity, QuantityReal,\\\n"
+	"  Comments, State) \\\n"
+	" select O.IdClub, 'D'+O.Id, O.IdClient, O.IdPointDelivery, (/*IDTOUR*/),(/*DATETOUR*/), O.IdAgency, O.QuantityRest, O.QuantityRest,\\\n"
+	" 'Commande '+O.Id, '0'\\\n"
+	" from " DB_PREFIX "CLIENTORDER O\\\n"
+	" where O.Id = '[/*ORDER.ID*/]'\\\n"
+	"  and not exists (select 1 from " DB_PREFIX "DELIVERY D where D.Id='D'+O.Id)\"\\\n"
+),
+
+%% add product into delivery if not exists
+AddOrderToTour_SQL2 = (
+	"\"INSERT INTO " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery,IdOrder, IdProduct, NoLine, Quantity, QuantityCommand, QuantityReal, QuantityCmdRest, QuantityDefective, PriceUnit, Comments, DateDelivery,NoPallet,NoPalletDelivery, Discount,LabelDiscount,IdVAT) \\\n"
+	"  select 'D'+O.Id, O.Id, OP.IdProduct, 1 as NoLine,\\\n"
+	"  OP.QuantityRest, OP.QuantityRest, OP.Quantity, 0, 0, OP.PriceUnit, OP.Comments, (/*DATETOUR*/), OP.NoPallet,OP.NoPalletDelivery, OP.Discount,OP.LabelDiscount,OP.IdVAT\\\n"
+	" from " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on OP.IdOrder=O.Id\\\n"
+	" where O.Id='[/*ORDER.ID*/]'\\\n"
+	"  and OP.QuantityRest>0\\\n"
+	"  and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery='D'+O.Id and DP.IdOrder=O.Id and DP.NoLine=1 and DP.IdProduct=OP.IdProduct)\"\\\n"
+),
+
+%% NoPallet  if NULL
+AddOrderToTour_SQL3 = (
+	"\"UPDATE " DB_PREFIX "DELIVERY_PRODUCT SET NoPalletDelivery= NoPallet where IdDelivery='D'+'[/*ORDER.ID*/]' and NoPalletDelivery is NULL \"\\\n"
+),
+%% NoPalletDelivery if NULL
+AddOrderToTour_SQL4 = (
+	"\"UPDATE " DB_PREFIX "ORDER_PRODUCT SET NoPalletDelivery= NoPallet where IdOrder='[/*ORDER.ID*/]' and NoPalletDelivery is NULL \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	%% set delivery values
+	AddOrderToTour_SQL5 = (
+		"\"update " DB_PREFIX "DELIVERY D set D.AmountHT=0, AmountVAT=0, Weight=0, NbPallet=0 where D.Id='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+
+	%% AmountHT
+	AddOrderToTour_SQL6 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id SET D.AmountHT= D.AmountHT+DP.Quantity*DP.PriceUnit where DP.IdDelivery='D'+'[/*ORDER.ID*/]' \"\\\n"
+	),
+
+	%% AmountVAT
+	AddOrderToTour_SQL7 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct SET DP.IdVAT= P.IdVAT where DP.IdDelivery='D'+'[/*ORDER.ID*/]' and (DP.IdVAT is NULL or DP.IdVAT<=' ') \"\\\n"
+	),
+	AddOrderToTour_SQL8 = (
+		"\"UPDATE (" DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id) inner join " DB_PREFIX "VAT T on T.IdVAT=DP.IdVAT SET D.AmountVAT= D.AmountVAT+DP.Quantity*DP.PriceUnit*T.VAT/100.0 where DP.IdDelivery='D'+'[/*ORDER.ID*/]' \"\\\n"
+	),
+
+	AddOrderToTour_SQL9 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY D SET D.AmountTotal =D.AmountHT + D.AmountVAT where D.Id='D'+'[/*ORDER.ID*/]' \"\\\n"
+	),
+
+	%% Weight
+	AddOrderToTour_SQL10 = (
+		"\"UPDATE (" DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id) inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct SET D.Weight= D.Weight+DP.Quantity*P.Weight where DP.IdDelivery='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+
+	%% NbPallet
+	AddOrderToTour_SQL11 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY D INNER JOIN " DB_PREFIX "DELIVERY_PRODUCT DP ON DP.IdDelivery = D.Id SET D.NbPallet= D.NbPallet+1 where D.Id='D'+'[/*ORDER.ID*/]' and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.NoPalletDelivery=DP.NoPalletDelivery and (DP0.IdOrder<DP.IdCOmmand or DP0.IdProduct<DP.IdProduct or DP0.NoLine<DP.NoLine) )\"\\\n"
+	),
+
+	%% ORDER values
+	AddOrderToTour_SQL12 = (
+		"\"Update " DB_PREFIX "CLIENTORDER O\\\n"
+		" set O.DateDelivery=(/*DATETOUR*/), QuantityRest=0, O.State='2'\\\n"
+		" where O.Id='[/*ORDER.ID*/]'\"\\\n"
+	),
+
+	AddOrderToTour_SQL13 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT OP \\\n"
+		" set OP.QuantityDelivered=OP.QuantityDelivered+OP.QuantityRest, OP.QuantityRest=0\\\n"
+		" where OP.IdOrder='[/*ORDER.ID*/]'\\\n"
+		"  and OP.QuantityRest>0 \"\\\n"
+	),
+
+	%% Tour values
+	AddOrderToTour_SQL14 = (
+		"\"Update " DB_PREFIX "TOUR T set T.Weight=0, Volume=0, NbPallet=0 \\\n"
+		" WHERE T.Id=(/*IDTOUR*/)\"\\\n"
+	),
+
+	AddOrderToTour_SQL15 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		" inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		" inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		"  set T.Weight=T.Weight + DP.Quantity*P.Weight\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Weight is not NULL \"\\\n"
+	),
+
+	AddOrderToTour_SQL16 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		" inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		" inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		"  set T.Volume=T.Volume + DP.Quantity*P.Volume\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Volume is not NULL \"\\\n"
+	),
+
+	%% NbPallet
+	AddOrderToTour_SQL17 = (
+		"\"Update (" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		"  set T.NbPallet=T.NbPallet + D.NbPallet\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and D.NbPallet is not NULL \"\n\n"
+	),
+
+	;
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù
+
+	%% set delivery values
+
+	%% IdVAT
+	AddOrderToTour_SQL5 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY_PRODUCT SET \\\n"
+		"  IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.ID=IdProduct) \\\n"
+		"where IdDelivery='D'+'[/*ORDER.ID*/]' and (IdVAT is NULL or IdVAT<=' ') \"\\\n"
+	),
+
+	%% AmountHT
+	AddOrderToTour_SQL6 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY SET \\\n"
+		"	AmountHT  = (select sum(DP.Quantity*DP.PriceUnit) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery = DELIVERY.Id ),\\\n"
+		"	AmountVAT = (select sum(DP.Quantity*DP.PriceUnit*T.VAT/100.0) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "VAT T on T.IdVAT=DP.IdVAT where DP.IdDelivery = DELIVERY.Id ),\\\n"
+		"	Weight	  = (select sum(DP.Quantity*P.Weight) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct where DP.IdDelivery = DELIVERY.Id ),\\\n"
+		"	Volume	  = (select sum(DP.Quantity*P.Volume) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct where DP.IdDelivery = DELIVERY.Id ),\\\n"
+		"	NbPallet  = (select count(1) from (slect distinct NoPalletDelivery from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery = DELIVERY.Id) PAL ),\\\n"
+		"where DP.IdDelivery='D'+'[/*ORDER.ID*/]' \"\\\n"
+	),
+
+	AddOrderToTour_SQL7 = (
+		"\"update " DB_PREFIX "DELIVERY set AmountHT=0, AmountVAT=0 where AmountHT is NULL and Id='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+	AddOrderToTour_SQL8 = (
+		"\"update " DB_PREFIX "DELIVERY set Weight=0 where Weight is NULL and Id='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+	AddOrderToTour_SQL9 = (
+		"\"update " DB_PREFIX "DELIVERY set Volume=0 where Volume is NULL and Id='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+	AddOrderToTour_SQL10 = (
+		"\"update " DB_PREFIX "DELIVERY set NbPallet=0 where NbPallet is NULL and Id='D'+'[/*ORDER.ID*/]'\"\\\n"
+	),
+
+	AddOrderToTour_SQL11 = (
+		"\"UPDATE " DB_PREFIX "DELIVERY SET AmountTotal =AmountHT + AmountVAT where Id='D'+'[/*ORDER.ID*/]' \"\\\n"
+	),
+
+
+	%%%%%%%
+	%% ORDER values
+	AddOrderToTour_SQL12 = (
+		"\"Update " DB_PREFIX "CLIENTORDER set \\\n"
+		"  DateDelivery=(/*DATETOUR*/), QuantityRest=0, State='2'\\\n"
+		" where Id='[/*ORDER.ID*/]'\"\\\n"
+	),
+
+	AddOrderToTour_SQL13 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT set \\\n"
+		" 	QuantityDelivered=QuantityDelivered+QuantityRest, QuantityRest=0\\\n"
+		" where IdOrder='[/*ORDER.ID*/]'\\\n"
+		"  and QuantityRest>0 \"\\\n"
+	),
+
+	%% Tour values
+	AddOrderToTour_SQL14 = (
+		"\"Update " DB_PREFIX "TOUR set \\\n"
+		"	Weight=(select sum(D.Weight) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour),\\\n"
+		"	Volume=(select sum(D.Volume) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour),\\\n"
+		"	NbPallet=(select sum(D.NbPallet) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour) \\\n"
+		" WHERE Id=(/*IDTOUR*/)\"\\\n"
+	),
+
+	AddOrderToTour_SQL15 = (
+		"\"Update " DB_PREFIX "TOUR set Weight=0 \\\n"
+		" WHERE Weight is NULL and Id=(/*IDTOUR*/)\"\\\n"
+	),
+
+	AddOrderToTour_SQL16 = (
+		"\"Update " DB_PREFIX "TOUR set Volume=0 \\\n"
+		" WHERE Volume is NULL and Id=(/*IDTOUR*/)\"\\\n"
+	),
+	AddOrderToTour_SQL17 = (
+		"\"Update " DB_PREFIX "TOUR set NbPallet=0 \\\n"
+		" WHERE NbPallet is NULL and Id=(/*IDTOUR*/)\"\\\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\AddOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) (/*DATETOUR*/) {/*Selected(tableORDERFORTOUR;1;(string,ID);)*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" ),
+		@ ("'\\\n"),
+		@ AddOrderToTour_SQL1,
+		@ AddOrderToTour_SQL2,
+		@ AddOrderToTour_SQL3,
+		@ AddOrderToTour_SQL4,
+		@ AddOrderToTour_SQL5,
+		@ AddOrderToTour_SQL6,
+		@ AddOrderToTour_SQL7,
+		@ AddOrderToTour_SQL8,
+		@ AddOrderToTour_SQL9,
+		@ AddOrderToTour_SQL10,
+		@ AddOrderToTour_SQL11,
+		@ AddOrderToTour_SQL12,
+		@ AddOrderToTour_SQL13,
+		@ AddOrderToTour_SQL14,
+		@ AddOrderToTour_SQL15,
+		@ AddOrderToTour_SQL16,
+		@ AddOrderToTour_SQL17,
+),

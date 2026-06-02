@@ -1,0 +1,86 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableTour.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableTour>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)	% JZ 1021
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableTour" postfix),
+
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT t.Id AS ID,\\\n"),
+ 		@ ("\t\t (select dr.LastName from " DB_PREFIX "DRIVER dr where dr.ID=t.idDriver) as NAMEDRIVER,\\\n"),
+ 		@ ("\t\t t.idVehicle AS IDVEHICLE,\\\n"),
+		@ ("\t\t  "SQL_FORMATDATE"(t.T1,'"SQL_FORMATDATESTR"')  as DATETOUR,\\\n"),
+ 		@ ("\t\t  mid(t.T1, 12,5) as T1,\\\n"),
+		@ ("\t\t  mid(t.T2, 12,6) as T2,\\\n"),
+		@ ("\t\t  (select count(1) from " DB_PREFIX "DELIVERY d where d.IdTour=t.Id) as NBCLIENT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(t.Weight,"SQL_FORMATSCALE1") as WEIGHT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(t.Volume,"SQL_FORMATSCALE1") as VOLUME,\\\n"),
+		@ ("\t\t (select sum(NbPallet) from " DB_PREFIX "DELIVERY d where d.IdTour=t.Id) as NBPALLET,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(t.KM/1000.0,"SQL_FORMATSCALE1") as KM,\\\n"),
+		@ ("\t\t t.worktime as WORKTIME,\\\n"),
+		@ ("\t\t t.routeTime as ROUTETIME,\\\n"),
+		@ ("\t\t  "SQL_CASEWHEN"t.IdState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='TOUR')"SQL_THEN"\\\n"),
+		@ ("\t\t    (select Label from " DB_PREFIX "STATE s where s.Id=t.IdState and s.CATEGORY='TOUR')"SQL_ELSE"\\\n"),
+		@ ("\t\t    t.IdState) as STATE,\\\n"),
+		@ ("\t\t  "SQL_CASEWHEN"t.IdState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='TOUR')"SQL_THEN"\\\n"),
+		@ ("\t\t    (select Color from " DB_PREFIX "STATE s where s.Id=t.IdState and s.CATEGORY='TOUR')"SQL_ELSE"\\\n"),
+		@ ("\t\t   '(255 255 255)') AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "TOUR t\\\n"),
+		@ ("\t WHERE (t.IdState is NULL or t.IdState<>'9')\\\n"),
+ 		%@ ("\t AND (t.DateTour is NULL or t.DateTour<=0 or "SQL_FORMATNUM"(t.DateTour,"SQL_FORMATSCALE0")>"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"')-3000)\\\n"),
+		@ ("\t ORDER BY t.Id desc\"\n\n\n"),
+		
+
+		
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2EditTour.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2TableDeliveryMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2TableDeliveryForTour.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2TableOrderForTour.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2OptimizeTour.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2PrintDeliveryPreparation.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2PrintPalletNote.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2PrintTour.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2PrintDelivery.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2PrintInvoice.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTour2TableState.n"],
+
+
+
+		%=============================================================================
+		['Work Directory' "Model\View\Data\DataDriver.n"],
+		['Work Directory' "Model\View\Data\DataVehicle.n"],
+		%=============================================================================
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

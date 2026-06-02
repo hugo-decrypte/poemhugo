@@ -1,0 +1,27 @@
+%==================================================%
+%                                                  %
+%           	Logistics               			 %
+%                                                  %
+%  		   DataBankAccount.n  					  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+@ ("/// BANKACCOUNT /////////////// \n"),
+
+@ ("Data BANKACCOUNT 'BankAccount' BANKACCOUNT "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[3;(string,IDBANK," TAG_BANK_ID ",,15.0.80,0);(string,NAMEBANK," TAG_BANK_NAME ",,100.0.100,0);(string,CITYBANK,Domiciliation,,15.0.80,0);]\"\\\n"),
+
+@ VIEWSQL,
+@ ("SELECT id AS IDBANK, \\\n"),
+@ ("\t\t Name as NAMEBANK, \\\n"),
+@ ("\t\t Domiciliation as CITYBANK \\\n"),
+@ ("\t FROM BANKACCOUNT\"\n\n\n"),
+
+
+
+
+

@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%	ViewTableBalanceSheetRevenueProduct.n      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableBalanceSheetRevenueProduct.n"],
+
+'@' => (
+	tableBalanceSheetRevenue("",TAG_TABLE,"BALANCEREVENUEPRODUCT",true,"", TAG_BALANCE_REVENUE_PRODUCT,	"",	""), % JZ 1021 
+	tableBalanceSheetRevenue("",TAG_TABLE,"BALANCEREVENUEPRODUCT",true,"", TAG_BALANCE_REVENUE_1_YEAR,	"Menu",	""),
+),

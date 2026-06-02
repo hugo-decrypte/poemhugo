@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableAgency.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableAgency>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+
+
+	'@' => (
+		['Work Directory' "Model\Common\SQL\SqlResource.n"],
+
+
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableAgency" postfix0),
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(color,LINERGB," TAG_RGB ",,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+	    	@ ("SELECT distinct t.id 	AS ID, \
+			t.name 				AS NAME,\
+			t.capital 			AS CAPITAL,\
+			t.registry 			AS REGISTRY,\
+			t.codeTax 			AS CODETAX,\
+			t.codeBusiness 			AS CODEBUSINESS,\
+			t.codeActivity 			AS CODEACTIVITY,\
+			t.establishment 		AS ESTABLISHMENT,\
+			t.address 			AS ADDRESS,\
+			t.postcode 			AS POSTCODE,\
+			t.city	 			AS CITY,\
+			t.country	 		AS COUNTRY,\
+			t.phone	 			AS PHONE,\
+			t.email	 			AS EMAIL,\
+			t.comments 			AS COMMENTS,\
+			t.state				AS STATE,\
+			" SQL_TypeStateName "		AS NAMESTATE,\
+			" SQL_TypeStateColor "		AS LINERGB \
+	 		FROM " DB_PREFIX "AGENCY t\"\n\n\n"),
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableAgency2EditAgency.n"],
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

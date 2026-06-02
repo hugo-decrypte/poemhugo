@@ -1,0 +1,58 @@
+%==================================================%
+%                                                  %
+%            	  Routing	    	           %
+%                                                  %
+%  	   ResetDateForView.n      		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+divisorMargin		= 50,
+
+date1 :: defaultDate,
+date2 :: defaultDate,
+
+date1 <> defaultDate =>(
+	sqlDate1 = (" '" date1 "' "),
+	date1View = (date1 < date1Plan ? date1Plan : date1),
+	;
+	sqlDate1 = SQL_SelectPlanDate1,
+	date1View = date1Plan,
+),
+
+date2 <> defaultDate =>( 
+	sqlDate2 = (" '" date2 "' "),
+	date2View = (date2 =< date2Plan ? 
+		date2
+		:
+		(date2Plan > date2Plan || date2Plan >= \sup{DATE} ? 
+			date2Plan
+			:
+			(time2Plan+1 < timeDay ? date2Plan : date2Plan+1)
+		)
+	),
+	;
+
+	sqlDate2 = SQL_SelectPlanDate2, % Zhou 0819
+	date2View = date2Plan,
+),
+
+time1View = time1Plan,
+time2View :: defaultTime,
+
+
+? timeFormat(
+	"hh":
+		time2View = (time2Plan = t2[timeFormat] ? time2Plan : time2Plan+1) ,
+	;
+	"hh:mm":
+		time2View = (time2Plan = t2[timeFormat] ? time2Plan : time2Plan+timeMinute*1),
+	;
+	"hh:mm:ss":
+		time2View = (time2Plan = t2[timeFormat] ? time2Plan : time2Plan+1),
+),
+
+
+dateMargin = (date1View < date2View ? (date2View - date1View) \div divisorMargin : 0),
+timeMargin = (dateMargin > 0 ? 0 : \lceil (time2View - time1Plan) / divisorMargin \rceil),

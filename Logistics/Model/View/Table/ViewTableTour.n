@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableTour.n    		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableTour.n"],
+
+'@' => (
+	tableTour("TOUR", TAG_TABLE, "TOUR",true,"TableDelivery",TAG_TOUR,"",""), 	% JZ 1021
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

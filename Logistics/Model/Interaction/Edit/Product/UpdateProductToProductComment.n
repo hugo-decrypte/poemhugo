@@ -1,0 +1,55 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductToProductComment.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idProductBuffer :: "",
+	
+	
+	idProductBuffer = (),
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjBuffer_{i} 		:: "",
+		idObjBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "',"),
+			;
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJBUFFER :: "",
+	IDOBJBUFFER = [\forall i \in [1, nbSelected] strIdObjBuffer_{i}],
+	
+
+
+	'()' <- database,
+	
+
+	UpdateProductToProductComment_SQL1 = (
+		"Update " DB_PREFIX "PRODUCT_COMPONENT set Comments='[/*COMMENTS*/]'
+		WHERE IdProduct in ("idProductBuffer")
+		and IdSubProduct in ("IDOBJBUFFER") "
+	),
+
+	(SQL : UpdateProductToProductComment_SQL1), 
+	
+	
+	database <- '()',
+),

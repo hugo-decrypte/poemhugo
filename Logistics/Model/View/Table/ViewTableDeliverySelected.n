@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableDeliverySelected.n     %   % what's the difference between TableDelivery ? wp ask
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableDeliverySelected.n"],
+
+'@' => (
+	tableDeliverySelect("", TAG_TABLE,"", TAG_DELIVERY " (/*TITLEOBJ*/)"), 
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

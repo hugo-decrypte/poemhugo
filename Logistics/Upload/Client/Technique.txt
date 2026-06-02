@@ -1,0 +1,7 @@
+SHEET_NUMBER=1;
+SHEET_NAME=Technique;20;3;
+length;width;height;quantity;weight;volume;temperature;pression;humidity;visibility;heat;speed;time;mileage;quote;cost;penality;indices;revenue;profit;
+330;;3;;;6;;;1000;;70;;37500;;;;;{2..3,6..7};700.00;163;
+;3;3;;;6;-10;;;;110;;;;;1000;;{3,6..7};99.854;25;
+500;;;200;45;4;;;;;;420;;;;;;{1..9};100000;;
+

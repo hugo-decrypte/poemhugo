@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	 Logistics	  	           %
+%                                                  %
+%  		ViewTableProductFamily.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductFamily.n"],
+
+'@' => (
+	tableProductFamily("FAMILYPRODUCT",TAG_TABLE,"FAMILYPRODUCT",true,"TableDefaultRateProduct",TAG_PRODUCT_FAMILY,""),
+),

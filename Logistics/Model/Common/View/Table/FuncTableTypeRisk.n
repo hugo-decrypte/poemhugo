@@ -1,0 +1,49 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableTypeRisk.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableTypeRisk>(id,type,aliasTable,bestfit, doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		viewFile = ("TableTypeRisk" postfix),
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+	    	@ ("SELECT t.id 			AS ID, \
+			t.name 				AS NAME,\
+			t.cost				AS COST,\
+			t.comments 			AS COMMENTS,\
+			" SQL_TypeStateName 		" AS NAMESTATE,\
+			" SQL_TypeStateColor 		" AS LINERGB \
+	 		FROM " DB_PREFIX "TYPERISK t \
+	 		ORDER BY t.state DESC,t.id\"\n\n\n"),
+
+			%" SQL_AliasCategoryIs "'BOOL' AND al.id=t.principal) AS PRINCIPAL,\
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTypeRisk2EditTypeRisk.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

@@ -1,0 +1,183 @@
+/********************************************************/
+/*							*/
+/*			WebGetSite.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+
+'()' => (
+	nameSite1 		:: "",
+	nameSite2 		:: "",
+
+	nameTypeResource	:: "",
+	nameTypeRisk		:: "",
+
+
+	idSite1 		:: "",
+	idSite2 		:: "",
+
+	latitudeSite1		:: 0.0,
+	longitudeSite1		:: 0.0,
+
+	latitudeSite2		:: 0.0,
+	longitudeSite2		:: 0.0,
+
+
+	nbArgument		= (),
+
+	nameSite1		= (),
+	nameSite2		= (),
+
+	nbArgument = 4 => (
+		nameTypeResource	= (),	% JZ 0825
+		nameTypeRisk		= (),
+	),
+
+
+	'()' <- database,
+
+
+	sqlReadSite = (
+		"SELECT id FROM "DB_PREFIX "SITE WHERE name='" nameSite1
+		"' UNION ALL SELECT id FROM "DB_PREFIX "SITE WHERE name='" nameSite2 "'"),
+ 
+	( SQL: sqlReadSite),
+
+	() = 2 => (
+		idSite1	= (),
+		idSite2	= (),
+		;
+
+		idSite1	= "",
+		idSite2	= "",
+	),
+
+
+
+
+	sqlReadlatitudelongitude = (
+		"SELECT latitude,longitude FROM "DB_PREFIX "SITE WHERE id='" idSite1 "'
+		UNION ALL SELECT latitude,longitude FROM "DB_PREFIX "SITE WHERE id='" idSite2 "'"),
+ 
+	( SQL: sqlReadlatitudelongitude),
+
+
+	() = 2 => (
+		latitudeSite1	= (),
+		longitudeSite1	= (),
+
+		latitudeSite2	= (),
+		longitudeSite2	= (),
+		;
+
+		latitudeSite1	= 0.0,
+		longitudeSite1	= 0.0,
+
+		latitudeSite2	= 0.0,
+		longitudeSite2	= 0.0,
+	),
+
+
+
+
+
+	nbArgument = 4 => (
+		(SQL: "SELECT rk.id FROM " DB_PREFIX "TYPERISK rk
+			WHERE rk.name='" nameTypeRisk "'"),
+
+
+		idTypeRisk	:: "",
+
+		() > 0 => (
+			idTypeRisk	= (),
+			;
+
+			idTypeRisk	= "none",	% JZ 0825
+		),
+
+
+		(SQL: "SELECT rc.id,rc.length,rc.width,rc.height,rc.maxWeight,rc.categoryTunnel,rc.nbTrailer FROM "
+			DB_PREFIX "OPT_TYPERESOURCE rc
+			WHERE rc.name='" nameTypeResource "'"),
+
+		( TAG_SQL_ERROR :
+			() > 0,
+		),
+
+		idTypeResource	:: "",
+
+		length		:: "",
+		width		:: "",
+		height		:: "",
+		maxWeight	:: "",
+		categoryTunnel	:: "",
+		nbTrailer	:: 0,
+
+
+		idTypeResource	= (),
+
+		length		= (),
+		width		= (),
+		height		= (),
+		maxWeight	= (),
+		categoryTunnel	= (),
+		nbTrailer	= (),
+	),
+
+
+	database <- '()',
+),
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+	@ (	"'" idSite1 			"'  "
+		\underline{latitudeSite1}	"  "
+		\underline{longitudeSite1}	"  \n"
+
+		"'" idSite2			"'  "
+		\underline{latitudeSite2}	"  "
+		\underline{longitudeSite2}	"  \n"
+	),
+
+
+
+	nbArgument = 4 => (
+		@ (  "'" idTypeResource		% JZ 0825
+		   "' '" idTypeRisk
+		    "' " length
+		     " " width
+		     " " height
+		     " " maxWeight
+		    " '" categoryTunnel
+		    "' " nbTrailer),
+
+		@ "\n",
+	),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+
+	( message : '.'),
+),
+
+
+.
+
+ '21361'  47.806407928466796875  3.154819965362548829  
+ '22590'  47.964118957519531250  3.485109806060791016  
+
+
+

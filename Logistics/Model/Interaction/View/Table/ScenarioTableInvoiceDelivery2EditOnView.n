@@ -1,0 +1,72 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableInvoiceDelivery2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyInvoice ",
+
+% Caption
+@ ("'" TAG_UPDATE_INVOICE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_UPDATE_INVOICE "' "),		% 0906
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableINVOICE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+@ ("'{/*Input(" TAG_UPDATE_INVOICE ";4;\\\n"),
+@ ("(string,IDINVOICE," TAG_INVOICE_ID ",[/*INVOICE.IDINVOICE*/],20." inputWidth ",0,,);\\\n"),
+@ ("(date,DATEINVOICE," TAG_INVOICE_DATE ",[/*INVOICE.DATEINVOICE*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"),
+@ ("(date,DATEPAYMENT," TAG_PAYMENT_DATE ",[/*INVOICE.DATEPAYMENT*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"),
+@ ("(int,DISCOUNT,Remise(%),[/*INVOICE.DISCOUNT*/],3." inputWidth ",1,,);\\\n"),
+@ (")*/}'\\\n"),
+@ ("\"Update " DB_PREFIX "DELIVERY set\\\n"),
+@ ("  IdInvoice='[/*IDINVOICE*/]',\\\n"),
+@ ("  DateInvoice=[/*DATEINVOICE*/],\\\n"),
+@ ("  DatePayment=[/*DATEPAYMENT*/],\\\n"),
+@ ("  Discount=[/*DISCOUNT*/]\\\n"),
+@ (" where IdDelivery='[/*INVOICE.IDDELIVERY*/]'\"\n\n"),
+
+
+
+
+

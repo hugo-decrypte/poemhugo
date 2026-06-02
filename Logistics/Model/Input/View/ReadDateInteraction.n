@@ -1,0 +1,31 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	   ReadDateInteraction.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0710
+% Read input buffer
+'()' => (
+	date1Interaction :: defaultDate,
+	date2Interaction :: defaultDate,
+
+	date1Interaction = (),
+	date2Interaction = (),
+
+	% Custom message
+	(TAG_T1_T2_CONFLICT : 
+		date1Interaction =< date2Interaction,
+	),
+		
+	( TAG_DATE_SELECTED_IS_EMPTY :
+		 date1ResourceSelected =< date2Interaction,
+	),
+	( TAG_DATE_SELECTED_IS_EMPTY :
+		date1Interaction  =< date2ResourceSelected,
+	),	%li 0715
+),
+
+

@@ -1,0 +1,35 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		EditClientZone.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'()' => (
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	\forall i \in [1,nbSelected] (
+		idClientSelected_{i} :: "",
+
+		idClientSelected_{i} = (),
+	),
+
+	idZoneBuffer	:: "",
+	idZoneBuffer	= (),
+	
+	IdClientSelected = \{ \forall i \in [1,nbSelected] idClientSelected_{i} \},
+
+	'()' <- database,
+	% update table client's zone
+	\forall c \in IdClientSelected (
+		(SQL : "UPDATE " DB_PREFIX "CLIENT SET idZone='" idZoneBuffer "'WHERE id='" c "'\n"),	
+	),
+	
+	database <- '()',
+),

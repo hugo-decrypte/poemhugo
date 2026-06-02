@@ -1,0 +1,55 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableOrder2TableOrderProduct.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableOrderProduct ",
+
+% Caption
+@ ("'" TAG_ORDER_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_ORDER_PRODUCT,
+
+% Label
+@ (" '" TAG_PRODUCTS "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableOrderProduct_Order.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS "TITLEOBJ=" TAG_PRODUCT_FOR_ORDER " {/*Selected(tableORDER;1;(string,ID))*/};IDPRODUCT='XXX';IDORDER={/*Selected(tableORDER;1;(string,ID))*/}]\"\n\n"),
+
+
+

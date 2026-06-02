@@ -1,0 +1,212 @@
+/******************************************************/
+/*	                                              */
+/*		 FuncChartTour.n  	    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+%timetable,viewtask, structured,expanded,bestfit : true,true, true,false,true
+
+%idTask		: TASK
+%idItem		: PROJECT
+%idDropScript	: MoveTask
+%idSelected	: Selected
+
+<chartTour>(type, timetable,viewtask, expanded,bestfit, id, idTask,idItem,idDropScript,idSelected,chartItemWidth, title, IdTour, postfix)	% JZ 1023
+(
+	'()' => (
+		MONTH0 = [1,12],
+
+		'()' <- database,
+
+		['Work Directory' "Model\Common\Config\ReadMonthDay.n"],
+
+		database <- '()',
+	),
+
+
+	'@' => (
+		%['Work Directory' "Model\Common\View\ResetDateForView.n"],
+		
+
+		viewFile = ("ChartTour" postfix ".view"),
+
+
+
+		[viewDirectory viewFile] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\BeginChart.n"],
+
+
+
+		IdTour = {} => (
+			sqlAndTourSelected = (" AND " SQL_ViewUserVisibleClubIs "t.idClub) "),
+			;
+
+			sqlAndTourSelected = (" AND " SQL_ViewUserVisibleClubIs "t.idClub) AND t.id IN (" concatSetQuoted(IdTour) ") "),
+		),
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idItem "' "),
+
+		% Caption
+		@ (" '" title "' "),
+
+		% Group	
+		@ (" '" idItem "' "),
+
+		% Source type (Data/DB/File/Clicked/Selected)
+		@ typeDataUser,
+
+
+		@ (" 0 '[TIPINFO=" TIPINFO_CHART_TOUR "]'  '_' \\\n"),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[14; (int,ID,ID,,10,0);"),
+
+		@ ("(string,TEXT,Text,,10,0);"),
+		@ ("(string,COLOR,COLOR,,,);"),
+		@ ("(string,Calendar,Calendar,,,," dateFormatSql ");"),
+		@ ("(string,TimeSlot,TimeSlot,,,,"timeFormatView");"),
+
+		@ ("(int,IDVEHICLE,IDVEHICLE,,10,0);"),
+		@ ("(string,T1,"TAG_PLAN_T1");"),
+		@ ("(string,T2,"TAG_PLAN_T2");"),
+		@ ("(int,QUANTITY,QUANTITY);"),
+		@ ("(int,WEIGHT,WEIGHT);"),
+		@ ("(int,VOLUME,VOLUME);"),
+		@ ("(float,RATEQUANTITY,RATEQUANTITY,,14.3.14,0);"),
+		@ ("(float,RATEWEIGHT,RATEWEIGHT,,14.3.14,0);"),
+		@ ("(float,RATEVOLUME,RATEVOLUME,,14.3.14,0);]\"\\\n"),
+
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT DISTINCT t.id  		AS ID, \
+				t.idResource 		AS IDVEHICLE, \
+				t.tourResource 		AS TOURVEHICLE, \
+				t.id+' '+CSTR(" SQL_CASEWHEN "t.nbOrder IS NULL" SQL_THEN "0" SQL_ELSE "t.nbOrder" SQL_CASEEND ") AS [TEXT], \
+				t.t1 			AS T1, \
+				t.t2 			AS T2, \
+				t.quantity 		AS QUANTITY, \
+				t.weight 		AS WEIGHT, \
+				t.volume 		AS VOLUME, \
+				t.rateQuantity 		AS RATEQUANTITY, \
+				t.rateWeight 		AS RATEWEIGHT, \
+				t.rateVolume 		AS RATEVOLUME, \
+				v.state, \
+				v.DateView 		AS Calendar, \
+				v.SlotView 		AS TimeSlot, \
+				'" RGB_WHITE "' 	AS COLOR \
+			FROM " DB_PREFIX "OPT_TOUR t," DB_PREFIX "RESOURCE v \
+			WHERE t.idResource=v.id AND v.state>='" STATE_PLANNED "'"
+				sqlAndTourSelected " ORDER BY t.idResource,t.tourResource \"\n\n"),
+
+
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idTask "' "),
+
+		% Caption	
+		@ (" '" idTask "' "),
+
+		% Group	
+		@ (" '" idTask "' "),
+
+
+		% Source type
+		@ typeDataUser,
+
+
+		@ (" 0 '[TIPINFO=" TIPINFO_CHART_TASK "]'  '_' \\\n"),
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[24;(string,ID,ID,,10,0);"),
+
+		@ ("(string,TEXT,Text,,10,0);"),
+		@ ("(string,GroupID,GroupID,,10,0);"),
+		@ ("(string,ItemID,ItemID,,10,0);"),
+		@ ("(string,Successor,Successor,,10,0);"),
+		@ ("(date,DateBegin,DateBegin,,,," dateFormatSql ");"),
+		@ ("(date,DateEnd,DateEnd,,,," dateFormatSql ");"),
+		@ ("(time,TimeBegin,TimeBegin,,,,"timeFormatView");"),
+		@ ("(time,TimeEnd,TimeEnd,,,,"timeFormatView");"),
+		@ ("(int,SELECTED,Selected,,,);"),
+		@ ("(string,COLOR,COLOR,,,);"),
+
+		@ ("(string,IDVEHICLE,IDVEHICLE);"),
+		@ ("(int,TOURVEHICLE,TOURVEHICLE,,10,0);"),
+		@ ("(datetime,T1PLAN,T1PLAN,,,,"dateTimeFormatView");"),
+		@ ("(datetime,T2PLAN,T2PLAN,,,,"dateTimeFormatView");"),
+		@ ("(datetime,T2SERVICEPLAN,T2SERVICEPLAN,,,,"dateTimeFormatView");"),
+
+		@ ("(string,IDORDER,OrderID);"),
+		@ ("(string,SITE1NAME,SITE1NAME);"),
+		@ ("(string,SITE2NAME,SITE2NAME);"),
+		@ ("(int,SERVICETIME,SERVICETIME);"),
+		@ ("(int,ROUTETIME,ROUTETIME);"),
+		@ ("(int,MILEAGE,MILEAGE);"),
+		@ ("(float,COST,COST,,14.3.14,0);"),
+		@ ("(float,RECEIPTS,RECEIPTS,,14.3.14,0);]\"\\\n"), % bai 0709
+
+		%@ ("(string,CAPTION,Caption,,10,0);"),
+
+
+		@ VIEWSQL,
+
+
+		@("SELECT p.idOrder 							AS ID, \
+			p.idOrder 							AS [TEXT], \
+			NULL 								AS GroupID, \
+			p.idTour 							AS ItemID, \
+			p.idOrderNext 							AS Successor, \
+			p.idResource 							AS IDVEHICLE, \
+			p.tourResource 							AS TOURVEHICLE, \
+			p.t1Service 							AS T1PLAN, \
+			p.t2Service 							AS T2SERVICEPLAN, \
+			p.t2 								AS T2PLAN, \
+			LEFT(p.t1Service,10) 						AS DateBegin, \
+			LEFT(p.t2,10) 							AS DateEnd, \
+			" (timeFormat = "hh:mm" ? "RIGHT(p.t1Service,5)" : "RIGHT(p.t1Service,8)") "	AS TimeBegin, \
+			" (timeFormat = "hh:mm" ? "RIGHT(p.t2,5)" : "RIGHT(p.t2,8)") "	AS TimeEnd, \
+			p.idOrder 							AS IDORDER, \
+			s1.name 							AS SITE1NAME, \
+			s2.name 							AS SITE2NAME, \
+			p.timeService 							AS SERVICETIME, \
+			p.timeRoute 							AS ROUTETIME, \
+			p.mileage 							AS MILEAGE, \
+			p.cost 								AS COST, \
+			p.receipts 							AS RECEIPTS, \
+			p.selected 							AS SELECTED, \
+			'" RGB_TASK "'	 						AS COLOR \
+		FROM " DB_PREFIX "OPT_TOUR t," DB_PREFIX "OPT_PLAN p," DB_PREFIX "SITE s1," DB_PREFIX "SITE s2 \
+		WHERE s1.id=p.idSite1 AND s2.id=p.idSite2 AND p.idTour=t.id"
+			sqlAndTourSelected " ORDER BY p.tourResource,p.t1Service,p.t2 \"\n\n"), 
+
+
+
+		['Work Directory' "Model\Common\View\EndChart.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile],
+	),
+),

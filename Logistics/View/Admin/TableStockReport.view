@@ -1,0 +1,81 @@
+View ViewTableSTOCKREPORT 'Rapport stock' 'Rapport stock'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableSTOCKREPORT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Rapport stock;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right}]"\
+"[DATAOBJ=STOCKREPORT;FILLCOLOR=LINERGB]"
+
+Data STOCKREPORT 'Rapport stock' STOCKREPORT HTTPSQL 0 '[FIND={ID,DESIGNATION,PRICE,QTYSTOCK,COSTINSTOCK,WEIGHTINSTOCK,QTYTRANSIT,COSTTRANSIT,WEIGHTTRANSIT,QTYDELIVERY,COSTDELIVERY,WEIGHTDELIVERY,MINQUANTITYSTOCK,QUANTITYSTOCK,quantityCOMMAND}]'   [DOUBLECLICK=] \
+"[15;(string,ID,Produit,,15,,);(string,DESIGNATION,Désignation,,25,,);(int,PRICE,Prix unitaire,,15,,);(int,QTYSTOCK,Qté en stock,,15,,);(string,COSTINSTOCK,Coût en stock,,15,,);(string,WEIGHTINSTOCK,Poids en stock,,16,,);(int,QTYTRANSIT,Qté transite,,15,,);(string,COSTTRANSIT,Coût transite,,15,,);(string,WEIGHTTRANSIT,Poids transite,,18,,);(int,QTYDELIVERY,Qté en livraison,,20,,);(string,COSTDELIVERY,Coût en livraison,,20,,);(string,WEIGHTDELIVERY,Poids en livraison,,20,,);(string,MINQUANTITYSTOCK,Stock sécurité,,18,,);(string,QUANTITYSTOCK,Stock total,,16,,);(string,quantityCOMMAND,Qté commande,,16,,);(string,REFERENCE,Référence,,10,0);\
+(string,LEVELTECH,Niveau TechNiveau Tech,,10,0);\
+(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT a.ID as ID, a.Reference as REFERENCE, a.LevelTech as LEVELTECH,\
+		 a.PriceUnit as PRICE,\
+		 a.QuantityStock as QUANTITYSTOCK,\
+		 a.QuantityOrdered as QUANTITYCOMMAND,\
+		 a.MinQuantityStock as MINQUANTITYSTOCK,\
+		 sum(IIF(TypeS='S', QTY , 0 )) as QTYINSTOCK,\
+		 format(sum(IIF(TypeS='S',QTY , 0 ))*a.PriceUnit, '0.00') as COSTINSTOCK,\
+		 format(sum(IIF(TypeS='S', QTY , 0 ))* a.Weight,'0') as WEIGHTINSTOCK,\
+		 sum(IIF(TypeS='T', QTY,0 )) as QTYTRANSIT,\
+		 format(sum(IIF(TypeS='T', QTY , 0 ))*a.PriceUnit, '0.00') as COSTTRANSIT,\
+		 format(sum(IIF(TypeS='T', QTY , 0 ))* a.Weight,'0') as WEIGHTTRANSIT,\
+		 sum(IIF(TypeS='D', QTY , 0 )) as QTYDELIVERY,\
+		 format(sum(IIF(TypeS='D', QTY , 0 ))*a.PriceUnit, '0.00') as COSTDELIVERY,\
+		 format(sum(IIF(TypeS='D', QTY , 0 ))* a.Weight,'0') as WEIGHTDELIVERY,\
+		 a.designation as DESIGNATION,\
+		 IIF(a.idStockState='NOK', '(255 120 120)' , '(220 220 255)') as LINERGB \
+	 FROM (/*DBOWNER*/)PRODUCT a inner join \
+		 (select LnP.IdProduct as IdA, LnP.IdPacking as IdP, LnP.NoPallet as NoL, LnP.QuantityStock as QTY, IIF(pk.idState='0','T' , 'S') as TypeS \
+		 from (/*DBOWNER*/)PALLET_PRODUCT LnP left join (/*DBOWNER*/)PACKING pk on LnP.IdPacking=pk.id\
+		 where LnP.QuantityStock>0\
+		 union\
+		 select LnD.IdProduct as IdA, LnD.idOrder as IdP, LnD.NoLine as NoL, LnD.Quantity as QTY, 'D' as TypeS\
+		 from (/*DBOWNER*/)DELIVERY_PRODUCT LnD left join (/*DBOWNER*/)DELIVERY D on LnD.IdDelivery=D.id\
+		 where format(D.DateDelivery,'0')>format(Date(), 'YYYYMMDD')\
+		 ) tabPK on tabPK.IdA=a.ID \
+	 WHERE a.TypeProduct<>'F' \
+	 GROUP BY a.ID, a.Reference, a.LevelTech, a.QuantityStock, a.QuantityOrdered, a.MinQuantityStock, a.PriceUnit, a.Weight, a.designation, a.idStockState \
+	 ORDER BY a.Reference, a.LevelTech \
+	 UNION\
+	 SELECT 'TOTAL' as ID, 'TOTAL' as REFERENCE, ' ' as LEVELTECH,\
+		 0 as PRICE,\
+		 sum(IIF(TypeS='A', QTY , 0 )) as QUANTITYSTOCK,\
+		 sum(IIF(TypeS='C', QTY , 0 )) as QUANTITYCOMMAND,\
+		 0 as MINQUANTITYSTOCK,\
+		 sum(IIF(TypeS='S', QTY , 0 )) as QTYINSTOCK,\
+		 format(sum(IIF(TypeS='S', QTY , 0 )*a.PriceUnit), '0.00') as COSTINSTOCK,\
+		 sum(IIF(TypeS='S', QTY , 0 )* a.Weight) as WEIGHTINSTOCK,\
+		 sum(IIF(TypeS='T', QTY , 0 )) as QTYTRANSIT,\
+		 format(sum(IIF(TypeS='T', QTY , 0 )*a.PriceUnit), '0.00') as COSTTRANSIT,\
+		 sum(IIF(TypeS='T', QTY , 0 )* a.Weight) as WEIGHTTRANSIT,\
+		 sum(IIF(TypeS='D', QTY , 0 )) as QTYDELIVERY,\
+		 format(sum(IIF(TypeS='D', QTY , 0 )*a.PriceUnit), '0.00') as COSTDELIVERY,\
+		 sum(IIF(TypeS='D', QTY , 0 )* a.Weight) as WEIGHTDELIVERY,\
+		 ' ' as DESIGNATION,\
+		 '(220 255 220 )' as LINERGB \
+	 FROM (/*DBOWNER*/)PRODUCT a inner join \
+		 (select LnP.IdProduct as IdA, LnP.IdPacking as IdP, LnP.NoPallet as NoL, LnP.QuantityStock as QTY, IIF(pk.idState='0','T','S') as TypeS \
+		 from (/*DBOWNER*/)PALLET_PRODUCT LnP left join (/*DBOWNER*/)PACKING pk on LnP.IdPacking=pk.id\
+		 where LnP.QuantityStock>0\
+		 union\
+		 select LnD.IdProduct as IdA, LnD.idOrder as IdP, LnD.NoLine as NoL, LnD.Quantity as QTY, 'D' as TypeS\
+		 from (/*DBOWNER*/)DELIVERY_PRODUCT LnD left join (/*DBOWNER*/)DELIVERY D on LnD.IdDelivery=D.id\
+		 where format(D.DateDelivery,'0')>format(Date(), 'YYYYMMDD') \
+		 union\
+		 select a1.Id as IdA, 'XXX' as IdP, 0 as NoL, a1.QuantityStock as QTY, 'A' as TypeS\
+		 from (/*DBOWNER*/)PRODUCT a1\
+		 where a1.TypeProduct<>'F'\
+		 union\
+		 select a1.Id as IdA, 'XXX' as IdP, 0 as NoL, a1.QuantityOrdered as QTY, 'C' as TypeS\
+		 from (/*DBOWNER*/)PRODUCT a1\
+		 where a1.TypeProduct<>'F'\
+		 ) tabPK on tabPK.IdA=a.ID \
+	 WHERE a.TypeProduct<>'F' \
+	 ORDER BY REFERENCE, LEVELTECH"
+

@@ -1,0 +1,183 @@
+%==================================================%
+%                                                  %
+% 	  	ReadShift.n                 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+'()' => (
+
+	'()' <- database,
+
+	sqlCalendar = ("SELECT DISTINCT id FROM " DB_PREFIX "CALENDAR"),
+	(SQL: sqlCalendar),
+
+	nbHoliday = (),
+	\forall i \in [1,nbHoliday] (
+		dateHoliday_{i} :: defaultDate,
+		dateHoliday_{i} = (),
+	),
+
+	HOLIDAY :: DefaultDate,
+	HOLIDAY = \{ \forall i \in [1,nbHoliday] dateHoliday_{i} \},
+
+
+	%HOLIDAY :: DefaultDate,
+	%HOLIDAY = \{ \forall i \in [1,()] () \},
+
+
+	(SQL:	"SELECT	" SQL_TOP_PERCENT
+			" id,name,type,
+			timeStart,timeEnd,
+			night1Start,night1End,
+			night2Start,night2End,
+			break1Start,break1End,
+			break2Start,break2End,
+			break3Start,break3End
+		FROM " DB_PREFIX "SHIFT
+		WHERE idClub='" idClubActive "' ORDER BY id"
+	),
+
+	DAY = [1,7],
+	WORKDAY = [1,5],
+
+
+	nbShift	= (),
+	SHIFT	= [1, nbShift],
+
+	\forall i \in SHIFT \cup \{0\} (
+		idShift_{i}	:: "",
+		typeShift_{i}   :: "",
+	),
+	idShift_{0} = "",
+	typeShift_{0} = "",
+
+	\forall s \in SHIFT (
+		idShift_{s}	:: "",
+		nameShift_{s}	:: "",
+		typeShift_{s}   :: "",
+
+		TimeShift_{s}	:: DefaultTime,
+
+
+		night1StartShift_{s}	:: defaultTime,
+		night1EndShift_{s}	:: defaultTime,
+
+		night2StartShift_{s}	:: defaultTime,
+		night2EndShift_{s}	:: defaultTime,
+
+
+		Night1Shift_{s}		:: DefaultTime,
+		Night2Shift_{s}		:: DefaultTime,
+
+
+		break1StartShift_{s}	:: defaultTime,
+		break1EndShift_{s}	:: defaultTime,
+
+		break2StartShift_{s}	:: defaultTime,
+		break2EndShift_{s}	:: defaultTime,
+
+		break3StartShift_{s}	:: defaultTime,
+		break3EndShift_{s}	:: defaultTime,
+
+		Break1Shift_{s}		:: DefaultTime,
+		Break2Shift_{s}		:: DefaultTime,
+		Break3Shift_{s}		:: DefaultTime,
+
+
+		idShift_{s}	= (),
+		nameShift_{s}	= (),
+		typeShift_{s}	= (),
+
+
+		TimeShift_{s}	= [(),()],
+
+
+		night1StartShift_{s}	= (),
+		night1EndShift_{s}	= (),
+
+		Night1Shift_{s}	= (
+			night1StartShift_{s} = defaultTime &&
+			night1EndShift_{s} = defaultTime ?
+			{}
+			:
+			[night1StartShift_{s},night1EndShift_{s}]
+		),
+
+		night2StartShift_{s}	= (),
+		night2EndShift_{s}	= (),
+
+		Night2Shift_{s}	= (
+			night2StartShift_{s} = defaultTime &&
+			night2EndShift_{s} = defaultTime ?
+			{}
+			:
+			[night2StartShift_{s},night2EndShift_{s}]
+		),
+
+
+		break1StartShift_{s}	= (),
+		break1EndShift_{s}	= (),
+
+		Break1Shift_{s}	= (
+			break1StartShift_{s} = defaultTime &&
+			break1EndShift_{s} = defaultTime ?
+			{}
+			:
+			[break1StartShift_{s},break1EndShift_{s}]
+		),
+
+
+		break2StartShift_{s}	= (),
+		break2EndShift_{s}	= (),
+
+		Break2Shift_{s}	= (
+			break2StartShift_{s} = defaultTime &&
+			break2EndShift_{s} = defaultTime ?
+			{}
+			:
+			[break2StartShift_{s},break2EndShift_{s}]
+		),
+
+
+		break3StartShift_{s}	= (),
+		break3EndShift_{s}	= (),
+
+		Break3Shift_{s}	= (
+			break3StartShift_{s} = defaultTime &&
+			break3EndShift_{s} = defaultTime ?
+			{}
+			:
+			[break3StartShift_{s},break3EndShift_{s}]
+		),
+
+
+		NightShift_{s} = (Night1Shift_{s} \cup Night2Shift_{s}) \setminus DefaultTime,
+		BreakShift_{s} = (Break1Shift_{s} \cup Break2Shift_{s} \cup Break3Shift_{s}) \setminus DefaultTime,
+
+		SlotShift_{s} = TimeShift_{s} \setminus BreakShift_{s},
+	),
+
+
+	IDSHIFT = \{ \forall s \in SHIFT idShift_{s} \},
+	#IDSHIFT = #SHIFT,
+
+	\forall i \in IDSHIFT \cup \{""\}
+		shiftId_{i} :: 0,
+	shiftId_{""} = 0,
+
+	\forall i \in IDSHIFT (
+		shiftId_{i} \in SHIFT,
+		idShift_{shiftId_{i}} = i,
+	),
+
+	NAMESHIFT = \{ \forall i \in SHIFT nameShift_{i} \},
+	\forall i \in NAMESHIFT (
+		shiftName_{i} \in SHIFT,
+		nameShift_{shiftName_{i}} = i,
+	),
+
+
+	database <- '()',	
+),

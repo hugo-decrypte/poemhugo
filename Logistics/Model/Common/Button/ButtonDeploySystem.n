@@ -1,0 +1,93 @@
+%==================================================%
+%                                                  %
+%	        ButtonDeploySystem.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+[viewDirectory "ButtonDeploySystem.view"] <- '@',
+
+ % View Object	
+@ ("View "),
+
+% ID	
+@ ("'" TAG_DEPLOY_SYSTEM "' "),
+
+% Caption	
+@ ("_ "),
+
+% Title	
+@ ("'" TAG_DEPLOY_SYSTEM "' "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+@ "\n\n",
+
+
+% Script Object	
+@ ("Script "),
+
+% ID	
+@ ("DeploySystem '"),
+
+% Caption
+@ (TAG_DEPLOY_SYSTEM "' "),
+
+% Group	
+@ ("_ "),
+
+% Integer Code [0..1000]	
+@ SCRIPT_DEPLOY_SYSTEM,
+
+% Label	
+@ (" '" TAG_CLICK_TO_DEPLOY_SYSTEM "' "),
+
+% Object Group Set "{G1, G2, ...}"	
+@ ("_ "),
+
+% Object Id. Set / Object Item
+@ ("_ "),
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message	
+%@ ("_ "),
+@ ("'" TAG_ASK_DEPLOY_SYSTEM "' "),
+
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_NCLSCRIPT_MESSAGE "Model\Common\Script\ScriptDeploySystem.n'"),
+@ NCL_ARGUMENT_BEGIN,
+@ NCL_ARGUMENT_END,
+
+
+
+'@' <- [viewDirectory "ButtonDeploySystem.view"],
+

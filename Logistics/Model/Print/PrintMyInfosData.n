@@ -1,0 +1,51 @@
+% ==================================================%
+%                                 					%
+%            	  ERP		    	     			%
+%                                              		%
+%			PrintMyInfosData.n						%
+%                                               	%
+% (c)2000. Enginest. All rights reserved.       	%
+% ==================================================%
+@ ("//////////////\n"),
+@ ("// agency info used in HEADER and FOOTER\n"),
+@ ("DATA1=MY_ADRESS\n"),
+@ ("NAME1=MYADRESS\n"),
+@ ("\n"),
+
+%% NumTVA = > codeTax
+%% Siret  = > establishment
+@ ("SQL1=SELECT \n"),
+@ ("SQL1_1=   " SQL_CASEWHEN "AG.NAME is not NULL" SQL_THEN "AG.NAME" SQL_ELSE "' '" SQL_CASEEND " as Nom,\n"),
+@ ("SQL1_2=   " SQL_CASEWHEN "AG.LABEL is not NULL" SQL_THEN "AG.LABEL" SQL_ELSE "' '" SQL_CASEEND " as Label,\n"),
+@ ("SQL1_3=   " SQL_CASEWHEN "AG.ADDRESS is not NULL" SQL_THEN "AG.ADDRESS" SQL_ELSE "' '" SQL_CASEEND " as Adr,\n"),
+@ ("SQL1_4=   " SQL_CASEWHEN "AG.ADDRESSSUP is not NULL" SQL_THEN "AG.ADDRESSSUP" SQL_ELSE "' '" SQL_CASEEND " as Adr2,\n"),
+@ ("SQL1_5=   " SQL_CASEWHEN "AG.PostCode is not NULL" SQL_THEN "AG.PostCode" SQL_ELSE "' '" SQL_CASEEND " as CodePost,\n"),
+@ ("SQL1_6=   " SQL_CASEWHEN "AG.City is not NULL" SQL_THEN "AG.City" SQL_ELSE "' '" SQL_CASEEND " as City,\n"),
+@ ("SQL1_7=   " SQL_CASEWHEN "AG.Country is not NULL" SQL_THEN "AG.Country" SQL_ELSE "'France'" SQL_CASEEND " as Country,\n"),
+@ ("SQL1_8=   " SQL_CASEWHEN "AG.Phone is not NULL" SQL_THEN "AG.Phone" SQL_ELSE "' '" SQL_CASEEND " as Phone,\n"),
+@ ("SQL1_9=   " SQL_CASEWHEN "AG.Fax is not NULL" SQL_THEN "AG.Fax" SQL_ELSE "' '" SQL_CASEEND " as Fax,\n"),
+@ ("SQL1_10=  " SQL_CASEWHEN "AG.EMAIL is not NULL" SQL_THEN "AG.EMAIL" SQL_ELSE "' '" SQL_CASEEND " as Mail,\n"),
+@ ("\n"),
+@ ("SQL1_11=  " SQL_CASEWHEN "AG.Capital is not NULL" SQL_THEN "AG.Capital" SQL_ELSE "'Type Société : ________ au capital de ______ _'" SQL_CASEEND " as TypeCompagny,\n"),
+@ ("SQL1_12=  " SQL_CONCAT "'TVA Intracom : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.codeTax is not NULL" SQL_THEN "AG.codeTax" SQL_ELSE "' '" SQL_CASEEND " "SQL_CONCATEND " as NoTVA,\n"),
+@ ("SQL1_13=  " SQL_CASEWHEN "AG.establishment is not NULL" SQL_THEN "AG.establishment" SQL_ELSE "'SIRET :'" SQL_CASEEND " as Siret,\n"),
+@ ("SQL1_14=  " SQL_CASEWHEN "AG.RCS is not NULL" SQL_THEN "AG.RCS" SQL_ELSE "'RCS :'" SQL_CASEEND " as RCS,\n"),
+@ ("SQL1_15=  " SQL_CASEWHEN "AG.APE is not NULL" SQL_THEN "AG.APE" SQL_ELSE "'APE :'" SQL_CASEEND " as APE,\n"),
+@ ("\n"),
+@ ("SQL1_16=  " SQL_CONCAT "'SIRET : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.establishment is not NULL" SQL_THEN "trim(AG.establishment)" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATWITH "' - RCS : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.RCS is not NULL" SQL_THEN "trim(AG.RCS)" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATWITH "' - APE : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.APE is not NULL" SQL_THEN "AG.APE" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATEND " as InfoRegistre,\n"),
+@ ("SQL1_17=  (select " SQL_CONCAT "'IBAN : '" SQL_CONCATWITH " " SQL_CASEWHEN "B.IBAN is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.IBAN)" SQL_CASEEND " " SQL_CONCATWITH "' - BIC : '" SQL_CONCATWITH " " SQL_CASEWHEN "B.BIC is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.BIC)" SQL_CASEEND " " SQL_CONCATWITH "'  '" SQL_CONCATWITH " " SQL_CASEWHEN "B.Name is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.Name)" SQL_CASEEND " " SQL_CONCATEND " from {/*OWNER*/}BANKACCOUNT B where B.ID='{/*BANKACCOUNT*/}') as BankInfo,\n"),
+@ ("SQL1_18=  " SQL_CASEWHEN "'{/*COUNTRY*/}' in ('France','FRANCE')" SQL_THEN "" SQL_CONCAT "'Imprimée le '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ", '" SQL_FORMATDATE_FR ", " SQL_FORMATTIMESTR "')" SQL_CONCATEND " " SQL_ELSE "" SQL_CONCAT "'Printed '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ", '" SQL_FORMATDATESTR ", " SQL_FORMATTIMESTR "')" SQL_CONCATEND " " SQL_CASEEND " as PrintDate,\n"),
+@ ("\n"),
+
+@ ("SQL1_19=  '{/*TITLEDOC*/}' as TitleDoc,\n"),
+@ ("SQL1_20=  '{/*TITLECODEOBJ*/}' as TitleObj,\n"),
+@ ("SQL1_21=  '{/*CODEOBJ*/}' as CodeObj,\n"),
+@ ("SQL1_22=  '{/*TITLEDATEOBJ*/}' as TitleDateObj,\n"),
+@ ("SQL1_23=  '{/*DATEOBJ*/}' as DateObj,\n"),
+@ ("SQL1_24=  '{/*TITLEREFERENCEOBJ*/}' as TitleRefObj,\n"),
+@ ("SQL1_25=  '{/*REFERENCEOBJ*/}' as RefObj\n"),
+@ ("SQL1_26= FROM {/*OWNER*/}AGENCY AG\n"),
+@ ("SQL1_27= WHERE  AG.Id='{/*CODEAGENCY*/}'\n\n"),
+
+@ ("// compagny Registre info, BankInfo in FOOTER\n"),
+@ ("\n\n"),

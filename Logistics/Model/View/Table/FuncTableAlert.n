@@ -1,0 +1,90 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableAlert.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableAlert>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)	% JZ 1015
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableAlert" postfix),
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);(string,IDCLUB,,,20,0)]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+
+	    	@("SELECT a.ID as ID, a.Reference as REFERENCE, a.LevelTech as LEVELTECH,\\\n"),
+	    	@("\t\t a.QuantityStock as QUANTITYSTOCK, a.QuantityOrdered as QUANTITYORDER,\\\n"),
+  		@("\t\t a.MinQuantityStock as MINQUANTITYSTOCK,\\\n"),
+  		@("\t\t tabCO.QTYTODAY as QTYTODAY,\\\n"),
+  		@("\t\t tabCO.QTY2M-a.QuantityStock as QTY2M,\\\n"),
+  		@("\t\t "SQL_FORMATNUM"(a.PriceUnit*(tabCO.QTY2M-a.QuantityStock),"SQL_FORMATSCALE0") as COST,\\\n"),
+  		@("\t\t a.Designation as DESIGNATION,\\\n"),
+
+
+		% Alert messages
+  		@("\t\t "SQL_CASEWHEN"tabCO.QTYTODAY>0, '"TAG_LATE_DELIVERY"',\\\n"),
+   		@("\t\t "SQL_CASEWHEN"tabCO.QTY2M>a.QuantityStock, '"TAG_BREAK_2_MONTHS"',\\\n"),
+   		@("\t\t "SQL_CASEWHEN"a.QuantityOrdered>a.QuantityStock, '"TAG_INSUFFICIENT_STOCK"',\\\n"),
+   		@("\t\t ' '"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as STATE,\\\n"),
+
+
+
+		% Alert colors
+  		@("\t\t "SQL_CASEWHEN"tabCO.QTYTODAY>0, '" RGB_ALERT_4 "',\\\n"),			% JZ 1016
+   		@("\t\t "SQL_CASEWHEN"tabCO.QTY2M>a.QuantityStock, '" RGB_ALERT_3 "',\\\n"),
+   		@("\t\t "SQL_CASEWHEN"a.QuantityOrdered>a.QuantityStock, '" RGB_ALERT_2 "',\\\n"),
+   		@("\t\t '" RGB_ALERT_1 "'"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as LINERGB \\\n"),
+
+
+		%RGB_ALERT_1 = RGB_YELLOW,
+		%RGB_ALERT_2 = RGB_LIGHTORANGE,
+		%RGB_ALERT_3 = RGB_ORANGE,
+		%RGB_ALERT_4 = RGB_RED,
+
+
+
+ 		@("\t FROM " DB_PREFIX "PRODUCT a left join \\\n"),
+  		@("\t\t (select LnO.idProduct as IdA, \\\n"),
+    		@("\t\t sum("SQL_CASEWHEN""SQL_FORMATNUM"(CO.DateDelivery,"SQL_FORMATSCALE0")<="SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"'), LnO.QuantityRest, 0"SQL_CASEEND") as QTYTODAY,\\\n"),
+    		@("\t\t sum("SQL_CASEWHEN""SQL_FORMATNUM"(CO.DateDelivery,"SQL_FORMATSCALE0")<="SQL_FORMATDATE"("SQL_CURRENTDATE"+60, '"SQL_FORMATDATENUM"'), LnO.QuantityRest, 0"SQL_CASEEND") as QTY2M\\\n"),
+   		@("\t\t from " DB_PREFIX "CLIENTORDER CO, " DB_PREFIX "ORDER_PRODUCT LnO\\\n"),
+  		@("\t\t  where CO.id=LnO.idOrder\\\n"),
+      		@("\t\t  and LnO.QuantityRest>0\\\n"),
+    		@("\t\t and CO.idState<>'9'\\\n"),
+   		@("\t\t group by LnO.IdProduct \\\n"),
+  		@("\t\t ) tabCO on tabCO.IdA=a.ID \\\n"),
+ 		@("\t WHERE tabCO.QTY2M>a.QuantityStock and a.TypeProduct<>'F'\\\n"),
+ 		@("\t ORDER BY tabCO.QTYTODAY desc, tabCO.QTY2M desc, a.Reference, a.LevelTech\"\n\n"),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),
+.
+

@@ -1,0 +1,138 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableDelivery.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+%% 2025.10.06 field date, format : YYYY-MM-DD
+%% (date,DATEDELIVERY,Date livraison,,20,,YYYY-MM-DD);\
+%%				@ ("(date,DATEINVOICE," TAG_INVOICE_DATE ",,15.0.80,1,YYYY-MM-DD);\\\n"),
+%%				@ ("(date,DATEPAYMENT," TAG_PAYMENT_DATE ",,15.0.80,1,YYYY-MM-DD);\\\n"),	
+
+<tableDelivery>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableDelivery" postfix),
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		related = "" => (
+			(
+				@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+				%@ ("(string,IDPACKING," TAG_PACKING_ID ",,10.0.50,0);\\\n"),	% JZ 0924
+				@ ("(string,IDAGENCY," TAG_AGENCY_ID ",,10.0.50,0);\\\n"),
+				@ ("(string,IDINVOICE," TAG_INVOICE_ID ",,8.2.40,0);\\\n"),
+				@ ("(float,AMOUNTHT," TAG_AMOUNT_HT ",,8.2.50,0);\\\n"),
+				@ ("(date,DATEINVOICE," TAG_INVOICE_DATE ",,15.0.80,1,YYYY-MM-DD);\\\n"),
+				@ ("(date,DATEPAYMENT," TAG_PAYMENT_DATE ",,15.0.80,1,YYYY-MM-DD);\\\n"),	
+			),
+			;
+			(
+				@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+				%@ ("(string,IDPACKING," TAG_PACKING_ID ",,10.0.50,0);\\\n"),	% JZ 0924
+				@ ("(string,IDTOUR,ID Tournée,,8.2.50,0);\\\n"),
+			),
+		),
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+
+
+		@ ("SELECT d.id AS ID, d.idClient AS IDCLIENT, cl.name as NAMECLIENT,\\\n"),
+		%@ ("\t\t d.idPacking AS IDPACKING,\\\n"), % JZ 0924 corrected a bug missing IDPACKING : d.idPacking AS IDPACKING
+ 		@ ("\t\t (select "SQL_CONCAT"trim(Address)"SQL_CONCATWITH"("SQL_CASEWHEN" AddressSup is not NULL and AddressSup>' ' "SQL_THEN" "SQL_CONCAT"', '"SQL_CONCATWITH"trim(AddressSup)"SQL_CONCATEND" "SQL_ELSE" ' ' "SQL_CASEEND")"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY p where p.IdClient=d.IdClient and p.IdPoint=d.IdPointDelivery) as ADRDELIVERY,\\\n"),
+		@ ("\t\t (select "SQL_CONCAT"trim(PostCode) "SQL_CONCATWITH" '-' "SQL_CONCATWITH" City"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY p where p.IdClient=d.IdClient and p.IdPoint=d.IdPointDelivery) as CITYDELIVERY,\\\n"),
+ 		@ ("\t\t d.idAgency AS IDAGENCY,\\\n"),
+ 		@ ("\t\t d.AmountHT as AMOUNTHT,\\\n"),
+ 		@ ("\t\t d.DateDelivery as DATEDELIVERY,\\\n"),
+ 		@ ("\t\t d.DateInvoice as DATEINVOICE,\\\n"),
+ 		@ ("\t\t d.DatePayment as DATEPAYMENT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(d.NbPallet,"SQL_FORMATSCALE0")      AS NBPALLET,\\\n"),
+		@ ("\t\t (select count(1) from " DB_PREFIX "Delivery_Product LD where LD.IdDelivery=d.Id) as NBPRODUCT,\\\n"),
+		@ ("\t\t d.CustomsInfo as MESSAGE,\\\n"),
+ 		@ ("\t\t (select "SQL_FORMATNUM"(sum(a.Weight*ld.Quantity),"SQL_FORMATSCALE1") from " DB_PREFIX "DELIVERY_PRODUCT ld inner join " DB_PREFIX "PRODUCT a on a.Id=ld.IdProduct where ld.IdDelivery=d.id) as WEIGHT,\\\n"),
+ 		@ ("\t\t d.Comments as COMMENTS, d.FollowedBy as FOLLOWEDBY, d.IdInvoice as IDINVOICE,\\\n"),
+ 		@ ("\t\t (select "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY') as IDSTATE,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"d.idState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='DELIVERY') "SQL_THEN" \\\n"),
+		@ ("\t\t     (select Color from " DB_PREFIX "STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY')"SQL_ELSE"\\\n"),
+   		@ ("\t\t     '(255 255 255)'"SQL_CASEEND" AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl\\\n"),
+		@ ("\t WHERE d.IdClient=cl.id\\\n"),
+				
+		related = "" => (
+			(
+				@ ("\t and d.idState<>'9'\\\n"),
+				@ ("\t Order BY d.id desc\"\n\n"),
+			),
+			;
+			(
+  				@ ("\t and (d.id in (select ld.IdDelivery from " DB_PREFIX "DELIVERY_PRODUCT ld where ld.(/*OWNERSUBOBJ*/) in ((/*IDSUBOBJ*/)) ) or 'XXX' in ((/*IDSUBOBJ*/)) )\\\n"),
+  				@ ("\t and (d.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)) ) \\\n"),
+				@ ("\t Order BY d.id\"\n\n"),
+			),
+		),
+
+
+
+
+
+		%@ "//////Edit///////////////////////////////////////////\n\n",
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2EditDelivery.n"],
+
+		@ "//////Table///////////////////////////////////////////\n\n",
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableDeliveryProduct.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableDeliveryPreparation.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TablePallet.n"],
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableAddOrderToDelivery.n"],	% JZ 0924
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableOrderForDelivery.n"],
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableInvoiceDelivery.n"],
+
+
+		@ "//////Print///////////////////////////////////////////\n\n",
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2PrintDeliveryPreparation.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2PrintPalletNote.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2PrintDelivery.n"],			
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2PrintInvoice.n"],
+
+
+		related = "" => (
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2EditOnView.n"],
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableState.n"],
+		),
+
+
+
+		related = "" => (
+			['Work Directory' "Model\View\Data\DataState.n"],
+		),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

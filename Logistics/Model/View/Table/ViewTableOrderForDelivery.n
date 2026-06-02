@@ -1,0 +1,16 @@
+%=======================================================%
+%                                                  	%
+%            	  	Logistics 			%
+%                                               	%
+%  		ViewTableOrderForDelivery.n 		%
+%                                                  	%
+% (c)2000. Enginest. All rights reserved.          	%
+%=======================================================%
+
+['Work Directory' "Model\View\Table\FuncTableOrderForDelivery.n"],	% JZ 1003 : DeliveryProductAddOrder -> OrderForDelivery
+
+'@' => (
+	tableOrderForDelivery("ORDERFORDELIVERY",TAG_TABLE, "ORDERFORDELIVERY",true, "", "(/*TITLEOBJ*/)", "", ""),
+	%tableDeliveryProductAddOrder("ORDERFORDELIVERY",TAG_TABLE,"ORDERFORDELIVERY","", "(/*TITLEOBJ*/)", ""),
+% JZ 1003 : ORDERFORDELIVERY
+),

@@ -1,0 +1,68 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	    	   %
+%                                                  %
+%  		 FuncTablePalletProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tablePalletProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableLinePallet" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TablePalletProduct"  postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT pl.idPacking AS IDPACKING, pl.NoPallet as NOPALLET,\\\n"),
+ 		@ ("\t\t Prd.ID as IDPRODUCT, Prd.Designation as DESIGNATION, PaPr.Quantity AS QUANTITY,\\\n"),
+ 		@ ("\t\t PaPr.QuantityReal AS QUANTITYREAL, PaPr.QuantityStock AS QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t PaPr.QuantityDefective AS QUANTITYDEFECTIVE, Prd.Weight AS WEIGHTNET,\\\n"),
+
+		@ ("\t\t  PaPr.IDZONE AS STOCKZONE,\\\n"),
+		@ ("\t\t  PaPr.IDROW AS STOCKROW,\\\n"),
+		@ ("\t\t  PaPr.IDCOLUMN AS STOCKCOLUMN,\\\n"),
+		@ ("\t\t  PaPr.comments AS COMMENTS,\\\n"),
+
+		@ ("\t\t (" SQL_CASEWHEN "PaPr.Quantity<>PaPr.QuantityReal or PaPr.QuantityStock<0 or PaPr.QuantityDefective>0" SQL_THEN "'Quantit  incorrecte'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock=PaPr.QuantityReal" SQL_THEN "'A Livrer'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock<PaPr.QuantityReal and PaPr.QuantityStock>0" SQL_THEN "'Livrée Partielle'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock=0" SQL_THEN "'Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t    ' '" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") as STATE,\\\n"),
+
+		@ ("\t\t (" SQL_CASEWHEN "PaPr.Quantity<>PaPr.QuantityReal or PaPr.QuantityStock<0 or PaPr.QuantityDefective>0" SQL_THEN "'(255 120 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock=PaPr.QuantityReal" SQL_THEN "'(160 160 255)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock<PaPr.QuantityReal and PaPr.QuantityStock>0" SQL_THEN "'(255 255 60)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPr.QuantityStock=0" SQL_THEN "'(120 255 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t    '(200 200 160)'" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") AS LINERGB \\\n"),
+
+		@ ("\t FROM ((" DB_PREFIX "PACKING Pck inner join " DB_PREFIX "PALLET pl on Pck.Id=pl.IdPacking) \\\n"),
+		@ ("\t\t inner join (/*DBOWNER*/)" DB_PREFIX "PALLET_PRODUCT PaPr on PaPr.IdPacking=pl.IdPacking and PaPr.NoPallet=pl.NoPallet) \\\n"),
+		@ ("\t\t inner join (/*DBOWNER*/)" DB_PREFIX "PRODUCT Prd on Prd.ID=PaPr.IdProduct \\\n"),
+		@ ("\t WHERE (pl.IdPacking in ((/*IDPACKING*/)) or 'XXX' in ((/*IDPACKING*/)) ) \\\n"),
+  		@ ("\t  AND ((Pck.idState<>'9' and pl.NoPallet in ((/*NOPALLET*/))) or 0 in ((/*NOPALLET*/)) ) \\\n"),
+  		@ ("\t  AND ((Pck.idState<>'9' and PaPr.IdProduct in ((/*IDPRODUCT*/))) or 'XXX' in ((/*IDPRODUCT*/)) ) \\\n"),
+		@ ("\t ORDER BY pl.IdPacking, pl.NoPallet, PaPr.IdProduct \"\n\n\n"), 
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePalletProduct2EditOnView.n"],	% JZ 0919
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePalletProduct2EditPallet.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

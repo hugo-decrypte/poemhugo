@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreatePointDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	
+	idClientBuffer				:: "",
+	idPointDeliveryBuffer		:: "",
+	nameClientDeliveryBuffer	:: "",
+	addressDeliveryBuffer		:: "",
+	addressSupDeliveryBuffer	:: "",
+	postcodeDeliveryBuffer		:: "",
+	cityDeliveryBuffer			:: "",
+	countryDeliveryBuffer		:: "",
+	
+	
+	idClientBuffer				= (),
+	idPointDeliveryBuffer		= (),
+	nameClientDeliveryBuffer	= (),
+	addressDeliveryBuffer		= (),
+	addressSupDeliveryBuffer	= (),
+	postcodeDeliveryBuffer		= (),
+	cityDeliveryBuffer			= (),
+	countryDeliveryBuffer		= (),
+	
+	
+
+	'()' <- database,
+
+	AddPointDelivery_SQL1 = (
+		"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) 
+		select '"idClientBuffer"','"idPointDeliveryBuffer"', '"nameClientDeliveryBuffer"', '"addressDeliveryBuffer"', '"addressSupDeliveryBuffer"','"cityDeliveryBuffer"','"postcodeDeliveryBuffer"','"countryDeliveryBuffer"'
+		from " DB_PREFIX "CLIENT cl 
+		where cl.ID='"idClientBuffer"' and '"idPointDeliveryBuffer"'>' '
+		and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where IdClient='"idClientBuffer"' and IdPoint='"idPointDeliveryBuffer"')"
+	),
+	AddPointDelivery_SQL2 = (
+		"UPDATE " DB_PREFIX "POINTDELIVERY SET 
+		NameClient='"nameClientDeliveryBuffer"',
+		Address='"addressDeliveryBuffer"', AddressSup='"addressSupDeliveryBuffer"',
+		City='"cityDeliveryBuffer"', PostCode='"postcodeDeliveryBuffer"',Country='"countryDeliveryBuffer"'
+		where IdClient='"idClientBuffer"' and IdPoint='"idPointDeliveryBuffer"'"
+	),
+	
+
+
+	(SQL : AddPointDelivery_SQL1), 
+	(SQL : AddPointDelivery_SQL2), 
+	
+	
+	database <- '()',
+),

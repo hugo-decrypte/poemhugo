@@ -1,0 +1,52 @@
+%==================================================%
+%                                                  %
+% 		SelectDeselectProduct.n		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+%['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+%['Work Directory' "Model\Common\Config\CheckLog.n"],
+%['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+%'()' => (
+%	aliasTable	= "SITE",
+%),
+%['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	nbSelected = (),
+	nbParam    = (),
+	
+	\forall i \in [1, nbSelected] (
+		idSelectedBuffer_{i} :: "",
+		idSelectedBuffer_{i} = (),
+		
+		i < nbSelected =>(
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "',"),
+			;
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDSELECTED :: "",
+	IDSELECTED = [\forall i \in [1, nbSelected] strIdSelectedBuffer_{i}],
+	
+
+
+	sqlProductSelected = (
+		"UPDATE " DB_PREFIX "PRODUCT p SET p.selected="
+			SQL_CASEWHEN "p.selected IS NULL OR p.selected='" STATE_FALSE "'"
+				SQL_THEN "'" STATE_TRUE "'"
+				SQL_ELSE "'" STATE_FALSE "'"
+			SQL_CASEEND
+	),
+
+
+	'()' <- database,
+
+	(SQL : sqlProductSelected " WHERE id IN (" IDSELECTED ")"),
+
+	database <- '()',
+),

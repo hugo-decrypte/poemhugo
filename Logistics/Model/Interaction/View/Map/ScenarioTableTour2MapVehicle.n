@@ -1,0 +1,82 @@
+%===============================================%
+%						%
+%    ScenarioTableTour2MapVehicle.n		%
+%						%
+%     (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "MapTour ",
+
+% Caption
+@ ("'" TAG_MAP "' "), % li 0614
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_MAP,
+
+% Label
+@ (" '" TAG_MAP "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableOPTTOUR' ", % JZ 1025
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (PREFIX_OPENTABLE_BEGIN "MapVehicle_Agent.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS "IDVEHICLESELECTED={/*Selected(tableOPTTOUR;1;(string,IDVEHICLE))*/};IDTOURSELECTED={/*selected(tableOPTTOUR;1;(string,IDTOUR))*/}]\"\n\n"),
+
+
+.
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\View\Map\GenerateMapVehicleTour.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(tableOPTTOUR;2;(string,IDTOUR);(string,IDVEHICLE))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+
+related = "OpenMap" => (
+	@ (OPENTABLE_BEGIN "MapVehicle(/*USERID*/).view" OPENTABLE_END),
+	@ (TABLE_ARGUMENTS "]\"\n\n\n"),
+	;
+
+	@ ("Reload \"[VIEWID='" TAG_MAP_RESOURCE "']\"\n\n"),
+),
+
+
+
+.
+
+
+

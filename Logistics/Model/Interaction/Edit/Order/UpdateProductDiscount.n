@@ -1,0 +1,102 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 UpdateProductDiscount.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+%% 2025.09.25  float discountBuffer[1..5]
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idProductSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+
+	idOrderBuffer	:: "",
+	discountBuffer	:: 0.0,
+	labelDiscountBuffer	:: "",
+
+	idOrderBuffer	= (),
+	discountBuffer	= (),
+	labelDiscountBuffer = (),
+	
+
+	
+
+	'()' <- database,
+
+	UpdateDiscount_SQL1 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set Discount="discountBuffer[1..5]", LabelDiscount='"labelDiscountBuffer "'"
+		"  WHERE IdOrder in ("idOrderBuffer") and IdProduct in ("IDPRODUCTSELECTEDBUFFER")"
+	),
+
+	UpdateDiscount_SQL2 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set Discount=0 WHERE IdOrder in ("idOrderBuffer") and Discount is NULL "
+	),
+
+	databaseType = "ACCESS" => (
+
+
+		UpdateDiscount_SQL3 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "ORDER_PRODUCT OP on P.Id=OP.IdProduct"
+			"  set OP.IdVAT=P.IdVAT"
+			"  WHERE OP.IdOrder in ("idOrderBuffer")"
+			"    and (OP.IdVAT is NULL or OP.IdVAT<= ' ')"
+		),
+
+		UpdateDiscount_SQL4 = (
+			"Update " DB_PREFIX "CLIENTORDER O set O.AmountHT=0 WHERE O.Id in ("idOrderBuffer") "
+		),
+		UpdateDiscount_SQL5 = (
+			"Update " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "ORDER_PRODUCT OP  "
+			"  set O.AmountHT=O.AmountHT + round(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount))/100.0 "
+			" where O.Id=OP.IdOrder and OP.IdOrder in ("idOrderBuffer")"
+		),
+		;
+
+
+		UpdateDiscount_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT"
+			"  set IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct)"
+			"  WHERE IdOrder in ("idOrderBuffer")"
+			"    and (IdVAT is NULL or IdVAT<= ' ')"
+		),
+
+		UpdateDiscount_SQL4 = (
+			"Update " DB_PREFIX "CLIENTORDER "
+			"  set AmountHT=(select sum(round(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount))/100.0) from " DB_PREFIX "ORDER_PRODUCT OP where Id=OP.IdOrder)"
+			" WHERE Id in ("idOrderBuffer")"
+		),
+		UpdateDiscount_SQL5 = (
+			"Update " DB_PREFIX "CLIENTORDER set AmountHT=0 WHERE Id in ("idOrderBuffer") and AmountHT is NULL"
+		),
+
+	),
+
+
+	(SQL : UpdateDiscount_SQL1), 
+	(SQL : UpdateDiscount_SQL2), 
+	(SQL : UpdateDiscount_SQL3), 
+	(SQL : UpdateDiscount_SQL4), 
+	(SQL : UpdateDiscount_SQL5), 
+	'',
+	database <- '()',
+),

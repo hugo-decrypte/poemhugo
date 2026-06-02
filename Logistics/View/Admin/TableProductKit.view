@@ -1,0 +1,186 @@
+View ViewTablePRODUCTKIT 'Kit produit' 'Kit produit'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCTKIT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Kit produit;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Right,LeftCenter,Left}]"\
+"[DATAOBJ=PRODUCTKIT;FILLCOLOR=LINERGB]"
+
+Data PRODUCTKIT 'Kit produit' PRODUCTKIT HTTPSQL 0 '[FIND={ID,DESIGNATION,DESIGNATIONTECH,PRICE,PURCHASEPRICE,LENGTH,HEIGHT,WIDTH,DEPTH,VOLUME,WEIGHT,STATE}]'   [DOUBLECLICK=TableProductComponent] \
+"[12;(string,ID,ID,,10,,);(string,DESIGNATION,Désignation,,20,,);(string,DESIGNATIONTECH,Matière,,20,,);(string,PRICE,Prix unitaire,,15,,);(float,PURCHASEPRICE,Prix achat,,15,,);(float,LENGTH,Longueur,,10,,);(float,HEIGHT,Hauteur,,10,,);(float,WIDTH,Largeur,,10,,);(float,DEPTH,Profondeur,,15,,);(float,VOLUME,Volume,,10,,);(float,WEIGHT,Référence,,10,,);(string,STATE,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT prd.id AS ID, \
+		 prd.Designation AS DESIGNATION,prd.DesignationTech AS DESIGNATIONTECH,\
+		 prd.TypeProduct as TYPEPRODUCT,\
+		 format(prd.PriceUnit,'0.0000') AS PRICE,\
+		 format(prd.PurchasePrice,'0.0000') AS PURCHASEPRICE,\
+		 format(prd.Length,'0') AS LENGTH,\
+		 format(prd.Height,'0') AS HEIGHT,\
+		 format(prd.Width,'0') AS WIDTH,\
+		 format(prd.Depth,'0') AS DEPTH,\
+		 format(prd.Volume,'0') AS VOLUME,\
+		 format(prd.Weight,'0.0') AS WEIGHT,\
+		 (select (trim(LABEL) + '(' + ID + ')') from STATE s where s.ID=prd.idState and s.CATEGORY='PRODUCT') as STATE,\
+		 IIF(prd.idState in (select s.Id from STATE s where s.CATEGORY='PRODUCT') , (select Color from STATE s where s.Id=prd.idState and s.CATEGORY='PRODUCT'),\
+		 '(255 255 255)') AS LINERGB \
+ FROM PRODUCT prd \
+ WHERE prd.TypeProduct in ('KIT') \
+ ORDER BY prd.ID"
+
+
+
+
+///////////////////// table component
+Script TableProductComponent 'Kit produit' _ 334 'Composants' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);FAMILY='XXX';IDPRODUCT={/*Selected(tablePRODUCTKIT;1;(string,ID))*/};TITLEOBJ={/*Selected(tablePRODUCTKIT;1;(string,DESIGNATION))*/}]"
+
+// Script 1. Create Product
+
+Script CreateProduct  'Créer kit produit' _ 61 'Créer' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\CreateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(CPRD;Créer kit produit;4;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+(string,FAMILY,Famille,,50.0.580,0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\
+(string,DESIGNATION,Désignation,,50.0.580,1);\
+(string,TYPEPRODUCT,Type produit,,100.0.580,0,0,[/*TYPEPRODUCT.LABELTYPE*/]);\
+)*/}'\
+Reload _ _ _
+
+// Script 2. Duplicate Product
+
+Script DuplicateProduct  'Dupliquer kit produit' _ 62 'Dupliquer' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DuplicateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePRODUCTKIT;1;(string,ID))*/} \
+{/*Input(DPRD;Dupliquer kit produit;1;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+)*/}'\
+Reload _ _ _
+
+
+
+
+// Script 3. Modify Product
+
+Script ModifyProduct 'Modifier kit produit' _ 63 'Modifier' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePRODUCTKIT;1;(string,ID))*/} \
+{/*Input(MPRD;Modifier kit produit;6;\
+(string,DESIGNATION,Désignation,[/*PRODUCTKIT.DESIGNATION*/],50.0.580,0);\
+(string,DESIGNATIONTECH,Matière,[/*PRODUCTKIT.DESIGNATIONTECH*/],50.0.580,1);\
+(string,FAMILY,Famille,[/*PRODUCTKIT.LABELFAMILY*/],50.0.580,0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\
+(string,TYPEPRODUCT,Type,[/*PRODUCTKIT.LABELTYPE*/],50.0.580,0,1,[/*TYPEPRODUCT.LABELTYPE*/],1);\
+(float,PRICE,Prix unitaire,[/*PRODUCTKIT.PRICE*/],10.4.580,1);\
+(float,WEIGHT,Poids,[/*PRODUCTKIT.WEIGHT*/],10.3.580,1);\
+)*/}'\
+Reload _ _ _
+
+// Script 4. Delete Product
+
+Script DeleteProduct 'Supprimer kit produit' _ 64 'Supprimer' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ Attention, Vous devez d'abord enlever ses composants et qu'il n'est composant d'autre produit.\
+ '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DeleteProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTKIT;1;(string,ID))*/}' \
+Reload _ _ _
+
+// 10.1  for all component (sub article) , compute their quantity from quantitative measures
+// 10.2  for all component semi-finished having components, compute their price from their components sum(quntity*price)
+// 10.3  the total price of the product is the sum(quantity*price) of all comenents not being component of prd semi-finished component
+Script ModifyMeasuresForQty 'Modifier mesure quantitative' _ 65 'Modifier mesure quantitative' _ 'tablePRODUCTKIT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \
+'{/*Input(MMQTY;Modifier mesure quantitative;10;\
+(float,LENGTH,Length,[/*PRODUCTKIT.LENGTH*/],10.3.580,1);\
+(float,WIDTH,Width,[/*PRODUCTKIT.WIDTH*/],10.3.580,1);\
+(float,HEIGHT,Height,[/*PRODUCTKIT.HEIGHT*/],10.3.580,1);\
+(float,DEPTH,Depth,[/*PRODUCTKIT.DEPTH*/],10.3.580,1);\
+(float,VOLUME,Volume,[/*PRODUCTKIT.VOLUME*/],12.3.580,1);\
+(float,WEIGHT,Weight,[/*PRODUCTKIT.WEIGHT*/],10.3.580,1);\
+(float,PARAMETER1,Parameter1,[/*PRODUCTKIT.PARAMETER1*/],10.3.580,1);\
+(float,PARAMETER2,Parameter2,[/*PRODUCTKIT.PARAMETER2*/],10.3.580,1);\
+(string,FORMULA1,Formula 1,[/*PRODUCTKIT.FORMULA1*/],200.0.580,1);\
+(string,FORMULA2,Formula 2,[/*PRODUCTKIT.FORMULA2*/],200.0.580,1);\
+)*/}'\
+"Update PRODUCT SET\
+   Length=[/*LENGTH*/],\
+   Height=[/*HEIGHT*/],\
+   Width= [/*WIDTH*/],\
+   Depth= [/*DEPTH*/],\
+   Volume=[/*VOLUME*/],\
+   Weight=[/*WEIGHT*/],\
+   Parameter1=[/*PARAMETER1*/],\
+   Parameter2=[/*PARAMETER2*/],\
+   Formula1='[/*FORMULA1*/]',\
+   Formula2='[/*FORMULA2*/]' \
+  WHERE Id ='[/*PRODUCTKIT.ID*/]'"\
+"Update PRODUCT_COMPONENT SET\
+   Quantity=1\
+  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+   and (\
+     (LengthByPiece is not NULL and LengthByPiece>0) or \
+     (WidthByPiece is not NULL and WidthByPiece>0) or \
+     (DepthByPiece is not NULL and DepthByPiece>0) or \
+     (HeightByPiece is not NULL and HeightByPiece>0) or \
+     (VolumeByPiece is not NULL and VolumeByPiece>0)\
+   ) "\
+"Update PRODUCT_COMPONENT pc inner join PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Length+pc.LengthByPiece-0.001)/pc.LengthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Length is not NULL and prd.Length>0\
+	   and pc.LengthByPiece is not NULL and pc.LengthByPiece>0"\
+\
+"Update PRODUCT_COMPONENT pc inner join PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Height+pc.HeightByPiece-0.001)/pc.HeightByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Height is not NULL and prd.Height>0\
+	   and pc.HeightByPiece is not NULL and pc.HeightByPiece>0"\
+\
+"Update PRODUCT_COMPONENT pc inner join PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Width+pc.WidthByPiece-0.001)/pc.WidthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Width is not NULL and prd.Width>0\
+	   and pc.WidthByPiece is not NULL and pc.WidthByPiece>0"\
+\
+"Update PRODUCT_COMPONENT pc inner join PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Depth+pc.DepthByPiece-0.001)/pc.DepthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Depth is not NULL and prd.Depth>0\
+	   and pc.DepthByPiece is not NULL and pc.DepthByPiece>0"\
+\
+"Update PRODUCT_COMPONENT pc inner join PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Volume+pc.VolumeByPiece-0.001)/pc.VolumeByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Volume is not NULL and prd.Volume>0\
+	   and pc.VolumeByPiece is not NULL and pc.VolumeByPiece>0 "\
+\
+"Update PRODUCT set\
+		PriceUnit=0,\
+		PurchasePrice=0,\
+		Weight=0\
+	  WHERE Id ='[/*PRODUCTKIT.ID*/]'"\
+"Update (PRODUCT prd inner join PRODUCT_COMPONENT pc on prd.Id=pc.IdProduct)\
+			inner join PRODUCT sub on sub.Id=pc.IdSubProduct set\
+		prd.PriceUnit	 =prd.PriceUnit+pc.Quantity*sub.PriceUnit, \
+		prd.PurchasePrice=prd.PurchasePrice+pc.Quantity*sub.PurchasePrice, \
+		prd.Weight		 =prd.Weight+pc.Quantity*sub.Weight \
+	  WHERE prd.Id ='[/*PRODUCTKIT.ID*/]' and pc.Quantity>0 "\
+"Update PRODUCT SET Weight=0 WHERE Id ='[/*PRODUCTKIT.ID*/]' and Weight is NULL"\
+"Update PRODUCT SET PurchasePrice=0 WHERE Id ='[/*PRODUCTKIT.ID*/]' and PurchasePrice is NULL"
+
+
+Data FAMILYPRODUCT 'Famille Produit' FAMILYPRODUCT HTTPSQL 0 _ _ \
+"[2;(string,IDFAMILY,Statut ID,,15.0.80,0);(string,LABELFAMILY,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT f.Id AS IDFAMILY,\
+	 (trim(f.DESIGNATION) + '(' + trim(f.ID) + ')') as LABELFAMILY \
+	 FROM FAMILYPRODUCT f \
+	 ORDER BY f.Designation,f.Id"
+
+Data TYPEPRODUCT 'Type Produit' TYPEPRODUCT HTTPSQL 0 _ _ \
+"[2;(string,IDTYPE,Statut ID,,15.0.80,0);(string,LABELTYPE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT tp.Id AS IDTYPE,\
+ (trim(name) + '(' + trim(ID) + ')') as LABELTYPE \
+	 FROM TYPEPRODUCT tp \
+	 ORDER BY tp.Id"
+

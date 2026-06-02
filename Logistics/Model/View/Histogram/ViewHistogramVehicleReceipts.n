@@ -1,0 +1,18 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%	ViewHistogramVehicleReceipts.n		%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+['Work Directory' "Model\View\Histogram\FuncHistogramVehicleReceipts.n"],
+
+'@' => (
+	histogramVehicleReceipts("VEHICLERECEIPTS",true, TAG_TOUR,TAG_RECEIPTS, "","", {}, TAG_HISTOGRAM_VEHICLE_RECEIPTS, ""),
+	histogramVehicleReceipts("VEHICLERECEIPTS",true, TAG_TOUR,TAG_RECEIPTS, "","", {}, TAG_HISTOGRAM_VEHICLE_RECEIPTS, "Menu"),
+	
+	('hh:mm:ss' "  " TAG_HISTOGRAM_VEHICLE_RECEIPTS TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ),
+),

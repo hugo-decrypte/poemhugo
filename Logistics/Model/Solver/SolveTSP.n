@@ -1,0 +1,61 @@
+/******************************************************/
+/*	                                              */
+/*			SolveTSP.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+['Work Directory' "Model\Input\Solver\ReadTSP.n"],
+
+
+<TSP>(	boundWorktime, boundMakespan, boundMileage,
+	nameObjectiveTop, maxBacktrack, maxTime, stepCost,stepTime,stepDistance
+)
+(
+	['Work Directory' "Model\Solver\TSP.n"],
+
+	'@' => (
+		['Work Directory' "Model\Output\WriteTSP.n"],
+	),
+
+	['Work Directory' "Model\Solver\TerminateSolving.n"],
+),
+
+
+'@' => (
+	result = TSP(
+		boundWorktimeTSP, boundMakespanTSP, boundMileageTSP,
+		nameObjectiveTop, maxBacktrack*3, maxTime,
+		stepCost,stepTime,stepDistance
+	),
+
+
+
+	% Attention: failure may occur at parsing. PostSolving may be not reached
+	? result (
+	'optimal solution proved' :
+		('hh:mm:ss' TAG_TAB_2 TAG_VEHICLE " " idVehicleTSP  " " TAG_TOUR " " idxTourVehicleTSP " " TAG_OPTIMIZED : '@'),
+		;
+
+	'all solutions found',
+	'approximate solution found',
+	'stopped with solution' :
+		(TAG_TASK_ACCOMPLISHED : '@'),
+		;
+
+	'stopped without solution':
+		(TAG_STOPPED_NO_SOLUTION : false),
+		;
+
+	:
+
+		result[1..8] = "failure:" => (
+			(TAG_FAILURE result[10..#result] : false),
+			;
+
+			(result : false),
+		),
+	),
+),

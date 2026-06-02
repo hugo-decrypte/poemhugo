@@ -1,0 +1,11 @@
+/******************************************************/
+/*	                                              */
+/*	 	SqlUser.n  	     	      	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+

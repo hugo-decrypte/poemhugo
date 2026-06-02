@@ -1,0 +1,76 @@
+View ViewChartTOUR 'Tournée' 'Tournée'255 255 255 _ 0 0 0 0  5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=1;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(192 192 255);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;]'
+
+Data  'TOUR'  'Tournée'  'TOUR' HTTPSQL 0 '[TIPINFO=[/*IDVEHICLE*/]    	[/*T1*/] - [/*T2*/]    Quantité : [/*QUANTITY*/]  [/*RATEQUANTITY*/]%    Poids : [/*WEIGHT*/]  [/*RATEWEIGHT*/]%    Volume : [/*VOLUME*/]  [/*RATEVOLUME*/]%]'  '_' \
+"[14; (int,ID,ID,,10,0);(string,TEXT,Text,,10,0);(string,COLOR,COLOR,,,);(string,Calendar,Calendar,,,,YYYY-MM-DD);(string,TimeSlot,TimeSlot,,,,HH:MM);(int,IDVEHICLE,IDVEHICLE,,10,0);(string,T1,Planification Début);(string,T2,Planification fin);(int,QUANTITY,QUANTITY);(int,WEIGHT,WEIGHT);(int,VOLUME,VOLUME);(float,RATEQUANTITY,RATEQUANTITY,,14.3.14,0);(float,RATEWEIGHT,RATEWEIGHT,,14.3.14,0);(float,RATEVOLUME,RATEVOLUME,,14.3.14,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT DISTINCT t.id  		AS ID, \
+				t.idResource 		AS IDVEHICLE, \
+				t.tourResource 		AS TOURVEHICLE, \
+				t.id+' '+CSTR(IIF(t.nbOrder IS NULL,0,t.nbOrder)) AS [TEXT], \
+				t.t1 			AS T1, \
+				t.t2 			AS T2, \
+				t.quantity 		AS QUANTITY, \
+				t.weight 		AS WEIGHT, \
+				t.volume 		AS VOLUME, \
+				t.rateQuantity 		AS RATEQUANTITY, \
+				t.rateWeight 		AS RATEWEIGHT, \
+				t.rateVolume 		AS RATEVOLUME, \
+				v.state, \
+				v.DateView 		AS Calendar, \
+				v.SlotView 		AS TimeSlot, \
+				'(255 255 255)' 	AS COLOR \
+			FROM OPT_TOUR t,RESOURCE v \
+			WHERE t.idResource=v.id AND v.state>='2' AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=t.idClub)  ORDER BY t.idResource,t.tourResource "
+
+Data  'ORDER'  'ORDER'  'ORDER' HTTPSQL 0 '[TIPINFO=Commande : [/*IDORDER*/]    [/*SITE1NAME*/]    Coût : [/*COST*/]    Recette : [/*RECEIPTS*/]\nService : [/*T1PLAN*/] - [/*T2SERVICEPLAN*/]    Fin de route : [/*T2PLAN*/]    KM : [/*MILEAGE*/]    Temps : [/*ROUTETIME*/]\n]'  '_' \
+"[24;(string,ID,ID,,10,0);(string,TEXT,Text,,10,0);(string,GroupID,GroupID,,10,0);(string,ItemID,ItemID,,10,0);(string,Successor,Successor,,10,0);(date,DateBegin,DateBegin,,,,YYYY-MM-DD);(date,DateEnd,DateEnd,,,,YYYY-MM-DD);(time,TimeBegin,TimeBegin,,,,HH:MM);(time,TimeEnd,TimeEnd,,,,HH:MM);(int,SELECTED,Selected,,,);(string,COLOR,COLOR,,,);(string,IDVEHICLE,IDVEHICLE);(int,TOURVEHICLE,TOURVEHICLE,,10,0);(datetime,T1PLAN,T1PLAN,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2PLAN,T2PLAN,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2SERVICEPLAN,T2SERVICEPLAN,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(string,IDORDER,OrderID);(string,SITE1NAME,SITE1NAME);(string,SITE2NAME,SITE2NAME);(int,SERVICETIME,SERVICETIME);(int,ROUTETIME,ROUTETIME);(int,MILEAGE,MILEAGE);(float,COST,COST,,14.3.14,0);(float,RECEIPTS,RECEIPTS,,14.3.14,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT p.idOrder 							AS ID, \
+			p.idOrder 							AS [TEXT], \
+			NULL 								AS GroupID, \
+			p.idTour 							AS ItemID, \
+			p.idOrderNext 							AS Successor, \
+			p.idResource 							AS IDVEHICLE, \
+			p.tourResource 							AS TOURVEHICLE, \
+			p.t1Service 							AS T1PLAN, \
+			p.t2Service 							AS T2SERVICEPLAN, \
+			p.t2 								AS T2PLAN, \
+			LEFT(p.t1Service,10) 						AS DateBegin, \
+			LEFT(p.t2,10) 							AS DateEnd, \
+			RIGHT(p.t1Service,5)	AS TimeBegin, \
+			RIGHT(p.t2,5)	AS TimeEnd, \
+			p.idOrder 							AS IDORDER, \
+			s1.name 							AS SITE1NAME, \
+			s2.name 							AS SITE2NAME, \
+			p.timeService 							AS SERVICETIME, \
+			p.timeRoute 							AS ROUTETIME, \
+			p.mileage 							AS MILEAGE, \
+			p.cost 								AS COST, \
+			p.receipts 							AS RECEIPTS, \
+			p.selected 							AS SELECTED, \
+			'(128 168 198)'	 						AS COLOR \
+		FROM OPT_TOUR t,OPT_PLAN p,SITE s1,SITE s2 \
+		WHERE s1.id=p.idSite1 AND s2.id=p.idSite2 AND p.idTour=t.id AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=t.idClub)  ORDER BY p.tourResource,p.t1Service,p.t2 "
+
+Schedule TOURORDER 'Tournée' _ 0 0 1000 0 \
+"[HORIZONTALLINEWIDTH=1;VERTICALLINEWIDTH=0;WORKCOLOR=(255 255 255);NOWORKCOLOR=(224 224 224);DEADLINECOLOR=(0 255 0);SEPARATIONLINEWIDTH=1;SEPARATIONLINECOLOR=(192 192 255);]" \
+"[DATEFORMAT=YYYY-MM-DD;TIMEFORMAT=HH:MM;DURATIONFORMAT=HH;DAYSTRINGS={Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche};MONTHSTRINGS={Janv,Févr,Mars,Avri,Mai,Juin,Juil,Août,Sept,Octo,Nove,Déce};]" \
+"[TITLE=Tournée;LINESEPARATOR=\n;FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTNAME=Courier New;FONTSIZE=10;]" \
+ "[CELLSIZE=0;DATEFIRST=;DATELAST=;\
+TIMEFIRST=00:00;TIMELAST=18:59;TIMESLOTS=[24,00:00,01:00,02:00,03:00,04:00,05:00,06:00,07:00,08:00,09:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00,19:00,20:00,21:00,22:00,23:00];TIMEPRECISION=SLOT;\
+ROWCOUNT=2; BORDERWIDTH=0; LINEWIDTH=1;BORDERCOLOR=(192 192 255);LINECOLOR=(192 192 255);FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Courier New;ALIGNTEXT=LeftCenter;]" \
+"[BORDERWIDTH=1;LINEWIDTH=0;BORDERCOLOR=(192 192 255);LINECOLOR=(192 192 255);FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Courier New;WIDTH=200;INTERLINE=0.5;]" \
+"[TIMETABLE=1; \
+  VIEWTASK=1; \
+  EXPANDALL=1; \
+  EXPANSIBILITY=1; \
+  DEFLATEHEIGHT=0.3; \
+  DEFLATEWIDTH=1.0; \
+  LINEWIDTH=0; \
+  LINECOLOR=(192 192 255); \
+  FILLCOLOR=(255 255 255); \
+  FONTCOLOR=(0 0 0); \
+  LINKCOLOR=(255 0 0); \
+  FONTSIZE=8; \
+  FONTNAME=Courier New; \
+  ALIGNTEXT=LeftCenter;]" \
+_ "[DATAOBJ=TOUR;]" "[DATAOBJ=ORDER;DROPSCRIPT=MoveTask;SELECTED=Selected]"
+

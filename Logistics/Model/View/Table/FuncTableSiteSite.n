@@ -1,0 +1,78 @@
+
+%==================================================%
+%                                                  %
+%  		 FuncTableSiteSite.n	 	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableSiteSite>(id,type,aliasTable,bestfit, IdSite, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableSiteSite" postfix),
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+
+		IdSite = {} => (
+			sqlIdSite = "",
+			;
+			sqlIdSite = (" ss.idSite1 IN (" concatSetQuoted(IdSite) ") AND "), % Chen 0822
+		),
+
+
+
+		@ ("(color,LINERGB,color,,13.0.0);(string,IDCLUB,,,);]\"\\\n"),
+
+		@ VIEWSQL,
+
+
+	     @("SELECT	s1.idClub 					AS IDCLUB, \\
+				" SQL_ClubNameIdIs "s1.idClub)		AS NAMECLUB,\\
+				ss.idTypeResource 			AS IDTYPERESOURCE,\\
+				ss.idTypeRisk 				AS IDTYPERISK,\\
+				ss.idSite1 				as IDSITE1, \\
+				ss.idSite2 				as IDSITE2, \\
+				ss.distance 				AS MILEAGE, \\
+				ss.duration 				AS DURATION, \\
+				s1.name 				AS NAMESITE1, \\
+				s2.name 				AS NAMESITE2, \\
+				'" RGB_WHITE "' 			AS LINERGB \\
+			FROM " DB_PREFIX "SITE s1," DB_PREFIX "SITE s2," DB_PREFIX "SITE_SITE ss \\
+			WHERE s1.id=ss.idSite1 AND s2.id=ss.idSite2 AND" sqlIdSite
+				SQL_ViewUserVisibleClubIs "ss.idClub)
+			ORDER BY ss.idSite1,ss.idSite2\"\n\n"),
+
+
+		%SQL_DataSiteSite = "' AS IDCLUB, '(/*USERID*/)' AS IDUSER, ss.idSite1+' '+IIF(s1.name IS NULL,'',s1.name) AS IDSITE1, ss.idSite2+' '+IIF(s2.name IS NULL,'',s2.name) AS IDSITE2, ss.distance AS MILEAGE, ss.time AS [TIME], ss.idSite1 as IDSS1, SS.idSite2 as IDSS2,",
+		%SQL_FromSiteQuerySiteQuerySiteSite = "FROM (SELECT s.id,s.name FROM OPT_SITE s) s1, (SELECT s.id,s.name FROM OPT_SITE s) s2, OPT_SITE_SITE ss WHERE s1.id=ss.idSite1 AND s2.id=ss.idSite2 AND ss.idSite1<>ss.idSite2",
+		%SQL_OrderBySiteSiteSite1Site2 = "ORDER BY ss.idSite1,ss.idSite2",
+
+
+
+		['Work Directory' "Model\\Interaction\\View\\Table\\ScenarioTableSiteSite2EditSiteSite.n"],
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

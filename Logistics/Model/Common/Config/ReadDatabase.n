@@ -1,0 +1,492 @@
+%==================================================%
+%                                                  %
+%		ReadDatabase.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+
+	% database
+	( TAG_DATABASE_ERROR :
+		database = [databaseName : databaseUser : databasePassword],
+	),
+
+
+	typeDataUser	= "HTTPSQL",
+	%typeDataUser	= "DB",
+
+
+	? databaseType (
+	"ORACLE":
+		TAG_EMPTY_STRING = " ",
+		;
+
+		:
+		TAG_EMPTY_STRING = "",
+	),	% ??????
+
+
+	
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%Jianyi : 27/01/2025
+	? databaseType (
+		"ACCESS" :
+			SQL_FIELD_PASSWORD = "password", 
+			SQL_FIELD_COLUMN = "column",
+			SQL_FIELD_TEXT ="[TEXT]",	% JZ 0506
+			;
+
+		"SQLSERVER" :
+			SQL_FIELD_PASSWORD = "password", 
+			SQL_FIELD_COLUMN = "[column]",
+			SQL_FIELD_TEXT ="[TEXT]",
+			;
+
+		"ORACLE" :
+			SQL_FIELD_PASSWORD = "[password]", 
+			SQL_FIELD_COLUMN = "\"column\"",
+			SQL_FIELD_TEXT ="TEXT",
+			;
+
+		"MYSQL" :
+			SQL_FIELD_PASSWORD = "password", 
+			SQL_FIELD_COLUMN = "`column`",
+			SQL_FIELD_TEXT ="TEXT",
+	),
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Jianyi : 26/12/2025
+	? databaseType (
+		"ACCESS" :
+			SQL_WEEKDAY	= "DatePart('w', ", 
+			SQL_WEEKDAYEND	= ",2)",
+
+			SQL_WEEK	= "DatePart('ww', ", 
+			SQL_WEEKEND	= ",2)",
+			;
+
+		"SQLSERVER" :
+			SQL_WEEKDAY	= "DatePart(dw, ", 
+			SQL_WEEKDAYEND	= ")",
+
+			SQL_WEEK	= "DatePart(ww, ", 
+			SQL_WEEKEND	= ")",
+			;
+
+		"ORACLE" :
+			SQL_WEEKDAY	= "DatePart(D, ", 
+			SQL_WEEKDAYEND	= ")",
+
+			SQL_WEEK	= "DatePart(WW, ", 
+			SQL_WEEKEND	= ")",
+			;
+
+		"MYSQL" :
+			SQL_WEEKDAY	= "WeekDay(", 
+			SQL_WEEKDAYEND	= ")+1",
+
+			SQL_WEEK	= "Week(", 
+			SQL_WEEKEND	= ",1)",
+	),
+
+
+	databaseType = "SQLSERVER" => (
+		SQL_FIELD_PERMISSION	= "[permission]",
+		SQL_TOP_PERCENT 	= "TOP 100 PERCENT",
+		;
+
+		SQL_FIELD_PERMISSION	= "permission",
+		SQL_TOP_PERCENT 	= "",
+	),
+
+
+	%%%%%%%%%%%%%%%%%% SQL function %%%%%%%%%%%%%
+
+	? databaseType (	% JZ 0723
+	"ORACLE" :
+		SQL_CURRENTDATE		= "SYSDATE",
+		SQL_CURRENTDATETIME	= "CURRENT_TIMESTAMP",
+
+		SQL_DATESERIAL		= "TO_DATE",
+
+		SQL_DATEPART_YEAR	= "YYYY",
+		SQL_DATEPART_MONTH	= "MM",  %% "m"
+		SQL_DATEPART_DAY	= "DD",  %% "d"
+		SQL_DATEPART_WEEK	= "WW",  %% "wk"
+		SQL_DATEPART_WEEKDAY	= "D",  %% from 1 to 7
+		SQL_DATEPART_YEARDAY	= "DDD",   %% from 1 to 365
+
+		SQL_DATEPART_HOUR	= "HH24",
+		SQL_DATEPART_MINUTE	= "MI", %% "mi"
+		SQL_DATEPART_SECOND	= "SS", %% "ss"
+		SQL_DATEPART_MILLISECOND= "FF",
+
+		SQL_SUBSTRING		= "SUBSTR",
+		;
+
+	"SQLSERVER" :
+		SQL_CURRENTDATE		= "GetDate()",
+		SQL_CURRENTDATETIME	= "CURRENT_TIMESTAMP",
+
+		SQL_DATESERIAL		= "DateFromParts",
+
+		SQL_DATEPART_YEAR	= "yyyy",
+		SQL_DATEPART_MONTH	= "mm",  %% "m"
+		SQL_DATEPART_DAY	= "dd",  %% "d"
+		SQL_DATEPART_WEEK	= "ww",  %% "wk"
+		SQL_DATEPART_WEEKDAY	= "dw",  %% from 1 to 7
+		SQL_DATEPART_YEARDAY	= "y",   %% from 1 to 365
+
+		SQL_DATEPART_HOUR	= "hh",
+		SQL_DATEPART_MINUTE	= "n", %% "mi"
+		SQL_DATEPART_SECOND	= "s", %% "ss"
+		SQL_DATEPART_MILLISECOND= "ms",
+
+		SQL_SUBSTRING		= "SubString",
+		;
+
+	"ACCESS" :
+		SQL_CURRENTDATE		= "Date()",
+		SQL_CURRENTDATETIME	= "Now()",
+
+		SQL_DATESERIAL		= "DateSerial",
+
+		SQL_DATEPART_YEAR	= "'yyyy'",
+		SQL_DATEPART_MONTH	= "'m'",
+		SQL_DATEPART_DAY	= "'d'",
+		SQL_DATEPART_WEEK	= "'ww'",
+		SQL_DATEPART_WEEKDAY	= "'w'",  %% from 1 to 7
+		SQL_DATEPART_YEARDAY	= "'y'",  %% from 1 to 365
+
+		SQL_DATEPART_HOUR	= "'h'",
+		SQL_DATEPART_MINUTE	= "'n'",
+		SQL_DATEPART_SECOND	= "'s'",
+		SQL_DATEPART_MILLISECOND= "",     %% not defined
+
+		SQL_SUBSTRING		= "mid",
+		;
+
+	"MYSQL" :
+		SQL_CURRENTDATE		= "CurDate()",
+		SQL_CURRENTDATETIME	= "Now()",
+
+		SQL_DATESERIAL		= "STR_TO_DATE",
+
+		SQL_DATEPART_YEAR	= "'%Y'", %% 4-digit year ;  '%y'  2-digit year
+		SQL_DATEPART_MONTH	= "'%m'", %%%  %M month name
+		SQL_DATEPART_DAY	= "'%d'",
+		SQL_DATEPART_WEEK	= "'%v'", %% (01..53) monday is the first day of the week
+					% "'%V'", %% (01..53) sunday is the first day of the week
+					% "'%U'", %% (00..53) sunday is the first day of the week
+					% "'%u'", %% (00..53) monday is the first day of the week
+		SQL_DATEPART_WEEKDAY	= "'w'",  %% from 1 to 7
+		SQL_DATEPART_YEARDAY	= "'%j'",  %% from 1 to 365
+
+		SQL_DATEPART_HOUR	= "'%H'", %% %H 00 - 23,  %h 00-12
+		SQL_DATEPART_MINUTE	= "'%i'",
+		SQL_DATEPART_SECOND	= "'%s'",
+		SQL_DATEPART_MILLISECOND= "'%f'",     
+
+		SQL_SUBSTRING		= "mid",
+	),
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%Jianyi : 2026-04-03
+	? databaseType (
+	"ACCESS" :
+		SQL_LastYear	= ("DateAdd("SQL_DATEPART_YEAR", -1, "SQL_CURRENTDATE")"),
+
+		SQL_ADDYEAR	= ("DateAdd("SQL_DATEPART_YEAR","),
+		SQL_ADDYEAREND	= (","SQL_CURRENTDATE")"),
+
+		SQL_ADDMONTH	= ("DateAdd("SQL_DATEPART_MONTH","),
+		SQL_ADDMONTHEND	= (","SQL_CURRENTDATE")"),
+
+		SQL_ADDDAY	= ("DateAdd("SQL_DATEPART_DAY","),
+		SQL_ADDDAYEND	= (","SQL_CURRENTDATE")"),
+		;
+
+	"SQLSERVER" :
+		SQL_LastYear	= ("DateAdd("SQL_DATEPART_YEAR", -1, "SQL_CURRENTDATE")"),
+
+		SQL_ADDYEAR	= ("DateAdd("SQL_DATEPART_YEAR","),
+		SQL_ADDYEAREND	= (","SQL_CURRENTDATE")"),
+
+		SQL_ADDMONTH	= ("DateAdd("SQL_DATEPART_MONTH","),
+		SQL_ADDMONTHEND	= (","SQL_CURRENTDATE")"),
+
+		SQL_ADDDAY	= ("DateAdd("SQL_DATEPART_DAY","),
+		SQL_ADDDAYEND	= (","SQL_CURRENTDATE")"),
+		;
+
+	"MYSQL" :
+		SQL_LastYear	= ("date_Add("SQL_CURRENTDATE", INTERVAL -12 MONTH)"), 
+
+		SQL_ADDYEAR	= ("date_Add("SQL_CURRENTDATE", INTERVAL "),
+		SQL_ADDYEAREND	= ("*12 MONTH)"),
+
+		SQL_ADDMONTH	= ("date_Add("SQL_CURRENTDATE", INTERVAL "),
+		SQL_ADDMONTHEND	= (" MONTH)"),
+
+		SQL_ADDDAY	= ("date_Add("SQL_CURRENTDATE", INTERVAL "),
+		SQL_ADDDAYEND	= (" DAY)"),
+		;
+
+	"ORACLE" :
+		SQL_LastYear	= ("ADD_MONTHS("SQL_CURRENTDATE",-12)"),
+
+		SQL_ADDYEAR	= ("ADD_MONTHS("SQL_CURRENTDATE","),
+		SQL_ADDYEAREND	= ("*12)"),
+
+		SQL_ADDMONTH	= ("ADD_MONTHS("SQL_CURRENTDATE","),
+		SQL_ADDMONTHEND	= (")"),
+
+		SQL_ADDDAY	= (SQL_CURRENTDATE),
+		SQL_ADDDAYEND	= (")"),
+	),
+
+
+
+	SQL_FIRSTWEEKDAY :: "",
+	SQL_FIRSTWEEKDAY = (databaseType = "ACCESS" ? ",2" : ""), 
+
+
+
+	? databaseType (
+
+	"ACCESS" :
+		SQL_FORMATNUM  = "format",
+		SQL_FORMATDATE = "format",
+
+		SQL_FORMATSCALE4 = "'0.0000'",
+		SQL_FORMATSCALE3 = "'0.000'",
+		SQL_FORMATSCALE2 = "'0.00'",
+		SQL_FORMATSCALE1 = "'0.0'",
+		SQL_FORMATSCALE0 = "'0'",
+
+		SQL_FORMATDATENUM = "YYYYMMDD",
+		SQL_FORMATDATESTR = "YYYY-MM-DD",
+		SQL_FORMATDATE_FR = "DD/MM/YYYY",
+		SQL_FORMATDATE_Y  = "YYYY",
+		SQL_FORMATDATE_M  = "MM",
+		SQL_FORMATDATE_D  = "DD",
+
+		SQL_FORMATTIMENUM = "hhnnss",
+		SQL_FORMATTIMESTR = "hh:nn:ss",
+		;
+
+	"SQLSERVER" :
+		SQL_FORMATNUM  = "trim(str",
+		SQL_FORMATDATE = "format",
+
+		SQL_FORMATSCALE4 = "10,4)",
+		SQL_FORMATSCALE3 = "10,3)",
+		SQL_FORMATSCALE2 = "10,2)",
+		SQL_FORMATSCALE1 = "10,1)",
+		SQL_FORMATSCALE0 = "10,0)",
+
+		SQL_FORMATDATENUM = "yyyyMMdd",
+		SQL_FORMATDATESTR = "yyyy-MM-dd",
+		SQL_FORMATDATE_FR = "dd/MM/yyyy",
+		SQL_FORMATDATE_Y  = "yyyy",
+		SQL_FORMATDATE_M  = "MM",
+		SQL_FORMATDATE_D  = "dd",
+
+		SQL_FORMATTIMENUM = "hhmiss",
+		SQL_FORMATTIMESTR = "hh:mi:ss",
+		;
+
+	"MYSQL" :
+		SQL_FORMATNUM  = "format",
+		SQL_FORMATDATE = "date_format",
+
+		SQL_FORMATSCALE4 = "4",
+		SQL_FORMATSCALE3 = "3",
+		SQL_FORMATSCALE2 = "2",
+		SQL_FORMATSCALE1 = "1",
+		SQL_FORMATSCALE0 = "0",
+
+		SQL_FORMATDATENUM = "%Y%m%d",
+		SQL_FORMATDATESTR = "%Y-%m-%d",
+		SQL_FORMATDATE_FR = "%d/%m/%Y",
+		SQL_FORMATDATE_Y  = "%Y",
+		SQL_FORMATDATE_M  = "%m",
+		SQL_FORMATDATE_D  = "%d",
+
+		SQL_FORMATTIMENUM = "%H%i%s",
+		SQL_FORMATTIMESTR = "%H:%i:%s",
+		;
+
+	"ORACLE" :
+		SQL_FORMATNUM  = "format",
+		SQL_FORMATDATE = "format",
+
+		SQL_FORMATSCALE4 = "'0.0000'",
+		SQL_FORMATSCALE3 = "'0.000'",
+		SQL_FORMATSCALE2 = "'0.00'",
+		SQL_FORMATSCALE1 = "'0.0'",
+		SQL_FORMATSCALE0 = "'0'",
+
+		SQL_FORMATDATENUM = "YYYYMMDD",
+		SQL_FORMATDATESTR = "YYYY-MM-DD",
+		SQL_FORMATDATE_FR = "DD/MM/YYYY",
+		SQL_FORMATDATE_Y  = "YYYY",
+		SQL_FORMATDATE_M  = "MM",
+		SQL_FORMATDATE_D  = "DD",
+
+		SQL_FORMATTIMENUM = "hhnnss",
+		SQL_FORMATTIMESTR = "hh:nn:ss",
+	),
+
+	? databaseType (
+	"ACCESS" :
+		%SQL_CASEWHEN = "IIF(", 
+		%SQL_THEN = ",", 
+		%SQL_ELSE = ",", 
+		%SQL_CASEEND = ")", 
+
+		SQL_CONCAT = "(", 
+		SQL_CONCATWITH = "+", 
+		SQL_CONCATEND = ")", 
+		;
+
+	"SQLSERVER" :
+		%SQL_CASEWHEN = "(CASE WHEN ", 
+		%SQL_THEN = " THEN ", 
+		%SQL_ELSE = " ELSE ", 
+		%SQL_CASEEND = " END)", 
+
+		SQL_CONCAT = "(", 
+		SQL_CONCATWITH = "+", 
+		SQL_CONCATEND = ")", 
+		;
+
+	"ORACLE" :
+		%SQL_CASEWHEN = "(CASE WHEN ", 
+		%SQL_THEN = " THEN ", 
+		%SQL_ELSE = " ELSE ", 
+		%SQL_CASEEND = " END)", 
+
+		SQL_CONCAT = "(", 
+		SQL_CONCATWITH = "||", 
+		SQL_CONCATEND = ")", 
+		;
+
+	"MYSQL" :
+		%SQL_CASEWHEN = "(CASE WHEN ", 
+		%SQL_THEN = " THEN ", 
+		%SQL_ELSE = " ELSE ", 
+		%SQL_CASEEND = " END)", 
+
+		SQL_CONCAT = "CONCAT(", 
+		SQL_CONCATWITH = ",", 
+		SQL_CONCATEND = ")", 
+	),
+
+
+
+	DB_PREFIX = "" => (
+		? databaseType (
+		"ACCESS" :
+			SQL_TABLE_USER = "USER",
+			SQL_TABLE_RESOURCE = "RESOURCE",
+			;
+
+		"SQLSERVER" :
+			SQL_TABLE_USER = "[USER]",
+			SQL_TABLE_RESOURCE = "RESOURCE",
+			;
+
+		"ORACLE" :
+			SQL_TABLE_USER = "[USER]",
+			SQL_TABLE_RESOURCE = "[RESOURCE]",
+			;
+
+		"MYSQL" :
+			SQL_TABLE_USER = "`USER`",
+			SQL_TABLE_RESOURCE = "RESOURCE",
+		),
+		;
+
+		SQL_TABLE_USER = (DB_PREFIX "USER"),
+		SQL_TABLE_RESOURCE = (DB_PREFIX "RESOURCE"),
+	),
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+	'()' <- database,
+
+
+	(SQL :	"SELECT parameter FROM " DB_PREFIX "CONFIG WHERE id='dateTimeFormat'"),
+
+	() > 0 => (
+		dateTimeFormat	= (),
+		;
+		dateTimeFormat	= "yyyy-mm-dd hh:mm",
+	),
+
+	database <- '()',
+
+
+
+
+
+	dateFormat = dateTimeFormat[1..10],	%"yyyy-mm-dd",
+
+
+	? dateTimeFormat(
+	"yyyy-mm-dd":
+		timeFormat	= "",
+		defaultTime	= '00',
+		midnight00	= '00',
+		midnight24	= '23',
+
+		timeHour	= 1,
+		timeMinute	= 1,
+		;
+
+	"yyyy-mm-dd hh":
+		timeFormat	= "hh",
+		defaultTime	= '00',
+		midnight00	= '00',
+		midnight24	= '23',
+
+		timeHour	= 1,
+		timeMinute	= 1,
+		;
+
+	"yyyy-mm-dd hh:mm":
+		timeFormat	= "hh:mm",
+		defaultTime	= '00:00',
+		midnight00	= '00:00',
+		midnight24	= '23:59',
+
+		timeHour	= 60,
+		timeMinute	= 1,
+		;
+
+	"yyyy-mm-dd hh:mm:ss":
+		timeFormat	= "hh:mm:ss",
+		defaultTime	= '00:00:00',
+
+		midnight00	= '00:00:00',
+		midnight24	= '23:59:59',
+
+		timeHour	= 3600,
+		timeMinute	= 60,
+	),
+
+	DefaultTime = \{ defaultTime \},
+
+	timeDay	= timeHour*24,
+
+	defaultTimeSS = '00:00:00',
+
+	lenStrTimeFormat = #timeFormat,
+
+),

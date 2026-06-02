@@ -1,0 +1,44 @@
+%==================================================%
+%                                                  %
+%           	Depot Optimization                 %
+%                                                  %
+%  		   DataProduct2.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: PRODUCT2
+@ "Data ",
+
+% ID
+@ ("PRODUCT2 '"),%li 0624
+
+% Caption
+@ TAG_DATA_PRODUCT2,
+
+% Group
+@ "' PRODUCT2 ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,IDPRODUCT,IDPRODUCT,,255,0);"), 
+@ ("(string,NAMEPRODUCT,NAMEPRODUCT,,255,0)]\"\\\n"),%li 0411b	
+
+@ VIEWSQL,
+
+@ ("SELECT 	id			AS IDPRODUCT, \
+			name 			AS NAMEPRODUCT \
+		FROM	" DB_PREFIX "PRODUCT  \
+		ORDER BY id\"\n\n"),
+

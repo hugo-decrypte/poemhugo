@@ -1,0 +1,200 @@
+%==================================================%
+%                                                  %
+% 	ParameterizeResourceTime.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+\forall s \in SHIFT \cup \{ 0 \}
+\forall d \in DATE (
+%\forall d \in DATE \cup HOLIDAY (
+	TimeDateShift_{s,d} :: DefaultDateTime,
+	NightDateShift_{s,d} :: DefaultDateTime,
+),
+
+\forall d \in DATE (
+%\forall d \in DATE \cup HOLIDAY (
+	TimeDateShift_{0,d} = HORIZON,
+	NightDateShift_{0,d} = {},
+),
+
+\forall s \in SHIFT (
+	\forall d \in DATE \cap HOLIDAY (
+		TimeDateShift_{s,d} = {},
+		NightDateShift_{s,d} = {},
+	),
+
+	\forall d \in DATE \setminus HOLIDAY (
+		TimeDateShift_{s,d} = SlotShift_{s} >> (d*timeDay),
+		NightDateShift_{s,d} = NightShift_{s} >> (d*timeDay),
+	),
+),
+
+
+
+
+% Date
+\forall s \in ResourceShift (
+	\forall i \in IdxResourceShift_{s} (
+		DateIdxResourceShift_{s,i} :: DefaultDate,
+		DateIdxResourceShift_{s,i} = \bigcup_{d \in DayIdxResourceShift_{s,i}}{DateDay_{d}},
+	),
+
+
+	DateResourceShift_{s} \subset DATE,
+
+	DateResourceShift_{s} =
+		\bigcup_{i \in IdxResourceShift_{s}}{DateIdxResourceShift_{s,i}},
+		%\setminus HOLIDAY,
+
+	%\forall d \in DateResourceShift_{s} (
+	%	IdxShiftDateResourceShift_{s,d} = \{
+	%		\forall i \in IdxResourceShift_{s}
+	%		(d \in DateIdxResourceShift_{s,i} ? i : 0)
+	%	\} \setminus 0,
+	%),
+
+	resourceResourceShift_{s} = resourceId_{idResourceResourceShift_{s}},
+),
+
+
+
+( TAG_NO_RESOURCE :
+	Resource0 <> {},
+),
+
+
+
+% Date
+\forall r \in Resource0
+	DateResource_{r} :: DATE,
+
+
+ResourceShiftValid = \{ \forall s \in ResourceShift (resourceResourceShift_{s} \in Resource0 ? s : 0) \} \setminus 0,
+
+% Resource
+ResourceResourceShift = \{ \forall s \in ResourceShiftValid resourceResourceShift_{s} \},
+
+
+
+\forall s \in ResourceShiftValid
+	DateResource_{resourceResourceShift_{s}} = DateResourceShift_{s} \setminus HOLIDAY,
+
+\forall r \in Resource0 \setminus ResourceResourceShift
+	DateResource_{r} = DATE \setminus HOLIDAY,
+
+
+% Shift
+\forall r \in Resource0
+\forall d \in DateResource_{r}
+	shiftDateResource_{r,d} :: 0,
+
+\forall r \in Resource0 \setminus ResourceResourceShift
+\forall d \in DateResource_{r}
+	shiftDateResource_{r,d} = shiftResource_{r},
+
+
+\forall s \in ResourceShiftValid
+\forall i \in IdxResourceShift_{s} (
+	\forall d \in DateIdxResourceShift_{s,i} \cap HOLIDAY
+		shiftDateResource_{resourceResourceShift_{s},d} = 0,
+
+	\forall d \in DateIdxResourceShift_{s,i} \setminus HOLIDAY
+		shiftDateResource_{resourceResourceShift_{s},d} = shiftIdxResourceShift_{s,i},
+),
+
+
+
+% Date
+\forall a \in ResourceAbsence (
+	\forall i \in IdxResourceAbsence_{a} (
+		t1IdxResourceAbsence_{a,i} :: defaultDateTime,
+		t2IdxResourceAbsence_{a,i} :: defaultDateTime,
+
+		t1IdxResourceAbsence_{a,i}[dateFormat] = date1IdxResourceAbsence_{a,i},
+		t1IdxResourceAbsence_{a,i}[timeFormat] = time1IdxResourceAbsence_{a,i},
+
+		t2IdxResourceAbsence_{a,i}[dateFormat] = date2IdxResourceAbsence_{a,i},
+		t2IdxResourceAbsence_{a,i}[timeFormat] = time2IdxResourceAbsence_{a,i},
+	),
+
+	TimeResourceAbsence_{a} :: DefaultDateTime,
+
+	TimeResourceAbsence_{a} = \bigcup_{i \in IdxResourceAbsence_{a}}{
+		[t1IdxResourceAbsence_{a,i}, t2IdxResourceAbsence_{a,i}]
+	},
+
+	DateResourceAbsence_{a} =
+		(TimeResourceAbsence_{a}[dateFormat] \setminus HOLIDAY)
+		\cap DATE,
+
+
+	resourceResourceAbsence_{a} = resourceId_{idResourceResourceAbsence_{a}},
+),
+
+
+
+
+% Resource
+ResourceAbsenceValid = \{ \forall a \in ResourceAbsence (resourceResourceAbsence_{a} \in Resource0 ? a : 0) \} \setminus 0,
+ResourceResourceAbsenceValid = \{ \forall a \in ResourceAbsenceValid resourceResourceAbsence_{a} \},
+
+
+\forall r \in Resource0
+	DateAbsenceResource_{r} :: DATE,
+
+\forall a \in ResourceAbsenceValid	% JZ 0723
+	DateAbsenceResource_{resourceResourceAbsence_{a}} = DateResourceAbsence_{a},
+
+\forall r \in Resource0 \setminus ResourceResourceAbsenceValid
+	DateAbsenceResource_{r} = {},
+
+
+
+
+% Absence
+\forall r \in Resource0
+\forall d \in DateResource_{r}
+	TimeAbsenceDateResource_{r,d} :: DefaultDateTime,
+	
+\forall r \in Resource0 \setminus ResourceResourceAbsenceValid
+\forall d \in DateResource_{r}
+	TimeAbsenceDateResource_{r,d} = {},
+
+\forall r \in ResourceResourceAbsenceValid
+\forall d \in DateResource_{r} \setminus DateAbsenceResource_{r}
+	TimeAbsenceDateResource_{r,d} = {},
+
+\forall a \in ResourceAbsenceValid
+\forall d \in DateResourceAbsence_{a}
+	TimeAbsenceDateResource_{resourceResourceAbsence_{a},d} = TimeResourceAbsence_{a} \cap HorizonDate_{d},
+
+
+
+
+% Resource Time
+\forall r \in Resource0 (
+	\forall d \in DateResource_{r}
+		TimeDateResource_{r,d} = TimeDateShift_{shiftDateResource_{r,d},d},
+
+	Schedule0Resource_{r} =
+		[	(t10Resource_{r} = defaultDateTime ? t1 : t10Resource_{r}),
+			(t20Resource_{r} = defaultDateTime ? t2 : t20Resource_{r})
+		] \cap
+	
+		\bigcup_{d \in DateResource_{r}}{TimeDateResource_{r,d}} \setminus
+	
+		\bigcup_{d \in DateResource_{r}}{TimeAbsenceDateResource_{r,d}},
+
+
+	( idResource_{r} TAG_RESOURCE_DATE_EMPTY :
+		DateResource_{r} <> {},
+	),
+
+	( idResource_{r} TAG_RESOURCE_SCHEDULE_EMPTY :
+		Schedule0Resource_{r} <> {},
+	),
+),
+
+

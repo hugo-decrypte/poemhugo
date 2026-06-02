@@ -1,0 +1,19 @@
+%==================================================%
+%                                                  %
+%          	Vehicle Routing               	   %
+%                                                  %
+% 		 ClearLog.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+'()' => (
+	'()' <- database,
+
+	(SQL : SQL_DeleteLogUserIsNot idUserLogin "' "), % Zhou 0730
+
+	database <- '()',
+),

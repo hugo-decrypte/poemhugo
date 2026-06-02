@@ -1,0 +1,360 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		UpdateData.n			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+['Work Directory' "Model\Input\Shift\ReadShift.n"],
+
+%=====================================================================================================================
+% Demo29 : no exclusive, no coupled, no coupledResource, no coupledT1, no coupledT2
+% Machining : no exclusive, no coupled, no coupledT1, no coupledT2, no coupleGroupeResource
+% platform : no coupled, no coupledResource, no coupledT2, no coupleGroupResource
+% projectTimeTabling : no exclusive, no coupled, no coupledResource, no coupledT1, no coupledT2, no coupledGroupResource
+
+
+%==========================================================================
+% -1 : Successor - terminé
+% 
+'()' => (
+	'()' <- database,
+
+
+/*
+	% Subprocess
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='00'"),
+
+
+	(SQL : "INSERT	INTO "  DB_PREFIX "PROCESS_PROCESS(idClub,type,idProcess1,idProcess2)
+		SELECT	'00','00',p1.id,p2.id
+		FROM	"  DB_PREFIX "PROCESS p1,"  DB_PREFIX "PROCESS p2
+		WHERE	p2.idParent=p1.id"),
+
+
+
+
+
+	% Successor
+	(SQL : "SELECT id,IdPrec,IdSucc,IdExclusive,IdCoupledT1,IdCoupledT2,IdCoupledGroupResource,IdCoupledResource FROM " DB_PREFIX "PROCESS"),
+		
+	nbProcess = (),
+	PROCESS = [1, nbProcess],
+
+	\forall i \in PROCESS (
+		idProcess_{i} 				:: "",
+		IdPrecProcess_{i} 			:: {""},
+		IdSuccProcess_{i} 			:: {""},
+		IdExclusiveProcess_{i} 			:: {""},
+		IdCoupledT1Process_{i} 			:: {""},
+		IdCoupledT2Process_{i} 			:: {""},
+			
+		IdCoupledGroupResourceProcess_{i} 	:: {""},
+		IdCoupledResourceProcess_{i} 		:: {""},
+
+
+		idProcess_{i} 				= (),
+
+		IdPrecProcess_{i} 			= (),
+		IdSuccProcess_{i} 			= (),
+		IdExclusiveProcess_{i} 			= (),		
+		IdCoupledT1Process_{i} 			= (),
+		IdCoupledT2Process_{i} 			= (),
+		IdCoupledGroupResourceProcess_{i} 	= (),
+		IdCoupledResourceProcess_{i} 		= (),
+
+	),
+
+
+	maxSucc = \max_{i \in PROCESS}{#IdSuccProcess_{i}},
+	maxExclusive = \max_{i \in PROCESS}{#IdExclusiveProcess_{i}},
+	maxCoupledT1 = \max_{i \in PROCESS}{#IdCoupledT1Process_{i}},
+	maxCoupledT2 = \max_{i \in PROCESS}{#IdCoupledT2Process_{i}},
+	maxCoupledGroupResource = \max_{i \in PROCESS}{#IdCoupledGroupResourceProcess_{i}},
+	maxCoupledResource = \max_{i \in PROCESS}{#IdCoupledResourceProcess_{i}},
+
+
+
+	\forall i \in PROCESS (
+		RangeSuccProcess_{i} \subset [1, maxSucc],
+		RangeExclusiveProcess_{i} \subset [1, maxExclusive],
+		RangeCoupledT1Process_{i} \subset [1, maxCoupledT1],
+		RangeCoupledT2Process_{i} \subset [1, maxCoupledT2],
+		RangeCoupledGroupResourceProcess_{i} \subset [1, maxCoupledGroupResource],
+		RangeCoupledResourceProcess_{i} \subset [1, maxCoupledResource],
+
+
+		RangeSuccProcess_{i} = [1, #{IdSuccProcess_{i}}],
+		RangeExclusiveProcess_{i} = [1, #{IdExclusiveProcess_{i}}],
+		RangeCoupledT1Process_{i} = [1, #{IdCoupledT1Process_{i}}],
+		RangeCoupledT2Process_{i} = [1, #{IdCoupledT2Process_{i}}],
+		RangeCoupledGroupResourceProcess_{i} = [1, #{IdCoupledGroupResourceProcess_{i}}],
+		RangeCoupledResourceProcess_{i} = [1, #{IdCoupledResourceProcess_{i}}],
+
+
+		\forall j \in RangeSuccProcess_{i}
+			idSuccProcess_{i,j} = IdSuccProcess_{i}[j],
+
+		\forall j \in RangeExclusiveProcess_{i}
+			idExclusiveProcess_{i,j} = IdExclusiveProcess_{i}[j],
+
+		\forall j \in RangeCoupledT1Process_{i}
+			idCoupledT1Process_{i,j} = IdCoupledT1Process_{i}[j],
+
+		\forall j \in RangeCoupledT2Process_{i}
+			idCoupledT2Process_{i,j} = IdCoupledT2Process_{i}[j],
+
+		\forall j \in RangeCoupledGroupResourceProcess_{i}
+			idCoupledGroupResourceProcess_{i,j} = IdCoupledGroupResourceProcess_{i}[j],
+	
+		\forall j \in RangeCoupledResourceProcess_{i}
+			idCoupledResourceProcess_{i,j} = IdCoupledResourceProcess_{i}[j],
+	),
+
+
+
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='01'"),
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='02'"),
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='04'"),
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='05'"),
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='09'"),
+	(SQL : "DELETE FROM "  DB_PREFIX "PROCESS_PROCESS WHERE type='10'"),
+
+
+	\forall i \in PROCESS (
+		\forall j \in RangeSuccProcess_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idSuccProcess_{i,j} "','01')"),
+
+		\forall j \in RangeExclusiveProcess_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idExclusiveProcess_{i,j} "','02')"),
+
+		\forall j \in RangeCoupledT1Process_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idCoupledT1Process_{i,j} "','04')"),
+
+		\forall j \in RangeCoupledT2Process_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idCoupledT2Process_{i,j} "','05')"),
+
+		\forall j \in RangeCoupledGroupResourceProcess_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idCoupledGroupResourceProcess_{i,j} "','09')"),
+
+		\forall j \in RangeCoupledResourceProcess_{i}
+		(SQL : "INSERT INTO " DB_PREFIX "PROCESS_PROCESS(idClub,idProcess1,idProcess2,type) VALUES('00','"
+			idProcess_{i} "','" idCoupledResourceProcess_{i,j} "','10')"),
+	),
+
+
+
+
+
+
+
+	% PROCESS_TYPERESOURCE_TYPESITE
+	(SQL : "SELECT 	idClub,idProcess,idx,IdTypeResource,IdTypeSite,IdSite,
+			siteInGroupResource,
+			minResource,maxResource,unitResource,
+			weightParallel,weightSequence
+		FROM	" DB_PREFIX "_PROCESS_RESOURCE_SITE"),
+
+	PROCESS_RESOURCE_SITE = [1, ()],
+
+	\forall i \in PROCESS_RESOURCE_SITE (
+		idClubProcess_{i}		:: "",
+		idClubProcess_{i}		= (),
+
+		idProcess_{i}			:: "",
+		idProcess_{i}			= (),
+		
+		idxProcess_{i}			:: 0,
+		idxProcess_{i}  		= (),
+
+		IdTypeResourceProcess_{i} 	:: {""},
+		IdTypeSiteProcess_{i} 	  	:: {""},
+
+		IdTypeResourceProcess_{i}	= (),
+		IdTypeSiteProcess_{i}		= (),
+
+		IdSiteProcess_{i} 		:: {""},
+		IdSiteProcess_{i} 		= (),
+
+		siteInGroupResourceProcess_{i}	:: 0,
+		siteInGroupResourceProcess_{i}	= (),
+
+		minResourceProcess_{i}		:: 0,
+		minResourceProcess_{i}		= (),
+
+		maxResourceProcess_{i}		:: 0,
+		maxResourceProcess_{i}		= (),
+
+		unitResourceProcess_{i}		:: 0,
+		unitResourceProcess_{i}		= (),
+
+		weightParallelProcess_{i}	:: 0,
+		weightParallelProcess_{i}	= (),
+
+		weightSequenceProcess_{i}	:: 0,
+		weightSequenceProcess_{i}	= (),
+	),
+	
+	maxTypeResource = \max_{i \in PROCESS_RESOURCE_SITE}{#IdTypeResourceProcess_{i}},
+	maxTypeSite = \max_{i \in PROCESS_RESOURCE_SITE}{#IdTypeSiteProcess_{i}},
+	maxSite = \max_{i \in PROCESS_RESOURCE_SITE}{#IdSiteProcess_{i}},
+
+	\forall i \in PROCESS_RESOURCE_SITE (
+		RangeTypeResourceProcess_{i} \subset [1, maxTypeResource],
+		RangeTypeResourceProcess_{i} = [1, #{IdTypeResourceProcess_{i}}],
+
+		RangeTypeSiteProcess_{i} \subset [1, maxTypeSite],
+		RangeTypeSiteProcess_{i} = [1, #{IdTypeSiteProcess_{i}}],
+
+		RangeSiteProcess_{i} \subset [1, maxSite],
+		RangeSiteProcess_{i} = [1, #{IdSiteProcess_{i}}],
+
+
+		\forall j \in RangeTypeResourceProcess_{i}
+			idTypeResourceProcess_{i,j} = IdTypeResourceProcess_{i}[j],
+
+		\forall j \in RangeTypeSiteProcess_{i}
+			idTypeSiteProcess_{i,j} = IdTypeSiteProcess_{i}[j],
+
+		\forall j \in RangeSiteProcess_{i}
+			idSiteProcess_{i,j} = IdSiteProcess_{i}[j],
+	),
+
+
+
+
+	(SQL : "DELETE * FROM "  DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE"),
+
+	\forall i \in PROCESS_RESOURCE_SITE
+	\forall j \in RangeTypeResourceProcess_{i}
+	#IdTypeSiteProcess_{i} > 0 => (
+		\forall k \in RangeTypeSiteProcess_{i} (
+		SQL : "INSERT INTO " DB_PREFIX
+			"PROCESS_TYPERESOURCE_TYPESITE(idClub,idProcess,idx,idTypeResource,idTypeSite,groupResourceSite,minResource,maxResource,weightParallel,weightSequence) VALUES('"
+			idClubProcess_{i} "','"
+			idProcess_{i} "',"
+
+			idxProcess_{i} ",'"
+
+			idTypeResourceProcess_{i,j} "','"
+			idTypeSiteProcess_{i,k} "',"
+
+			siteInGroupResourceProcess_{i} ","
+
+			minResourceProcess_{i} ","
+			maxResourceProcess_{i} ","
+			weightParallelProcess_{i} ","
+			weightSequenceProcess_{i} ")"
+		),
+		;
+
+
+		(SQL : "INSERT INTO " DB_PREFIX
+			"PROCESS_TYPERESOURCE_TYPESITE(idClub,idProcess,idx,idTypeResource,groupResourceSite,minResource,maxResource,weightParallel,weightSequence) VALUES('"
+			idClubProcess_{i} "','"
+			idProcess_{i} "',"
+
+			idxProcess_{i} ",'"
+
+			idTypeResourceProcess_{i,j} "',"
+
+			siteInGroupResourceProcess_{i} ","
+
+			minResourceProcess_{i} ","
+			maxResourceProcess_{i} ","
+			weightParallelProcess_{i} ","
+			weightSequenceProcess_{i} ")"
+		),
+	),
+
+
+	%#IdSiteProcess_{i} > 0 =>
+	%\forall j \in RangeSiteProcess_{i}
+	%	(SQL : "INSERT INTO " DB_PREFIX "PROCESS_SITE(idClub,idProcess,idSite) VALUES('" idClubProcess_{i} "','" idProcess_{i} "','" idSiteProcess_{i,j} "')"),
+*/
+
+
+
+
+
+
+
+
+
+	(SQL :	"SELECT	"SQL_TOP_PERCENT "id,IdTypeResource0,IdShift0
+		FROM	" DB_PREFIX "RESOURCE
+		ORDER	BY id"),
+
+	RESOURCE = [1,()],
+
+	\forall r \in RESOURCE (
+		idResource_{r} 			:: "",
+		IdTypeResourceResource_{r}	:: {""},
+		IdShiftResource_{r}		:: {""},
+
+		idResource_{r}			= (),
+		IdTypeResourceResource_{r}	= (),
+		IdShiftResource_{r}		= (),
+
+
+		idTypeResourceResource_{r}	= \inf IdTypeResourceResource_{r},
+		idShiftResource_{r}		= \inf IdShiftResource_{r},
+
+		IdTypeResourceResource_{r} = {} => idTypeResourceResource_{r} = "",
+		IdShiftResource_{r} = {} => idShiftResource_{r} = "",
+	),
+
+
+
+
+	\forall s \in SHIFT (
+		(SQL :	"SELECT	"SQL_TOP_PERCENT "Day FROM " DB_PREFIX "SHIFT WHERE id='" idShift_{s} "'"),
+
+		1 = (),
+		
+		DayShift_{s} :: {},
+		DayShift_{s} = (),
+	),
+
+
+
+	(SQL : "DELETE FROM "  DB_PREFIX "RESOURCE_TYPERESOURCE"),
+	(SQL : "DELETE FROM "  DB_PREFIX "RESOURCE_SHIFT"),
+
+
+	\forall r \in RESOURCE (
+		ShiftResource_{r} = \{ \forall i \in IdShiftResource_{r} shiftId_{i} \},
+		DayResource_{r} = \bigcup_{s \in ShiftResource_{r}}{DayShift_{s}},
+	),
+
+	\forall r \in RESOURCE (
+		\forall i \in IdTypeResourceResource_{r}
+		(SQL : "INSERT INTO " DB_PREFIX "RESOURCE_TYPERESOURCE(idClub,idResource,idTypeResource) VALUES('00','"
+			idResource_{r} "','" i "')"),
+
+		\forall s \in ShiftResource_{r}
+		(SQL : "INSERT INTO " DB_PREFIX "RESOURCE_SHIFT(idClub,idResource,dayStart,dayEnd,idShift) VALUES('00','"
+			idResource_{r} "','" \inf DayShift_{s} "','" \sup DayShift_{s} "','" idShift_{s} "')"),
+
+
+		(SQL : "UPDATE " DB_PREFIX "RESOURCE SET idTypeResource='"
+			idTypeResourceResource_{r} "',idShift='" idShiftResource_{r} "' WHERE id='" idResource_{r} "'"),
+
+	),
+
+
+
+	database <- '()',
+),
+

@@ -1,0 +1,61 @@
+/******************************************************/
+/*	                                              */
+/*			ReadClient.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' <- database,
+
+SQL_SelectClient = ("SELECT c.id,c.name,c.idSite,c.idShift,c.idZone FROM " DB_PREFIX "OPT_CLIENT c ORDER BY c.id"),	% JZ 1023
+%SQL_SelectClient = ("SELECT c.id,c.name,c.idSite,c.idShift,c.idZone FROM " DB_PREFIX "CLIENT c ORDER BY c.id"),
+
+(SQL: SQL_SelectClient),
+
+
+nbClient	= (),
+CLIENT		= [1, nbClient],
+
+\forall c \in CLIENT \cup \{0\} (
+	idClient_{c}		:: "",
+),
+idClient_{0} = "",
+
+\forall c \in CLIENT (
+	%idClient_{c}		:: "",
+	nameClient_{c}		:: "",
+	idSiteClient_{c}	:: "",
+	idShiftClient_{c}	:: "",
+	idZoneClient_{c}	:: "",
+
+	idClient_{c}		= (),
+	nameClient_{c}		= (),
+	idSiteClient_{c}	= (),
+	idShiftClient_{c}	= (),
+	idZoneClient_{c}	= (),
+),
+
+database <- '()',
+
+
+IDCLIENT = \{ \forall c \in CLIENT idClient_{c} \},
+
+\forall i \in IDCLIENT \cup \{""\}
+	clientId_{i} \in CLIENT \cup \{0\},
+
+clientId_{""} = 0,
+\forall c \in CLIENT (
+	clientId_{idClient_{c}} = c,
+),
+
+
+
+%clientId_{""} = 0,
+%\forall i \in IDCLIENT (
+%	clientId_{i} \in CLIENT,
+%	idClient_{clientId_{i}} = i,
+%),
+
+
+

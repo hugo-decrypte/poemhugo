@@ -1,0 +1,40 @@
+%==================================================%
+%                                                  %
+%  		   DataVehicle2.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: VEHICLE2
+@ "Data ",
+
+% ID
+@ ("VEHICLE2 '"),
+
+% Caption
+@ TAG_VEHICLE,
+
+% Group
+@ "' VEHICLE2 ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,IDVEHICLE,IDVEHICLE,,255,0);"), 
+@ ("(string,NAMEVEHICLE,NAMEVEHICLE,,255,0)]\"\\\n"),%li 0411b	
+
+@ VIEWSQL,
+
+@ ("SELECT id AS IDVEHICLE,name AS NAMEVEHICLE FROM "
+	DB_PREFIX "RESOURCE WHERE idClub='(/*CLUBID*/)' ORDER BY id\"\n\n"),	% JZ 0318
+

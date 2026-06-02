@@ -1,0 +1,142 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  		 FuncTableProductProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductProduct" postfix),	% JZ 1018
+
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		
+		@ ("(float,LENGTHBYPIECE,Longueur/Pièce,,8.3.50,1);\\\n"),
+		@ ("(float,HEIGHTBYPIECE,Hauteur/Pièce,,8.3.50,1);\\\n"),
+		@ ("(float,WIDTHBYPIECE,Largeur/Pièce,,8.3.50,1);\\\n"),
+		@ ("(float,DEPTHBYPIECE,Profondeur/Pièce,,8.3.50,1);\\\n"),
+		@ ("(float,VOLUMEBYPIECE,Volume/Pièce,,8.3.50,1);\\\n"),
+		@ ("(int,ORDBYLENGTH,Ordre/Longueur,,3.0.50,1);\\\n"),
+		@ ("(int,ORDBYHEIGHT,Ordre/Hauteur,,3.0.50,1);\\\n"),
+		@ ("(int,ORDBYWIDTH,Ordre/Largeur,,3.0.50,1);\\\n"),
+		@ ("(int,ORDBYDEPTH,Ordre/Profondeur,,3.0.50,1);\\\n"),
+		@ ("(string,COMMENTS," TAG_COMMENT ",,20.0.100,1);\\\n"),
+		@ ("(float,PURCHASEPRICE,Prix Achat,,10.4.50,0);\\\n"),
+		@ ("(string,IDPARENT,Parent,,50.0.20,1);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				' ' as IDPARENT,\
+				' ' as BEPARENT,\
+				NULL as QUANTITY,\
+				' ' as COMMENTS,\
+				\
+				"SQL_FORMATNUM"(P.PriceUnit,"SQL_FORMATSCALE4") as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				' ' as AMOUNTHT,\
+				\
+				NULL as ORDBYLENGTH,\
+				NULL as ORDBYHEIGHT,\
+				NULL as ORDBYWIDTH,\
+				NULL as ORDBYDEPTH,\
+				NULL as LENGTHBYPIECE,\
+				NULL as HEIGHTBYPIECE,\
+				NULL as WIDTHBYPIECE,\
+				NULL as DEPTHBYPIECE,\
+				NULL as VOLUMEBYPIECE,\
+				0 as INPRODUCT,\
+				"SQL_CASEWHEN"P.IdState in (select s.ID from " DB_PREFIX "STATE s where s.CATEGORY='PRODUCT') "SQL_THEN" (select s.COLOR from " DB_PREFIX "STATE s where s.CATEGORY='PRODUCT' and s.ID=P.IdState) "SQL_ELSE" '(255 255 255)' "SQL_CASEEND" AS LINERGB \
+			FROM " DB_PREFIX "PRODUCT P \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and (P.Id not in ((/*IDPRODUCT*/)) )\
+			and P.TypeProduct<>'F'\
+			and P.IdState not in ('0','9')\
+			and P.Id not in (select PC.IdSubProduct from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct in ((/*IDPRODUCT*/)) ) \
+			UNION ALL \
+			SELECT \
+				P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				PC.IdSubProduct as IDPARENT,\
+				'0' as BEPARENT,\
+				ROUND(PC.Quantity) as QUANTITY,\
+				PC.Comments as COMMENTS,\
+				\
+				"SQL_FORMATNUM"(P.PriceUnit,"SQL_FORMATSCALE4") as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				"SQL_FORMATNUM"(P.PriceUnit*PC.Quantity, "SQL_FORMATSCALE2") as AMOUNTHT,\
+				\
+				ROUND(PC.OrderByLength) as ORDBYLENGTH,\
+				ROUND(PC.OrderByHeight) as ORDBYHEIGHT,\
+				ROUND(PC.OrderByWidth)  as ORDBYWIDTH,\
+				ROUND(PC.OrderByDepth)  as ORDBYDEPTH,\
+				"SQL_FORMATNUM"(PC.LengthByPiece,"SQL_FORMATSCALE0") as LENGTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.HeightByPiece,"SQL_FORMATSCALE0") as HEIGHTBYPIECE,\
+				"SQL_FORMATNUM"(PC.WidthByPiece,"SQL_FORMATSCALE0")  as WIDTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.DepthByPiece,"SQL_FORMATSCALE0")  as DEPTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.VolumeByPiece,"SQL_FORMATSCALE0") as VOLUMEBYPIECE,\
+				1 as INPRODUCT,\
+				'(150 150 255)' AS LINERGB \
+			FROM " DB_PREFIX "PRODUCT P \
+			inner join " DB_PREFIX "PRODUCT_COMPONENT PC on PC.IdSubProduct=P.Id \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and (PC.IdProduct in ((/*IDPRODUCT*/)) )\
+			UNION ALL \
+			SELECT \
+				P.Id as IDSUBPRODUCT,\
+				P.Designation as DESIGNATION,\
+				P.Family as FAMILY,\
+				P.TypeProduct as TYPEPRODUCT,\
+				PC.IdProduct as IDPARENT,\
+				'2' as BEPARENT,\
+				ROUND(PC.Quantity) as QUANTITY,\
+				PC.Comments as COMMENTS,\
+				\
+				"SQL_FORMATNUM"(P.PriceUnit,"SQL_FORMATSCALE4") as PRICE,\
+				P.PurchasePrice as PURCHASEPRICE,\
+				"SQL_FORMATNUM"(P.PriceUnit*PC.Quantity, "SQL_FORMATSCALE2") as AMOUNTHT,\
+				\
+				ROUND(PC.OrderByLength) as ORDBYLENGTH,\
+				ROUND(PC.OrderByHeight) as ORDBYHEIGHT,\
+				ROUND(PC.OrderByWidth)  as ORDBYWIDTH,\
+				ROUND(PC.OrderByDepth)  as ORDBYDEPTH,\
+				"SQL_FORMATNUM"(PC.LengthByPiece,"SQL_FORMATSCALE0") as LENGTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.HeightByPiece,"SQL_FORMATSCALE0") as HEIGHTBYPIECE,\
+				"SQL_FORMATNUM"(PC.WidthByPiece,"SQL_FORMATSCALE0")  as WIDTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.DepthByPiece,"SQL_FORMATSCALE0")  as DEPTHBYPIECE,\
+				"SQL_FORMATNUM"(PC.VolumeByPiece,"SQL_FORMATSCALE0") as VOLUMEBYPIECE,\
+				1 as INPRODUCT,\
+				'(150 150 180)' AS LINERGB \
+			FROM " DB_PREFIX "PRODUCT P \
+			inner join " DB_PREFIX "PRODUCT_COMPONENT PC on PC.IdSubProduct=P.Id \
+			WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+			and PC.IdProduct in (select PC1.IdSubProduct from " DB_PREFIX "PRODUCT_COMPONENT PC1 where PC1.IdProduct in ((/*IDPRODUCT*/)) )\
+			ORDER BY INPRODUCT desc, IDPARENT, BEPARENT, IDSUBPRODUCT, Family, DESIGNATION\"\n\n\n\n"), 
+
+			%=====================
+			['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForProduct2EditOnView.n"],
+			%=====================
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

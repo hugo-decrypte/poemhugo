@@ -1,0 +1,18 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+% 		ViewTableResourceShift.n           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableResourceShift.n"],
+
+'@' => (
+	tableResourceShift("RESOURCE_SHIFT",TAG_TABLE,"RESOURCESHIFT",true,"EditResourceShift",TAG_TABLE_RESOURCE_SHIFT, "", ""),
+	tableResourceShift("RESOURCE_SHIFT",TAG_TABLE,"RESOURCESHIFT",true,"EditResourceShift",TAG_TABLE_RESOURCE_SHIFT, "User", ""), % JZ 1013
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_RESOURCE_SHIFT TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

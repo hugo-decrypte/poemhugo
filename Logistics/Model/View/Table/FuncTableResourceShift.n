@@ -1,0 +1,194 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR    	           	   %
+%                                                  %
+%  		FuncTableResourceShift.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%% 2025.01.29 SQL_TABLE_USER
+%% 2025.01.29  " DB_PREFIX "CLUB
+%% 2025.07.12 ORDER BY rr.idResource, rr.dayStart
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableResourceShift>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableResourceShift" postfix),
+
+
+		['Work Directory' "Model\Common\SQL\SqlTask.n"],
+		['Work Directory' "Model\Common\SQL\SqlResource.n"],
+
+
+
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+/*
+		% View Object	
+		@ ("View "),
+
+		% ID	
+		@ ("ViewTableResourceShift "),
+
+		% Caption	
+		@ ("'" title "' "),  
+
+		% Title	
+		@ ("'" title "' "),  
+
+		% Color(R G B)
+		@ " 255 255 255 ",
+
+		% Icon	
+		@ ("_ "),
+
+		% Rect(X Y SX SY )	
+		@ ("0 0 0 0 "),
+
+		% Margin	
+		@ ("5 5 5 5 "),
+
+		% [Option items]
+		@ ("'[TRACELEVEL=0;"),
+		@ ("TRACEFILE=;"),
+		@ ("TOOLBAR=0;"),
+		@ ("FLIPVERTICALLY=0;"),
+		@ ("FLIPHORIZONTALLY=0;"),
+		@ ("NATURESCALE=0;"),
+		@ ("BESTFIT=1;"),
+		@ ("SCROLLBAR=1;"),
+		@ ("SHOWNAME=1;"),
+		@ ("ZOOMOBJECT=;"),
+		@ ("CURRENTPAGE=1;"),
+		@ ("CLOSEEVENT=0;"),
+		@ ("BKGROUNDCOLOR="tableTitleFillColor";"),
+		@ ("SCREENCOLOR="tableTitleFillColor";"),
+		@ ("PATHLINEWIDTH=9;"),
+		@ ("PATHLINECOLOR=(0 0 0);"),
+		@ ("PATHARROWWIDTH=15;"),
+		@ ("PATHARROWCOLOR=(255 0 0);"),
+		@ ("POEMSERVER=;"),
+		@ ("MAPLOGFILE=;"), 
+		@ ("MATRIXCRITERION=Distance;"),
+		@ ("MATRIXCOMPUTERADIUS=0.5;"),
+		@ ("SPEEDKMHOUR=50;"),
+		@ ("STRAIGHTDISTANCERATIO=1.4;"),
+		@ ("SITEINTRADISTANCE=;"),
+		@ ("MATRIXMAXCOMPUTEWIDTH=;"),
+		@ ("NEIGHBOURHOOD=;"),
+		@ ("MATRIXFILENAME=;"),
+		@ ("MATRIXDIRECTORY=;GLOBALVARIABLE=0]'"),
+		@ "\n\n",
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResourceShift2EditResourceShift.n"],
+
+				
+
+		@ ("Table tableRESOURCESHIFT _ _ 0 0  " tableWidth "  600 \\\n"), 
+*/
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		
+/*
+		% [Data source options]:
+		@ ("\"[DATAOBJ=RESOURCESHIFT; FillColor=LINERGB]\"\n\n"),
+
+		@ ("Data RESOURCESHIFT '" TAG_RESOURCE_SHIFT "' RESOURCESHIFT "),
+
+		@ typeDataUser,
+
+		% FIND AND DOUBLECLICK
+		@ (" 0 \'[FIND={"),
+
+		\forall i \in FieldSelected (
+			@ aliasField_{i},
+
+			i < \sup FieldSelected => @ ",",
+		),
+
+		@ "}]\' ",
+		
+		doubleclick <> "" => (
+			@ ("  [DOUBLECLICK=" doubleclick "] \\\n"),
+			;
+			@ ("  [DOUBLECLICK=_] \\\n"),
+		),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[" #FieldSelected ";"),
+
+		\forall i \in FieldSelected
+			@ ("(" typeField_{i} "," aliasField_{i} "," nameField_{i} "," formatField_{i} ");"),
+*/
+
+
+		@ ("(color,LINERGB,,,13.0.0);(string,IDRESOURCE,,,);(string,DAYSTART,,,);(string,IDSHIFT,,,);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+		sqlResourceColor = (
+			"IIF(rr.idResource=(select u.idResource FROM " SQL_TABLE_USER " u WHERE u.id='(/*USERID*/)'),'"
+			RGB_CRITICAL "', " SQL_ColorCategoryIs "'RESOURCE' AND al.field='category' AND al.id=r.idTypeResource))"
+		),
+		
+		related = "" => (
+			sqlResourceSelected = "",
+			;
+			sqlResourceSelected = " AND rr.idResource IN ((/*IDOBJ*/))",
+		),
+
+	    	@ ("SELECT r.idClub 							AS IDCLUB,\
+			"SQL_ClubNameIdIs"r.idClub) 					AS NAMECLUB, \
+			rr.idResource 							AS IDRESOURCE,\
+			r.name 								AS NAMERESOURCE,\
+			rr.dayStart 							AS DAYSTART,\
+			rr.dayEnd 							AS DAYDAYEND,\
+			" SQL_AliasCategoryIs
+			"'CALENDAR' AND al.field='weekday' AND al.id=rr.dayStart)	AS NAMEDAYSTART,\
+			" SQL_AliasCategoryIs
+			"'CALENDAR' AND al.field='weekday' AND al.id=rr.dayEnd)		AS NAMEDAYEND,\
+			rr.idShift							AS IDSHIFT,\
+			s.name								AS NAMESHIFT,\
+			rr.state 							AS STATE,\
+			" SQL_ActivityStateName 					" AS NAMESTATE,\
+			" sqlResourceColor "						AS LINERGB \
+			FROM " DB_PREFIX "RESOURCE_SHIFT rr, " 
+				DB_PREFIX "RESOURCE r, " 
+				DB_PREFIX "SHIFT s\
+			WHERE s.id=rr.idShift AND r.id=rr.idResource AND" sqlResourceVisibility),
+			@ (" ORDER BY rr.idResource, rr.dayStart\"\n\n\n"),
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResourceShift2EditResourceShift.n"],
+
+				
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

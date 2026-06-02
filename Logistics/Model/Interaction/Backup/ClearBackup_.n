@@ -1,0 +1,29 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		ClearBackup.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'()' => (
+	sqlOperationLog := TAG_CLEAR_BACKUP, % Zhou 0725
+
+
+	'()' <- database,
+
+	['Work Directory' "Model\\Interaction\\Backup\\ClearBackup0.n"],	
+
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+
+	database <- '()',
+
+
+),
+

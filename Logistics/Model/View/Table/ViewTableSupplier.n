@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableSupplier.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableSupplier.n"],
+
+'@' => ( 
+	tableSupplier("SUPPLIER",TAG_TABLE,"SUPPLIER",true,"EditSupplier",TAG_SUPPLIER,""),	% JZ 1020
+),

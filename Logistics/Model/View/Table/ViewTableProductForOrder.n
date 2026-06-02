@@ -1,0 +1,13 @@
+%==================================================%
+%                                                  %
+%  		ViewTableProductForOrder.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductForOrder.n"],
+
+'@' => (
+	tableProductForOrder("",TAG_TABLE,"PRODUCTFORORDER",true,"", "(/*TITLEOBJ*/)", ""), % JZ 0924
+	% Check "TableProductForOrder" for open view file operations
+),

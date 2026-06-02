@@ -1,0 +1,499 @@
+/******************************************************/
+/*	         Vehicle Routing	              */
+/*	                                              */
+/*		WriteSolutionSql.n		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+
+% RESOURCE
+\forall v \in VehicleActive (
+	TourActiveVehicle_{v}	= TourVehicle_{v} \cap TourActive,
+
+	quantityPlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{quantityTour_{t}},
+	weightPlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{weightTour_{t}},
+	volumePlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{volumeTour_{t}},
+
+	maxQuantityTourVehicle_{v} 	= (maxQuantityTour0Vehicle_{v} 	= 0 ? maxQuantityTypeVehicle_{typeVehicleVehicle_{v}}	: maxQuantityTour0Vehicle_{v}),
+	maxWeightTourVehicle_{v} 	= (maxWeightTour0Vehicle_{v} 	= 0.0 ? maxWeightTypeVehicle_{typeVehicleVehicle_{v}}	: maxWeightTour0Vehicle_{v}),
+	maxVolumeTourVehicle_{v} 	= (maxVolumeTour0Vehicle_{v} 	= 0.0 ? maxVolumeTypeVehicle_{typeVehicleVehicle_{v}}	: maxVolumeTour0Vehicle_{v}),
+
+	maxQuantityPlanVehicle_{v}	= maxQuantityTourVehicle_{v} * #TourActiveVehicle_{v},
+	maxWeightPlanVehicle_{v}	= maxWeightTourVehicle_{v} * #TourActiveVehicle_{v},
+	maxVolumePlanVehicle_{v}	= maxVolumeTourVehicle_{v} * #TourActiveVehicle_{v},
+
+	maxQuantityTourVehicle_{v} = 0 => (
+		rateQuantityVehicle_{v}	= (quantityPlanVehicle_{v} / \max_{v1 \in VehicleActive}{quantityPlanVehicle_{v1}}) * 100,
+		;
+
+		rateQuantityVehicle_{v}	= (quantityPlanVehicle_{v} / maxQuantityPlanVehicle_{v}) * 100,
+	),
+
+	maxWeightTourVehicle_{v} = 0 => (
+		rateWeightVehicle_{v}	= (weightPlanVehicle_{v} / \max_{v1 \in VehicleActive}{weightPlanVehicle_{v1}}) * 100,
+		;
+
+		rateWeightVehicle_{v}	= (weightPlanVehicle_{v} / maxWeightPlanVehicle_{v}) * 100,
+	),
+
+	maxVolumeTourVehicle_{v} = 0 => (
+		rateVolumeVehicle_{v}	= (volumePlanVehicle_{v} / \max_{v1 \in VehicleActive}{volumePlanVehicle_{v1}}) * 100,
+		;
+
+		rateVolumeVehicle_{v}	= (volumePlanVehicle_{v} / maxVolumePlanVehicle_{v}) * 100,
+	),
+),
+
+
+% TOUR
+\forall t \in TourActive (
+	maxQuantityTour_{t}		= maxQuantityTourVehicle_{vehicleTour_{t}},
+	maxWeightTour_{t}		= maxWeightTourVehicle_{vehicleTour_{t}},
+	maxVolumeTour_{t}		= maxVolumeTourVehicle_{vehicleTour_{t}},
+
+	maxQuantityTour_{t} = 0 => (
+		rateQuantityTour_{t}	= (quantityTour_{t} / \max_{t1 \in TourActive}{quantityTour_{t1}}) * 100,
+		;
+
+		rateQuantityTour_{t}	= (quantityTour_{t} / maxQuantityTour_{t}) * 100,
+	),
+
+	maxWeightTour_{t} = 0.0 => (
+		rateWeightTour_{t}	= (weightTour_{t} / \max_{t1 \in TourActive}{weightTour_{t1}}) * 100,
+		;
+
+		rateWeightTour_{t}	= (weightTour_{t} / maxWeightTour_{t}) * 100,
+	),
+
+	maxVolumeTour_{t} = 0.0 => (
+		rateVolumeTour_{t}	= (volumeTour_{t} / \max_{t1 \in TourActive}{volumeTour_{t1}}) * 100,
+		;
+
+		rateVolumeTour_{t}	= (volumeTour_{t} / maxVolumeTour_{t}) * 100,
+	),
+),
+
+
+\forall v \in RESOURCE (
+	mappingVehicle_{v} \in VehicleActive,
+),
+
+
+<matchingVehicle>(Vehicle, maxBacktrack)
+(
+	Vehicle \subset VehicleActive,
+
+%\forall v \in Vehicle (
+%rateMappingQuantityVehicle_{v} :: 0.0,
+%),
+
+%?? rateMappingQuantityVehicle_{1} > 90,
+
+	\forall v \in Vehicle (
+		mappingVehicle_{v} \in Vehicle,
+
+		rateMappingQuantityVehicle_{v} = (quantityPlanVehicle_{v} / maxQuantityPlanVehicle_{mappingVehicle_{v}}) * 100,
+
+		rateMappingWeightVehicle_{v}   = (weightPlanVehicle_{v} / maxWeightPlanVehicle_{mappingVehicle_{v}}) * 100,
+		rateMappingVolumeVehicle_{v}   = (volumePlanVehicle_{v} / maxVolumePlanVehicle_{mappingVehicle_{v}}) * 100,
+	),
+
+	\forall v1<v2 \in Vehicle
+		mappingVehicle_{v1} <> mappingVehicle_{v2},
+
+
+	meanRateQuantity = \sum_{v \in Vehicle}{rateMappingQuantityVehicle_{v}} / #Vehicle,
+	meanRateWeight = \sum_{v \in Vehicle}{rateMappingWeightVehicle_{v}} / #Vehicle,
+	meanRateVolume = \sum_{v \in Vehicle}{rateMappingVolumeVehicle_{v}} / #Vehicle,
+
+	deviationQuantity = \sqrt{\sum_{v \in Vehicle}{(rateMappingQuantityVehicle_{v} - meanRateQuantity)^2} / #Vehicle},
+	deviationWeight = \sqrt{\sum_{v \in Vehicle}{(rateMappingWeightVehicle_{v} - meanRateWeight)^2} / #Vehicle},
+	deviationVolume = \sqrt{\sum_{v \in Vehicle}{(rateMappingVolumeVehicle_{v} - meanRateVolume)^2} / #Vehicle},
+
+	\forall v \in Vehicle -> (
+		\min	rateMappingQuantityVehicle_{v},
+		\min	rateMappingWeightVehicle_{v},
+		\min	rateMappingVolumeVehicle_{v},
+	)
+	\forall m \in Vehicle -> (
+		\min	maxQuantityPlanVehicle_{m} - quantityPlanVehicle_{v},
+		\min	maxWeightPlanVehicle_{m} - weightPlanVehicle_{v},
+		\min	maxVolumePlanVehicle_{m} - volumePlanVehicle_{v},
+	)
+	mappingVehicle_{v} = m ?,
+
+
+	deviationQuantity = ?,
+	deviationWeight = ?,
+	deviationVolume = ?,
+
+
+	\min	deviationQuantity : 1,
+
+	meanRateWeight > 0.0 =>
+	\min	deviationWeight : 1,
+
+	meanRateVolume > 0.0 =>
+	\min	deviationVolume : 1,
+
+
+	% Termination
+	'Solution Count' >= 1 && 'Search Gap' > maxBacktrack => (
+		'.',
+	),
+),
+
+%!!,
+
+matchingVehicle(VehicleActive, maxBacktrack),
+
+
+\forall t \in TourActive (
+	mappingTour_{t} \in TourActive,
+),
+
+\forall v \in VehicleActive (
+	\forall t \in TourActiveVehicle_{v}
+		mappingTour_{t} \in TourActiveVehicle_{mappingVehicle_{v}},
+
+	\forall t1<t2 \in TourActiveVehicle_{v}
+		mappingTour_{t1} < mappingTour_{t2},
+),
+
+
+MappingVehicle = VehicleActive,
+\forall m \in MappingVehicle
+	reverseVehicle_{m} :: 0,
+
+\forall v \in VehicleActive
+	reverseVehicle_{mappingVehicle_{v}} = v,
+
+
+MappingTour = TourActive,
+\forall m \in MappingTour
+	reverseTour_{m} :: 0,
+
+\forall t \in TourActive
+	reverseTour_{mappingTour_{t}} = t,
+
+
+\forall t \in TourActive (
+	SourceOrderMappingTour_{t} \subset SourceActiveOrder,
+	SourceOrderSinkMappingTour_{t} \subset SourceSinkActiveOrder,
+
+	SourceOrderMappingTour_{mappingTour_{t}} 	= OrderTour_{t} \cup SourceTour_{mappingTour_{t}},
+	SourceOrderSinkMappingTour_{mappingTour_{t}}	= SourceOrderMappingTour_{mappingTour_{t}} \cup SinkTour_{mappingTour_{t}},
+),
+
+\forall o \in SourceSinkActiveOrder (
+	nextOrderMapping_{o} :: 0,
+),
+
+\forall t \in TourActive (
+	nextOrderMapping_{sourceTour_{mappingTour_{t}}} = nextOrder_{sourceTour_{t}},
+	nextOrderMapping_{sinkTour_{t}} = sinkTour_{t},	% Sink
+),
+
+\forall o \in ORDER (
+	nextOrder_{o} \in ORDER => (
+		nextOrderMapping_{o} = nextOrder_{o},
+		;
+
+		tourSink_{o} = tourOrder_{nextOrder_{o}},
+		nextOrderMapping_{o} = sinkTour_{mappingTour_{tourSink_{o}}},
+	),
+),
+
+
+\forall o \in SourceSinkActiveOrder (
+	idOrderNextOrder_{o} :: "",
+	idSiteNextOrder_{o} :: "",
+),
+
+\forall o \in SourceActiveOrder (
+	idOrderNextOrder_{o}	= idOrder_{nextOrderMapping_{o}},
+	idSiteNextOrder_{o}	= idSiteOrder_{nextOrderMapping_{o}},
+),
+
+\forall t \in TourActive (
+	idOrderNextOrder_{sinkTour_{t}}	= idOrder_{sinkTour_{t}},
+	idSiteNextOrder_{sinkTour_{t}}	= idSite2Tour_{t},
+),
+
+\forall o \in OrderSinkActive
+	prevOrder_{o} \in SourceActiveOrder,
+
+\forall o \in SourceActiveOrder
+	prevOrder_{nextOrderMapping_{o}} = o,
+
+
+\forall t \in TourActive
+	t1Order_{sinkTour_{mappingTour_{t}}} = t2Tour_{t} + 1,
+
+
+\forall t \in TourActive (
+	costUnitTour_{t} = costUnitTypeVehicle_{typeVehicleVehicle_{vehicleTour_{t}}},
+
+	makespanTour_{t} = t2Tour_{t} - t1Tour_{t} + 1,
+
+	%SourceSinkTour_{t} = SourceTour_{t} \cup SinkTour_{t},
+),
+
+\forall o \in SourceSinkActiveOrder (
+	costOrder_{o} :: 0.0,
+),
+
+\forall o \in SourceActive \cup SinkActive
+	costOrder_{o} = 0.0,
+
+
+\forall o \in ORDER (
+	costUnitKilometerOrder_{o} = costKilometerTypeVehicle_{typeVehicleVehicle_{vehicleTour_{tourOrder_{o}}}},
+
+	costKilometerOrder_{o} = (mileageOrder_{prevOrder_{o}} + mileageOrder_{o}) * costUnitKilometerOrder_{o},
+
+	costOrder_{o} = quantityOrder_{o} * costUnitTour_{tourOrder_{o}} + costKilometerOrder_{o},
+),
+
+\forall o \in SourceSinkActiveOrder (
+	t2ServiceOrder_{o} :: defaultDateTime,
+),
+
+\forall o \in SourceActiveOrder (
+	t2ServiceOrder_{o} = t2Order_{o}-timeToNextOrder_{o},
+),
+
+\forall t \in TourActive (
+	t2Order_{sinkTour_{t}} = t1Order_{sinkTour_{t}},
+	t2ServiceOrder_{sinkTour_{t}} = t1Order_{sinkTour_{t}},
+
+	timeServiceOrder_{sinkTour_{t}}	= defaultTime,
+	timeToNextOrder_{sinkTour_{t}}	= defaultTime,
+
+	mileageOrder_{sinkTour_{t}}	= 0,
+	
+	quantityOrder_{sourceTour_{t}}	= 0,
+	receiptsOrder_{sourceTour_{t}}	= 0.0,
+
+	quantityOrder_{sinkTour_{t}}	= 0,
+	receiptsOrder_{sinkTour_{t}}	= 0.0,
+
+
+	\forall o \in SourceOrderSinkMappingTour_{t}
+		idxOrderTour_{t,o} \in [1, #{SourceOrderSinkMappingTour_{t}}],
+
+
+	idxOrderTour_{t,sourceTour_{t}} = 1,
+
+	\forall o \in SourceOrderMappingTour_{t}
+		idxOrderTour_{t,nextOrderMapping_{o}} = idxOrderTour_{t,o} + 1,
+),
+
+
+\forall v \in VehicleActive (
+	timeRouteVehicle_{v} :: 0,
+	timeServiceVehicle_{v} :: 0,
+
+
+	OrderVehicle_{v}	= \bigcup_{t \in TourActiveVehicle_{v}}{OrderTour_{t}},
+
+	timeServiceVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{timeServiceTour_{t}},
+	timeRouteVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{timeRouteTour_{t}},
+
+	mileageVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{mileageTour_{t}},
+	receiptsVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{receiptsTour_{t}},
+
+
+	costDayVehicle_{v}	= costDayTypeVehicle_{typeVehicleVehicle_{v}},
+	costNightVehicle_{v}	= costNightTypeVehicle_{typeVehicleVehicle_{v}},
+
+	costVehicle_{v}		=
+		costDayVehicle_{v}*nbDayVehicle_{v} +
+		costNightVehicle_{v}*nbNightVehicle_{v} +
+		\sum_{t \in TourActiveVehicle_{v}}{costTour_{t}},
+),
+
+\forall v \in VehicleActive (
+	rateQuantityVehicleMapping_{v} = quantityPlanVehicle_{v} / maxQuantityPlanVehicle_{mappingVehicle_{v}},
+	rateWeightVehicleMapping_{v}   = weightPlanVehicle_{v} / maxWeightPlanVehicle_{mappingVehicle_{v}},
+	rateVolumeVehicleMapping_{v}   = volumePlanVehicle_{v} / maxVolumePlanVehicle_{mappingVehicle_{v}},
+
+	\forall t \in TourActiveVehicle_{v} (
+		rateQuantityMappingTour_{t} = quantityTour_{t} / maxQuantityTour_{mappingTour_{t}},
+		rateWeightMappingTour_{t}   = weightTour_{t} / maxWeightTour_{mappingTour_{t}},
+		rateVolumeMappingTour_{t}   = volumeTour_{t} / maxVolumeTour_{mappingTour_{t}},
+	),
+),
+
+
+
+database <- '@',
+
+
+% CLEAN
+(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idResource NOT IN (SELECT id FROM " DB_PREFIX "RESOURCE WHERE state>='" STATE_CANDIDATE "')"),
+(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idClub='" idClubLogin "' AND t1>='" t1 "' AND t2 <='" t2 "'"),
+
+(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN WHERE idResource NOT IN (SELECT id FROM " DB_PREFIX "RESOURCE WHERE state>='" STATE_CANDIDATE "')"),
+(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN WHERE idClub='" idClubLogin "' AND t1Service>='" t1 "' AND t2 <='" t2 "'"),
+
+\forall t \in TOUR (
+	(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN p WHERE p.idTour='" idTour_{t} "'"),
+	(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR t WHERE t.id='" idTour_{t} "'"),
+),
+
+(SQL : "UPDATE " DB_PREFIX "OPT_PLAN p SET p.selected='"  STATE_FALSE "'"),
+(SQL : "UPDATE " DB_PREFIX "OPT_ORDER o SET o.selected='" STATE_FALSE "'"),
+
+(SQL : "UPDATE " DB_PREFIX "RESOURCE SET
+			nbTour=0,nbOrder=0,
+			timeService=0,timeRoute=0,
+			makespan=0,mileage=0,
+			cost=0,receipts=0,
+			quantity=0,weight=0,volume=0,
+			rateQuantity=0,rateWeight=0,rateVolume=0
+	  	WHERE state<'" STATE_CANDIDATE "'"
+),
+
+\forall v \in RESOURCE \setminus VehicleActive (
+	SQL :	"UPDATE " DB_PREFIX "RESOURCE SET
+			nbTour=0,nbOrder=0,
+			timeService=0,timeRoute=0,
+			makespan=0,mileage=0,
+			cost=0,receipts=0,
+			quantity=0,weight=0,volume=0,
+			rateQuantity=0,rateWeight=0,rateVolume=0,
+			state='" STATE_CANDIDATE "'
+	  	WHERE id='" idResource_{v} "'"
+),
+
+
+
+% WRITE
+\forall t \in TourActive
+\forall o \in SourceOrderSinkMappingTour_{t} (
+	SQL :	"INSERT INTO OPT_PLAN (idClub,idTour,idResource,tourResource,idOrder,idOrderNext,idSite1,idSite2,idx,t1Service,t2Service,t2,timeService,timeRoute,quantity,mileage,cost,receipts) VALUES ('"
+		idClubActive 					"','"
+
+		idTour_{mappingTour_{t}} 			"','"
+		idResource_{vehicleTour_{mappingTour_{t}}} 	"',"
+		idxTourVehicleTour_{mappingTour_{t}}		",'"
+
+		idOrder_{o} 			"','"
+		idOrderNextOrder_{o}		"','"
+
+		idSiteOrder_{o}			"','"
+		idSiteNextOrder_{o}		"',"
+
+		idxOrderTour_{t,o}		",'"
+
+		t1Order_{o}			"','"
+		t2ServiceOrder_{o}		"','"
+		t2Order_{o}			"',"
+
+		timeServiceOrder_{o}[""]	","
+		timeToNextOrder_{o}[""]		","
+
+		quantityOrder_{o}		","
+		mileageOrder_{o}		","
+		\underline{costOrder_{o}}	","
+		\underline{receiptsOrder_{o}}	")"
+),
+
+%idOrder_{o} = "Retour" &&
+%idTour_{mappingTour_{t}} = "30P03-1" && 
+%t1Order_{o} < '2024-12-28 16:00' => !!,
+
+
+
+% Selected?
+%\forall o \in OrderSelected (
+%	(SQL : "UPDATE OPT_PLAN SET selected='" STATE_TRUE "' WHERE idOrder='" idOrder_{o} "'"),
+%	(SQL : "UPDATE OPT_ORDER SET selected='" STATE_TRUE "' WHERE id='" idOrder_{o} "'"),
+%),
+
+
+
+\forall o \in ORDER (
+	SQL :	"UPDATE OPT_ORDER o "
+		"SET o.idResource='"	idResource_{vehicleTour_{mappingTour_{tourOrder_{o}}}} "'"
+		",o.tourResource="	idxTourVehicleTour_{mappingTour_{tourOrder_{o}}}
+
+		",o.t1='"		t1Order_{o} 			"'"
+		",o.t2='"		t2Order_{o} 			"'"
+		",o.cost="		\underline{costOrder_{o}}
+		",o.state='"		STATE_PLANNED 			"' "
+		"WHERE o.id='"		idOrder_{o} 			"'"
+),
+
+\forall v \in VehicleActive (
+	SQL :	"UPDATE " DB_PREFIX
+			"RESOURCE SET state='" 	(OrderVehicle_{v} <> {} ? STATE_PLANNED : STATE_CANDIDATE) "'"
+			",nbTour="		#TourActiveVehicle_{v}
+			",nbOrder="		#OrderVehicle_{v}
+
+			",timeService="		timeServiceVehicle_{v}
+			",timeRoute="		timeRouteVehicle_{v}
+			",makespan="		makespanVehicle_{v}
+
+			",mileage="		mileageVehicle_{v}
+
+			",cost="		\underline{costVehicle_{v}}
+			",receipts="		\underline{receiptsVehicle_{v}}
+
+			",quantity="		\underline{quantityPlanVehicle_{v}}
+			",weight="		\underline{weightPlanVehicle_{v}}
+			",volume="		\underline{volumePlanVehicle_{v}}
+
+
+			% mapping is to improve loading rate
+			",rateQuantity="	\underline{rateQuantityVehicleMapping_{v}}
+			",rateWeight="		\underline{rateWeightVehicleMapping_{v}}
+			",rateVolume="		\underline{rateVolumeVehicleMapping_{v}}
+
+		 	" WHERE id='" idResource_{mappingVehicle_{v}} "'"
+),
+
+\forall t \in TourActive (
+	SQL :	"INSERT INTO OPT_TOUR (idClub,id,idResource,tourResource,rateQuantity,rateWeight,rateVolume,t1,t2,idSite1,idSite2,nbOrder,timeService,timeRoute,makespan,mileage,cost,receipts,quantity,weight,volume) VALUES ('"
+		idClubActive					"','"
+
+
+		% mapping is to improve loading rate
+		idTour_{mappingTour_{t}}			"','"
+		idResource_{vehicleTour_{mappingTour_{t}}} 	"',"
+		idxTourVehicleTour_{mappingTour_{t}}		","
+
+		\underline{rateQuantityMappingTour_{t}}		","
+		\underline{rateWeightMappingTour_{t}}		","
+		\underline{rateVolumeMappingTour_{t}}		",'"
+
+
+		t1Tour_{t}				"','"
+		t2Tour_{t}				"','"
+
+
+		idSite1Tour_{t}				"','"
+		idSite2Tour_{t}				"',"
+
+
+		#OrderTour_{t}				","
+
+		timeServiceTour_{t}			","
+		timeRouteTour_{t}			","
+		makespanTour_{t}			","
+		mileageTour_{t}				","
+
+		\underline{costTour_{t}}		","
+		\underline{receiptsTour_{t}}		","
+
+		\underline{quantityTour_{t}}		","
+		\underline{weightTour_{t}}		","
+		\underline{volumeTour_{t}}		")"
+),
+
+'@' <- database,
+

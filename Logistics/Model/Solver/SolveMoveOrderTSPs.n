@@ -1,0 +1,180 @@
+/******************************************************/
+/*	          	Logistocs	              */
+/*                                                    */
+/*	       	SolveMoveOrderTSPs.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	%['Work Directory'  "Model\Relaxation\ReadRelaxation.n"],
+
+
+	/*\forall s \in [1, nbSelected] (
+		IdOrderSiteSelected_{s} = \{
+			\forall o \in ORDER
+			(idSiteOrderBuffer_{o} = idSiteOrderSelected_{s} ? idOrderBuffer_{o} : "")
+		\}
+		\setminus "",
+
+		OrderSiteSelected_{s} = \{ \forall i \in IdOrderSiteSelected_{s} orderId_{i} \},
+
+
+		Tour1Selected_{s} = \{
+			\forall o \in OrderSiteSelected_{s}
+			(idSiteOrderBuffer_{o} = idSiteOrderSelected_{s} ? tourOrderBuffer_{o} : 0)
+		\} \setminus 0 \setminus Tour2Relaxed,
+
+		Tour1Selected_{s} \subset TourActiveBuffer,
+	),
+
+	Tour1Relaxed = \bigcup_{s \in [1, nbSelected]}{Tour1Selected_{s}},*/
+
+
+	TourRelaxed = Tour1Relaxed \cup Tour2Relaxed,
+
+
+
+	IdOrderTour1Relaxed = \bigcup_{s \in [1, nbSelected]}{IdOrderSiteSelected_{s}},
+
+	OrderTour1Relaxed = \bigcup_{s \in [1, nbSelected]}{OrderSiteSelected_{s}},
+
+
+
+	OrderTour2Relaxed = {},
+
+
+
+	\forall t \in TourRelaxed (
+		OrderRejectedTour_{t} = (\bigcup_{s \in [1, nbSelected]}{
+			(t \in Tour1Selected_{s} ? OrderSiteSelected_{s} : {})
+		}
+		\cup (t \in Tour1Relaxed ? OrderTour2Relaxed : {})) \cap OrderTourBuffer_{t},
+
+		OrderAcceptedTour_{t} = \bigcup_{s \in [1, nbSelected]}{
+			(t \in Tour2Relaxed ? OrderSiteSelected_{s} : {})
+		}
+		\cup (t \in Tour2Relaxed ? OrderTour1Relaxed : {}),
+	),
+
+
+
+	\forall t \in TourActiveBuffer (
+		OrderTourPlan_{t}	\subset ORDER,
+		SourceOrderTourPlan_{t}	\subset SourceActiveOrderBuffer,
+
+		quantityTourPlan_{t}	:: 0,
+		weightTourPlan_{t}	:: 0.0,
+		volumeTourPlan_{t}	:: 0.0,
+
+		receiptsTourPlan_{t}	:: 0.0,
+
+		costTourPlan_{t}	:: 0.0,
+	
+		mileageTourPlan_{t}	:: 0,
+
+		t1TourPlan_{t}		:: defaultDateTime,
+		t2TourPlan_{t}		:: defaultDateTime,
+
+		timeServiceTourPlan_{t}	:: 0,
+		timeRouteTourPlan_{t}	:: 0,
+
+		worktimeTourPlan_{t} 	:: defaultTime,
+		makespanTourPlan_{t} 	:: defaultTime,
+
+		worktimeTourBuffer_{t}	= timeServiceTourBuffer_{t} + timeRouteTourBuffer_{t},
+		makespanTourBuffer_{t} 	= t2TourBuffer_{t} - t1TourBuffer_{t} + 1,
+	),
+
+
+
+	\forall o \in SourceActiveOrderBuffer (
+		timeServiceOrderPlan_{o}	:: defaultTime,
+		timeToNextOrderPlan_{o}		:: defaultTime,
+
+		nextOrderPlan_{o}		:: 0,
+	
+		t1OrderPlan_{o}			:: defaultDateTime,
+		t2OrderPlan_{o}			:: defaultDateTime,
+
+		timeServiceOrderPlan_{o}	:: defaultTime,
+		timeToNextOrderPlan_{o}		:: defaultTime,
+
+		mileageOrderPlan_{o}		:: 0,
+		receiptsOrderPlan_{o}		:: 0.0,
+	),
+
+	\forall t \in TourRelaxed (
+		OrderTourPlan_{t} = OrderTourBuffer_{t} \setminus OrderRejectedTour_{t} \cup OrderAcceptedTour_{t},
+		SourceOrderTourPlan_{t} = OrderTourPlan_{t} \cup \{ sourceTour_{t} \},
+	),
+
+
+
+	% By default, assign buffered values to those not re-optimized tours
+	\forall t \in TourActiveBuffer \setminus TourRelaxed (
+		OrderTourPlan_{t}	= OrderTourBuffer_{t},
+		SourceOrderTourPlan_{t}	= SourceOrderTourBuffer_{t},
+
+
+		quantityTourPlan_{t} 	= quantityTourBuffer_{t},
+		weightTourPlan_{t} 	= weightTourBuffer_{t},
+		volumeTourPlan_{t} 	= volumeTourBuffer_{t},
+
+		receiptsTourPlan_{t} 	= receiptsTourBuffer_{t},
+
+		costTourPlan_{t} 	= costTourBuffer_{t},
+
+	
+		mileageTourPlan_{t}	= mileageTourBuffer_{t},
+
+		t1TourPlan_{t}		= t1TourBuffer_{t},
+		t2TourPlan_{t}		= t2TourBuffer_{t},
+
+		timeServiceTourPlan_{t}	= timeServiceTourBuffer_{t},
+		timeRouteTourPlan_{t}	= timeRouteTourBuffer_{t},
+
+		worktimeTourPlan_{t}	= worktimeTourBuffer_{t},
+		makespanTourPlan_{t}	= makespanTourBuffer_{t},
+
+
+		\forall o \in SourceOrderTourPlan_{t} (
+			timeServiceOrderPlan_{o}	= timeServiceOrderBuffer_{o},
+			timeToNextOrderPlan_{o}		= timeToNextOrderBuffer_{o},
+
+			nextOrderPlan_{o}		= nextOrderBuffer_{o},
+	
+			t1OrderPlan_{o}			= t1OrderBuffer_{o},
+			t2OrderPlan_{o}			= t2OrderBuffer_{o},
+
+			timeServiceOrderPlan_{o}	= timeServiceOrderBuffer_{o},
+			timeToNextOrderPlan_{o}		= timeToNextOrderBuffer_{o},
+
+			mileageOrderPlan_{o}		= mileageOrderBuffer_{o},
+			receiptsOrderPlan_{o}		= receiptsOrderBuffer_{o},
+		),
+	),
+
+
+	TSP = [1, #TourRelaxed],
+	\forall tsp \in TSP (
+		idTourTsp_{tsp} :: "",
+		idTourTsp_{tsp} = idTour_{TourRelaxed[tsp]},
+	),
+
+
+	\forall tsp \in TSP (
+		resultTsp_{tsp} :: "",
+
+		resultTsp_{tsp} := [['Work Directory' "Model\Solver\SolveMoveOrderTSP.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+%!!,
+resultTsp_{tsp} = "no solution exists" => !!,
+
+		resultTsp_{tsp} \not\in ResultWithSolution => (
+			resultTsp_{tsp} : false,
+			%TAG_NO_SOLUTION " : " idTourTsp_{tsp} : false,
+		),
+	),
+),
+

@@ -1,0 +1,61 @@
+% ==================================================%
+%                                 					%
+%            	  ERP		    	     			%
+%                                              		%
+%			PrintHeaderFooter.n						%
+%                                               	%
+% (c)2000. Enginest. All rights reserved.       	%
+% ==================================================%
+
+
+%@ ("[HEADER]\n"),
+%@ ("VERSION="VERSION"\n"),
+%@ ("TITLE="TITLE"\n"),
+
+@ ("//PAGENUM=Text(0 70 2000 120, \"page {/*PAGENUM*/}/{/*PAGECOUNT*/}\", FONT5, RIGHT|VCENTER, COLOR1)\n"),
+
+@ ("// logo.jpg 2888 * 1245 : 290 120\n"),
+
+@ ("HEADER1=Picture(200 60 490 185, PICTURE1)\n"),
+
+@ ("// Label compagny\n"),
+@ ("HEADER2=Text(120  190 1000 230, {/*DATA1.2.1*/}, FONT10, LEFT|VCENTER, COLOR1)\n"),
+@ ("// adress\n"),
+@ ("HEADER3=Text(120  240 1000 270, \"{/*DATA1.3.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("HEADER4=Text(120  270 1000 300, \"{/*DATA1.4.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("// post code, city\n"),
+@ ("HEADER5=Text(120  300 1000 330, \"{/*DATA1.5.1*/}  {/*DATA1.6.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("HEADER6=Text(120  330 1000 360, \"{/*DATA1.7.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("HEADER7=Text(500  270 1200 300, \"Tél.  : {/*DATA1.8.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("HEADER8=Text(500  300 1200 330, \"Email : {/*DATA1.10.1*/}\", FONT16, LEFT|VCENTER, COLOR1)\n"),
+@ ("\n\n"),
+
+@ ("// TITLE\n"),
+@ ("HEADER9=Text(1100 120 1950 200, \"{/*DATA1.19.1*/}\", FONT5, CENTER|VCENTER, COLOR1)\n"),
+
+@ ("// order no\n"),
+@ ("HEADER10=Text(1100 200 1600 260, \"{/*DATA1.20.1*/}\", FONT6, RIGHT|VCENTER, COLOR1)\n"),
+@ ("HEADER11=Text(1610 200 1950 260, \"{/*DATA1.21.1*/}\", FONT6, LEFT|VCENTER, COLOR1)\n"),
+@ ("// delivery date\n"),
+@ ("HEADER12=Text(1100 260 1600 320, \"{/*DATA1.22.1*/}\", FONT6, RIGHT|VCENTER, COLOR1)\n"),
+@ ("HEADER13=Text(1610 260 1950 320, \"{/*DATA1.23.1*/}\", FONT6, LEFT|VCENTER, COLOR1)\n"),
+@ ("// Reference\n"),
+@ ("HEADER14=Text(1100 320 1600 380, \"{/*DATA1.24.1*/}\", FONT6, RIGHT|VCENTER, COLOR1)\n"),
+@ ("HEADER15=Text(1610 320 1950 380, \"{/*DATA1.25.1*/}\", FONT6, LEFT|VCENTER, COLOR1)\n"),
+@ ("\n// Line\n"),
+@ ("HEADER16=Line(110  400, 2000  400, PEN1); \n"),
+@ ("////////////////\n"),
+
+@ ("\n\n"),
+
+@ ("[FOOTER]\n"),
+@ ("PAGENUM=Text(1200 0 2100 50, \"page {/*PAGENUM*/}/{/*PAGECOUNT*/}\", FONT9, RIGHT|VCENTER, COLOR1)\n"),
+@ ("// compagny registre info \n"),
+@ ("FOOTER1=Text(0  0 1700  40, \"{/*DATA1.11.1*/} - {/*DATA1.16.1*/} - {/*DATA1.12.1*/}\", FONT16, CENTER|VCENTER, COLOR1)\n"),
+
+@ ("// bank info \n"),
+@ ("FOOTER2=Text(0 40 1700 80, \"{/*DATA1.17.1*/}\", FONT16, CENTER|VCENTER, COLOR1)\n"),
+@ ("// print date time\n"),
+@ ("FOOTER3=Text(0 50 2000  80, \"{/*DATA1.18.1*/}\", FONT19, RIGHT|VCENTER, COLOR1)\n"),
+@ ("FOOTER4=Line(0 0,1900  0, PEN1); \n"),
+@ ("\n\n"),

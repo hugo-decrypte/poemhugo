@@ -1,0 +1,56 @@
+/******************************************************/
+/*	        Vehicle Routing 	              */
+/*	                                              */
+/*		ReadSite.n   			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	'()' <- database,
+
+	(SQL: "SELECT id,name,idZone FROM " DB_PREFIX"SITE WHERE idClub='" idClubActive "' ORDER BY id"),
+
+
+	nbSite	= (),
+	SITE	= [1, nbSite],
+
+	\forall s \in SITE \cup \{0\} (
+		idSite_{s}		:: "",
+	),
+	idSite_{0} = "",
+
+	\forall s \in SITE (
+		%idSite_{s}		:: "",
+		nameSite_{s}		:: "",
+		idZoneSite_{s}		:: "",
+
+		%xSite_{s}		:: 0,
+		%ySite_{s}		:: 0,
+		%longitudeSite_{s}	:: "",
+		%latitudeSite_{s}	:: "",
+
+		idSite_{s}		= (),
+		nameSite_{s}		= (),
+		idZoneSite_{s}		= (),
+
+		%xSite_{s}		= (),
+		%ySite_{s}		= (),
+		%longitudeSite_{s}	= (),
+		%latitudeSite_{s}	= (),
+	),
+
+	database <- '()',
+
+	IDSITE = \{ \forall s \in SITE idSite_{s} \},
+
+	\forall i \in IDSITE \cup \{""\}
+		siteId_{i} \in SITE \cup \{0\},
+
+	siteId_{""} = 0,
+	\forall i \in IDSITE (
+		siteId_{i} \in SITE,
+		idSite_{siteId_{i}} = i,
+	),
+),

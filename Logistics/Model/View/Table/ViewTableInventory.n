@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableInventory.n          	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableInventory.n"],
+
+'@' => (
+	tableInventory("INVENTORY",TAG_TABLE,"Inventory",true,"TableOrder",TAG_INVENTORY), 	% JZ 0919
+),

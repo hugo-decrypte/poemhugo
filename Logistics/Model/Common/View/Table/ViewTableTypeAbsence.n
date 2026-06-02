@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+% 		ViewTableTypeAbsence.n             %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableTypeAbsence.n"],
+
+'@' => (
+	tableTypeAbsence("TYPEABSENCE",TAG_TABLE,"TYPEABSENCE",true,"EditTypeAbsence",TAG_TABLE_TYPEABSENCE,""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_TYPEABSENCE TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

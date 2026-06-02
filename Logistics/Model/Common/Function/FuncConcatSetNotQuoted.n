@@ -1,0 +1,28 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	FuncConcatSetNotQuoted.n                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<concatSetNotQuoted>(Str)
+(
+	Str :: {""},
+	#Str =< maxConcatSet,	% Zhou 0824
+
+	Str <> {} => (
+		\forall i \in [1,#Str]
+			concat_{i} :: "",
+
+		concat_{1} = \inf Str,
+		\forall i \in [2,#Str]
+			concat_{i} = (concat_{i-1} ("," Str[i])),
+
+		concatSetNotQuoted = concat_{#Str},
+		;
+
+		concatSetNotQuoted = TAG_EMPTY_STRING, % Zhou 0823 : ???
+	),
+),

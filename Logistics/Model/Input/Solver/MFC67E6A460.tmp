@@ -1,0 +1,163 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ReadSolutionBuffer.n		   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+'()' <- solutionBuf,
+
+VehicleActive	\subset RESOURCE,
+TourActive	\subset TOUR,
+
+VehicleActive	= (),
+TourActive	= (),
+
+\forall v \in VehicleActive (
+	nbDayVehicle_{v}	:: 0,
+	nbNightVehicle_{v}	:: 0,
+	makespanVehicle_{v}	:: 0,
+
+	nbDayVehicle_{v}	= (),
+	nbNightVehicle_{v}	= (),
+	makespanVehicle_{v}	= (),
+
+	\forall d \in DateVehicle_{v} (
+		timeActiveDateVehicle_{v,d} = (),
+		makespanDateVehicle_{v,d} = (),
+	),
+),
+
+
+\forall t \in TourActive (
+	SourceTour_{t}		:: {},
+	SourceOrderTour_{t}	:: {},
+	SourceOrderSinkTour_{t}	:: {},
+	OrderTour_{t}		:: {},
+	SinkTour_{t}		:: {},
+
+	t1Tour_{t}		:: defaultDateTime,
+	t2Tour_{t}		:: defaultDateTime,
+
+	timeServiceTour_{t}	:: 0,
+	timeRouteTour_{t}	:: 0,
+	mileageTour_{t}		:: 0,
+	costTour_{t}		:: 0.0,
+	receiptsTour_{t}	:: 0.0,
+
+	quantityTour_{t}	:: 0,
+	weightTour_{t}		:: 0.0,
+	volumeTour_{t}		:: 0.0,
+
+	SourceTour_{t}		= (),
+	SourceOrderTour_{t}	= (),
+	SourceOrderSinkTour_{t}	= (),
+	OrderTour_{t}		= (),
+	SinkTour_{t}		= (),
+
+	t1Tour_{t}		= (),
+	t2Tour_{t}		= (),
+
+	timeServiceTour_{t}	= (),
+	timeRouteTour_{t}	= (),
+	mileageTour_{t}		= (),
+	costTour_{t}		= (),
+	receiptsTour_{t}	= (),
+
+	quantityTour_{t}	= (),
+	weightTour_{t}		= (),
+	volumeTour_{t}		= (),
+),
+
+SourceSinkActiveOrder \subset SOURCEORDERSINK,
+
+SourceSinkActiveOrder = \bigcup_{t \in TourActive}{SourceOrderTour_{t} \cup SinkTour_{t}},
+OrderActive = SourceSinkActiveOrder \setminus SOURCESINK,
+
+
+\forall o \in SourceSinkActiveOrder (
+	tourOrder_{o}		:: 0,
+	idSiteBufferOrder_{o}	:: "",
+
+	tourOrder_{o}		= (),
+	idSiteBufferOrder_{o}	= (),
+),
+
+
+\forall o \in ORDER (
+	%tourOrder_{o}	:: 0,
+	%tourOrder_{o}	= (),
+
+	tChainOrder_{o}	:: 0,
+	tChainOrder_{o}	= (),
+
+	costKilometerOrder_{o}	:: 0.0,
+	costKilometerOrder_{o}	= (),
+),
+
+
+\forall o<>i \in ORDER (
+	tSwapOrder_{o,i} :: 0,
+	tSwapOrder_{o,i} = (),
+),
+
+\forall t \in TourActive (
+	SourceOrderSinkTour_{t} \subset SourceSinkActiveOrder,
+
+	\forall o \in SourceOrderSinkTour_{t} (
+		nextOrder_{o}		:: 0,
+
+		t1Order_{o}		:: defaultDateTime,
+		t2Order_{o}		:: defaultDateTime,
+		t2ServiceOrder_{o}	:: defaultDateTime,
+
+		timeServiceOrder_{o}	:: defaultTime,
+		timeToNextOrder_{o}	:: defaultTime,
+
+		mileageOrder_{o}	:: 0,
+		costOrder_{o}		:: 0.0,
+	),
+
+	SourceOrderTour_{t} \subset SourceOrderSinkTour_{t},
+
+	\forall o \in SourceOrderTour_{t} (
+		nextOrder_{o}		= (),
+
+		t1Order_{o}		= (),
+		t2Order_{o}		= (),
+
+		timeServiceOrder_{o}	= (),
+		timeToNextOrder_{o}	= (),
+		mileageOrder_{o}	= (),
+
+		costOrder_{o}		= (),
+	),
+
+
+	nextOrder_{sinkTour_{t}}	= sinkTour_{t},
+
+	t1Order_{sinkTour_{t}}		= t2Tour_{t} + 1,
+	t2Order_{sinkTour_{t}}		= t2Tour_{t} + 1,
+
+	timeServiceOrder_{sinkTour_{t}}	= 0,
+	timeToNextOrder_{sinkTour_{t}}	= 0,
+	mileageOrder_{sinkTour_{t}}	= 0,
+	costOrder_{sinkTour_{t}}	= 0.0,
+
+	%\forall o \in SourceOrderSinkTour_{t} (
+	%	t2ServiceOrder_{o}	=
+	%	t1Order_{o} + (timeServiceOrder_{o} > 0 ? timeServiceOrder_{o}-1 : 0),
+	%),
+),
+
+
+\forall o \in SourceSinkActiveOrder (
+	t2ServiceOrder_{o}	=
+	t1Order_{o} + (timeServiceOrder_{o} > 0 ? timeServiceOrder_{o}-1 : 0),
+),
+
+
+solutionBuf <- '()',
+

@@ -1,0 +1,70 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ReadColor.n                        %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	colorsConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\\View\\Colors.cfg"),	% JZ 1208
+
+	colorsConfigFile = [colorsConfig],
+
+
+	'()' <- colorsConfigFile,
+
+	nbColor = (),
+	IDXCOLOR = [0,nbColor-1],
+
+	\forall i \in  IDXCOLOR (
+		colorIdx_{i} :: "",
+		colorIdx_{i} = (),
+	),
+
+	colorsConfigFile <- '()',
+
+
+
+	distinctColorsConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\\View\\DistinctColors.cfg"),
+
+	distinctColorsConfigFile = [distinctColorsConfig],
+
+
+	'()' <- distinctColorsConfigFile,
+
+	nbDistinctColor = (),
+	IdxDistinctColor = [0,nbDistinctColor-1],
+
+	\forall i \in IdxDistinctColor (
+		colorDistinctIdx_{i} 	:: "",
+		colorDistinctIdx_{i} 	= (),
+	), % Zhou 0617
+
+	distinctColorsConfigFile <- '()',
+
+
+
+	'()' <- database,
+
+	(SQL : SQL_SelectProjectIdProjectById), % li 0816
+	%(SQL: 	"SELECT	id FROM	" DB_PREFIX "OPT_PROJECT ORDER BY id"),
+
+	nbIdxProject	= (),
+	\forall i \in [1, nbIdxProject] (
+		idIdxProject_{i}	:: "",
+		idIdxProject_{i}	= (),
+	),
+
+	(SQL : SQL_SelectVehicleIdProjectById), % Zhou 0831
+	%(SQL: 	"SELECT	id FROM " SQL_TABLE_RESOURCE " ORDER BY id"),
+
+	nbIdxVehicle	= (),
+	\forall i \in [1, nbIdxVehicle] (
+		idIdxVehicle_{i}	:: "",
+		idIdxVehicle_{i}	= (),
+	),
+
+	database <- '()',
+),

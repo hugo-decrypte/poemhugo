@@ -1,0 +1,223 @@
+/******************************************************/
+/*	                                              */
+/*		   ReadAlias.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+'()' => (
+
+
+	'()' <- database,
+
+	% Contract Config Parameters
+	%% category	field	id 				name		comments		state
+	%% CONFIGURATION	contractItem	bonusSaturday	130.0		Prime samedi	2
+	%% CONFIGURATION	contractItem	indemnityKM		1.85		indemnité KM	2
+
+	(SQL : ("UPDATE " DB_PREFIX "ALIAS set category='CONFIGURATION',field='contractItem' "
+			" WHERE category='CONTRACT' AND field='item'")),
+
+	(SQL : ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','contractItem','bonusSaturday', '130.00', 'Prime samedi','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='contractItem' and id='bonusSaturday')")),
+	(SQL : ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','contractItem','indemnityKM', '1.85', 'indemnité KM','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='contractItem' and id='indemnityKM')")),
+
+
+	bonusSaturday	:: 0.0,
+	indemnityKM		:: 0.0,
+	
+
+	SQL_ItemContract = ("SELECT id,name FROM " DB_PREFIX "ALIAS WHERE category='CONFIGURATION' AND field='contractItem'"),
+
+	(SQL : SQL_ItemContract),	
+
+	nbItemContract = (),
+	\forall i \in [1,nbItemContract] (
+		idItemContract_{i}	:: "",
+		valueItemContract_{i}	:: 0.0,
+
+		idItemContract_{i}	= (),
+		valueItemContract_{i}	= (),
+
+	%	idItemContract_{i} = "bonusSaturday"	=> bonusSaturday = valueItemContract_{i},
+	%	idItemContract_{i} = "indemnityKM"	=> indemnityKM = valueItemContract_{i},
+	),
+
+
+	\forall i \in [1,nbItemContract] (
+		& idItemContract_{i} = valueItemContract_{i},
+	),
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%% CONFIGURATION	export	exportPath		"\\QNAPTECHNIFOR/poem/"		répertoire export	2
+	%% CONFIGURATION	export	printOutputPath	"\\QNAPTECHNIFOR/poem/"		répertoire print	2
+
+	%% strExportPath = "D:/poem/ERP/Data/"						%% default
+	%% strExportPath = "\\\\\\\\QNAPTECHNIFOR/poem/",			%% TES
+	 strExportPath = "\\\\\\\\Desktop-d8rdati/poem/ERP/Data/",	%% ENGINEST server
+
+	%% strPrintOutputPath = "D:/poem/ERP/PoemPrint/",			%% default
+	%% strPrintOutputPath = "\\\\\\\\QNAPTECHNIFOR/poem/",		%% TES server
+	 strPrintOutputPath = "\\\\\\\\Desktop-d8rdati/poem/ERP/PoemPrint/", %% ENGINEST server
+
+	SQL_InsertExportPath = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','exportPath', '\"" strExportPath "\"', 'répertoire export','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='exportPath')"),
+	%("SQL_InsertExportPath=" SQL_InsertExportPath : !!),
+	(SQL : SQL_InsertExportPath),
+
+	SQL_InsertPrintPath = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','printOutputPath', '\"" strPrintOutputPath "\"', 'répertoire print','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='printOutputPath')"),
+	%("SQL_InsertPrintPath=" SQL_InsertPrintPath : !!),
+	(SQL : SQL_InsertPrintPath),
+
+	%%% tiles in export file csv
+
+	%% work time
+	SQL_InsertTitleWorkTime = (
+		"INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+		"select distinct 'CONFIGURATION','export','titleWorkTime', 'H TRAVAILLES', '" TAG_WORKTIME "','7' from " DB_PREFIX "ALIAS "
+		" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleWorkTime')"
+	),
+			
+	%("DB_PREFIX=" DB_PREFIX "; TAG_WORKTIME=" TAG_WORKTIME "; SQL_InsertTitleWorkTime=" SQL_InsertTitleWorkTime : !!),
+	(SQL : SQL_InsertTitleWorkTime),
+
+	SQL_InsertTitleOvertime = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleOvertime', 'H125', '" TAG_OVERTIME "','8' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleOvertime')"),
+	(SQL : SQL_InsertTitleOvertime),
+
+	SQL_InsertTitleOvertimeExcess = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleOvertimeExcess', 'H A 150% EXO', '" TAG_OVERTIME_EXCESS "','9' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleOvertimeExcess')"),
+	(SQL : SQL_InsertTitleOvertimeExcess),
+
+	SQL_InsertTitleNightTime = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleNightTime', 'H MAJOREES A 50%', '" TAG_NIGHTTIME "','10' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleNightTime')"),
+	(SQL : SQL_InsertTitleNightTime),
+
+	SQL_InsertTitleRouteTime = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleRouteTime', 'H ROUTE', '" TAG_ROUTETIME "','11' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleRouteTime')"),
+	(SQL : SQL_InsertTitleRouteTime),
+
+	SQL_InsertTitleDrivingTime = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleDrivingTime', 'H CONDUITE', '" TAG_DRIVINGTIME "','12' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleDrivingTime')"),
+	(SQL : SQL_InsertTitleDrivingTime),
+
+	%% accountant values
+	SQL_InsertTitleAdvancePayment = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleAdvancePayment', 'ACOMPTE', '" TAG_ADVANCE_PAYMENT "','6' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleAdvancePayment')"),
+	(SQL : SQL_InsertTitleAdvancePayment),
+
+	SQL_InsertTitleMealSubsidyNb = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleMealSubsidyNb', 'NB REPAS CONV', '" TAG_MEAL_SUBSIDY "','13' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleMealSubsidyNb')"),
+	(SQL : SQL_InsertTitleMealSubsidyNb),
+
+	SQL_InsertTitleMealVoucherNb = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleMealVoucherNb', 'NB TITRES RESTAURANT', '" TAG_MEAL_VOUCHER "','14' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleMealVoucherNb')"),
+	(SQL : SQL_InsertTitleMealVoucherNb),
+
+	SQL_InsertTitleBonusException = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleBonusException', 'PRIME EXCEPTIONNELLE', '" TAG_BONUS "','15' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleBonusException')"),
+	(SQL : SQL_InsertTitleBonusException),
+
+	SQL_InsertTitleBonusYear = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleBonusYear', 'PRIME FIN ANNEE', '" TAG_BONUS_YEAR "','16' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleBonusYear')"),
+	(SQL : SQL_InsertTitleBonusYear),
+
+	SQL_InsertTitleGarnishment = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleGarnishment', 'SAISIE ARRET', '" TAG_GARNISHMENT "','17' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleGarnishment')"),
+	(SQL : SQL_InsertTitleGarnishment),
+
+	SQL_InsertTitleReimbursement = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleReimbursement', 'REMBOURS. DE FRAIS', '" TAG_REIMBURSEMENT "','18' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleReimbursement')"),
+	(SQL : SQL_InsertTitleReimbursement),
+
+	SQL_InsertTitleDeduction = ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,comments,state) "
+			"select distinct 'CONFIGURATION','export','titleDeduction', 'RETENUE DIVERSE AU NET', '" TAG_DEDUCTION "','19' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='CONFIGURATION' AND field='export' and id='titleDeduction')"),
+	(SQL : SQL_InsertTitleDeduction),
+
+
+	%%% read config export
+	SQL_ConfigExport = ("SELECT id,name FROM " DB_PREFIX "ALIAS WHERE category='CONFIGURATION' AND field='export'"),
+
+	(SQL : SQL_ConfigExport),	
+
+	nbConfigExport = (),
+	\forall i \in [1,nbConfigExport] (
+		idConfigExport_{i}	:: "",
+		valueConfigExport_{i}	:: "",
+
+		idConfigExport_{i}	= (),
+		valueConfigExport_{i}	= (),
+
+	%	("idConfigExport_{"i"}=" idConfigExport_{i} ", valueConfigExport_{"i"}="valueConfigExport_{i} : !!),
+	),
+
+	\forall i \in [1,nbConfigExport] (
+		& idConfigExport_{i} = valueConfigExport_{i},
+	),
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	%idTypeTrip0		= "G0", %% without trip
+	%idTypeTripHome0	= "P0", %% without trip between home and client
+
+	(SQL : ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,color,comments,state) "
+			"select distinct 'TRIP','default','idTypeTrip0', 'G0', '(255 255 255)', 'aucun GD','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='TRIP' AND field='default' and id='idTypeTrip0')")),
+	(SQL : ("INSERT INTO " DB_PREFIX "ALIAS (category,field,id,name,color,comments,state) "
+			"select distinct 'TRIP','default','idTypeTripHome0', 'P0', '(255 255 255)', 'aucun Petit Dépl','2' from " DB_PREFIX "ALIAS "
+			" WHERE not exists (select 1 from " DB_PREFIX "ALIAS where category='TRIP' AND field='default' and id='idTypeTripHome0')")),
+
+
+	SQL_ConfigTrip = ("SELECT id,name FROM " DB_PREFIX "ALIAS WHERE category='TRIP' AND field='default'"),
+
+	(SQL : SQL_ConfigTrip),	
+
+	nbConfigTrip = (),
+	\forall i \in [1,nbConfigTrip] (
+		idConfigTrip_{i}	:: "",
+		valueConfigTrip_{i}	:: "",
+
+		idConfigTrip_{i}	= (),
+		valueConfigTrip_{i}	= (),
+
+	%	idConfigTrip_{i} = "idTypeTrip0"		=> idTypeTrip0 = valueConfigTrip_{i},
+	%	idConfigTrip_{i} = "idTypeTripHome0"	=> idTypeTripHome0 = valueConfigTrip_{i},
+	),
+
+	\forall i \in [1,nbConfigTrip] (
+		& idConfigTrip_{i} = valueConfigTrip_{i},
+	),
+
+	%	( "idTypeTrip0=" idTypeTrip0 : !!),
+	%	( "idTypeTripHome0=" idTypeTripHome0 : !!),
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%%% alert activity (RESOURCE_DATE)
+%ACTIVITY	alert	dayTime	660	(255 255 128)	H J élevée	2
+%ACTIVITY	alert	nightTime	600	(255 255 128)	H N élevée	2
+
+	%%%%%%%%% in ScriptCheckData.n
+
+	database <- '()',
+), %%% end of i/o state

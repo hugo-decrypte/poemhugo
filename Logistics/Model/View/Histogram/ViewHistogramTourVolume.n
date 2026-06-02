@@ -1,0 +1,19 @@
+%===============================================%
+%						%
+%		Tour Routing			%
+%						%
+%	  ViewHistogramTourVolume.n	        %
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+['Work Directory' "Model\View\Histogram\FuncHistogramTourVolume.n"],	%li 0617
+
+'@' => (
+	
+	histogramTourVolume("TOURVOLUME",true, TAG_TOUR,TAG_RATE_PERCENTAGE, "","", {}, TAG_HISTOGRAM_TOUR_VOLUME, ""),
+	histogramTourVolume("TOURVOLUME",true, TAG_TOUR,TAG_RATE_PERCENTAGE, "","", {}, TAG_HISTOGRAM_TOUR_VOLUME, "Menu"),
+
+	('hh:mm:ss' "  " TAG_HISTOGRAM_TOUR_VOLUME TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ),
+),

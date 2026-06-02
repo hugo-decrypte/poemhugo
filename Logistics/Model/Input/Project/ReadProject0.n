@@ -1,0 +1,209 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ReadProject0.n		           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Input\Process\ReadTypeProcess.n"],
+['Work Directory' "Model\Input\Product\ReadProduct.n"],
+
+
+% Read Project	
+'()' => (
+	'()' <- database,
+
+	sqlProject0 = ("SELECT "SQL_TOP_PERCENT" id,idProduct,quantity,priority,
+			t1,t2,strict,t1Plan,t2Plan,unitPenalty,receipts,excess,nbTask,state
+		FROM	" DB_PREFIX "PROJECT o
+		WHERE	state>='" STATE_CANDIDATE "' AND selected='" STATE_TRUE "' AND o.idClub IN " IDDOMCLUBLOGIN
+		"ORDER BY state,idx,t1,t2,id,priority"),
+
+	(SQL:  sqlProject0),
+ 
+	nbProject = (),
+
+
+
+	%ruleOptimizePlannedCandidate => 
+	( TAG_NO_PROJECT	 :
+		nbProject > 0,
+	),
+
+
+
+	PROJECT = [1, nbProject],
+
+
+	\forall o \in PROJECT (
+		%idClubProject_{o} 	:: "",
+		idProject_{o} 		:: "",
+		idProductProject_{o}	:: "",
+		quantityProject_{o}	:: 0,
+		priorityProject_{o}	:: 0,
+		t01Project_{o}		:: defaultDateTime,
+		t02Project_{o}		:: defaultDateTime,
+
+		t1PlanProject_{o}	:: defaultDateTime,
+		t2PlanProject_{o}	:: defaultDateTime,
+
+		%idTypeProcessProject_{o}:: "",
+		unitPenaltyProject_{o}	:: 0.0,
+		receiptsProject_{o}	:: 0.0,
+
+		stateProject_{o}	:: "",
+		excessPlanProject_{o}	:: 0,
+		nbTaskProject_{o}	:: 0,
+
+
+		%idClubProject_{o}	= (),
+		idProject_{o} 		= (),
+		idProductProject_{o}	= (),
+		quantityProject_{o}	= (),
+		priorityProject_{o}	= (),
+		t01Project_{o} 		= (),
+		t02Project_{o} 		= (),
+		strictProject_{o} 	== (() = STATE_TRUE),
+
+		t1PlanProject_{o}	= (),
+		t2PlanProject_{o}	= (),
+
+		%idTypeProcessProject_{o}= (),
+		unitPenaltyProject_{o}	= (),
+		receiptsProject_{o}	= (),
+
+		excessPlanProject_{o}	= (),
+		nbTaskProject_{o}	= (),
+
+		stateProject_{o}	= (),
+		%selectedProject_{o}	== (() = STATE_TRUE),
+
+		%IdGroupResourceProject_{o}= (),
+		%IdPrec0Project_{o}	= (),
+		%IdSucc0Project_{o}	= (),
+		%IdExclusive0Project_{o}	= (),
+
+
+		nameProductProject_{o}	= nameProduct_{productId_{idProductProject_{o}}},
+		%idClub_idProject_{o}	= (idClubProject_{o} idProject_{o}),
+	),
+
+
+
+
+	\forall o \in PROJECT (
+		IdGroupResourceProject_{o}:: {""},
+		IdExclusive0Project_{o}	:: {""},
+
+		IdSucc0Project_{o}	:: {""},
+		IdPrec0Project_{o}	:: {""},
+
+
+		(SQL : "SELECT "SQL_TOP_PERCENT" idGroupResource FROM " DB_PREFIX "PROJECT_GROUPRESOURCE WHERE idProject='" idProject_{o}
+			"' ORDER BY idGroupResource"),
+
+		IdxGroupResourceProject_{o} \subset [1, #GROUPRESOURCE],
+		IdxGroupResourceProject_{o} = [1,()],
+
+		IdGroupResourceProject_{o} = \{
+			\forall i \in IdxGroupResourceProject_{o} ()
+		\},
+
+
+
+		(SQL : "SELECT "SQL_TOP_PERCENT" idProject2 FROM " DB_PREFIX "PROJECT_PROJECT WHERE idProject1='" idProject_{o}
+			"' AND type='" STATE_EXCLUSIVE "' ORDER BY idProject2"),
+
+
+		IdxExclusiveProject_{o} \subset [1, #PROJECT],
+		IdxExclusiveProject_{o} = [1,()],
+
+		IdExclusive0Project_{o} = \{
+			\forall i \in IdxExclusiveProject_{o} ()
+		\},
+
+
+
+		(SQL : "SELECT "SQL_TOP_PERCENT" idProject2 FROM " DB_PREFIX "PROJECT_PROJECT WHERE idProject1='" idProject_{o}
+			"' AND type='" STATE_SUCCESSOR "' ORDER BY idProject2"),
+
+
+		IdxSuccProject_{o} \subset [1, #PROJECT],
+		IdxSuccProject_{o} = [1,()],
+
+		IdSucc0Project_{o} = \{
+			\forall i \in IdxSuccProject_{o} ()
+		\},
+
+
+		(SQL : "SELECT "SQL_TOP_PERCENT" idProject1 FROM " DB_PREFIX "PROJECT_PROJECT WHERE idProject2='" idProject_{o}
+			"' AND type='" STATE_SUCCESSOR "' ORDER BY idProject1"),
+
+
+		IdxPrecProject_{o} \subset [1, #PROJECT],
+		IdxPrecProject_{o} = [1,()],
+
+		IdPrec0Project_{o} = \{
+			\forall i \in IdxPrecProject_{o} ()
+		\},
+	),
+
+
+
+	% ProjectCandidate / ProjectPlanned / ProjectLaunched
+	ProjectCandidate = \{ \forall o \in PROJECT (stateProject_{o} = STATE_CANDIDATE ? o : 0) \} \setminus 0,
+	ProjectPlanned	= PROJECT \setminus ProjectCandidate,
+
+	%ProjectLaunched	= \{ \forall o \in PROJECT (stateProject_{o} >= STATE_LAUNCHED ? o : 0) \} \setminus 0,
+	%ProjectPlanned	= PROJECT \setminus ProjectCandidate \setminus ProjectLaunched,
+
+
+
+
+	IDPROJECT = \{ \forall o \in PROJECT idProject_{o} \},
+
+
+
+
+	database <- '()',
+
+
+
+
+	averageQtyProject :: 0,
+
+	sumQtyProject = \sum_{o \in PROJECT}{quantityProject_{o}},
+
+
+	averageQtyProject = \lceil sumQtyProject / nbProject \rceil,
+
+
+	\forall o \in PROJECT (
+		( TAG_TABLE_PROJECT ": " TAG_IDCLUB_ID_CANNOT_BE_NULL :
+			%idClubProject_{o}	<> "",
+			idProject_{o}		<> "",
+		),
+
+
+		%t1InteractionProject_{o} = (t01InteractionProject_{o} = defaultDateTime ? t1 : t01InteractionProject_{o}),
+		%t2InteractionProject_{o} = (t02InteractionProject_{o} = defaultDateTime ? t2 : t02InteractionProject_{o}),
+
+		t1Project_{o} :: defaultDateTime,
+		t2Project_{o} :: defaultDateTime,
+
+		t1Project_{o} = (t01Project_{o} = defaultDateTime ? t1 : t01Project_{o}),
+		t2Project_{o} = (t02Project_{o} = defaultDateTime ? t2 : t02Project_{o}),
+
+		date1Project_{o}	= t1Project_{o}[dateFormat],
+		date2Project_{o}	= t2Project_{o}[dateFormat],
+
+		date1PlanProject_{o}	= t1PlanProject_{o}[dateFormat],
+		date2PlanProject_{o}	= t2PlanProject_{o}[dateFormat],
+
+		productProject_{o}	= productId_{idProductProject_{o}},
+		%typeProductProject_{o}	= typeProduct_{productProject_{o}},
+	),
+),
+

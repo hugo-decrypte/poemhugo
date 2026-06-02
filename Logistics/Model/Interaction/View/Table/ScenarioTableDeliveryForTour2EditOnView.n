@@ -1,0 +1,299 @@
+%=======================================================%
+%							%
+%			GestionStock			%
+%							%
+%	    ScenarioTableDeliveryForTour2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+%======================================================================================================
+%
+% Script
+@ "Script ", 
+
+% ID
+@ "AddDeliveryToTour ",
+
+% Caption
+@ (" '" TAG_ADD_DELIVERY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_ADD_DELIVERY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERYFORTOUR' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+AddDeliveryToTour_SQL1 = (
+	"\"Update " DB_PREFIX "DELIVERY\\\n"
+	"   set IdTour=(/*IDTOUR*/) \\\n"
+	"  WHERE (IdTour is NULL or IdTour<=' ')\\\n"
+	"   and 'XXX' not in ((/*IDTOUR*/))\\\n"
+	"   and Id= '[/*DELIVERY.ID*/]' \"\\\n"
+),
+
+AddDeliveryToTour_SQL2 = (
+	"\"Update " DB_PREFIX "DELIVERY\\\n"
+	"   set idState='2' \\\n"
+	"  WHERE (IdTour is not NULL and IdTour>' ')\\\n"
+	"   and idState<'2'\\\n"
+	"   and Id= '[/*DELIVERY.ID*/]' \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	AddDeliveryToTour_SQL3 = (
+		"\"Update " DB_PREFIX "TOUR T set T.Weight=0, Volume=0, NbPallet=0 \\\n"
+		"  WHERE T.Id=(/*IDTOUR*/) \"\\\n"
+	),
+
+	AddDeliveryToTour_SQL4 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		" set T.Weight=T.Weight + DP.Quantity*P.Weight\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Weight is not NULL \"\\\n"
+	),
+
+	AddDeliveryToTour_SQL5 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		" set T.Volume=T.Volume + DP.Quantity*P.Volume\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Volume is not NULL \"\\\n"
+	),
+
+	AddDeliveryToTour_SQL6 = (
+		"\"Update (" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		" set T.NbPallet=T.NbPallet + D.NbPallet\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and D.NbPallet is not NULL \"\n\n\n"
+	),
+
+	; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	AddDeliveryToTour_SQL3 = (
+		"\"Update " DB_PREFIX "TOUR set \\\n"
+			"   Weight= (select sum(DP.Quantity*P.Weight) from ( " DB_PREFIX "DELIVERY D \\\n"
+			"	  	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+			"	  	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+			" 		where TOUR.Id=D.IdTour and P.Weight is not NULL), \\\n"
+			"   Volume= (select sum(DP.Quantity*P.Volume) from ( " DB_PREFIX "DELIVERY D \\\n"
+			" 	 	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+			" 	 	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+			" 		where TOUR.Id=D.IdTour and P.Volume is not NULL), \\\n"
+			"   NbPallet= (select sum(D.NbPallet) from " DB_PREFIX "DELIVERY D \\\n"
+			" 		where TOUR.Id=D.IdTour and D.NbPallet is not NULL) \\\n"
+			" WHERE Id=(/*IDTOUR*/) \"\\\n"
+	),
+
+	AddDeliveryToTour_SQL4 = (
+		"\"Update " DB_PREFIX "TOUR set Weight=0 WHERE Id=(/*IDTOUR*/) and Weight is NULL \"\\\n"
+	),
+	AddDeliveryToTour_SQL5 = (
+		"\"Update " DB_PREFIX "TOUR set Volume=0 WHERE Id=(/*IDTOUR*/) and Volume is NULL \"\\\n"
+	),
+	AddDeliveryToTour_SQL6 = (
+		"\"Update " DB_PREFIX "TOUR set NbPallet=0 WHERE Id=(/*IDTOUR*/) and NbPallet is NULL \"\\\n"
+	),
+),
+
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\AddDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) {/*Selected(tableDELIVERYFORTOUR;1;(string,ID);)*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" ),
+		@ ("'\\\n"),
+		@ AddDeliveryToTour_SQL1,
+		@ AddDeliveryToTour_SQL2,
+		@ AddDeliveryToTour_SQL3,
+		@ AddDeliveryToTour_SQL4,
+		@ AddDeliveryToTour_SQL5,
+		@ AddDeliveryToTour_SQL6,
+),
+
+%======================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveDeliveryFromTour ",
+
+% Caption
+@ ("'" TAG_REMOVE_DELIVERY_FROM_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_REMOVE_DELIVERY_FROM_TOUR "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERYFORTOUR' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+RemoveDeliveryFromTour_SQL1 = (
+	"\"Update " DB_PREFIX "DELIVERY \\\n"
+	"   set IdTour=NULL \\\n"
+	"  WHERE (IdTour = (/*IDTOUR*/))\\\n"
+	"   and 'XXX' not in ((/*IDTOUR*/))\\\n"
+	"   and Id in ('[/*DELIVERY.ID*/]') \"\\\n"
+),
+
+RemoveDeliveryFromTour_SQL2 = (
+	"\"Update " DB_PREFIX "DELIVERY\\\n"
+	"   set idState='1' \\\n"
+	"  WHERE (IdTour is NULL or IdTour<=' ')\\\n"
+	"   and idState>'1'\\\n"
+	"   and Id in ('[/*DELIVERY.ID*/]') \"\\\n"
+),
+
+
+
+databaseType = "ACCESS" => (
+
+	RemoveDeliveryFromTour_SQL3 = (
+		"\"Update " DB_PREFIX "TOUR T set T.Weight=0, Volume=0, NbPallet=0 \\\n"
+		"  WHERE T.Id=(/*IDTOUR*/) \"\\\n"
+	),
+
+	RemoveDeliveryFromTour_SQL4 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		" set T.Weight=T.Weight + DP.Quantity*P.Weight\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Weight is not NULL \"\\\n"
+	),
+
+	RemoveDeliveryFromTour_SQL5 = (
+		"\"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+		" set T.Volume=T.Volume + DP.Quantity*P.Volume\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and P.Volume is not NULL \"\\\n"
+	),
+
+	RemoveDeliveryFromTour_SQL6 = (
+		"\"Update (" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)\\\n"
+		" set T.NbPallet=T.NbPallet + D.NbPallet\\\n"
+		" WHERE T.Id=(/*IDTOUR*/) and D.NbPallet is not NULL \"\n\n\n"
+	),
+
+	; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	RemoveDeliveryFromTour_SQL3 = (
+		"\"Update " DB_PREFIX "TOUR set \\\n"
+			"   Weight= (select sum(DP.Quantity*P.Weight) from ( " DB_PREFIX "DELIVERY D \\\n"
+			"	  	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+			"	  	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+			" 		where TOUR.Id=D.IdTour and P.Weight is not NULL), \\\n"
+			"   Volume= (select sum(DP.Quantity*P.Volume) from ( " DB_PREFIX "DELIVERY D \\\n"
+			" 	 	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)\\\n"
+			" 	 	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct\\\n"
+			" 		where TOUR.Id=D.IdTour and P.Volume is not NULL), \\\n"
+			"   NbPallet= (select sum(D.NbPallet) from " DB_PREFIX "DELIVERY D \\\n"
+			" 		where TOUR.Id=D.IdTour and D.NbPallet is not NULL) \\\n"
+			" WHERE Id=(/*IDTOUR*/) \"\\\n"
+	),
+
+	RemoveDeliveryFromTour_SQL4 = (
+		"\"Update " DB_PREFIX "TOUR set Weight=0 WHERE Id=(/*IDTOUR*/) and Weight is NULL \"\\\n"
+	),
+	RemoveDeliveryFromTour_SQL5 = (
+		"\"Update " DB_PREFIX "TOUR set Volume=0 WHERE Id=(/*IDTOUR*/) and Volume is NULL \"\\\n"
+	),
+	RemoveDeliveryFromTour_SQL6 = (
+		"\"Update " DB_PREFIX "TOUR set NbPallet=0 WHERE Id=(/*IDTOUR*/) and NbPallet is NULL \"\\\n"
+	),
+),
+
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\RemoveDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) {/*Selected(tableDELIVERYFORTOUR;1;(string,ID);)*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" ),
+		@ ("'\\\n"),
+		@ RemoveDeliveryFromTour_SQL1,
+		@ RemoveDeliveryFromTour_SQL2,
+		@ RemoveDeliveryFromTour_SQL3,
+		@ RemoveDeliveryFromTour_SQL4,
+		@ RemoveDeliveryFromTour_SQL5,
+		@ RemoveDeliveryFromTour_SQL6,
+),

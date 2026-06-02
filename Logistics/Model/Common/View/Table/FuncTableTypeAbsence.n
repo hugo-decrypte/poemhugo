@@ -1,0 +1,53 @@
+%==================================================%
+%                                                  %
+%  		FuncTableTypeAbsence.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableTypeAbsence>(id,type,aliasTable,bestfit, doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		%viewFile = ("TableTypeAbsence" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableTypeAbsence" postfix),
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+	    	@ ("SELECT t.id 						AS ID, \
+			t.name 							AS NAME,\
+			t.title 						AS TITLE,\
+			"SQL_AliasCategoryIs "'ABSENCE' AND al.field='category' AND al.id=t.category)	AS CATEGORY,\
+			t.timePaid						AS TIMEPAID,\
+			t.duration 						AS DURATION,\
+			t.timeReduced 						AS TIMEREDUCED,\
+			t.comments 						AS COMMENTS,\
+			t.idx							AS IDX,\
+			t.state 						AS STATE,\
+			t.color 						AS COLOR,\
+			" SQL_TypeStateName "					AS NAMESTATE,\
+			" SQL_TypeStateColor "					AS LINERGB \
+	 		FROM " DB_PREFIX "TYPEABSENCE t \
+	 		ORDER BY t.state DESC,t.id\"\n\n\n"),
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTypeAbsence2EditTypeAbsence.n"],
+		
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

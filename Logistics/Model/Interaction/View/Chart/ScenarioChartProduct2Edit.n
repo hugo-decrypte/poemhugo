@@ -1,0 +1,114 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ScenarioChartProduct2Edit.n   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% Script: EditProduct
+@ "Script ",
+
+% ID
+@ "EditProduct ",
+
+% Caption
+@ ("'" TAG_EDIT_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_PRODUCT,
+
+% Label
+@ (" '" TAG_EDIT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+
+% Object Id. Set / Object Item
+@ "'[OBJECTIDS={DIAGRAM}; SUBOBJTYPE={PRODUCT}]' ",
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=1; NETNCL=HTTP; SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/); MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=1;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+@ (VIEWPOEMDATA "?OPEN TABLE " DB_PREFIX
+"PRODUCT&idProcess in ({/*selected(PRODUCT;1;(string,IDPROCESS))*/})\" _ _ _ _ _ _ _ \n\n\n"),
+
+
+
+
+
+
+% Script: EditTask
+@ "Script ",
+
+% ID
+@ "EditTask ",
+
+% Caption
+@ ("'" TAG_EDIT_PROCESS "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_TASK,
+
+% Label
+@ (" '" TAG_EDIT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+
+% Object Id. Set / Object Item
+@ "'[OBJECTIDS={DIAGRAM}; SUBOBJTYPE={TASK}]' ",
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=1; NETNCL=HTTP; SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/); MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=1;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+@ (VIEWPOEMDATA "?OPEN TABLE " DB_PREFIX
+"PROCESS&id in ({/*selected(TASK;1;(string,IDPROCESS))*/})\" _ _ _ _ _ _ _ \n\n\n"),
+
+

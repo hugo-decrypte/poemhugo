@@ -1,0 +1,124 @@
+View ViewTableORDERFORDELIVERY '(/*TITLEOBJ*/)' '(/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableORDERFORDELIVERY _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=(/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Center,Center,Right,Right,Left,Right,Left,Right,Right,Right,Left,Right,Right,Right,Right,Left}]"\
+"[DATAOBJ=ORDERFORDELIVERY;FILLCOLOR=LINERGB]"
+
+Data ORDERFORDELIVERY '(/*TITLEOBJ*/)' ORDERFORDELIVERY HTTPSQL 0 '[FIND={IDORDER,IDPRODUCT,DESIGNATION,DATEDELIVERY,DATEEXPIRY,QUANTITYPACKAGE,WEIGHTPACKING,IDPACKING,NOPALLET,NOLOT,QUANTITYREAL,QUANTITYDEFECTIVE,WEIGHT,NOPALLETDELIVERY,WEIGHTPALLET,PRICE,DISCOUNT,AMOUNTHT,IDSTATE}]'   [DOUBLECLICK=] \
+"[19;(string,IDORDER,Commande,,15,,);(string,IDPRODUCT,Produit,,15,,);(string,DESIGNATION,Désignation,,20,,);(date,DATEDELIVERY,Date livraison,,20,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEEXPIRY,Date expiration,,20,,YYYY-MM-DD|DD/MM/YYYY);(int,QUANTITYPACKAGE,Qté paquet,,20,,);(float,WEIGHTPACKING,Poids paquet,,25,,);(string,IDPACKING,ID entrée,,20,,);(int,NOPALLET,Palette en stock,,20,,);(string,NOLOT,N° Lot,,20,,);(int,QUANTITYREAL,Qté livrée,,15,,);(int,QUANTITYDEFECTIVE,Qté défectueuse,,20,,);(float,WEIGHT,Poids,,20,,);(int,NOPALLETDELIVERY,Palette livraison,,20,,);(float,WEIGHTPALLET,Poids palette,,20,,);(float,PRICE,Prix unitaire,,20,,);(float,DISCOUNT,Remise(%),,20,,);(float,AMOUNTHT,Montant HT(€),,20,,);(string,IDSTATE,Etat,,20,,);(string,IDCLIENT,ID client,,20.0.50,0);\
+(string,POINTDELIVERY,Point livraison,,15.0.70,1);\
+(string,ID,No livraison,,20.0.80,0);\
+(int,NOLINE,No Ligne,,15.0.80,0);\
+(string,IDORDERPRODUCTLINE,Identifiant Ligne,,30.0.20,1);\
+(int,QUANTITY,Qté déclarée,,15.0.80,0);\
+(int,QUANTITYDEFECTIVE,Qté défectueuse,,20.0.80,1);\
+(int,QUANTITYCMDREST,Qté Reste à Livrer,,20.0.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT d.id AS ID, d.idClient AS IDCLIENT,d.IdPointDelivery as POINTDELIVERY,\
+		 P.Id as IDPRODUCT, P.Family as FAMILY, P.Designation as DESIGNATION,\
+		 P.QuantityPackaging as QUANTITYPACKAGE,\
+		 format(P.Weight*P.QuantityPackaging,'0.0') as WEIGHTPACKING,\
+		 DP.PriceUnit as PRICE, format(DP.Discount,'0.0') as DISCOUNT,\
+		 DP.LabelDiscount as LABELDISCOUNT, DP.AmountHT as AMOUNTHT,\
+		 DP.AmountVAT as AMOUNTVAT, DP.DateDelivery as DATEDELIVERY,\
+		 DP.Quantity AS QUANTITY, DP.QuantityReal AS QUANTITYREAL,\
+		 DP.QuantityOrderRest AS QUANTITYORDERREST, DP.QuantityDefective AS QUANTITYDEFECTIVE,\
+		 P.Weight*DP.QuantityReal as WEIGHT, DP.IdPacking as IDPACKING,\
+		 IIF(DP.NoPallet is NULL,0,DP.NoPallet) as NOPALLET,\
+		 IIF(DP.NoPalletDelivery is NULL,0,DP.NoPalletDelivery) as NOPALLETDELIVERY,\
+		 DP.IdOrder as IDORDER,\
+		 DP.NoLine as NOLINE,\
+		 (trim(DP.IdOrder)+'-'+trim(DP.IdProduct)+'-'+format(DP.NoLine,'0')) as IDORDERPRODUCTLINE,\
+		 (select NoLot from PALLET_PRODUCT PaPrd where PaPrd.IdPacking=DP.IdPacking and PaPrd.NoPallet=DP.NoPallet and PaPrd.IdProduct=DP.IdProduct) as NOLOT,\
+		 (select DateExpiration from PALLET_PRODUCT PaPrd where PaPrd.IdPacking=DP.IdPacking and PaPrd.NoPallet=DP.NoPallet and PaPrd.IdProduct=DP.IdProduct) as DATEEXPIRY,\
+		 (select format(sum(DP0.QuantityReal*P0.Weight), '0.0') from DELIVERY_PRODUCT DP0 inner join PRODUCT P0 on P0.Id=DP0.IdProduct where DP0.IdDelivery=d.id and DP0.NoPalletDelivery=DP.NoPalletDelivery) as WEIGHTPALLET,\
+		 0 as INDELIVERY,\
+		 IIF(DP.IdPacking='STOCK','Attent Retrait du Stock','OK') AS STATE, \
+		 IIF(DP.IdPacking='STOCK,(250 220 20)','(120 255 120)') AS LINERGB \
+	 FROM DELIVERY d, DELIVERY_PRODUCT DP, PRODUCT P \
+	 WHERE d.id=DP.IdDelivery\
+	 AND P.Id=DP.IdProduct\
+	 AND d.id in ((/*IDDELIVERY*/)) \
+	 UNION ALL SELECT d.id AS ID, d.idClient AS IDCLIENT, d.IdPointDelivery as POINTDELIVERY,\
+		 P.Id as IDPRODUCT, P.Family as FAMILY, P.Designation as DESIGNATION,\
+		 P.QuantityPackaging as QUANTITYPACKAGE,\
+		 format(P.Weight*P.QuantityPackaging, '0.0') as WEIGHTPACKING,\
+		 OP.PriceUnit as PRICE, OP.Discount as DISCOUNT,\
+		 OP.LabelDiscount as LABELDISCOUNT, ' ' as AMOUNTHT,\
+		 ' ' as AMOUNTVAT, OP.DateDelivery as DATEDELIVERY,\
+		 OP.QuantityRest AS QUANTITY, OP.QuantityRest AS QUANTITYREAL,\
+		 OP.QuantityRest AS QUANTITYORDERREST, ' ' AS QUANTITYDEFECTIVE,\
+		 P.Weight*OP.QuantityRest as WEIGHT,' ' as IDPACKING,\
+		 0 as NOPALLET, OP.NoPalletDelivery as NOPALLETDELIVERY,\
+		 OP.IdOrder as IDORDER,\
+		 0 as NOLINE,\
+		 (trim(OP.IdOrder)+'-'+trim(OP.IdProduct)+'-0') as IDORDERPRODUCTLINE,\
+		 ' ' as NOLOT, 0 as DATEEXPIRY,\
+		 (select format(sum(LO0.QuantityRest*P0.Weight), '0.0') from ORDER_PRODUCT LO0 inner join PRODUCT P0 on P0.Id=LO0.IdProduct where LO0.IdOrder=OP.IdOrder and LO0.NoPalletDelivery=OP.NoPalletDelivery and LO0.QuantityRest>0) as WEIGHTPALLET,\
+		 2 as INDELIVERY, 'A Rajouter' AS STATE, \
+		 '(220 220 255)' AS LINERGB \
+	 FROM DELIVERY d, CLIENTORDER O, ORDER_PRODUCT OP, PRODUCT P \
+	 WHERE O.Id=OP.IdOrder\
+		AND O.IdClient=d.IdClient and O.IdPointDelivery=d.IdPointDelivery\
+		AND P.Id=OP.IdProduct and OP.QuantityRest>0 and d.ID in ((/*IDDELIVERY*/)) \
+		AND O.IdState not in ('9') \
+		ORDER BY INDELIVERY, FAMILY, DESIGNATION, IDORDER, DATEEXPIRY"
+
+Script ModifyPallet  'Modifier palette livraison' _ 61 'Modifier palette livraison' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;2;(string,ID);(string,IDORDERPRODUCTLINE);)*/} \
+{/*Input(Modifier Palette;1;\
+(int,PALLET,Numéro palette,1,10.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// 2. Remove Product from delivery
+// update quantities in order, Pallet, Product
+Script RemoveProduct 'Enlever produit' _ 62'Enlever produit' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;4;(string,IDPRODUCT);(string,IDORDER);(string,IDPACKING);(string,IDORDERPRODUCTLINE);)*/} \
+ (/*IDDELIVERY*/) '\
+Reload _ _ _
+
+// 3. add command to delivery
+Script AddOrderToDelivery 'Ajouter commande' _ 63'Ajouter commande' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\AddDeliveryProductOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;4;(string,ID);(string,IDPRODUCT);(string,IDORDER);(string,IDORDERPRODUCTLINE);)*/} \
+'\
+Reload _ _ _
+
+// 4. modify price
+Script ModifyPriceUnit  'Modifier prix unitaire' _ 64 'Modifier prix unitaire' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductPrice.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;4;(string,ID);(string,IDORDER);(string,IDPRODUCT);(string,NOLINE);)*/} \
+{/*Input(MPU;Modifier prix unitaire;1;\
+(float,PRICE,Prix unitaire,[/*DELIVERY.PRICE*/],10.4.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// 5. modify Discount
+Script ModifyDiscount  'Modifier remise' _ 65 'Modifier remise' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductDiscount.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;2;(string,ID);(string,IDORDERPRODUCTLINE);)*/} \
+{/*Input(ModDis;Modifier remise;2;\
+(float,DISCOUNT,Remise,[/*DELIVERY.DISCOUNT*/],4.1.580,1);\
+(string,LABELDISCOUNT,Libellé Remise,[/*DELIVERY.LABELDISCOUNT*/],100.0.580,1,,);\
+)*/}\
+'\
+Reload _ _ _
+
+// 6. picking all possible
+Script PickAllForDelivery  'Prélever tous possibles pour livrer' _ 66 'Prélever tous possibles pour livrer' _ 'tableORDERFORDELIVERY' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductAllDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDERFORDELIVERY;1;(string,ID);)*/} \
+'\
+Reload _ _ _
+

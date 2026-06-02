@@ -1,0 +1,59 @@
+/********************************************************/
+/*							*/
+/*		    GetMacros.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	macroConfig = ('Work Directory' "Boot/" directoryClubLogin "/View/Macro.cfg"),
+
+
+	'()' <- [macroConfig],
+
+
+	%@ ("\"" TAG_PROMPT_TRANSLATION  "\"\n"),
+
+
+	nbMacro = #([macroConfig], ",\n"),
+
+
+
+	Macro = [1, nbMacro],
+
+	\forall i \in Macro (
+		nameMacro_{i}	:: "",
+		valueMacro_{i}	:: "",
+
+		nameMacro_{i} 	= () : " ",
+		"="		= () : " ",
+		valueMacro_{i}	= () : ",\n",
+	),
+
+
+	[macroConfig] <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ (nbMacro "\n"),
+
+	\forall i \in Macro (
+		@ (valueMacro_{i} "\n"),
+	),
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+
+
+),
+

@@ -1,0 +1,151 @@
+/********************************************************/
+/*							*/
+/*			BootMobile.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+'()' => (
+	% Boot program
+	bootConfig = ('Work Directory' "Boot\Boot.cfg"),
+	[bootConfig],
+
+
+
+
+	% Basic config file
+	bootMobileConfig = ('Work Directory' "Boot\BootMobile.cfg"),
+	bootMobileConfigFile = [bootMobileConfig],
+
+
+	'()' <- bootMobileConfigFile,
+
+
+	% Macros
+	() = "Macro",
+	Macro = [1, ()],
+
+	\forall i \in Macro (
+		nameMacro_{i}	:: "",
+		equalMacro_{i}	:: "",
+		valueMacro_{i}	:: "",
+
+		nameMacro_{i} 	= () : " ",
+		equalMacro_{i} 	= () : " ",
+		valueMacro_{i}	= () : "\n",
+	),
+
+
+
+	% Static NCL programs
+	() = "Static",
+	Static = [1,()],
+	Argument = [1,()],
+
+	\forall s \in Static (
+		permissionStatic_{s} 	:: "",
+		idStatic_{s} 		:: "",
+		nameStatic_{s} 		:: "",
+		httpStatic_{s} 		:: "",
+
+		permissionStatic_{s}	= (),
+		idStatic_{s}		= (),
+		nameStatic_{s}		= (),
+		httpStatic_{s}		= (),
+
+		ArgumentStatic_{s} \subset Argument,
+		ArgumentStatic_{s} = [1,()],
+
+		\forall a \in ArgumentStatic_{s} (
+			idArgumentStatic_{s,a} :: "",
+			sqlArgumentStatic_{s,a} :: "",
+
+			idArgumentStatic_{s,a} = (),
+			sqlArgumentStatic_{s,a} = (),
+		),
+	),
+
+	bootMobileConfigFile <- '()',
+),
+
+
+['Work Directory' "Model\Common\Config\ReadDatabase.n"],
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+
+	messageBuffer <- '@',
+
+
+
+	% Server parameters
+	@ ("------Server\n"),
+
+	@ (defaultIP "\n"),
+	@ (defaultPort "\n"),
+
+
+
+
+	% Write macros
+	@ ("------Macro\n"),
+	@ (#Macro "\n"),
+	\forall i \in Macro (
+		@ (nameMacro_{i} "=="),		% ?????? ==
+		@ (valueMacro_{i} = "" ? "\"\"" : valueMacro_{i}),
+		@ "\n",
+	),
+
+
+
+	% Static Programs
+	@ ("------Static\n"),
+	@ (#Static "\n"),
+
+	\forall s \in Static (
+		@ (permissionStatic_{s} "\n" idStatic_{s} "\n" nameStatic_{s} "\n" httpStatic_{s} "\n" #ArgumentStatic_{s} "\n"),
+
+		\forall a \in ArgumentStatic_{s} (
+			@ (idArgumentStatic_{s,a}  "\n"),
+
+			sqlArgumentStatic_{s,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentStatic_{s,a} "\n"),
+			),
+		),
+	),
+	% ??????
+
+
+
+	% Dynamic Programs
+	@ ("------Program\n"),
+	@ ("0\n"),
+
+	% DB table composite primary key
+	@ ("------SQL\n"),
+	@ ("0\n"),
+
+
+	% DB Field alias
+	@ ("------Alias\n"),
+	@ ("0\n"),
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+
+
+
+	( message : '.'),
+
+
+),
+
+
+.
+

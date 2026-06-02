@@ -1,0 +1,57 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeleteQuote.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+
+	'()' <- database,
+
+	DeleteQuote_SQL1 = (
+		"DELETE FROM " DB_PREFIX "QUOTE_PRODUCT 
+		WHERE IdQuote IN ("IDOBJSELECTEDBUFFER")
+		and exists (select 1 from " DB_PREFIX "QUOTE WHERE Id=IdQuote and (IdState is NULL or IdState='0') )"
+	),
+	DeleteQuote_SQL2 = (
+		"DELETE FROM " DB_PREFIX "QUOTE
+		WHERE Id IN ("IDOBJSELECTEDBUFFER") and (IdState is NULL or IdState='0') 
+		and not exists (select 1 from " DB_PREFIX "QUOTE_PRODUCT WHERE Id=IdQuote)"
+	),
+	DeleteQuote_SQL3 = (
+		"Update " DB_PREFIX "QUOTE
+		set Comments='NON Supprimée'
+		where Id IN ("IDOBJSELECTEDBUFFER") "
+	),
+
+	(SQL : DeleteQuote_SQL1), 
+	(SQL : DeleteQuote_SQL2), 
+	(SQL : DeleteQuote_SQL3), 
+	
+	database <- '()',
+),

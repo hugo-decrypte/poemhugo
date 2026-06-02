@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTablePalletProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTablePalletProduct.n"],
+
+'@' => (
+	tablePalletProduct("PALLETPRODUCT",TAG_TABLE,"PALLETPRODUCT",true,"", "(/*TITLEOBJ*/)", ""),	% JZ 0924 : TITLEOBJ
+	% Check "TablePalletProduct" in open view file interaction
+),

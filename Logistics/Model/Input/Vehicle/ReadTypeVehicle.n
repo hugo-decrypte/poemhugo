@@ -1,0 +1,173 @@
+/******************************************************/
+/*	         Vehicle Routing	              */
+/*	                                              */
+/*		ReadTypeVehicle.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+% Data Reading
+%['Work Directory' "Model\Common\Config\ReadColor.n"],
+%['Work Directory' "Model\Input\Product\ReadProduct.n"],
+
+'()' => (
+	'()' <- database,
+
+
+	(SQL: "SELECT id,timeFixed,timeLoadingUnit,timeUnloadingUnit,costDay,costNight,costUnit,costKilometer,minResource,maxResource,minOrder,maxOrder,minTour,maxTour,minMakespan,maxMakespan,minWorktime,maxWorktime,minQuantity,maxQuantity,minWeight,maxWeight,minVolume,maxVolume,length,width,height,idIcon FROM " DB_PREFIX "TYPERESOURCE WHERE idClub='" idClubActive "' ORDER BY id DESC"), % JZ 1022
+
+
+
+	nbTypeVehicle	= (),
+	TYPEVEHICLE	= [1, nbTypeVehicle],
+
+	\forall t \in TYPEVEHICLE (
+		idTypeVehicle_{t} 		:: "",
+
+		timeFixed0TypeVehicle_{t}	:: 0,
+		timeLoadingUnit0TypeVehicle_{t}	:: 0.0,
+		timeUnloadingUnit0TypeVehicle_{t}:: 0.0,
+
+		costDayTypeVehicle_{t}		:: 0.0,
+		costNightTypeVehicle_{t}	:: 0.0,
+		costUnitTypeVehicle_{t}		:: 0.0,
+		costKilometerTypeVehicle_{t}	:: 0.0,
+
+		minVehicleTypeVehicle_{t} 	:: 0,
+		maxVehicle0TypeVehicle_{t} 	:: 0,
+
+
+		minOrderTypeVehicle_{t} 	:: 0,
+		maxOrder0TypeVehicle_{t} 	:: 0,
+
+		minTourTypeVehicle_{t} 		:: 0,
+		maxTourTypeVehicle_{t} 		:: 0,
+
+		minMakespanDayTypeVehicle_{t} 	:: 0,
+		maxMakespanDay0TypeVehicle_{t} 	:: 0,
+
+		minWorktimeDayTypeVehicle_{t} 	:: 0,
+		maxWorktimeDay0TypeVehicle_{t} 	:: 0,
+
+
+		%minMakespanDayTypeVehicle_{t} 	:: defaultTime,
+		%maxMakespanDay0TypeVehicle_{t} 	:: defaultTime,
+		%minWorktimeDayTypeVehicle_{t} 	:: defaultTime,
+		%maxWorktimeDay0TypeVehicle_{t} 	:: defaultTime,
+
+
+		minQuantityTypeVehicle_{t} 	:: 0,
+		maxQuantity0TypeVehicle_{t} 	:: 0,
+
+		minWeightTypeVehicle_{t} 	:: 0.0,
+		maxWeight0TypeVehicle_{t} 	:: 0.0,
+
+		minVolumeTypeVehicle_{t} 	:: 0.0,
+		maxVolume0TypeVehicle_{t} 	:: 0.0,
+
+		length0TypeVehicle_{t} 		:: 0.0,
+		width0TypeVehicle_{t} 		:: 0.0,
+		height0TypeVehicle_{t} 		:: 0.0,
+		%colorTypeVehicle_{t}		:: "",
+		idIconTypeVehicle_{t}		:: "",
+
+
+		idTypeVehicle_{t} 		= (),
+
+		timeFixed0TypeVehicle_{t}		= (),
+		timeLoadingUnit0TypeVehicle_{t}		= (),
+		timeUnloadingUnit0TypeVehicle_{t}	= (),
+
+		costDayTypeVehicle_{t}		= (),
+		costNightTypeVehicle_{t}	= (),
+		costUnitTypeVehicle_{t}		= (),
+		costKilometerTypeVehicle_{t}	= (),
+
+		minVehicleTypeVehicle_{t} 	= (),
+		maxVehicle0TypeVehicle_{t} 	= (),
+
+
+		minOrderTypeVehicle_{t} 	= (),
+		maxOrder0TypeVehicle_{t} 	= (),
+
+		minTourTypeVehicle_{t} 		= (),
+		maxTourTypeVehicle_{t} 		= (),
+
+		minMakespanDayTypeVehicle_{t} 	= (),
+		maxMakespanDay0TypeVehicle_{t} 	= (),
+
+		minWorktimeDayTypeVehicle_{t} 	= (),
+		maxWorktimeDay0TypeVehicle_{t} 	= (),
+
+
+		minQuantityTypeVehicle_{t} 	= (),
+		maxQuantity0TypeVehicle_{t} 	= (),
+
+		minWeightTypeVehicle_{t} 	= (),
+		maxWeight0TypeVehicle_{t} 	= (),
+
+		minVolumeTypeVehicle_{t} 	= (),
+		maxVolume0TypeVehicle_{t} 	= (),
+
+		length0TypeVehicle_{t} 		= (),
+		width0TypeVehicle_{t} 		= (),
+		height0TypeVehicle_{t} 		= (),
+
+		idIconTypeVehicle_{t}		= (),
+	),
+
+
+	(SQL: "SELECT COUNT(p.id) FROM " DB_PREFIX "PRODUCT p WHERE "
+		SQL_UserVisibleClubIs "p.idClub)"),  % JZ 1022
+
+	1 = (),
+	maxProduct = (),
+	
+	
+
+	\forall t \in TYPEVEHICLE (
+		(SQL: "SELECT tvp.idProduct,tvp.minQuantity,tvp.maxQuantity,tvp.maxWeight,tvp.maxVolume FROM " DB_PREFIX "TYPERESOURCE_PRODUCT tvp WHERE tvp.idTypeResource='" idTypeVehicle_{t} "' "),  % JZ 1022
+		%(SQL: SQL_SelectTypeVehicleProductTypeVehicleIs idTypeVehicle_{t} "' "),  % Chen 0726
+
+		nbProductTypeVehicle_{t} = (),
+		nbProductTypeVehicle_{t} =< maxProduct,
+
+		\forall i \in [1,nbProductTypeVehicle_{t}] (
+			idProductIdxTypeVehicle_{t,i}		:: "",
+			minQuantityIdxTypeVehicle_{t,i} 	:: 0,
+			maxQuantity0IdxTypeVehicle_{t,i} 	:: 0,
+			maxWeight0IdxTypeVehicle_{t,i} 		:: 0.0,
+			maxVolume0IdxTypeVehicle_{t,i} 		:: 0.0,
+
+			idProductIdxTypeVehicle_{t,i}		= (),
+			minQuantityIdxTypeVehicle_{t,i} 	= (),
+			maxQuantity0IdxTypeVehicle_{t,i} 	= (),
+			maxWeight0IdxTypeVehicle_{t,i} 		= (),
+			maxVolume0IdxTypeVehicle_{t,i} 		= (),
+		),
+
+		%colorTypeVehicle_{t} = colorIdx_{(t-1) \mod nbColor},
+	),
+
+	\forall t \in TYPEVEHICLE
+	\forall i \in [1,nbProductTypeVehicle_{t}] (
+		maxQuantityIdxTypeVehicle_{t,i} = (maxQuantity0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxQuantity0IdxTypeVehicle_{t,i}),
+		maxWeightIdxTypeVehicle_{t,i} 	= (maxWeight0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxWeight0IdxTypeVehicle_{t,i}),
+		maxVolumeIdxTypeVehicle_{t,i} 	= (maxVolume0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxVolume0IdxTypeVehicle_{t,i}),
+
+		%maxQuantityIdxTypeVehicle_{t,i} = \overline{(maxQuantity0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxQuantity0IdxTypeVehicle_{t,i})},
+		%maxWeightIdxTypeVehicle_{t,i} 	= \overline{(maxWeight0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxWeight0IdxTypeVehicle_{t,i})},
+		%maxVolumeIdxTypeVehicle_{t,i} 	= \overline{(maxVolume0IdxTypeVehicle_{t,i} = 0 ? +\infty : maxVolume0IdxTypeVehicle_{t,i})},
+	),
+
+	database <- '()',
+
+
+	IDTYPEVEHICLE = \{\forall i \in TYPEVEHICLE idTypeVehicle_{i} \},
+
+	\forall i \in IDTYPEVEHICLE (
+		typeVehicleId_{i} \in TYPEVEHICLE,
+		idTypeVehicle_{typeVehicleId_{i}} = i,
+	),
+),

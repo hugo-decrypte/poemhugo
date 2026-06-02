@@ -1,0 +1,39 @@
+%==================================================%
+%						   %
+%            	  Scheduling    	           %
+%						   %
+% 		RestoreBySelected.n        	   %
+%                                                  %
+% (c)2000 Enginest. All rights reserved.           %
+%==================================================%
+	% bai 0620
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+
+'()' => (
+	nbRestore		:: 0,
+	nbParameter		:: 0,
+	idClubLogin		:: "",
+	idBackup 		:: "",	
+	typebackupRestore 	:: "",
+
+	nbRestore		= (),
+	nbParameter		= (),
+
+	(TAG_ONLY_ONE_TO_SELECT :
+		nbRestore = 1,
+	),
+
+	idClubLogin		= (),
+	idBackup 		= (),
+	typebackupRestore	= (),
+
+	(TAG_ONLY_SNAPSHOT_TO_RESTORE:
+		typebackupRestore = TAG_TYPE_SNAPSHOT,
+	),
+),
+
+['Work Directory' "Model\\Interaction\\Backup\\Restore.n"],
+

@@ -1,0 +1,279 @@
+/******************************************************/
+/*	                                              */
+/*		ReadMoveOrderTSP.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+idTourTSP		= idTourTsp_{tsp},
+tourTSP			= tourId_{idTourTSP},
+
+vehicleTSP		= vehicleTour_{tourTSP},
+typeVehicleTSP		= typeVehicleVehicle_{vehicleTSP},
+
+idVehicleTSP		= idResource_{vehicleTSP},
+idxTourVehicleTSP	= idxTourVehicleTour_{tourTSP},
+
+source			= -tourTSP,
+sink			= -tourTSP - nbTour,
+
+SourceTSP		= \{ source \},
+SinkTSP			= \{ sink \},
+
+maxTour0Vehicle_{vehicleTSP} > 0 => (
+	TAG_VEHICLE " " idVehicleTSP " : " TAG_MAX_TOUR " = " maxTour0Vehicle_{vehicleTSP} :
+	idxTourVehicleTSP \in [1, maxTour0Vehicle_{vehicleTSP}],
+),
+
+
+
+% Tour sites
+idSite10Vehicle_{vehicleTSP} <> "" => (
+	idSite1Vehicle = idSite10Vehicle_{vehicleTSP},
+
+	idSite20Vehicle_{vehicleTSP} <> "" => (
+		idSite2Vehicle = idSite20Vehicle_{vehicleTSP},
+		;
+		idSite2Vehicle = idSite10Vehicle_{vehicleTSP},
+	),
+	;
+
+	idSite1Vehicle = idSite20Vehicle_{vehicleTSP},
+	idSite2Vehicle = idSite20Vehicle_{vehicleTSP},
+),
+
+idSite1TSP :: "",
+idSite2TSP :: "",
+
+t10TSP :: defaultDateTime,
+t20TSP :: defaultDateTime,
+
+
+
+
+idSite1TSP		= idSite1TourBuffer_{tourTSP},
+idSite2TSP		= idSite2TourBuffer_{tourTSP},
+
+t10TSP			= t1TourBuffer_{tourTSP},
+
+%t20TSP			= t2TourBuffer_{tourTSP},
+
+
+%t10ResourceTSP = (t100Vehicle_{vehicleTSP} = defaultDateTime ? t1 : t100Vehicle_{vehicleTSP}),
+t20ResourceTSP = (t200Vehicle_{vehicleTSP} = defaultDateTime ? t2 : t200Vehicle_{vehicleTSP}),
+
+
+tour2ActiveVehicleBuffer_{vehicleTSP} > tourTSP => (
+	t20TSP = t1TourBuffer_{tourTSP+1} - 1,
+	;
+
+	t20TSP = t20ResourceTSP,
+),
+
+
+
+boundWorktimeTSP	= timeServiceTourBuffer_{tourTSP} + timeRouteTourBuffer_{tourTSP},
+boundMakespanTSP	= t2TourBuffer_{tourTSP} - t1TourBuffer_{tourTSP} + 1,
+
+
+
+
+OrderTSP = OrderTourBuffer_{tourTSP} \setminus OrderRejectedTour_{tourTSP} \cup OrderAcceptedTour_{tourTSP},
+
+
+
+SourceOrderTSP		= SourceTSP \cup OrderTSP,
+OrderSinkTSP		= OrderTSP  \cup SinkTSP,
+SourceOrderSinkTSP	= SourceTSP \cup OrderTSP \cup SinkTSP,
+
+
+
+\forall o \in SourceOrderSinkTSP (
+	idOrder_{o} :: "",
+
+	%timeServiceOrder_{o}	:: defaultTime,
+	%timeToNextOrder_{o}	:: defaultTime,
+
+	quantityOrder_{o} >= 0,
+	weightOrder_{o} >= 0.0,
+	volumeOrder_{o} >= 0.0,
+
+	receiptsOrder_{o} :: 0.0,
+),
+
+\forall o \in SourceTSP \cup SinkTSP (
+	quantityOrder_{o} = 0,
+	weightOrder_{o} = 0.0,
+	volumeOrder_{o} = 0.0,
+
+	receiptsOrder_{o} = 0.0,
+),
+
+\forall o \in OrderTSP (
+	idOrder_{o}		= idOrderBuffer_{o},
+
+%	timeServiceOrder_{o}	= timeServiceOrderBuffer_{o},	% ????????
+%	timeToNextOrder_{o}	= timeToNextOrderBuffer_{o},
+
+	quantityOrder_{o}	= quantityOrderBuffer_{o},
+	weightOrder_{o}		= weightOrderBuffer_{o},
+	volumeOrder_{o}		= volumeOrderBuffer_{o},
+
+	receiptsOrder_{o}	= receiptsOrderBuffer_{o},
+
+	priorityOrder_{o}	= priorityOrderBuffer_{o},
+),
+
+
+IdOrderTSP = \{ \forall o \in OrderTSP idOrder_{o} \},
+
+
+
+nbTourVehilce_1		= tour2ActiveVehicleBuffer_{vehicleTSP} - tour1Vehicle_{vehicleTSP},
+
+
+sumNbOrderVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}]}{#OrderTourBuffer_{t}}
+			- #OrderTSP,
+
+sumMileageVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{mileageTourBuffer_{t}},
+sumTimeServiceVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{timeServiceTourBuffer_{t}},
+sumTimeRouteVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{timeRouteTourBuffer_{t}},
+sumMakespanVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{t2TourBuffer_{t} - t1TourBuffer_{t} + 1},
+
+sumQuantityVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{quantityTourBuffer_{t}},
+sumVolumeVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{weightTourBuffer_{t}},
+sumWeightVehilce_1	= \sum_{t \in [tour1Vehicle_{vehicleTSP}, tour2ActiveVehicleBuffer_{vehicleTSP}] \setminus tourTSP}{volumeTourBuffer_{t}},
+
+
+
+
+IdSiteOrder = \{ \forall o \in OrderTSP idSiteOrderBuffer_{o} \},
+
+IDSITE = (
+	IdSiteOrder \cup \{
+		idSite1Vehicle, idSite2Vehicle
+	\} \cup \{
+		idSite1TSP, idSite2TSP
+	\}
+) \setminus "",
+
+
+
+['Work Directory' "Model\Input\Site\ReadSiteOrder.n"],
+['Work Directory' "Model\Input\Site\ReadSiteSite.n"],
+
+
+
+
+% Tour horizon
+Horizon0TSP = [t10TSP, t20TSP],
+HorizonTSP = (ruleDailyTour ? Horizon0TSP \cap HorizonDate_{t10TSP["yyyy-mm-dd"]} : Horizon0TSP),
+
+
+% Tour max worktime / max makespan
+maxMakespanConfig = (maxMakespanDay = 0 ? timeDay : maxMakespanDay),
+maxWorktimeConfig = (maxWorktimeDay = 0 ? timeDay : maxWorktimeDay),
+
+maxMakespanDayTypeVehicle = (maxMakespanDay0TypeVehicle_{typeVehicleTSP} = 0 ? maxMakespanConfig : maxMakespanDay0TypeVehicle_{typeVehicleTSP}),
+maxWorktimeDayTypeVehicle = (maxWorktimeDay0TypeVehicle_{typeVehicleTSP} = 0 ? maxWorktimeConfig : maxWorktimeDay0TypeVehicle_{typeVehicleTSP}),
+
+maxWorktimeDayVehicle = (maxWorktimeDay0Vehicle_{vehicleTSP} = 0 ? maxWorktimeDayTypeVehicle : maxWorktimeDay0Vehicle_{vehicleTSP}),
+maxMakespanDayVehicle = (maxMakespanDay0Vehicle_{vehicleTSP} = 0 ? maxMakespanDayTypeVehicle : maxMakespanDay0Vehicle_{vehicleTSP}),
+
+
+
+
+
+% Quantity
+receiptsTSP = \sum_{o \in OrderTSP}{receiptsOrder_{o}},
+
+costUnitTSP = costUnitTypeVehicle_{typeVehicleTSP},
+
+
+
+% Capacity
+maxQuantityTypeVehicle 	= (maxQuantity0TypeVehicle_{typeVehicleTSP} = 0 ? +\infty : maxQuantity0TypeVehicle_{typeVehicleTSP}),
+maxWeightTypeVehicle 	= \overline{(maxWeight0TypeVehicle_{typeVehicleTSP} = 0.0 ? +\infty : maxWeight0TypeVehicle_{typeVehicleTSP})},
+maxVolumeTypeVehicle 	= \overline{(maxVolume0TypeVehicle_{typeVehicleTSP} = 0.0 ? +\infty : maxVolume0TypeVehicle_{typeVehicleTSP})},
+
+maxQuantityTSP	= (maxQuantityTour0Vehicle_{vehicleTSP} = 0 ? maxQuantityTypeVehicle	: maxQuantityTour0Vehicle_{vehicleTSP}),
+maxWeightTSP	= (maxWeightTour0Vehicle_{vehicleTSP} 	= 0.0 ? maxWeightTypeVehicle	: maxWeightTour0Vehicle_{vehicleTSP}),
+maxVolumeTSP	= (maxVolumeTour0Vehicle_{vehicleTSP} 	= 0.0 ? maxVolumeTypeVehicle	: maxVolumeTour0Vehicle_{vehicleTSP}),
+
+
+
+
+
+
+% PreSolving
+['Work Directory' "Model\Solver\ParameterizeTimeDistance.n"],
+
+
+
+% Schedule
+Schedule = Schedule0Resource_{vehicleTSP} \cap HorizonTSP,
+
+ScheduleRest = HorizonTSP \setminus Schedule,
+
+
+\forall o \in OrderTSP (
+	timeFixedOrder_{o} :: 0,
+	timeFixedOrder_{o} = \lfloor \underline{timeFixed0OrderBuffer_{o} * timeRatio + 0.5} \rfloor,
+),
+
+
+% Time win
+\forall o \in SourceOrderSinkTSP
+	TimeWinOrder_{o} :: HorizonTSP,
+
+\forall o \in OrderTSP (
+	TimeWin0Order_{o} = [
+		(t1Service0OrderBuffer_{o} = defaultDateTime ?
+		\inf HorizonTSP : t1Service0OrderBuffer_{o}),
+
+		(t2Service0OrderBuffer_{o} = defaultDateTime ?
+		\sup HorizonTSP : t2Service0OrderBuffer_{o})
+	],
+
+	TimeWinOrder_{o} = (
+		!ruleTimeWindow ?
+		HorizonTSP : (
+			strictTimeOrderBuffer_{o} ?
+			TimeWin0Order_{o} : [\inf TimeWin0Order_{o}, \sup HorizonTSP]
+		) \cap HorizonTSP
+	)
+),
+
+TimeWinOrder_{source}	= HorizonTSP,
+TimeWinOrder_{sink}	= HorizonTSP,
+
+
+
+% Site
+\forall o \in SourceOrderSinkTSP
+	siteOrder_{o} \in SITE,
+
+\forall o \in OrderTSP
+	siteOrder_{o} = siteId_{idSiteOrderBuffer_{o}},
+
+
+siteOrder_{source}	= (idSite1TSP <> "" ? siteId_{idSite1TSP} : siteId_{idSite1Vehicle}),
+siteOrder_{sink}	= (idSite2TSP <> "" ? siteId_{idSite2TSP} : siteId_{idSite2Vehicle}),
+
+
+
+% dOrderOrder/tOrderOrder
+\forall o,i \in SourceOrderSinkTSP (
+	tOrderOrder_{o,i} :: defaultTime,
+	tOrderOrder_{o,i} >= 0,
+
+	dOrderOrder_{o,i} = dSiteSite_{siteOrder_{o},siteOrder_{i}},
+	tOrderOrder_{o,i} = tSiteSite_{siteOrder_{o},siteOrder_{i}},
+),
+
+costUnitKilometer = costKilometerTypeVehicle_{typeVehicleTSP},
+
+
+('hh:mm:ss' TAG_TAB_0 TAG_OPTIMIZE_TOUR " " idTourTSP "    " TAG_ORDER_NB " : " #OrderTSP "    " TAG_OBJECTIVE " : " nameObjectiveTop "    " TAG_HORIZON " : " \inf HorizonTSP " .. " \sup HorizonTSP : ),
+

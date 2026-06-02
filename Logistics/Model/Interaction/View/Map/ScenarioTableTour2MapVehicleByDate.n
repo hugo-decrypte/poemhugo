@@ -1,0 +1,67 @@
+%===============================================%
+%						%
+%    ScenarioTableTour2MapVehicleByDate.n		%
+%						%
+%     (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "MapTourByDate ",
+
+% Caption
+@ ("'Carte par date' "), % li 0614
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_MAP_BY_DATE,
+
+% Label
+@ (" 'Carte par date' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableOPTTOUR' ", % JZ 1025
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[SINGLESEL=0;COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\View\Map\GenerateMapVehicleTourByDate.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ (" (/*CLUBID*/) \\\n"),
+@ ("{/*Input(MCM;Selectionnez;2;\\\n"),
+@ ("(string,DATESTART,Date départ,[/*DATESTART2.DateStart2*/],50.0.580,0,,[/*DATESTART2.DateStart2*/]);\\\n"),
+@ ("(string,DATEEND,Date retour,[/*DATEEND2.DateEnd2*/],50.0.580,0,,[/*DATEEND2.DateEnd2*/]);*/}'\\\n"),
+
+
+
+related = "OpenMap" => (
+	@ (OPENTABLE_BEGIN "MapVehicle(/*USERID*/).view" OPENTABLE_END),
+	@ (TABLE_ARGUMENTS "]\"\n\n\n"),
+	;
+
+	@ ("Reload \"[VIEWID='" TAG_MAP_RESOURCE "']\"\n\n"),
+),

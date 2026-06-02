@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ViewTableConfig.n        	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableConfig.n"],
+
+'@' => (
+	tableConfig("CONFIG",TAG_TABLE,"CONFIG",true,"EditConfig",TAG_TABLE_CONFIG,"",""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_CONFIG TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] "\n" : ),
+),
+

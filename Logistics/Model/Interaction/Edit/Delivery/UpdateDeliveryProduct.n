@@ -1,0 +1,216 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateDeliveryProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idProductBuffer 			:: "",
+	idOrderBuffer 				:: "",
+	idPackingBuffer				:: "",
+	idDeliveryProducuLineBuffer :: "",
+	
+	idDeliveryBuffer			:: "",
+	
+	idProductBuffer 			= (),
+	idOrderBuffer 				= (),
+	idPackingBuffer				= (),
+	idDeliveryProductLineBuffer	= (),
+	
+	idDeliveryBuffer			= (),
+	
+	
+	
+	idDeliveryOrderProductLineCondition = ( 
+		SQL_CONCAT"trim(IdDelivery)"
+		SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(IdOrder)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH"trim(IdProduct)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH""SQL_FORMATNUM"(NoLine,"SQL_FORMATSCALE0")"
+		SQL_CONCATEND" in ('"idDeliveryProductLineBuffer"') "
+	),
+	
+	
+	'()' <- database,
+	
+	UpdateDeliveryProduct_SQL1 = (
+		"Delete from " DB_PREFIX "DELIVERY_PRODUCT 
+		WHERE IdDelivery in ("idDeliveryBuffer") and "idDeliveryOrderProductLineCondition" "
+	),
+
+
+	databaseType = "ACCESS" => (
+		UpdateDeliveryProduct_SQL2 = (
+			"Update " DB_PREFIX "DELIVERY set Quantity=0,QuantityReal=0, QuantityDefective=0, AmountHT=0, AmountVAT=0, Weight=0 WHERE ID in ("idDeliveryBuffer") "
+		),
+		UpdateDeliveryProduct_SQL3 = (
+			"Update (" DB_PREFIX "DELIVERY D inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.id=DP.idDelivery)
+				inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct set
+				D.Quantity = D.Quantity+DP.Quantity,
+				D.QuantityReal = D.QuantityReal + DP.QuantityReal,
+				D.QuantityDefective = D.QuantityDefective + DP.QuantityDefective,
+				D.AmountHT=D.AmountHT + DP.AmountHT,
+				D.AmountVAT=D.AmountVAT+DP.AmountVAT,
+				D.Weight = D.Weight + DP.QuantityReal*P.Weight 
+				WHERE D.ID in ("idDeliveryBuffer") "
+		),
+		UpdateDeliveryProduct_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY set AmountTotal = AmountHT + AmountVAT  WHERE ID in ("idDeliveryBuffer") "
+		),
+
+
+		%% ORDER_PRODUCT Qty
+		UpdateDeliveryProduct_SQL5 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityDelivered=0
+			where OP.IdOrder in ('"idOrderBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL6 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct set 
+				OP.QuantityDelivered=OP.QuantityDelivered+DP.QuantityReal
+				where OP.IdOrder in ('"idOrderBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL7 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP	set OP.QuantityRest=OP.Quantity-OP.QuantityDelivered
+				where OP.IdOrder in ('"idOrderBuffer"')"
+		),
+	
+		%% PALLET Qty
+		UpdateDeliveryProduct_SQL8 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityOut=0
+				WHERE PLP.IdPacking in ('"idPackingBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL9 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on DP.IdPacking=PLP.IdPacking and DP.NoPallet=PLP.NoPallet and DP.IdProduct=PLP.IdProduct set
+			PLP.QuantityOut=PLP.QuantityOut+DP.QuantityReal
+			WHERE PLP.IdPacking in ('"idPackingBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL10 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityStock=PLP.quantityReal-PLP.QuantityOut
+			WHERE PLP.IdPacking in ('"idPackingBuffer"')"
+		),
+	
+		%% PRODUCT Qty
+		UpdateDeliveryProduct_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0, QuantityStock=0 WHERE Id in ('"idProductBuffer"') and QuantityOrdered is NULL"
+		),
+		UpdateDeliveryProduct_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "ORDER_PRODUCT OP on P.Id=OP.IdProduct set 
+				P.QuantityOrdered=P.QuantityOrdered+OP.QuantityRest
+				WHERE P.Id in ('"idProductBuffer"') "
+		),
+		UpdateDeliveryProduct_SQL13 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "PALLET_PRODUCT PLP on P.Id=PLP.IdProduct set 
+				P.QuantityStock=P.QuantityStock+PLP.QuantityStock 
+				WHERE P.Id in ('"idProductBuffer"') "
+		),
+
+		;
+
+		UpdateDeliveryProduct_SQL2 = (
+			"Update " DB_PREFIX "DELIVERY set
+				Quantity=(select sum(DP.Quantity) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				QuantityReal = (select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				QuantityDefective = (select sum(DP.QuantityDefective) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				AmountHT=(select sum(DP.AmountHT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				AmountVAT=(select sum(DP.AmountVAT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				Weight =(select sum(DP.QuantityReal*P.Weight) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct where DELIVERY.ID=DP.IdDelivery) 
+				WHERE ID in ("idDeliveryBuffer") "
+		),
+		UpdateDeliveryProduct_SQL3 = (
+			"Update " DB_PREFIX "DELIVERY set Quantity=0  WHERE ID in ("idDeliveryBuffer") and Quantity is NULL "
+		),
+		UpdateDeliveryProduct_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY set QuantityReal=0  WHERE ID in ("idDeliveryBuffer") and QuantityReal is NULL "
+		),
+		UpdateDeliveryProduct_SQL5 = (
+			"Update " DB_PREFIX "DELIVERY set QuantityDefective=0  WHERE ID in ("idDeliveryBuffer") and QuantityDefective is NULL "
+		),
+		UpdateDeliveryProduct_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY set AmountHT=0  WHERE ID in ("idDeliveryBuffer") and AmountHT is NULL "
+		),
+		UpdateDeliveryProduct_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY set AmountVAT=0  WHERE ID in ("idDeliveryBuffer") and AmountVAT is NULL "
+		),
+		UpdateDeliveryProduct_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY set AmountTotal = AmountHT + AmountVAT  WHERE ID in ("idDeliveryBuffer") "
+		),
+		UpdateDeliveryProduct_SQL9 = (
+			"Update " DB_PREFIX "DELIVERY set Weight=0  WHERE ID in ("idDeliveryBuffer") and Weight is NULL "
+		),
+	
+		%% ORDER_PRODUCT Qty
+		UpdateDeliveryProduct_SQL10 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set 
+				QuantityDelivered=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdOrder=ORDER_PRODUCT.IdOrder and DP.IdProduct=ORDER_PRODUCT.IdProduct)
+			where IdOrder in ('"idOrderBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL11 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set QuantityDelivered=0
+				where IdOrder in ('"idOrderBuffer"') and OP.QuantityDelivered is NULL"
+		),
+		UpdateDeliveryProduct_SQL12 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=OP.Quantity-OP.QuantityDelivered
+				where IdOrder in ('"idOrderBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL13 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT set
+				QuantityOut=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdPacking=PALLET_PRODUCT.IdPacking and DP.NoPallet=PALLET_PRODUCT.NoPallet and DP.IdProduct=PALLET_PRODUCT.IdProduct)
+				WHERE IdPacking in ('"idPackingBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL14 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT set QuantityOut=0
+			WHERE IdPacking in ('"idPackingBuffer"')"
+		),
+		UpdateDeliveryProduct_SQL15 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT set QuantityStock=quantityReal-QuantityOut
+			WHERE IdPacking in ('"idPackingBuffer"')"
+		),
+	
+
+		%% PRODUCT Qty
+		UpdateDeliveryProduct_SQL16 = (
+			"Update " DB_PREFIX "PRODUCT set 
+				QuantityOrdered=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where Id=OP.IdProduct),
+				QuantityStock=(select sum(PLP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PLP where Id=PLP.IdProduct)
+			WHERE Id in ('"idProductBuffer"') "
+		),
+		UpdateDeliveryProduct_SQL17 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0 WHERE Id in ('"idProductBuffer"') and QuantityOrdered is NULL"
+		),
+		UpdateDeliveryProduct_SQL18 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityStock=0   WHERE Id in ('"idProductBuffer"') and QuantityStock is NULL"
+		),
+	),
+
+	(SQL : UpdateDeliveryProduct_SQL1), 
+	(SQL : UpdateDeliveryProduct_SQL2), 
+	(SQL : UpdateDeliveryProduct_SQL3), 
+	(SQL : UpdateDeliveryProduct_SQL4), 
+	(SQL : UpdateDeliveryProduct_SQL5), 
+	(SQL : UpdateDeliveryProduct_SQL6), 
+	(SQL : UpdateDeliveryProduct_SQL7), 
+	(SQL : UpdateDeliveryProduct_SQL8), 
+	(SQL : UpdateDeliveryProduct_SQL9), 
+	(SQL : UpdateDeliveryProduct_SQL10), 
+	(SQL : UpdateDeliveryProduct_SQL11), 
+	(SQL : UpdateDeliveryProduct_SQL12), 
+	(SQL : UpdateDeliveryProduct_SQL13), 
+	databaseType <> "ACCESS" => (
+		(SQL : UpdateDeliveryProduct_SQL14), 
+		(SQL : UpdateDeliveryProduct_SQL15), 
+		(SQL : UpdateDeliveryProduct_SQL16), 
+		(SQL : UpdateDeliveryProduct_SQL17), 
+		(SQL : UpdateDeliveryProduct_SQL18), 
+	),
+	
+	database <- '()',
+),

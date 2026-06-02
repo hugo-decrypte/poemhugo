@@ -1,0 +1,75 @@
+/********************************************************/
+/*							*/
+/*		ClientSetAddress.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	SITE = [1,()],
+
+	\forall s \in SITE (
+		idSite_{s}		:: "",
+		latitudeSite_{s}	:: "",
+		longitudeSite_{s}	:: "",
+
+		idSite_{s}		= (),
+		latitudeSite_{s}	= (),
+		longitudeSite_{s}	= (),
+	),
+),
+
+
+'@' => (
+	database <- '@',
+
+	\forall s \in SITE (
+		databaseType = "SQLSERVER" =>(
+			sqlUpdateSite_{s} = (
+				"UPDATE s SET s.latitude='" latitudeSite_{s}
+					"',s.longitude='" longitudeSite_{s}
+				"' FROM SITE s
+				WHERE s.idClub='" idClubLogin "' AND s.id='" idSite_{s} "'"
+			),
+			;
+
+			sqlUpdateSite_{s} = (
+				"UPDATE "DB_PREFIX"SITE SET latitude='" latitudeSite_{s}
+					"',longitude='" longitudeSite_{s}
+				"' WHERE idClub='" idClubLogin "' AND id='" idSite_{s} "'"
+			),
+		),
+
+		(SQL :	sqlUpdateSite_{s}),
+	),
+
+	'@' <- database,
+
+	%TAG_ADDRESS_WRITTEN = " adresses écrites",
+
+	(#SITE " addresses handles" : !!),
+),
+
+
+.
+
+
+
+'@' => (
+	output = ['Work Directory' "TestSite.txt"],
+
+	output <- '@',
+
+	\forall s \in SITE (
+		@ (idSite_{s} "  "),
+		@ (latitudeSite_{s} "  "),
+		@ (longitudeSite_{s} "\n"),
+	),
+
+	'@' <- output,
+).
+

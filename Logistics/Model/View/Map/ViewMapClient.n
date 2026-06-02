@@ -1,0 +1,14 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ViewMapClient.n			%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\\View\\Map\\FuncMapClient.n"],
+
+'@' => ( 
+	mapSite(TAG_MAP_SITE,TAG_CLIENT,{},""),	% wu 20210921
+),

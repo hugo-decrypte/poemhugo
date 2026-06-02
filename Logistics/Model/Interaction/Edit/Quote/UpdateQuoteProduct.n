@@ -1,0 +1,102 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateQuoteProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	
+	idQuoteSelectedBuffer 			:: "",
+	idProductSelectedBuffer 		:: "",
+		
+	idQuoteSelectedBuffer			= (),
+	idProductSelectedBuffer			= (),
+	
+	
+	/*% FLOAT 实数区间未定。 要求 : 客户输入多少就是多少 比如用户输入2.31 就是2.31
+	quantityBuffer	:: 0.0,  
+	priceBuffer		:: 0.0,
+	toolcost		:: 0.0,
+	discount		:: 0.0,*/
+	
+	%不得不定义float 为字符串
+	quantityBuffer		:: "",  
+	priceBuffer			:: "",
+	toolcostBuffer		:: "",
+	discountBuffer		:: "",
+	
+	quantityBuffer		= (),  
+	priceBuffer			= (),
+	toolcostBuffer		= (),
+	discountBuffer		= (),
+	
+
+	'()' <- database,
+
+	UpdateQuoteProduct_SQL1 = (
+		"UPDATE " DB_PREFIX "QUOTE_PRODUCT set Quantity="quantityBuffer", PriceUnit="priceBuffer", ToolCost="toolcostBuffer", Discount="discountBuffer"
+		WHERE IdQuote in ('"idQuoteSelectedBuffer"')
+		AND IdProduct ='"idProductSelectedBuffer"'"
+	),
+ 
+	UpdateQuoteProduct_SQL2 = (
+		"Update " DB_PREFIX "QUOTE_PRODUCT set Discount=0 
+		WHERE IdQuote in ('"idQuoteSelectedBuffer"')
+		AND Discount is NULL"
+	),
+	UpdateQuoteProduct_SQL3 = (
+		"Update " DB_PREFIX "QUOTE_PRODUCT set AmountHT=Quantity*PriceUnit*(100.0-Discount)/100.0
+		WHERE IdQuote in ('"idQuoteSelectedBuffer"')
+	and IdProduct ='"idProductSelectedBuffer"'"
+	),
+
+	databaseType = "ACCESS" => (
+
+		UpdateQuoteProduct_SQL4 = (
+			"Update " DB_PREFIX "QUOTE  set Quantity=0, AmountHT=0
+			WHERE Id in ('"idQuoteSelectedBuffer"')"
+		),
+
+		UpdateQuoteProduct_SQL5 = (
+			"Update " DB_PREFIX "QUOTE Q inner join " DB_PREFIX "QUOTE_PRODUCT QP on Q.Id=QP.IdQuote set
+				Q.Quantity=Q.Quantity+QP.Quantity,
+				Q.AmountHT=Q.AmountHT+QP.AmountHT 
+			WHERE Q.Id in ('"idQuoteSelectedBuffer"')"
+		),
+
+		;
+	
+		UpdateQuoteProduct_SQL4 = (
+			"Update " DB_PREFIX "QUOTE  set
+				Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote),
+				AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote) 
+			WHERE Id in ('"idQuoteSelectedBuffer"')"
+		),
+		UpdateQuoteProduct_SQL5 = (
+			"Update " DB_PREFIX "QUOTE  set
+				Quantity=0,
+				AmountHT=0 
+			WHERE Id in ('"idQuoteSelectedBuffer"') and Quantity is NULL"
+		),
+	),
+
+	(SQL : UpdateQuoteProduct_SQL1), 
+	(SQL : UpdateQuoteProduct_SQL2), 
+	(SQL : UpdateQuoteProduct_SQL3), 
+	(SQL : UpdateQuoteProduct_SQL4), 
+	(SQL : UpdateQuoteProduct_SQL5), 
+	
+	database <- '()',
+),

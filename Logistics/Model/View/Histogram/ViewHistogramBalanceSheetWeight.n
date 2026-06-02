@@ -1,0 +1,18 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	ViewHistogramBalanceSheetWeight.n	%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+['Work Directory' "Model\View\Histogram\FuncHistogramBalanceSheetWeight.n"],
+
+'@' => (
+	histogramBalanceSheetWeight("MONTHLYWEIGHT",true, TAG_MONTH,TAG_TON, "","", {},TAG_MONTHLY_WEIGHT,""),	% JZ 1022
+	
+
+	('hh:mm:ss' "  " TAG_MONTHLY_WEIGHT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ),
+),

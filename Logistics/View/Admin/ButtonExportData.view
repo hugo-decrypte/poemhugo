@@ -1,0 +1,5 @@
+View 'Exporter données' _ 'Exporter données' 255 255 255 _ 0 0 40 40 5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;DEBUGLEVEL=0;SCROLLBAR=0;NATURESCALE=0;BESTFIT=1]'
+
+Script ExportData 'Exporter données' _ 11 'Cliquer à exporter données' _ _ '0 0 40 40' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;;AUTOCLOSE=1]'\
+  Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Common\Interface\ExportData.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) ' 
+

@@ -1,0 +1,78 @@
+/********************************************************/
+/*							*/
+/*		ClientSetDemandPrediction.n		*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	PRODUCTDEMAND = [1,()],
+
+	\forall i \in PRODUCTDEMAND (
+		idProduct_{i}		:: "",
+
+		date1Product_{i}	:: defaultDateTime,
+		date2Product_{i}	:: defaultDateTime,
+
+		minQuantityProduct_{i}	:: 0,
+		minWeightProduct_{i}	:: 0.0,
+		minVolumeProduct_{i}	:: 0.0,
+
+		maxQuantityProduct_{i}	:: 0,
+		maxWeightProduct_{i}	:: 0.0,
+		maxVolumeProduct_{i}	:: 0.0,
+
+		probabilityProduct_{i}	:: 0.0,
+
+
+		idProduct_{i}		= (),
+
+		date1Product_{i}	= (),
+		date2Product_{i}	= (),
+
+		minQuantityProduct_{i}	= (),
+		minWeightProduct_{i}	= (),
+		minVolumeProduct_{i}	= (),
+		maxQuantityProduct_{i}	= (),
+		maxWeightProduct_{i}	= (),
+		maxVolumeProduct_{i}	= (),
+
+		probabilityProduct_{i}	= (),
+	),
+),
+
+
+'@' => (
+	database <- '@',
+
+	\forall i \in PRODUCTDEMAND (
+		(SQL : "DELETE	FROM " DB_PREFIX "PRODUCT_DEMAND
+			WHERE	idClub='"	idClubLogin
+				"' AND id='"	idProduct_{i}
+				"' AND date1='"	date1Product_{i} "'"),
+
+		(SQL : "INSERT 	INTO " DB_PREFIX "PRODUCT_DEMAND(
+				idClub,id,date1,date2,minQuantity,minWeight,minVolume,maxQuantity,maxWeight,maxVolume,probability)
+			VALUES( '" 	idClubLogin
+				"','" 	idProduct_{i}
+				"','"	date1Product_{i}
+				"','"	date2Product_{i}
+				"',"	minQuantityProduct_{i}
+				","	minWeightProduct_{i}
+				","	minVolumeProduct_{i}
+				","	maxQuantityProduct_{i}
+				","	maxWeightProduct_{i}
+				","	maxVolumeProduct_{i}
+				","	probabilityProduct_{i}
+			")"),
+	),
+
+	'@' <- database,
+
+
+	(#PRODUCTDEMAND " products handles" : !!),
+),

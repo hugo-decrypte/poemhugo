@@ -1,0 +1,245 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 AddOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+
+	idTourBuffer	:: "",
+	dateTourBuffer	:: "",
+	idTourBuffer	= (),
+	dateTourBuffer	= (),
+	
+	nbParameter	= (),
+	nbSelected	= (),
+
+	%%% only 1 order selected
+	idOrderSelectedBuffer		:: "",
+	idOrderSelectedBuffer		= (),
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	'()' <- database,
+
+%% create delivery if not exists
+AddOrderToTour_SQL1 = (
+	"INSERT INTO " DB_PREFIX "DELIVERY"
+	"(IdClub, IdDelivery, IdClient, IdPointDelivery, IdTour, DateDelivery, IdAgency, Quantity, QuantityReal,"
+	"  Comments, State) "
+	" select O.IdClub, 'D'+O.Id, O.IdClient, O.IdPointDelivery, " idTourBuffer "," dateTourBuffer ", O.IdAgency, O.QuantityRest, O.QuantityRest,"
+	" 'Commande '+O.Id, '0'"
+	" from " DB_PREFIX "CLIENTORDER O"
+	" where O.Id in ('" idOrderSelectedBuffer "')"
+	"  and not exists (select 1 from " DB_PREFIX "DELIVERY D where D.Id='D'+O.Id)"
+),
+
+%% add product into delivery if not exists
+AddOrderToTour_SQL2 = (
+	"INSERT INTO " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery,IdOrder, IdProduct, NoLine, Quantity, QuantityCommand, QuantityReal, QuantityCmdRest, QuantityDefective, PriceUnit, Comments, DateDelivery,NoPallet,NoPalletDelivery, Discount,LabelDiscount,IdVAT) "
+	"  select 'D'+O.Id, O.Id, OP.IdProduct, 1 as NoLine,"
+	"  OP.QuantityRest, OP.QuantityRest, OP.Quantity, 0, 0, OP.PriceUnit, OP.Comments, " dateTourBuffer ", OP.NoPallet,OP.NoPalletDelivery, OP.Discount,OP.LabelDiscount,OP.IdVAT"
+	" from " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on OP.IdOrder=O.Id"
+	" where O.Id in ('" idOrderSelectedBuffer "')"
+	"  and OP.QuantityRest>0"
+	"  and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery='D'+O.Id and DP.IdOrder=O.Id and DP.NoLine=1 and DP.IdProduct=OP.IdProduct)"
+),
+
+%% NoPallet  if NULL
+AddOrderToTour_SQL3 = (
+	"UPDATE " DB_PREFIX "DELIVERY_PRODUCT SET NoPalletDelivery= NoPallet where IdDelivery='D'+" idOrderSelectedBuffer " and NoPalletDelivery is NULL "
+),
+%% NoPalletDelivery if NULL
+AddOrderToTour_SQL4 = (
+	"UPDATE " DB_PREFIX "ORDER_PRODUCT SET NoPalletDelivery= NoPallet where IdOrder in ('" idOrderSelectedBuffer "') and NoPalletDelivery is NULL "
+),
+
+databaseType = "ACCESS" => (
+
+	%% set delivery values
+	AddOrderToTour_SQL5 = (
+		"update " DB_PREFIX "DELIVERY D set D.AmountHT=0, AmountVAT=0, Weight=0, NbPallet=0 where D.Id='D'+" idOrderSelectedBuffer "
+	),
+
+	%% AmountHT
+	AddOrderToTour_SQL6 = (
+		"UPDATE " DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id SET D.AmountHT= D.AmountHT+DP.Quantity*DP.PriceUnit where DP.IdDelivery='D'+" idOrderSelectedBuffer " "
+	),
+
+	%% AmountVAT
+	AddOrderToTour_SQL7 = (
+		"UPDATE " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct SET DP.IdVAT= P.IdVAT where DP.IdDelivery='D'+" idOrderSelectedBuffer " and (DP.IdVAT is NULL or DP.IdVAT<=' ') "
+	),
+	AddOrderToTour_SQL8 = (
+		"UPDATE (" DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id) inner join " DB_PREFIX "VAT T on T.IdVAT=DP.IdVAT SET D.AmountVAT= D.AmountVAT+DP.Quantity*DP.PriceUnit*T.VAT/100.0 where DP.IdDelivery='D'+" idOrderSelectedBuffer " "
+	),
+
+	AddOrderToTour_SQL9 = (
+		"UPDATE " DB_PREFIX "DELIVERY D SET D.AmountTotal =D.AmountHT + D.AmountVAT where D.Id='D'+" idOrderSelectedBuffer " "
+	),
+
+	%% Weight
+	AddOrderToTour_SQL10 = (
+		"UPDATE (" DB_PREFIX "DELIVERY_PRODUCT DP INNER JOIN " DB_PREFIX "DELIVERY D ON DP.IdDelivery = D.Id) inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct SET D.Weight= D.Weight+DP.Quantity*P.Weight where DP.IdDelivery='D'+" idOrderSelectedBuffer " "
+	),
+
+	%% NbPallet
+	AddOrderToTour_SQL11 = (
+		"UPDATE " DB_PREFIX "DELIVERY D INNER JOIN " DB_PREFIX "DELIVERY_PRODUCT DP ON DP.IdDelivery = D.Id SET D.NbPallet= D.NbPallet+1 where D.Id='D'+" idOrderSelectedBuffer " and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.NoPalletDelivery=DP.NoPalletDelivery and (DP0.IdOrder<DP.IdCOmmand or DP0.IdProduct<DP.IdProduct or DP0.NoLine<DP.NoLine) )"
+	),
+
+	%% ORDER values
+	AddOrderToTour_SQL12 = (
+		"Update " DB_PREFIX "CLIENTORDER O"
+		" set O.DateDelivery=" dateTourBuffer ", QuantityRest=0, O.State='2'"
+		" where O.Id=" idOrderSelectedBuffer " "
+	),
+
+	AddOrderToTour_SQL13 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT OP "
+		" set OP.QuantityDelivered=OP.QuantityDelivered+OP.QuantityRest, OP.QuantityRest=0"
+		" where OP.IdOrder=" idOrderSelectedBuffer " "
+		"  and OP.QuantityRest>0 "
+	),
+
+	%% Tour values
+	AddOrderToTour_SQL14 = (
+		"Update " DB_PREFIX "TOUR T set T.Weight=0, Volume=0, NbPallet=0 "
+		" WHERE T.Id=" idTourBuffer ""
+	),
+
+	AddOrderToTour_SQL15 = (
+		"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		" inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+		" inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+		"  set T.Weight=T.Weight + DP.Quantity*P.Weight"
+		" WHERE T.Id=" idTourBuffer " and P.Weight is not NULL "
+	),
+
+	AddOrderToTour_SQL16 = (
+		"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		" inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+		" inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+		"  set T.Volume=T.Volume + DP.Quantity*P.Volume"
+		" WHERE T.Id=" idTourBuffer " and P.Volume is not NULL "
+	),
+
+	%% NbPallet
+	AddOrderToTour_SQL17 = (
+		"Update (" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		"  set T.NbPallet=T.NbPallet + D.NbPallet"
+		" WHERE T.Id=" idTourBuffer " and D.NbPallet is not NULL \n\n"
+	),
+
+	;
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ù
+
+	%% set delivery values
+
+	%% IdVAT
+	AddOrderToTour_SQL5 = (
+		"UPDATE " DB_PREFIX "DELIVERY_PRODUCT SET "
+		"  IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.ID=IdProduct) "
+		"where IdDelivery='D'+" idOrderSelectedBuffer " and (IdVAT is NULL or IdVAT<=' ') "
+	),
+
+	%% AmountHT
+	AddOrderToTour_SQL6 = (
+		"UPDATE " DB_PREFIX "DELIVERY SET "
+		"	AmountHT  = (select sum(DP.Quantity*DP.PriceUnit) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery = DELIVERY.Id ),"
+		"	AmountVAT = (select sum(DP.Quantity*DP.PriceUnit*T.VAT/100.0) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "VAT T on T.IdVAT=DP.IdVAT where DP.IdDelivery = DELIVERY.Id ),"
+		"	Weight	  = (select sum(DP.Quantity*P.Weight) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct where DP.IdDelivery = DELIVERY.Id ),"
+		"	Volume	  = (select sum(DP.Quantity*P.Volume) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.Id=DP.IdProduct where DP.IdDelivery = DELIVERY.Id ),"
+		"	NbPallet  = (select count(1) from (slect distinct NoPalletDelivery from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery = DELIVERY.Id) PAL ),"
+		"where DP.IdDelivery='D'+" idOrderSelectedBuffer " "
+	),
+
+	AddOrderToTour_SQL7 = (
+		"update " DB_PREFIX "DELIVERY set AmountHT=0, AmountVAT=0 where AmountHT is NULL and Id='D'+" idOrderSelectedBuffer " "
+	),
+	AddOrderToTour_SQL8 = (
+		"update " DB_PREFIX "DELIVERY set Weight=0 where Weight is NULL and Id='D'+" idOrderSelectedBuffer " "
+	),
+	AddOrderToTour_SQL9 = (
+		"update " DB_PREFIX "DELIVERY set Volume=0 where Volume is NULL and Id='D'+" idOrderSelectedBuffer " "
+	),
+	AddOrderToTour_SQL10 = (
+		"update " DB_PREFIX "DELIVERY set NbPallet=0 where NbPallet is NULL and Id='D'+" idOrderSelectedBuffer " "
+	),
+
+	AddOrderToTour_SQL11 = (
+		"UPDATE " DB_PREFIX "DELIVERY SET AmountTotal =AmountHT + AmountVAT where Id='D'+" idOrderSelectedBuffer " "
+	),
+
+
+	%%%%%%%
+	%% ORDER values
+	AddOrderToTour_SQL12 = (
+		"Update " DB_PREFIX "CLIENTORDER set "
+		"  DateDelivery=" dateTourBuffer ", QuantityRest=0, State='2'"
+		" where Id=" idOrderSelectedBuffer " "
+	),
+
+	AddOrderToTour_SQL13 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set "
+		" 	QuantityDelivered=QuantityDelivered+QuantityRest, QuantityRest=0"
+		" where IdOrder=" idOrderSelectedBuffer " "
+		"  and QuantityRest>0 "
+	),
+
+	%% Tour values
+	AddOrderToTour_SQL14 = (
+		"Update " DB_PREFIX "TOUR set "
+		"	Weight=(select sum(D.Weight) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour),"
+		"	Volume=(select sum(D.Volume) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour),"
+		"	NbPallet=(select sum(D.NbPallet) from " DB_PREFIX "DELIVERY D where TOUR.Id=D.IdTour) "
+		" WHERE Id=" idTourBuffer ""
+	),
+
+	AddOrderToTour_SQL15 = (
+		"Update " DB_PREFIX "TOUR set Weight=0 "
+		" WHERE Weight is NULL and Id=" idTourBuffer ""
+	),
+
+	AddOrderToTour_SQL16 = (
+		"Update " DB_PREFIX "TOUR set Volume=0 "
+		" WHERE Volume is NULL and Id=" idTourBuffer ""
+	),
+	AddOrderToTour_SQL17 = (
+		"Update " DB_PREFIX "TOUR set NbPallet=0 "
+		" WHERE NbPallet is NULL and Id=" idTourBuffer ""
+	),
+),
+
+
+
+	(SQL : AddOrderToTour_SQL1), 
+	(SQL : AddOrderToTour_SQL2), 
+	(SQL : AddOrderToTour_SQL3), 
+	(SQL : AddOrderToTour_SQL4), 
+	(SQL : AddOrderToTour_SQL5), 
+	(SQL : AddOrderToTour_SQL6), 
+	(SQL : AddOrderToTour_SQL7), 
+	(SQL : AddOrderToTour_SQL8), 
+	(SQL : AddOrderToTour_SQL9), 
+	(SQL : AddOrderToTour_SQL10), 
+	(SQL : AddOrderToTour_SQL11), 
+	(SQL : AddOrderToTour_SQL12), 
+	(SQL : AddOrderToTour_SQL13), 
+	(SQL : AddOrderToTour_SQL14), 
+	(SQL : AddOrderToTour_SQL15), 
+	(SQL : AddOrderToTour_SQL16), 
+	(SQL : AddOrderToTour_SQL17), 
+	
+
+	database <- '()',
+),

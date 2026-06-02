@@ -1,0 +1,68 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 CreateProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	
+	idProductBuffer		:: "",
+	familyBuffer		:: "",
+	designationBuffer	:: "",
+	typeProductBuffer	:: "",
+
+	
+	idProductBuffer		= (),
+	familyBuffer		= (),
+	designationBuffer	= (),
+	typeProductBuffer	= (),
+
+	'()' <- database,
+	
+	CreateProduct_SQL1=(
+		"INSERT INTO " DB_PREFIX "PRODUCT (IdClub,Id, Family, Designation, TypeProduct, IdState) 
+		select idClub, '"idProductBuffer"', ' ', '"designationBuffer"', 'P', '1' from " DB_PREFIX SQL_TABLE_USER
+	),
+
+%%		values ('(/*CLUBID*/)', '"idProductBuffer"', ' ', '"designationBuffer"', 'P', '1')"
+
+databaseType = "ACCESS" => (
+
+	CreateProduct_SQL2=(
+		"Update " DB_PREFIX "PRODUCT p, " DB_PREFIX "FAMILYPRODUCT f 
+		SET p.Family=f.ID, p.Category=f.Category
+		WHERE p.Id ='"idProductBuffer"'
+		and "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"familyBuffer"'"
+	),
+	CreateProduct_SQL3=(
+		"UPDATE " DB_PREFIX "PRODUCT p, " DB_PREFIX "TYPEPRODUCT tp 
+		SET p.TypeProduct=tp.ID
+		where p.Id ='"idProductBuffer"'
+		and "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='"typeProductBuffer"'"
+	),
+	;
+
+	CreateProduct_SQL2=(
+		"Update " DB_PREFIX "PRODUCT set  
+			Family=(select f.ID from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"familyBuffer"'), 
+			Category=(select f.Category from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"familyBuffer"')
+		WHERE Id ='"idProductBuffer"' "
+	),
+	CreateProduct_SQL3=(
+		"UPDATE " DB_PREFIX "PRODUCT set
+			TypeProduct=select tp.ID from " DB_PREFIX "TYPEPRODUCT tp where "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='"typeProductBuffer"')
+		where Id ='"idProductBuffer"' "
+	),
+),
+	
+	(SQL : CreateProduct_SQL1), 
+	(SQL : CreateProduct_SQL2), 
+	(SQL : CreateProduct_SQL3), 
+	
+	database <- '()',
+),

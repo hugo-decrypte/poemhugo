@@ -1,0 +1,208 @@
+/****************************************************/
+/*              Vehicle Routing              	    */
+/*                                                  */
+/*		RelaxPrevious.n 	            */
+/*                                                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE             */
+/* All rights reserved                              */
+/****************************************************/
+
+
+TourToRelaxBuffer \subset TOUR,
+OrderToRelaxBuffer \subset ORDER,
+
+loop > 0 => (
+	['Work Directory' "Model\Relaxation\ReadRelaxation.n"],
+
+
+
+
+	% Search for better solutions ?
+	? nameObjectiveTop (
+	TAG_RESOURCE_NB:
+		%nbVehicleActive =< nbVehicleBuffer-1,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{nbVehicleBuffer-1}),
+		;
+	TAG_TOUR_NB:
+		%nbTourActive =< nbTourBuffer-1,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{nbTourBuffer-1}),
+		;
+	TAG_PROFIT:
+		%profit >= profitBuffer + stepCost,
+		tagRelaxation = (nameObjectiveTop " >= " \underline{profitBuffer + stepCost}),
+		;
+	TAG_COST:
+		%cost =< costBuffer - stepCost,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{costBuffer - stepCost}),
+		;
+	TAG_MILEAGE:
+		%mileage =< mileageBuffer - stepDistance,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{mileageBuffer - stepDistance}),
+		;
+	TAG_WORKTIME:
+		%worktime =< worktimeBuffer - stepTime,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{worktimeBuffer - stepTime}),
+		;
+	TAG_MAKESPAN:
+		%makespan =< makespanBuffer - stepTime,
+		tagRelaxation = (nameObjectiveTop " =< " \overline{makespanBuffer - stepTime}),
+	),
+
+
+
+	% Constraints & relaxation for solution
+	%nbTourActive =< nbTourBuffer,
+	%nbVehicleActive =< nbVehicleBuffer,	% BUG
+
+
+
+	\forall v \in VehicleActiveBuffer (
+		TourActiveBufferVehicle_{v} = TourVehicle_{v} \cap TourActiveBuffer,
+		TourActiveVehicle_{v} \subset [tour1Vehicle_{v}, \sup TourActiveBufferVehicle_{v}],
+
+		%TourToRelax0Vehicle_{v} = TourActiveBufferVehicle_{v} \cap TourToRelaxBuffer,
+		%TourToRelaxVehicle_{v} = [\inf TourToRelax0Vehicle_{v}, tour2Vehicle_{v}] \cap TourActiveBuffer,
+
+		%TourToRelax0Vehicle_{v} = {} -> TourToRelaxVehicle_{v} = {},
+	),
+
+	TourToRelaxBuffer \subset TOUR,
+
+	KeyToRelaxBuffer = \{ key_oBuffer, key_iBuffer \},
+
+	TourNotToRelax = TourActiveBuffer \setminus TourToRelaxBuffer,
+
+	SourceOrderToRelaxBuffer = \bigcup_{t \in TourToRelaxBuffer}{SourceOrderTourBuffer_{t}},
+	SourceOrderSinkToRelaxBuffer = \bigcup_{t \in TourToRelaxBuffer}{SourceOrderSinkTourBuffer_{t}},
+
+	SourceOrderNotToRelaxBuffer \subset SOURCEORDERSINK,
+	SourceOrderNotToRelaxBuffer = SourceActiveOrderBuffer \setminus SourceOrderToRelaxBuffer,
+
+	OrderToRelaxBuffer = SourceOrderToRelaxBuffer \cap ORDER,
+	OrderSinkToRelaxBuffer = SourceOrderSinkToRelaxBuffer \setminus SOURCE,
+
+
+	% Tour level
+	TourNotToRelax \subset TourActive,
+	
+	\forall t \in TourNotToRelax (
+		site1Tour_{t}		= siteId_{idSite1TourBuffer_{t}},
+		site2Tour_{t}		= siteId_{idSite2TourBuffer_{t}},
+
+		t1Tour_{t}		= t1TourBuffer_{t},
+		t2Tour_{t}		= t2TourBuffer_{t},
+
+		SourceOrderSinkTour_{t}	= SourceOrderSinkTourBuffer_{t},
+		SourceOrderTour_{t}	= SourceOrderTourBuffer_{t},
+
+		OrderTour_{t}		= OrderTourBuffer_{t},
+		SourceOrderTour_{t}	= SourceOrderTourBuffer_{t},
+		SourceOrderSinkTour_{t}	= SourceOrderSinkTourBuffer_{t},
+
+
+		%timeServiceTour_{t}	= timeServiceTourBuffer_{t},
+		%timeRouteTour_{t}	= timeRouteTourBuffer_{t},
+		%mileageTour_{t}	= mileageTourBuffer_{t},
+
+		%costTour_{t}		= costTourBuffer_{t},
+		%receiptsTour_{t}	= receiptsTourBuffer_{t},
+
+		%quantityTour_{t}	= quantityTourBuffer_{t},
+		%weightTour_{t}		= weightTourBuffer_{t},
+		%volumeTour_{t}		= volumeTourBuffer_{t},
+
+
+
+		SourceOrderTourBuffer_{t} \subset SOURCEORDER,
+
+		\forall o \in SourceOrderTourBuffer_{t} (
+			nextOrder_{o}		= nextOrderBuffer_{o},
+
+			t1Order_{o}		= t1OrderBuffer_{o},
+			t2Order_{o}		= t2OrderBuffer_{o},
+
+			TimeOrder_{o}		= [t1Order_{o},t2Order_{o}],
+
+			timeServiceOrder_{o}	= timeServiceOrderBuffer_{o},
+			timeToNextOrder_{o}	= timeToNextOrderBuffer_{o},
+
+			mileageOrder_{o}	= mileageOrderBuffer_{o},
+		),
+	),
+
+
+
+	% Order level
+	\forall o \in SourceOrderNotToRelaxBuffer (
+		tourOrder_{o} = tourOrderBuffer_{o},
+		nextOrder_{o} = nextOrderBuffer_{o},
+
+		t1Order_{o} = t1OrderBuffer_{o},
+		t2Order_{o} = t2OrderBuffer_{o},
+	),
+
+
+
+	KeyToRelaxBuffer \subset ORDER,
+	KeyToRelaxBuffer = \{ key_oBuffer, key_iBuffer \},
+
+
+	%Vertex2Tour_o \subset SITE,
+	%Vertex2Tour_i \subset SITE,
+	%Vertex2Tour_o = Vertex2TourTour_{tourOrderBuffer_{key_iBuffer}, tourOrderBuffer_{key_oBuffer}},
+	%Vertex2Tour_i = Vertex2TourTour_{tourOrderBuffer_{key_oBuffer}, tourOrderBuffer_{key_iBuffer}},
+
+
+	('hh:mm:ss' TAG_TAB_1
+		(loop > 9 ? "" : "0") loop " : " tagRelaxation "  "
+
+		TAG_ORDER_NB " : " #SourceOrderToRelaxBuffer "  "
+
+
+		TAG_TOUR_TO_RELAX " : "
+		tour_oBuffer " " tour_iBuffer "  "
+		idTour_{tour_oBuffer} "  " idTour_{tour_iBuffer} "  "
+
+
+		%TAG_TOUR_SITE " : "
+		%Vertex2Tour_o " " Vertex2Tour_i "  " 
+		%\{ \forall s \in Vertex2Tour_o idSite_{s} \} " "
+		%\{ \forall s \in Vertex2Tour_i idSite_{s} \} "  "
+
+
+		TAG_KEY_ORDER " : "
+		key_oBuffer " " key_iBuffer "  "
+		idOrder_{key_oBuffer} " " idOrder_{key_iBuffer} "  "
+
+
+		TAG_KEY_SITE " : "
+		idSite2Order_{key_oBuffer} " " idSite2Order_{key_iBuffer} "  "
+
+
+		TAG_IMPROVEMENT " : " 
+		improvementIfTourOrderBuffer_{key_oBuffer,tour_iBuffer} ", "
+		improvementIfTourOrderBuffer_{key_iBuffer,tour_oBuffer}
+
+		: '()'
+	),
+
+
+
+
+%IdKeyToRelaxBuffer = \{ idOrder_{key_oBuffer}, idOrder_{key_oBuffer} \},
+%"D2312010" \in 	IdKeyToRelaxBuffer && "D2312012" \in IdKeyToRelaxBuffer => !!,
+
+	;
+
+	SourceOrderToRelaxBuffer = {},
+	OrderSinkToRelaxBuffer = {},
+	OrderToRelaxBuffer = {},
+	TourToRelaxBuffer = {},
+
+	KeyToRelaxBuffer = {},
+	%key_o = 0,
+	%key_i = 0,
+
+	\forall t \in TOUR
+		OrderTourBuffer_{t} = {},
+),

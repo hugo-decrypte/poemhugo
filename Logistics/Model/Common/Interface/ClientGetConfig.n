@@ -1,0 +1,241 @@
+/********************************************************/
+/*							*/
+/*		    ClientGetConfig.n 			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+
+'()' => (
+
+	clientConfig = ('Work Directory' "Boot/" directoryClubLogin "/Client.cfg"),
+
+
+	'()' <- [clientConfig],
+
+	"Parameter" = (),
+
+	% Parameters
+	GoogleMapsKey			:: "",
+	GoogleMapsUrl			:: "",
+
+	HereMapsKey			:: "",
+	HereMapsUrl			:: "",
+
+
+	ChatGPTKey			:: "",
+	ChatGPTUrl			:: "",
+	ChatGPTModel			:: "",
+
+	GeminiKey			:: "",
+	GeminiUrl			:: "",
+	GeminiModel			:: "",
+
+
+	maxSitePacketSiteTable		:: 0,
+	maxSite1PacketSiteSiteTable	:: 0,
+
+
+
+	GoogleMapsKey			:: "",
+	GoogleMapsUrl			:: "",
+
+	HereMapsKey			:: "",
+	HereMapsUrl			:: "",
+
+	ChatGPTKey			:: "",
+	ChatGPTUrl			:: "",
+	ChatGPTModel			:: "",
+
+	GeminiKey			:: "",
+	GeminiUrl			:: "",
+	GeminiModel			:: "",
+
+	"GoogleMapsKey"			= (),
+	GoogleMapsKey			= (),
+	"GoogleMapsUrl"			= (),
+	GoogleMapsUrl			= (),
+
+	"HereMapsKey"			= (),
+	HereMapsKey			= (),
+	"HereMapsUrl"			= (),
+	HereMapsUrl			= (),
+
+	"ChatGPTKey"			= (),
+	ChatGPTKey			= (),
+	"ChatGPTUrl"			= (),
+	ChatGPTUrl			= (),
+	"ChatGPTModel"			= (),
+	ChatGPTModel			= (),
+
+	"GeminiKey"			= (),
+	GeminiKey			= (),
+	"GeminiUrl"			= (),
+	GeminiUrl			= (),
+	"GeminiModel"			= (),
+	GeminiModel			= (),
+
+	"maxSitePacketSiteTable"	= (),
+	maxSitePacketSiteTable		= (),
+
+	"maxSitePacketSiteSiteTable"	= (),
+	maxSitePacketSiteSiteTable	= (),
+
+
+
+	% PROGRAM SQL
+
+
+	"Program" = (),
+
+	PROGRAM = [1,()],
+	ARGUMENT = [1, ()],
+
+	\forall p \in PROGRAM (
+		permissionProgram_{p}	= (),
+		idProgram_{p}		= (),
+		httpProgram_{p}		= (),
+
+		ArgumentProgram_{p} \subset ARGUMENT,
+		ArgumentProgram_{p} = [1,()],
+
+		\forall a \in ArgumentProgram_{p} (
+			nameArgumentProgram_{p,a} :: "",
+			sqlArgumentProgram_{p,a} :: "",
+
+			nameArgumentProgram_{p,a} = (),
+			sqlArgumentProgram_{p,a} = (),
+		),
+	),
+
+
+
+	"Agent" = (),
+
+	AGENT = [1,()],
+	ARGUMENT = [1, ()],
+
+	\forall p \in AGENT (
+		permissionAgent_{p}	= (),
+		nameAgent_{p}		= (),
+		httpAgent_{p}		= (),
+
+		ArgumentAgent_{p} \subset ARGUMENT,
+		ArgumentAgent_{p} = [1,()],
+
+		\forall a \in ArgumentAgent_{p} (
+			nameArgumentAgent_{p,a} :: "",
+			sqlArgumentAgent_{p,a} :: "",
+
+			nameArgumentAgent_{p,a} = (),
+			sqlArgumentAgent_{p,a} = (),
+		),
+	),
+
+
+
+
+	[clientConfig] <- '()',
+),
+
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	% Parameters
+	@ ("------Parameter\n"),
+	@ ("GoogleMapsKey" "\n"),
+	@ (GoogleMapsKey "\n"),
+	@ ("GoogleMapsUrl" "\n"),
+	@ (GoogleMapsUrl "\n"),
+
+	@ ("HereMapsKey" "\n"),
+	@ (HereMapsKey "\n"),
+	@ ("HereMapsUrl" "\n"),
+	@ (HereMapsUrl "\n"),
+
+	@ ("ChatGPTKey" "\n"),
+	@ (ChatGPTKey "\n"),
+	@ ("ChatGPTUrl" "\n"),
+	@ (ChatGPTUrl "\n"),
+	@ ("ChatGPTModel" "\n"),
+	@ (ChatGPTModel "\n"),
+
+	@ ("GeminiKey" "\n"),
+	@ (GeminiKey "\n"),
+	@ ("GeminiUrl" "\n"),
+	@ (GeminiUrl "\n"),
+	@ ("GeminiModel" "\n"),
+	@ (GeminiModel "\n"),
+
+	@ ("maxSitePacketSiteTable" "\n"),
+	@ (maxSitePacketSiteTable "\n"),
+
+	@ ("maxSitePacketSiteSiteTable" "\n"),
+	@ (maxSitePacketSiteSiteTable "\n"),
+
+
+
+
+	% Programs
+	@ ("------Program\n"),
+	@ (#PROGRAM "\n"),
+
+	\forall p \in PROGRAM (
+		@ (permissionProgram_{p} "\n" idProgram_{p} "\n" httpProgram_{p} "\n" #ArgumentProgram_{p} "\n"),
+
+		\forall a \in ArgumentProgram_{p} (
+			@ ("\"" nameArgumentProgram_{p,a}  "\"\n"),	% JZ 0711
+
+			sqlArgumentProgram_{p,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentProgram_{p,a} "\n"),
+			),
+		),
+	),
+
+
+
+	% Agents
+	@ ("------Agent\n"),
+	@ (#AGENT "\n"),
+
+	\forall p \in AGENT (
+		@ (permissionAgent_{p} "\n"),
+		@ ("\"" nameAgent_{p} "\"\n"),
+		@ (httpAgent_{p} "\n"),
+
+		@ (#ArgumentAgent_{p} "\n"),
+
+		\forall a \in ArgumentAgent_{p} (
+			@ ("\"" nameArgumentAgent_{p,a}  "\"\n"),
+
+			sqlArgumentAgent_{p,a} = "" => (
+				@ "\"\"\n"
+				;
+				@ (sqlArgumentAgent_{p,a} "\n"),
+			),
+		),
+	),
+
+
+
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+!!,
+
+	( message : '.'),
+),
+

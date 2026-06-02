@@ -1,0 +1,59 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTablePallet2TableProductForPallet.n	%  
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableProductForPallet ",
+
+% Caption
+@ (" '" TAG_PRODUCT_FOR_PALLET "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_PRODUCT,
+
+% Label
+@ (" '" TAG_PRODUCT_FOR_PALLET "' "),	% JZ 0926 A
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePALLET' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (PREFIX_OPENTABLE_BEGIN "TableProductForPackingPallet.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS "IDPACKING={/*Selected(tablePALLET;1;(string,IDPACKING))*/};NOPALLET={/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPRODUCT='XXX';FAMILY='XXX']\"\n\n"),
+
+
+
+
+
+
+
+

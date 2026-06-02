@@ -1,0 +1,42 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   DeleteSite.n	   	   %
+%                                                  %
+%    (c)2000. Enginest. All rights reserved.       %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+
+'()' => (
+	nbSiteSelected		= (),
+	nbParameterSelected	= (),
+
+	IdSiteSelected		:: {""},
+
+	\forall i \in [1, nbSiteSelected](
+		idSiteSelected_{i}	:: "",
+		idSiteSelected_{i}	= (),
+	),
+
+	IdSiteSelected = \{ \forall i \in [1, nbSiteSelected] idSiteSelected_{i} \},
+
+
+	'()' <- database,
+
+	(SQL : SQL_DeleteSiteIdIn concatSetQuoted(IdSiteSelected) ")"),
+	%(SQL : "DELETE FROM " DB_PREFIX "SITE s WHERE s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+
+
+	sqlOperationLog := TAG_DELETE_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

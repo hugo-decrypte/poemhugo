@@ -1,0 +1,59 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		ReadResourceAbsence.n              %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+(SQL : "SELECT DISTINCT a.idResource FROM " DB_PREFIX "RESOURCE_ABSENCE a,"
+	SQL_TABLE_RESOURCE " r WHERE a.idResource=r.id AND a.state>'" STATE_DELETED
+	"' AND r.state>'" STATE_DELETED "' AND r.idClub IN " IDDOMCLUBLOGIN),
+
+
+ResourceAbsence0 = [1,()],
+
+\forall a \in ResourceAbsence0 (
+	idResourceResourceAbsence_{a} :: "",
+	idResourceResourceAbsence_{a} = (),
+),
+
+ResourceAbsence = \{
+	\forall a \in ResourceAbsence0 (
+		idResourceResourceAbsence_{a} \in IDRESOURCE ? a : 0
+	)
+\} \setminus 0,
+
+
+
+(SQL : "SELECT COUNT(*) FROM " DB_PREFIX "RESOURCE_ABSENCE WHERE state>'" STATE_DELETED "' AND idClub IN " IDDOMCLUBLOGIN),
+
+1 = (),
+maxResourceAbsence = (),
+
+
+\forall a \in ResourceAbsence (
+	(SQL:	"SELECT	dateStart,timeStart,dateEnd,timeEnd
+		FROM	" DB_PREFIX "RESOURCE_ABSENCE
+		WHERE	idResource='" idResourceResourceAbsence_{a} "' AND state>'" STATE_DELETED "' AND idClub IN " IDDOMCLUBLOGIN),
+
+	IdxResourceAbsence_{a} \subset [1,maxResourceAbsence],
+	IdxResourceAbsence_{a} = [1,()],
+
+	\forall i \in IdxResourceAbsence_{a} (
+		date1IdxResourceAbsence_{a,i} :: defaultDate,
+		time1IdxResourceAbsence_{a,i} :: defaultTime,
+		date2IdxResourceAbsence_{a,i} :: defaultDate,
+		time2IdxResourceAbsence_{a,i} :: defaultTime,
+
+
+		date1IdxResourceAbsence_{a,i} = (),
+		time1IdxResourceAbsence_{a,i} = (),
+		date2IdxResourceAbsence_{a,i} = (),
+		time2IdxResourceAbsence_{a,i} = (),
+	),
+),
+
+

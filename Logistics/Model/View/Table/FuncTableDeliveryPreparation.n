@@ -1,0 +1,112 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  	FuncTableDeliveryPreparation.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+<tableDeliveryPreparation>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+	'@' => (
+
+		postfix = (postfix0 = "" ? "" : "Menu"),
+
+		viewFile = ("TableDeliveryPreparation"  postfix),	% JZ 1018
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(string,DATEEXPIRY," TAG_DATE_EXPD ",,8.0.80,1);\\\n"),
+		@ ("(float,PRICE," TAG_PRICE_UNIT ",,8.2.80,0);\\\n"),
+		@ ("(float,DISCOUNT," TAG_DISCOUNT ",,3.1.80,0);\\\n"),
+		@ ("(string,LABELDISCOUNT," TAG_DISCOUNT_LABEL ",,3.0.80,1);\\\n"),
+		@ ("(string,FAMILY," TAG_FAMILY ",,50.0.100,0);\\\n"),
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+		@ ("(string,POINTDELIVERY," TAG_DELIVERY_POINT ",,15.0.70,1);\\\n"),
+		@ ("(string,ID," TAG_DELIVERY_ID ",,20.0.80,0);\\\n"),
+		@ ("(string,DATEDELIVERY," TAG_DELIVERY_DATE ",,15.0.80,0);\\\n"),
+		@ ("(string,IDORDERPRODUCTLINE," TAG_LINE_ID ",,20.0.80,0);\\\n"),
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT \\\n"),
+		@ ("\t\t d.id AS ID,\\\n"),
+		@ ("\t\t d.idClient AS IDCLIENT,\\\n"),
+		@ ("\t\t d.IdPointDelivery as POINTDELIVERY,\\\n"),
+		@ ("\t\t P.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t P.Family as FAMILY,\\\n"),
+		@ ("\t\t P.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.Weight,"SQL_FORMATSCALE1") as WEIGHTUNIT,\\\n"),
+		@ ("\t\t DP.IdOrder AS IDORDER,"SQL_FORMATNUM"(DP.NoLine,"SQL_FORMATSCALE0") AS NOLINE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(DP.PriceUnit,"SQL_FORMATSCALE3") as PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(DP.Discount,"SQL_FORMATSCALE1") as DISCOUNT,\\\n"),
+		@ ("\t\t DP.LabelDiscount as LABELDISCOUNT,\\\n"),
+		@ ("\t\t DP.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t DP.Quantity AS QUANTITY,\\\n"),
+		@ ("\t\t P.Weight*DP.QuantityReal as WEIGHT,\\\n"),
+		@ ("\t\t DP.IdPacking as IDPACKING,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DP.NoPallet is NULL" SQL_THEN "0" SQL_ELSE "DP.NoPallet" SQL_CASEEND " as NOPALLET,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DP.NoPalletDelivery is NULL" SQL_THEN "0" SQL_ELSE "DP.NoPalletDelivery" SQL_CASEEND " as NOPALLETDELIVERY,\\\n"),	% JZ 0919 NOPALLETDELIVERY
+		@ ("\t\t "SQL_CONCAT"trim(DP.IdOrder)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(DP.IdProduct)"SQL_CONCATWITH"'-'"SQL_CONCATWITH""SQL_FORMATNUM"(DP.NoLine,"SQL_FORMATSCALE0")"SQL_CONCATEND" as IDORDERPRODUCTLINE,\\\n"),
+		@ ("\t\t (select DateExpiration from " DB_PREFIX "PALLET_PRODUCT LP where  LP.IdPacking=DP.IdPacking and LP.NoPallet=DP.NoPallet and LP.IdProduct=DP.IdProduct) as DATEEXPIRY,\\\n"),
+		@ ("\t\t (select "SQL_FORMATNUM"(sum(DP0.QuantityReal*P0.Weight),"SQL_FORMATSCALE1") from " DB_PREFIX "DELIVERY_PRODUCT DP0 inner join " DB_PREFIX "PRODUCT P0 on P0.Id=DP0.IdProduct where DP0.IdDelivery=d.Id and DP0.NoPalletDelivery=DP.NoPalletDelivery) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t  0 as INDELIVERY,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DP.IdPacking='STOCK'" SQL_THEN "'Attent Retrait du Stock'" SQL_ELSE "'OK'" SQL_CASEEND " AS STATE, \\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DP.IdPacking='STOCK'" SQL_THEN "'(250 220 20)'" SQL_ELSE "'(120 255 120)'" SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t\t WHERE d.Id=DP.IdDelivery\\\n"),
+		@ ("\t\t and P.Id=DP.IdProduct\\\n"),
+		@ ("\t\t and d.Id in ((/*IDDELIVERY*/)) \\\n"),
+		@ ("\t\t \\\n"),
+
+		@ ("\t\t UNION ALL SELECT\\\n"),
+		@ ("\t\t d.id AS ID,\\\n"),
+		@ ("\t\t d.idClient AS IDCLIENT,\\\n"),
+		@ ("\t\t d.IdPointDelivery as POINTDELIVERY,\\\n"),
+		@ ("\t\t P.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t P.Family as FAMILY,\\\n"),	
+		@ ("\t\t P.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.Weight,"SQL_FORMATSCALE1") as WEIGHTUNIT,\\\n"),
+		@ ("\t\t ' ' as IDORDER, 0 AS NOLINE,\\\n"),
+		@ ("\t\t '0.000' as PRICE,\\\n"),
+		@ ("\t\t '0.0' as DISCOUNT,\\\n"),
+		@ ("\t\t ' ' as LABELDISCOUNT,\\\n"),
+		@ ("\t\t ' ' as DATEDELIVERY,\\\n"),
+		@ ("\t\t PaPr.QuantityStock AS QUANTITY,\\\n"),
+		@ ("\t\t P.Weight*PaPr.QuantityStock as WEIGHT,\\\n"),
+		@ ("\t\t PaPr.IdPacking as IDPACKING,\\\n"),
+		@ ("\t\t PaPr.NoPallet as NOPALLET,\\\n"),
+		@ ("\t\t ' ' as NOPALLETDELIVERY,\\\n"),
+		@ ("\t\t ' ' as IDORDERPRODUCTLINE,\\\n"),
+		@ ("\t\t PaPr.DateExpiration as DATEEXPIRY,\\\n"),
+		@ ("\t\t (select "SQL_FORMATNUM"(sum(PaPr0.QuantityStock*P0.Weight),"SQL_FORMATSCALE1") from " DB_PREFIX "PALLET_PRODUCT PaPr0 inner join " DB_PREFIX "PRODUCT P0 on P0.Id=PaPr0.IdProduct where PaPr0.IdPacking=PaPr.IdPacking and PaPr0.NoPallet=PaPr.NoPallet) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t 1 as INDELIVERY,\\\n"),
+		@ ("\t\t 'A Retirer' AS STATE, \\\n"),
+		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "PALLET_PRODUCT PaPr, " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t\t WHERE PaPr.IdProduct in (select DP.IdProduct from " DB_PREFIX "DELIVERY_PRODUCT DP where d.Id=DP.IdDelivery and DP.IdPacking='STOCK')\\\n"),
+		@ ("\t\t and P.Id=PaPr.IdProduct\\\n"),
+		@ ("\t\t and PaPr.QuantityStock>0 and d.Id in ((/*IDDELIVERY*/)) \\\n"),
+		@ ("\t\t Order BY FAMILY, DESIGNATION, INDELIVERY,IDORDER, NOLINE, DATEEXPIRY\"\n\n\n"),
+
+
+
+		%===================================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryProductPreparation2EditOnView.n"],
+		%===================================
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

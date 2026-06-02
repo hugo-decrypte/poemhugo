@@ -1,0 +1,44 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataResourceDate.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: RESOURCEDATE
+@ "Data ",
+
+% ID
+@ ("RESOURCEDATE '"),	
+
+% Caption
+@ "RESOURCEDATE",
+%@ TAG_EVENT,
+
+% Group
+@ "' RESOURCEDATE ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[1;(duration,WORKTIME,,255,0);]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT DISTINCT worktime AS WORKTIME FROM " DB_PREFIX "RESOURCE_DATE ORDER BY worktime\"\n\n"),
+
+

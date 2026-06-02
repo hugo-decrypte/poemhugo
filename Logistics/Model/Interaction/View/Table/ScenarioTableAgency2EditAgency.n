@@ -1,0 +1,108 @@
+%=======================================================%
+%							%
+%			ERP				%
+%							%
+%  	ScenarioTableAgency2EditAgency.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "EditAgency ",
+
+% Caption
+@ ("'" TAG_EDIT  "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT,
+
+% Label
+@ (" '" TAG_EDIT "' "),	%li 0731
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableAGENCY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_POEMDATA_OPEN "AGENCY&id in ({/*selected(tableAGENCY;1;(string,ID))*/})\"\\\n"),
+
+@ POEMDATA_RELOAD,
+
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "ConfirmResourceAbsence ",
+
+% Caption
+@ ("'" TAG_CONFIRM "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_CONFIRM,
+
+% Label
+@ (" '" TAG_CONFIRM "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableRESOURCEABSENCE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Script\ScriptConfirmResourceAbsence.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(RESOURCEABSENCE;3;(string,IDRESOURCE);(date,DATESTART," TAG_DATE ",,20.0.380,,YYYY-MM-DD);(time,TIMESTART," TAG_HOUR ",,20.0.380,,HH:MM))*/}"),
+@ NCL_ARGUMENT_END,
+
+
+@ ("Reload _ _ _\n\n"),
+
+

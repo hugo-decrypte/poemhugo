@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTablDeliveryPreparation.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableDeliveryPreparation.n"],	% JZ 1018
+
+'@' => (
+	tableDeliveryPreparation("", TAG_TABLE,"DELIVERYPREPARATION",true,"", (TAG_DELIVERY_PREPARATION " (/*IDDELIVERY*/)"), ""), % JZ 0919
+	
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

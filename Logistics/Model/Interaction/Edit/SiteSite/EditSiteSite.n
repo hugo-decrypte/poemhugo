@@ -1,0 +1,99 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   EditSiteSite.n		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+'()' => (
+	aliasTable	= "SITE_SITE",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],
+
+'()' => (
+	idSite1Buffer0		:: "",
+	idSite2Buffer0		:: "",
+
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	(TAG_ONLY_ONE_TO_EDIT : nbSelected = 1),
+
+	idSite1Buffer0		= (),
+	idSite2Buffer0		= (),
+	
+	idSite1Buffer				:: "",
+	idSite2Buffer				:: "",
+	mileageBuffer				:: 0,
+	timeBuffer				:: 0,
+
+	"IDSITE1" \in IdFieldSelected => ( % li 0701
+		idSite1Buffer			= (),
+		;
+		idSite1Buffer			= TAG_EMPTY_STRING, 
+	),
+	"IDSITE2" \in IdFieldSelected => ( 
+		idSite2Buffer			= (),
+		;
+		idSite2Buffer			= TAG_EMPTY_STRING, 
+	),
+	"MILEAGE" \in IdFieldSelected => (
+		mileageBuffer			= (),
+		;
+		mileageBuffer			= 0, 
+	),
+	"TIME" \in IdFieldSelected => (
+		timeBuffer			= (),
+		;
+		timeBuffer			= 0, 
+	),
+
+
+
+	'()' <- database,
+
+	sqlMileage = ( % Zhou 0822
+		"MILEAGE" \in IdFieldSelected ? (SQL_AndLetSiteSiteMileageBe mileageBuffer " "):	""
+	),
+
+	sqlTime = (
+		"TIME" \in IdFieldSelected ? (SQL_AndLetSiteSiteTimeBe timeBuffer " "):			""
+	),
+/*
+	databaseType = "ACCESS" =>(
+		sqlTime = (
+			"TIME" \in IdFieldSelected ? (" ss.[time]" timeBuffer ):					""
+		),
+		;
+		sqlTime = (
+			"TIME" \in IdFieldSelected ? (" ss.time=" timeBuffer ):					""
+		),
+	),
+*/
+
+	(SQL :  SQL_UpdateSiteSiteSet
+		sqlMileage
+		sqlTime
+		SQL_WhereSiteSiteSite1Is idSite1Buffer0 "'," SQL_FuncInstr "('" idSite1Buffer0 "','" stringLinkSymbol "'))) "
+		SQL_AndWhereSiteSiteSite2IsRtrim idSite2Buffer0  "'," SQL_FuncInstr "('" idSite2Buffer0 "','" stringLinkSymbol "'))) "), % Chen 0820
+/*
+	(SQL :  "UPDATE	" DB_PREFIX "SITE_SITE ss SET"
+		sqlMileage
+		sqlTime
+		" WHERE ss.idSite1=RTRIM(LEFT('" idSite1Buffer0 "',INSTR('" idSite1Buffer0 "','" stringLinkSymbol "')))
+			AND ss.idSite2=RTRIM(LEFT('" idSite2Buffer0 "',INSTR('" idSite2Buffer0 "','" stringLinkSymbol "')))), % Chen 0820
+*/
+	sqlOperationLog := TAG_EDIT_SITE_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

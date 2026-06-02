@@ -1,0 +1,20 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ViewChartVehicle.n            	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Chart\FuncChartVehicle.n"],
+
+'@' => (	
+	chartVehicle(
+		TAG_CHART,
+		true,true, false,true,
+		"VEHICLEORDER", "ORDER","VEHICLE", "MoveOrder", "selected", 200,
+		TAG_VEHICLE,
+		{},
+		""),	% JZ 1023
+),

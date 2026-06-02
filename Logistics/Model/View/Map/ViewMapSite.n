@@ -1,0 +1,14 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ViewMapSite.n			%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\View\Map\FuncMapSite.n"],
+
+'@' => ( 
+	mapSite({}, "",TAG_MAP_SITE, "",""),
+),

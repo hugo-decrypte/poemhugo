@@ -1,0 +1,68 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableInvoiceDelivery.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableInvoiceDelivery>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+	'@' => (
+
+		postfix = (postfix0 = "" ? "" : "Menu"),
+		viewFile = ("TableInvoiceDelivery" postfix),
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		
+		@ ("(string,AMOUNTTOTAL,TTC(€),,8.2.50,0);\\\n"),
+		@ ("(string,WEIGHT,Poids,,8.2.50,0);\\\n"),
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT \\\n"),
+		@ ("\t\t  d.IdInvoice as IDINVOICE,\\\n"),
+		@ ("\t\t  d.id AS IDDELIVERY, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t  d.RefInvoice as REFERENCE,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(d.Discount, "SQL_FORMATSCALE2") as DISCOUNT,\\\n"),
+		@ ("\t\t  d.LabelDiscount as LABELDISCOUNT,\\\n"),
+		@ ("\t\t  d.AmountHT as AMOUNTHT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(d.VAT, "SQL_FORMATSCALE2") as TVA,\\\n"),
+		@ ("\t\t  d.AmountVAT as AMOUNTVAT,\\\n"),
+		@ ("\t\t  d.AmountTotal as AMOUNTTOTAL,\\\n"),
+		@ ("\t\t  d.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t  d.DateInvoice as DATEINVOICE,\\\n"),
+		@ ("\t\t  d.DatePayment as DATEPAYMENT,\\\n"),
+		@ ("\t\t  (select sum(a.Weight*ld.Quantity) from " DB_PREFIX "DELIVERY_PRODUCT ld inner join (/*DBOWNER*/)" DB_PREFIX "PRODUCT a on a.Id=ld.IdProduct where ld.IdDelivery=d.Id) as WEIGHT,\\\n"),
+		@ ("\t\t  '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id\\\n"),
+		@ ("\t AND d.id IN ((/*IDDELIVERY*/))\\\n"),
+		@ ("\t ORDER BY d.Id,d.DateInvoice\"\n\n\n"),
+ 		
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInvoiceDelivery2TableInvoiceProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInvoiceDelivery2PrintInvoice.n"],
+		
+		%===================================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableInvoiceDelivery2EditOnView.n"],
+		%===================================
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableDeliveryForTour.n         %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableDeliveryForTour.n"],
+
+'@' => (
+	tableDeliveryForTour("", TAG_TABLE,"DELIVERYFORTOUR",true,"", (TAG_DELIVERY_TO_ADD " (/*TITLEOBJ*/)"), "", ""), 	% JZ 1018
+
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

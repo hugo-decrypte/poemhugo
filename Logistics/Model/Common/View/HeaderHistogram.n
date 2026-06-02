@@ -1,0 +1,144 @@
+%===============================================%
+%						%
+%	 	HeaderHistogram.n		%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+% View
+@ "View ",
+
+% ID
+@ ("ViewHistogram" aliasHistogram),
+
+% Caption
+@ (" '" title "' "),
+
+% Title	
+@ (" '" title "' "),
+
+
+% Red Green Blue
+@ " 255 255 255 ",
+
+% Icon
+@ "_ ",
+
+% X1 Y1 X2 Y2
+%@ ("_ _ _ _ "),
+@ ("0 0 " histogramWidth " 0 "),
+
+% Margin Left/Margin Top/Margin Right/Margin Bottom
+@ histogramMargin,
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("CLOSEEVENT=1;"),
+@ ("TRACEFILE=;"),
+@ ("TOOLBAR=0;"),
+@ ("FLIPVERTICALLY=0;"),
+@ ("FLIPHORIZONTALLY=0;"),
+
+bestfit => (
+	@ ("NATURESCALE=0;"),
+	@ ("BESTFIT=1;"),
+	;
+
+	@ ("NATURESCALE=1;"),
+	@ ("BESTFIT=0;"),
+),
+
+%@ ("NATURESCALE=0;"),
+%@ ("BESTFIT=1;"),
+
+@ ("SCROLLBAR=1;"),
+@ ("SHOWNAME=1;"),
+@ ("ZOOMOBJECT=;"),
+@ ("CURRENTPAGE=1;"),
+@ ("BKGROUNDCOLOR=(255 255 255);"),
+@ ("SCREENCOLOR=(255 255 255);"),
+@ ("PATHLINEWIDTH=9;"),
+@ ("PATHLINECOLOR=(0 0 0);"),
+@ ("PATHARROWWIDTH=15;"),
+@ ("PATHARROWCOLOR=(255 0 0);"),
+@ ("POEMSERVER=;"),
+@ ("MAPLOGFILE=;"), 
+@ ("MATRIXCRITERION=Distance;"),
+@ ("MATRIXCOMPUTERADIUS=0.5;"),
+@ ("SPEEDKMHOUR=50;"),
+@ ("STRAIGHTDISTANCERATIO=1.4;"),
+@ ("SITEINTRADISTANCE=;"),
+@ ("MATRIXMAXCOMPUTEWIDTH=;"),
+@ ("NEIGHBOURHOOD=;"),
+@ ("MATRIXFILENAME=;"),
+@ ("MATRIXDIRECTORY=;]'"),
+@ "\n\n",
+
+
+% Histogram
+@ "Histogram ",
+
+% ID
+@ ("HISTOGRAM "),
+
+% Caption
+@ ("'" title "'"),
+
+% Group
+@ " _ ",
+
+% X Y SX SY
+@ " 0 0 0 400 \\\n",
+
+% Drawing options
+@ ("\"[BQUANTITYWIDTH=1; BQUANTITYCOLOR=(0 128 192); FILLCOLOR=(238 238 238); LINEWIDTH=1; LINECOLOR=(128 128 128);]\" \\\n"),
+
+% Data convention item
+@ "\"[TEXTS={4};]\" \\\n",
+
+% Title options
+@ ("\"[TITLE=" title),
+@ (";FONTSIZE=" histogramTitleFontSize "; FONTNAME=" histogramTitleFont "; FONTCOLOR=(0 0 0); LINESEPARATOR=\\n]\" \\\n"),
+
+% Legend item
+@ ("\"[AUTOCREATE=0; FONTSIZE=" histogramLegendFontSize "; WIDTH=" histogramBarWidth 
+"; LABELS={" labelLegend "}; COLORS={"colorLegend "};POSITION=Top;]\" \\\n"),
+
+
+
+% Axis X item
+@ ("\"[LABELPOSITION=R; LABELFONTSIZE=" histogramXFontSize "; LABEL= "labelX"; ALIGNTEXT=CenterBottom; BQUANTITYWIDTH=0; FONTSIZE=" histogramXFontSize "; FONTNAME=" histogramTextFont "; FONTCOLOR=(0 0 0); LINEWIDTH=1; LINECOLOR=(0 0 0); HEIGHT=-5;]\" \\\n"),
+
+% Axis Y item
+@ ("\"[CORRELATION=" correlatedDoubleBars ";LABELPOSITION=T; LABELFONTSIZE=" histogramYFontSize "; LABEL="labelY";BQUANTITYWIDTH=0; FONTSIZE=" histogramYFontSize "; FONTNAME=" histogramTextFont "; FONTCOLOR=(0 0 0); LINEWIDTH=1; LINECOLOR=(0 0 0); WIDTH=-5;]\" \\\n"),
+
+
+
+% Cell drawing options
+@ ("\"[WIDTH=" histogramBarWidth "; FONTSIZE=" histogramFontSize "; FONTNAME=" histogramTextFont "; FONTCOLOR=(0 255 0); ALIGNTEXT=LeftBottom;]\" \\\n"),
+
+% Data source item
+@ ("\"[DATAOBJ=" aliasHistogram "; FILLCOLOR=COLOR]\""),
+@ "\n\n",
+
+
+% Data
+@ "Data",
+
+% ID
+@ (" '" aliasHistogram "' "),
+
+% Caption
+@ (" '" aliasHistogram "' "),
+
+% Group
+@ (" '" aliasHistogram "' "),
+
+% Source type
+@ typeDataUser,
+
+% Editable
+%@ " 0 ",
+
+% Object item
+%@ "_ ",

@@ -1,0 +1,209 @@
+%==================================================%
+%                                                  %
+%            	Routing 	          	   %
+%                                                  %
+%		WriteSolutionBuffer.n              %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+solutionBuf <- '@',
+
+
+@ "Relaxation\n",
+@ ({} "  " {} "  " {} "  " 0 "  " 0 "\n"),
+%@ ({} "  " {} "  " {} "  " {} "  " 0 "  " 0 "\n"),
+
+
+
+
+worktime :: defaultTime,
+makespan :: defaultTime,
+
+@ "Objectives\n",
+@ (\overline{profit} "  "),
+@ (\underline{cost} "  "),
+@ (nbVehicleActive "  "),
+@ (nbTourActive "  "),
+@ (mileage "  "),
+
+@ (worktime "  "),
+@ (makespan "\n\n"),
+
+
+
+@ "Vehicle\n",
+@ (VehicleActive "  " SourceActive "  " SourceActiveOrder "  " SourceSinkActiveOrder"\n\n"),
+
+
+
+
+@ "TourActive\n",
+@ (TourActive "\n"),
+
+\forall t \in TourActive (
+	OrderTour_{t} \subset ORDER,
+
+
+	timeServiceTour_{t} :: 0,
+	timeRouteTour_{t} :: 0,
+
+
+	weightTour_{t} = \sum_{o \in OrderTour_{t}}{weightOrder_{o}},
+	volumeTour_{t} = \sum_{o \in OrderTour_{t}}{volumeOrder_{o}},
+
+	timeServiceTour_{t} = \sum_{o \in SourceOrderTour_{t}}{timeServiceOrder_{o}},
+	timeRouteTour_{t} = \sum_{o \in SourceOrderTour_{t}}{timeToNextOrder_{o}},
+
+	receiptsTour_{t} = \sum_{o \in OrderTour_{t}}{receiptsOrder_{o}},
+
+
+	@ ({} "  "),
+
+
+	@ (idSite_{site1Tour_{t}} "  "),
+	@ (idSite_{site2Tour_{t}} "  "),
+
+
+	@ (OrderTour_{t} "  "),
+
+	@ (\underline{quantityTour_{t}} "  "),
+	@ (\underline{weightTour_{t}} "  "),
+	@ (\underline{volumeTour_{t}} "  "),
+
+	@ (\underline{receiptsTour_{t}} "  "),
+
+	@ (\underline{costTour_{t}} "  "),
+
+
+	@ (mileageTour_{t} "  "),
+
+	@ (t1Tour_{t} "  "),
+	@ (t2Tour_{t} "  "),
+
+	@ (timeServiceTour_{t} "  "),
+	@ (timeRouteTour_{t} "\n"),
+
+),
+@ "\n\n",
+
+
+
+\forall t \in TourActive (
+	\forall o \in SourceOrderTour_{t} (
+		timeServiceOrder_{o}	:: defaultTime,
+		timeToNextOrder_{o}	:: defaultTime,
+	
+		@ (idOrder_{o} "  "),
+		@ (nextOrder_{o} "  "),
+
+		@ (\underline{t1Order_{o}} "  "),
+		@ (\underline{t2Order_{o}} "  "),
+
+		@ (timeServiceOrder_{o} "  "),
+		@ (timeToNextOrder_{o} "  "),
+
+		@ (mileageOrder_{o} "  "),
+
+		@ (receiptsOrder_{o} "  "),
+	),
+	@ "\n",
+),
+@ "\n",
+
+
+@ "ORDER\n",
+@ (ORDER "\n"),
+\forall o \in ORDER (
+	strictTimeOrder_{o}	:: true,
+
+	idShiftOrder_{o}	:: "",
+	t1Service0Order_{o}	:: defaultDateTime,
+	t2Service0Order_{o}	:: defaultDateTime,
+	timeFixed0Order_{o}	:: 0,
+
+	quantityOrder_{o}	:: 0,
+	weightOrder_{o}		:: 0.0,
+	volumeOrder_{o}		:: 0.0,
+
+	priorityOrder_{o}	:: 0,
+
+
+
+	@ (strictTimeOrder_{o} "  "),
+
+	@ ("\"" idShiftOrder_{o} "\"  "),
+	@ (t1Service0Order_{o} "  "),
+	@ (t2Service0Order_{o} "  "),
+	@ (timeFixed0Order_{o} "  "),
+
+	@ (quantityOrder_{o} "  "),
+	@ (weightOrder_{o} "  "),
+	@ (volumeOrder_{o} "  "),
+
+	@ (priorityOrder_{o} "\n"),
+),
+@ "\n\n",
+
+
+@ "tour/site\n",
+\forall o \in SourceSinkActiveOrder (
+	@ (o "  "),
+	@ (tourOrder_{o} "  "),
+	@ (idSite_{siteOrder_{o}} "  "),
+),
+@ "\n\n",
+
+
+@ "VehicleActive\n",
+\forall v \in VehicleActive (
+	@ (tour2ActiveVehicle_{v} "  "),
+
+	@ (nbDayVehicle_{v} "  "),
+	@ (nbNightVehicle_{v} "  "),
+
+	@ makespanVehicle_{v} : "",
+	@ "  ",
+
+	\forall d \in DateVehicle_{v} (
+		@ timeActiveDateVehicle_{v,d} : "",
+		@ "  ",
+
+		@ makespanDateVehicle_{v,d} : "",
+		@ "  ",
+	),
+	@ "\n",
+),
+@ "\n\n",
+
+
+
+/*
+@ "ImprovementIfTourOrder\n",
+\forall t \in TourActive (
+	\forall o \in ORDER (
+		@ (0 "  "),
+	),
+	@ "\n",
+),
+@ "\n\n",
+*/
+
+
+'@' <- solutionBuf,
+
+
+loop = 0 => (
+	('hh:mm:ss' TAG_TAB_1
+		TAG_SOLUTION	'Solution Count' ": "
+		TAG_PROFIT	TAG_OPTIMIZED_TO profit[(16,2)]		"  "
+		TAG_COST	TAG_OPTIMIZED_TO cost[(16,2)]		"  "
+		TAG_RESOURCE_NB	TAG_OPTIMIZED_TO nbVehicleActive	"  "
+		TAG_TOUR_NB	TAG_OPTIMIZED_TO nbTourActive		"  "
+		TAG_DISTANCE	TAG_OPTIMIZED_TO mileage		"  "
+		TAG_WORKTIME	TAG_OPTIMIZED_TO worktime		"  "
+		TAG_MAKESPAN	TAG_OPTIMIZED_TO makespan : '@'
+	),
+),
+

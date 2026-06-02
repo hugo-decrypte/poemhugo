@@ -1,0 +1,272 @@
+%==================================================%
+%                                                  %
+% 		ImportData.n		  	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+
+'()' => (
+	dataFormat = ('Work Directory' uploadDirectory directoryClub_{clubId_{idClubLogin}} "/" DataFormatName ".cfg"),
+	['Work Directory' "Model\Common\Data\DataFormat.n"],
+
+%?? `type0FieldTable_{2,5}`,
+
+	\forall i \in [1, #ExcelTable] (
+		ExcelTable[i][idxTableExcel_{i}] = "=",
+
+		idTableExcel_{i} = ExcelTable[i][1..(idxTableExcel_{i}-1)],
+		nameTableExcel_{i} = ExcelTable[i][(idxTableExcel_{i}+1)..#{ExcelTable[i]}],
+	),
+
+	NameExcelTable = \{ \forall i \in [1, #ExcelTable] nameTableExcel_{i} \},
+
+	\forall e \in NameExcelTable
+		idxExcelName_{e} \in [1, #NameExcelTable],
+
+	\forall i \in [1, #NameExcelTable]
+		idxExcelName_{nameTableExcel_{i}} = i,
+
+
+
+
+	importData = ('Work Directory' uploadDirectory directoryClub_{clubId_{idClubLogin}} "/" ExcelImporDataName ".txt"),
+
+
+	( TAG_EXCEL_FILE " " ExcelImporDataName ".xls" " : " ListTableExcel TAG_INTO
+		TAG_DATABASE " : " ListTableDB : '()'),
+
+
+
+	( TAG_DATA_ERROR :
+		'()' <- [importData],
+
+
+		ExcelSheetNumberPrefix 	= () : "=",
+
+		nbTable		= () : ";",
+		TABLE 		= [1, nbTable],
+
+		\forall t \in TABLE (
+			nameTable_{t}	:: "",
+
+			ExcelSheetNamePrefix	= () : "=",
+			nameTable_{t}		= () : ";",
+
+			Field0Table_{t}		= [1, ()],
+			""			= () : ";",	% Skip ;
+
+			RecordTable_{t}		= [1, () - 2],
+			""			= () : ";",	% Skip ;
+
+			Field0Table_{t} \subset [1,maxFieldTable],
+			RecordTable_{t} \subset [1,ExcelImportLineMaximum],
+
+			\forall f \in Field0Table_{t} (
+				nameFieldTable_{t,f} :: "",
+				nameFieldTable_{t,f} = () : ";",
+			),
+			\forall f \in Field0Table_{t} (
+				idFieldTable_{t,f} :: "",
+				idFieldTable_{t,f} = () : ";",
+			),
+			\forall f \in Field0Table_{t} (
+				type0FieldTable_{t,f} :: "",
+
+%?? type0FieldTable_{2,5} <> "",
+
+				type0FieldTable_{t,f} = () : ";",
+			),
+
+			\forall f \in Field0Table_{t} (
+				keyFieldTable_{t,f} == type0FieldTable_{t,f}[-3..-1] = "key",	% JZ 0723
+				keyFieldTable_{t,f} => (
+					typeFieldTable_{t,f} = type0FieldTable_{t,f}[1..#type0FieldTable_{t,f}-4],
+					;
+					typeFieldTable_{t,f} = type0FieldTable_{t,f},
+				),
+			),
+
+
+			\forall r \in RecordTable_{t}
+			\forall f \in Field0Table_{t} (
+				value0FieldRecordTable_{t,r,f} :: "",
+				value0FieldRecordTable_{t,r,f} = () : ";",
+			),
+		),
+
+		[importData] <- '()',
+	),
+
+
+
+	\forall t \in TABLE (
+		idTable_{t} = idTableExcel_{idxExcelName_{nameTable_{t}}},
+
+
+		FieldTable_{t} \subset Field0Table_{t},
+
+		FieldTable_{t} = \{
+			\forall f \in Field0Table_{t}
+			(idFieldTable_{t,f} <> "" && typeFieldTable_{t,f} <> "" ? f : 0)
+		\} \setminus 0,
+
+		KeyTable_{t} = \{
+			\forall f \in FieldTable_{t}
+			(keyFieldTable_{t,f} ? f : 0)
+		\} \setminus 0,
+
+
+
+		\forall r \in RecordTable_{t} (
+			\forall f \in FieldTable_{t} (
+				valueFieldRecordTable_{t,r,f} :: "",
+
+				dateFieldRecordTable_{t,r,f} :: defaultDate,
+				datetimeFieldRecordTable_{t,r,f} :: defaultDateTime,
+
+				delimiterFieldTable_{t,f} = (
+					typeFieldTable_{t,f} = "float" || typeFieldTable_{t,f} = "int" ? "" : "'"
+				),
+
+
+				? typeFieldTable_{t,f} (
+				"dd/mm/yyyy","mm/dd/yyyy","yyyy-mm-dd" :
+					strDateFieldRecordTable_{t,r,f} = (value0FieldRecordTable_{t,r,f} = "" ? (defaultDate "") : value0FieldRecordTable_{t,r,f}),
+
+					(dateFieldRecordTable_{t,r,f}[typeFieldTable_{t,f}] "") = strDateFieldRecordTable_{t,r,f},
+
+					valueFieldRecordTable_{t,r,f} = ("'" dateFieldRecordTable_{t,r,f}[dateFormat] "'"),
+					;
+
+				("dd/mm/yyyy" timeFormat),("mm/dd/yyyy" timeFormat),("yyyy-mm-dd" timeFormat) :
+					strDatetimeFieldRecordTable_{t,r,f} = (value0FieldRecordTable_{t,r,f} = "" ? (defaultDateTime "") : value0FieldRecordTable_{t,r,f}),
+
+					(datetimeFieldRecordTable_{t,r,f}[typeFieldTable_{t,f}] "") = strDatetimeFieldRecordTable_{t,r,f},
+
+					valueFieldRecordTable_{t,r,f} = ("'" datetimeFieldRecordTable_{t,r,f}[dateTimeFormat] "'"),
+					;
+
+				"hh","hh:mm","hh:mm:ss" :
+					valueFieldRecordTable_{t,r,f} = (
+						"'" (value0FieldRecordTable_{t,r,f} = "" ? (defaultTime "") : value0FieldRecordTable_{t,r,f}) "'"
+					),
+					;
+
+				"int","duration" :
+					valueFieldRecordTable_{t,r,f} = (
+						value0FieldRecordTable_{t,r,f} = "" ? "0" : value0FieldRecordTable_{t,r,f}
+					),
+					;
+
+				"float" :
+					floatFieldRecordTable_{t,r,f} = value0FieldRecordTable_{t,r,f}["," >> "."],
+
+					valueFieldRecordTable_{t,r,f} = (
+						floatFieldRecordTable_{t,r,f} = "" ? "0" : floatFieldRecordTable_{t,r,f}
+					)
+					;
+
+				:
+
+					strFieldRecordTable_{t,r,f} = value0FieldRecordTable_{t,r,f}["'" >> "''"],
+
+					valueFieldRecordTable_{t,r,f} = (
+						delimiterFieldTable_{t,f}
+						(
+							keyFieldTable_{t,f} && strFieldRecordTable_{t,r,f} = "" ?
+							TAG_UNKNOWN : strFieldRecordTable_{t,r,f}
+						)
+						delimiterFieldTable_{t,f}
+					),
+				),
+			),
+
+			KeyTable_{t} = {} => (
+				sqlWhereRecordTable_{t,r} = "",
+				;
+				sqlWhereRecordTable_{t,r} = (
+					" WHERE idClub='" idClubLogin "' AND "
+					[
+						\forall f \in KeyTable_{t} (
+							idFieldTable_{t,f} "=" valueFieldRecordTable_{t,r,f}
+							(f = \sup KeyTable_{t} ? "" : " AND ")
+						)
+					]
+				),
+			),
+		),
+	),
+
+
+
+	'()' <- database,
+
+	\forall t \in TABLE (
+		(TAG_IMPORT " " nameTable_{t} TAG_INTO idTable_{t} : '()'),
+
+		\forall r \in RecordTable_{t} (
+			okInsertRecordTable_{t,r} :: true,
+			existingRecordTable_{t,r} :: true,
+
+			sqlSelectRecordTable_{t,r} = (
+				"select 1 FROM " DB_PREFIX idTable_{t} sqlWhereRecordTable_{t,r}
+			),
+			%sqlDeleteRecordTable_{t,r} = (
+			%	"DELETE  FROM " DB_PREFIX idTable_{t} sqlWhereRecordTable_{t,r}
+			%),
+			sqlInsertRecordTable_{t,r} = (
+				"INSERT INTO " DB_PREFIX idTable_{t}"(idClub,"
+					[\forall f \in FieldTable_{t} (
+						idFieldTable_{t,f} (f = \sup FieldTable_{t} ? "" : ",")
+					)]
+				")VALUES('"
+					idClubLogin "',"
+					[\forall f \in FieldTable_{t} (
+						valueFieldRecordTable_{t,r,f}
+						(f = \sup FieldTable_{t} ? "" : ",")
+					)]
+				")"
+			),
+
+
+			( TAG_SQL_ERROR :
+				(SQL : sqlSelectRecordTable_{t,r}),
+
+				() = 0 => (
+					! existingRecordTable_{t,r},
+
+					okInsertRecordTable_{t,r} == (SQL : sqlInsertRecordTable_{t,r}),
+					;
+
+
+					existingRecordTable_{t,r},
+
+					! okInsertRecordTable_{t,r},
+				),
+			),
+		),
+
+		nbRecordExistingTable_{t} = \sum_{r \in RecordTable_{t}}{existingRecordTable_{t,r}},
+		nbRecordImportedTable_{t} = \sum_{r \in RecordTable_{t}}{okInsertRecordTable_{t,r}},
+
+
+		(TAG_RECORDS_IMPORTED nbRecordImportedTable_{t} : '()'),
+		(TAG_RECORDS_EXISTING nbRecordExistingTable_{t} : '()'),
+	),
+
+
+
+	%['Work Directory' "Model\Output\WriteLog.n"],
+
+
+	database <- '()',
+
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+),
+

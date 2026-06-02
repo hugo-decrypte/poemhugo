@@ -1,0 +1,316 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTableProductFamily2EditOnView.n				%
+%														%
+% 	(c)2000 Enginest. All rights reserved.				%
+%=======================================================%
+%
+%
+@ "// Script 1. Create Family\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreateFamily ",
+
+% Caption
+@ (" '" TAG_INSERT_FAMILTY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableFAMILYPRODUCT' ", 	% JZ 1018 : FAMILYPRODUCT
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+%"(string,FAMILY,Famille,,50.0.180,0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\\\n"
+
+% Instruction... (When Count>0)
+CreateProductFamily_Input = (
+	"{/*Input(CPRD;" TAG_INSERT_FAMILTY ";2;\\\n"
+	"(string,IDNEW,Nouveau ID,,20." inputWidth ",0);\\\n"
+	"(string,DESIGNATION,Désignation,,50." inputWidth ",1);\\\n"
+	")*/}\\\n"
+),
+CreateProductFamily_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "FAMILYPRODUCT (Id, Designation) values ('[/*IDNEW*/]', '[/*DESIGNATION*/]')\"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\product\CreateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+		@ CreateProductFamily_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" CreateProductFamily_Input),
+		@ ("'\\\n"),
+		@ CreateProductFamily_SQL1,
+),
+
+
+
+%=======================================================%
+%
+%
+@ "// Script 2. Duplicate Family\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "DuplicateFamilyProduct ",
+
+% Caption
+@ ("'" TAG_COPY_FAMILTY  "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_COPY  "' "),		% JZ 0911
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableFAMILYPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DuplicateProductFamily_Input = (
+	"{/*Input(DPRD;" TAG_COPY_FAMILTY ";1;\\\n"
+	"(string,IDNEW,Nouveau ID,,20." inputWidth ",0);\\\n"
+	")*/}\\\n"
+),
+DuplicateProductFamily_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "FAMILYPRODUCT (Id, Designation,QuantityStock, QuantityOrdered, QuantitySupplied, MinStorageUnit, MaxStorageUnit) \
+	select '[/*IDNEW*/]', Designation,QuantityStock, QuantityOrdered, QuantitySupplied, MinStorageUnit, MaxStorageUnit\
+	from " DB_PREFIX "FAMILYPRODUCT f\
+	where f.Id ='[/*FAMILYPRODUCT.ID*/]'\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DuplicateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \\\n"),
+		@ DuplicateProductFamily_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" DuplicateProductFamily_Input),
+		@ ("'\\\n"),
+		@ DuplicateProductFamily_SQL1,
+),
+
+
+%=======================================================%
+%
+%
+@ "// Script 3. Modify Family\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyFamily ",
+
+% Caption
+@ ("'" TAG_UPDATE_FAMILTY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ ("'" TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableFAMILYPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateProductFamily_Input = (
+	"{/*Input(MPRD;" TAG_UPDATE_FAMILTY ";6;\\\n"
+	"(string,DESIGNATION,Désignation,[/*FAMILYPRODUCT.DESIGNATION*/],50." inputWidth ",0);\\\n"
+	"(int,MINSTORAGEUNIT, Min Capacité Stock,,10." inputWidth ",1);\\\n"
+	"(int,MAXSTORAGEUNIT, Max Capacité Stock,,10." inputWidth ",1);\\\n"
+	"(string,IDZONE,Secteur,[/*FAMILYPRODUCT.IDZONE*/],20." inputWidth ",1);\\\n"
+	"(string,IDROW,Rang,[/*FAMILYPRODUCT.IDROW*/],20." inputWidth ",1);\\\n"
+	"(string,IDCOLUMN,Colonne,[/*FAMILYPRODUCT.IDCOLUMN*/],20." inputWidth ",1);\\\n"
+	")*/}\\\n"
+),
+UpdateProductFamily_SQL1 = (
+	"\"UPDATE " DB_PREFIX "FAMILYPRODUCT SET \
+	 Designation='[/*DESIGNATION*/]',\
+	 MinStorageUnit=[/*MINSTORAGEUNIT*/],\
+	 MaxStorageUnit=[/*MAXSTORAGEUNIT*/],\
+	 IdZone='[/*IDZONE*/]',\
+	 IdRow='[/*IDROW*/]',\
+	 IdColumn='[/*IDCOLUMN*/]'\
+	 where Id ='[/*FAMILYPRODUCT.ID*/]'\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \\\n"),
+		@ UpdateProductFamily_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProductFamily_Input),
+		@ ("'\\\n"),
+		@ UpdateProductFamily_SQL1,
+),
+
+
+%=======================================================%
+%
+%
+@ "// Script 4. Delete Family\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteFamily ",
+
+% Caption
+@ ("'" TAG_DELETE_FAMILTY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ ("'" TAG_DELETE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableFAMILYPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("'" TAG_DELETE_FAMILTY " ?' "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeleteProductFamily_SQL1 = (
+		"\"DELETE FROM " DB_PREFIX "FAMILYPRODUCT where Id IN ('[/*FAMILYPRODUCT.ID*/]')\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DeleteProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ DeleteProductFamily_SQL1,
+),
+.

@@ -1,0 +1,67 @@
+/******************************************************/
+/*	          	ERP	              	      */
+/*	                                              */
+/*	 	ReadDatePlanned.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+(SQL : 	"SELECT	MIN(" sqlTaskStartDate "),MAX(" sqlTaskEndDate
+	") FROM " DB_PREFIX "OPT_PLAN rr WHERE state>'" STATE_DELETED "'"),
+
+1 = (),
+
+date1Plan :: defaultDate,
+date2Plan :: defaultDate,
+
+date1Plan = (),
+date2Plan = (),
+
+
+(SQL :	"SELECT	MIN(t1),MAX(t2) FROM " SQL_TABLE_RESOURCE),
+
+1 = (),
+
+t1Resource :: defaultDateTime,
+t2Resource :: defaultDateTime,
+
+t1Resource = (),
+t2Resource = (),
+
+
+date1Resource = t1Resource["yyyy-mm-dd"],
+date2Resource = t2Resource["yyyy-mm-dd"],
+
+
+date1 = (date1Plan < date1Resource ? date1Resource : date1Plan),
+date2 = (date2Resource > date2Plan ? date2Plan : date2Resource),
+
+.
+
+
+
+
+
+
+
+date10 = (date1Plan < date1Input ? date1Input : date1Plan),
+
+date2Input = defaultDate => (
+	date20 = date2Plan,
+	;
+	date20 = (date2Plan > date2Input ? date2Input : date2Plan),
+),
+
+
+
+date1 = (date10 < date1Resource ? date1Resource : date10),
+
+date20 = defaultDate => (
+	date2 = date2Resource,
+	;
+	date2 = (date2Resource > date20 ? date20 : date2Resource),
+),
+

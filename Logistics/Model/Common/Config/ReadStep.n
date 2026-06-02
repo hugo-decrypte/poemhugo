@@ -1,0 +1,95 @@
+%==================================================%
+%                                                  %
+%      		ReadStep.n			   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	(SQL : "SELECT 	"SQL_TOP_PERCENT" step,state FROM " DB_PREFIX "STEP
+		WHERE 	step>0 " SQL_AND_CLUB "
+		ORDER BY step"),
+
+	%(SQL : SQL_SelectState SQL_AND_CLUB " ORDER BY step"), % bai 0731
+
+	nbStep = (),
+	STEP = [1,nbStep],
+
+	\forall i \in STEP(
+		idStep_{i}	:: 0,
+		stateStep_{i}	:: "",
+
+		idStep_{i}	= (),
+		stateStep_{i}	= (),
+	),
+
+/*
+	STEP = {} => (
+		? databaseType (
+		"ACCESS":
+			(SQL : "DELETE DISTINCTROW j.* FROM " DB_PREFIX "JOB j LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON j.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			(SQL : "DELETE DISTINCTROW t.* FROM " DB_PREFIX "TASK t LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON t.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			(SQL : "DELETE DISTINCTROW p.* FROM " DB_PREFIX "RESOURCE_TASK p LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON p.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			%(SQL : "DELETE DISTINCTROW p.* FROM " DB_PREFIX "SUBPLAN p LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON p.idProject=o.id 
+			%					WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			;
+
+		"SQLSERVER":
+			(SQL : "DELETE j FROM " DB_PREFIX "JOB j LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON j.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			(SQL : "DELETE t FROM " DB_PREFIX "TASK t LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON t.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			(SQL : "DELETE p FROM " DB_PREFIX "RESOURCE_TASK p LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON p.idProject=o.id 
+								WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			%(SQL : "DELETE p FROM " DB_PREFIX "SUBPLAN p LEFT JOIN " DB_PREFIX "OPT_PROJECT o ON p.idProject=o.id 
+			%					WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 SQL_AND_CLUB_o),
+			;
+		:
+			sqlWhereValidProject = (
+				" WHERE idProject IN(
+					SELECT	"SQL_TOP_PERCENT" o.id
+					FROM	" DB_PREFIX "OPT_PROJECT o
+					WHERE o.state='" STATE_CANDIDATE "'" sqlAndClubProject0 ")" SQL_AND_CLUB
+			),
+
+			(SQL : "DELETE FROM " DB_PREFIX "JOB"		sqlWhereValidProject),
+			(SQL : "DELETE FROM " DB_PREFIX "TASK"		sqlWhereValidProject),	% li 1218
+			(SQL : "DELETE FROM " DB_PREFIX "RESOURCE_TASK"	sqlWhereValidProject),
+			%(SQL : "DELETE FROM " DB_PREFIX "SUBPLAN"	sqlWhereValidProject),
+
+		),
+
+	),
+*/
+
+	(SQL : "SELECT 	COUNT(j.id) AS num
+		FROM 	" DB_PREFIX "JOB j," DB_PREFIX "OPT_PROJECT o
+		WHERE 	j.idProject=o.id AND o.state='" STATE_CANDIDATE "' AND j.idClub=o.idClub AND
+			(o.nbTask=0 OR o.nbTask IS NULL)" SQL_AND_CLUB_o
+	),
+	% To index on "idClub, id, step, idx, state" of PROJECT/JOB/TASL/PLAN
+
+	() > 0 => (
+		nbJobToPlan = (),
+		;
+		nbJobToPlan = 0,
+	),
+
+
+	database  <- '()',
+
+
+	ruleSchedulingForward => (
+		nbGroupPlanned = \sum_{i \in STEP}{stateStep_{i} = STATE_ACTIVE},
+		Step := [nbGroupPlanned+1, nbStep],
+		;
+
+		nbGroupPlanned = nbStep+1 - \sum_{i \in STEP}{stateStep_{i} = STATE_ACTIVE},
+		Step := [1, nbGroupPlanned-1],
+	),
+),

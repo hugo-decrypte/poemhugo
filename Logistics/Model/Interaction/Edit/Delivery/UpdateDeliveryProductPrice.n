@@ -1,0 +1,127 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   		%
+%                                                  %
+% 		 UpdateDeliveryProductPrice.n		   	 		  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idDeliveryBuffer		:: "",
+	idOrderBuffer			:: "",
+	idProductBuffer			:: "",
+	noLineBuffer			:: "",
+	
+	idDeliveryBuffer		= (),
+	idOrderBuffer			= (),
+	idProductBuffer			= (),
+	noLineBuffer			= (),
+	
+
+	priceBuffer			:: "",
+	priceBuffer			= (),
+		
+	
+	'()' <- database,
+	
+	UpdateDeliveryPrice_SQL1 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set PriceUnit="priceBuffer"
+		WHERE IdDelivery in ('"idDeliveryBuffer"')
+		AND IdOrder='"idOrderBuffer"' and IdProduct='"idProductBuffer"' and NoLine="noLineBuffer" "
+	),
+
+
+	databaseType = "ACCESS" => (
+		UpdateDeliveryPrice_SQL2 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "DELIVERY_PRODUCT DP on P.Id=DP.IdProduct
+			set DP.IdVAT=P.IdVAT
+			where DP.IdDelivery in ('"idDeliveryBuffer"') and (DP.IdVAT is NULL or DP.IdVAT<= ' ') "
+		),
+		UpdateDeliveryPrice_SQL3 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP set DP.Discount=0
+			WHERE DP.IdDelivery in ('"idDeliveryBuffer"') and DP.Discount is NULL "
+		),
+		UpdateDeliveryPrice_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP set 
+				DP.AmountHT = round(DP.QuantityReal*DP.PriceUnit*(100.0-DP.Discount))/100.0
+			WHERE DP.IdDelivery in ('"idDeliveryBuffer"') "
+		),
+		UpdateDeliveryPrice_SQL5 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "VAT t on t.Id=DP.IdVAT
+			set DP.AmountVAT= round(round(DP.QuantityReal*DP.PriceUnit*(100.0-DP.Discount))/100.0*t.VAT)/100.0
+			WHERE DP.IdDelivery in ('"idDeliveryBuffer"')"
+		),
+		UpdateDeliveryPrice_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY d set d.AmountHT=0, d.AmountVAT=0 WHERE d.ID in ('"idDeliveryBuffer"') "
+		),
+		UpdateDeliveryPrice_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY d inner join " DB_PREFIX "DELIVERY_PRODUCT DP on d.ID=DP.IdDelivery set
+			d.AmountHT=d.AmountHT+DP.AmountHT,
+			d.AmountVAT=d.AmountVAT+DP.AmountVAT
+			WHERE d.ID in ('"idDeliveryBuffer"') "
+		),
+		UpdateDeliveryPrice_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY d set d.AmountTotal = d.AmountHT + d.AmountVAT  WHERE d.ID in ('"idDeliveryBuffer"')"
+		),
+		
+		;
+
+		UpdateDeliveryPrice_SQL2 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT 
+			set IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct)
+			where IdDelivery in ('"idDeliveryBuffer"') and (IdVAT is NULL or IdVAT<= ' ') "
+		),
+		UpdateDeliveryPrice_SQL3 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set Discount=0
+			WHERE IdDelivery in ('"idDeliveryBuffer"') and Discount is NULL "
+		),
+
+		UpdateDeliveryPrice_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set 
+				AmountHT = round(QuantityReal*PriceUnit*(100.0-Discount))/100.0
+			WHERE IdDelivery in ('"idDeliveryBuffer"') "
+		),
+		UpdateDeliveryPrice_SQL5 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT 
+			set AmountVAT= (select round(AmountHT*t.VAT)/100.0 from " DB_PREFIX "VAT t where t.Id=IdVAT)
+			WHERE IdDelivery in ('"idDeliveryBuffer"')"
+		),
+		UpdateDeliveryPrice_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY set
+				AmountHT=(select sum(DP.AmountHT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				AmountVAT=(select sum(DP.AmountVAT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery)
+			WHERE ID in ('"idDeliveryBuffer"') "
+		),
+		UpdateDeliveryPrice_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY set AmountHT=0  WHERE ID in ('"idDeliveryBuffer"') and AmountHT is NULL "
+		),
+		UpdateDeliveryPrice_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY set AmountVAT=0  WHERE ID in ('"idDeliveryBuffer"') and AmountVAT is NULL "
+		),
+		UpdateDeliveryPrice_SQL9 = (
+			"Update " DB_PREFIX "DELIVERY set AmountTotal = AmountHT + AmountVAT  WHERE ID in ('"idDeliveryBuffer"')"
+		),
+	),
+
+	(SQL : UpdateDeliveryPrice_SQL1), 
+	(SQL : UpdateDeliveryPrice_SQL2), 
+	(SQL : UpdateDeliveryPrice_SQL3), 
+	(SQL : UpdateDeliveryPrice_SQL4), 
+	(SQL : UpdateDeliveryPrice_SQL5), 
+	(SQL : UpdateDeliveryPrice_SQL6), 
+	(SQL : UpdateDeliveryPrice_SQL7), 
+	(SQL : UpdateDeliveryPrice_SQL8), 
+	databaseType <> "ACCESS" => (
+		(SQL : UpdateDeliveryPrice_SQL9), 
+	),
+	
+	database <- '()',
+),

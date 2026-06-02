@@ -1,0 +1,167 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/* 		 FuncMapZone.n  	    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapSite>(title,tag,IdSiteSelected,postfix0)
+(
+	'@' => (
+		['Work Directory' "Model\Common\View\ResetDateForView.n"],
+
+		IdSiteSelected = {} => (
+			sqlIdSite = "",
+			;
+			sqlIdSite = (" AND s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+		),
+
+		sqlWhereSiteSelected = (" WHERE s.id=p.idSite1 OR s.id=p.idSite2"), % Chen 1024
+
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+	
+		viewFile =  ("MapZone" postfix),
+
+		[viewDirectory viewFile ".view"] <- '@',
+		
+		!simulation,
+
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+		%====
+		% Data: SITECLIENT
+		@ "Data ",
+
+		% ID
+		@ "ZONE '", 
+
+		% Caption
+		@ tag,
+
+		% Group
+		@ "' ZONE ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+		% Object item "[TYPE=SITE/....; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;MAP=VRP;WIDTH=-30;TIPINFO=" TIPINFO_ZONE "]'  _ \\\n"),
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[13;(string,IDSITE,IDSITE);(string,NAMESITE,NAMESITE);(string,NAMECLIENT,NAMECLIENT);(string,IDCLIENT,IDCLIENT);(string,POSTCODE,POSTCODE);(string,IDZONE,IDZONE);(int,X,X);(int,Y,Y);"),
+		@ ("(float,LONGITUDE,LONGITUDE);(float,LATITUDE,LATITUDE);(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,);]\" \\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT DISTINCT s.id AS IDSITE, \\
+				                s.name AS NAMESITE, \\
+						c.id AS IDCLIENT, \\
+						c.name AS NAMECLIENT, \\
+						s.postcode AS POSTCODE, \\
+					        z.id AS IDZONE, \\
+                                                s.x AS X, \\
+				                s.y AS Y, \\
+                                                s.longitude AS LONGITUDE, \\
+                                                s.latitude AS LATITUDE, \\
+                                                z.sizeIcon AS WIDTH, \\
+                                                IIF(z.idIcon=NULL,'',z.idIcon) AS ICON, \\
+						z.color as COLOR \\
+                                                FROM " DB_PREFIX"SITE s," DB_PREFIX "OPT_CLIENT c, " DB_PREFIX"ZONE z \\
+                                                WHERE s.id=c.idSite and z.id=c.idZone\\
+			UNION \\
+			SELECT DISTINCT s.id AS IDSITE, \\
+				                s.name AS NAMESITE, \\
+						c.id AS IDCLIENT, \\
+						c.name AS NAMECLIENT, \\
+						s.postcode AS POSTCODE, \\
+					        '' AS IDZONE, \\
+                                                s.x AS X, \\
+				                s.y AS Y, \\
+                                                s.longitude AS LONGITUDE, \\
+                                                s.latitude AS LATITUDE, \\
+                                                -30 AS WIDTH, \\
+                                                '' AS ICON, \\
+						'(98 98 255)' as COLOR \\
+                                                FROM " DB_PREFIX"SITE s," DB_PREFIX "OPT_CLIENT c \\
+                                                WHERE s.id=c.idSite and c.idZone=''\"\n\n"), 
+		
+% JZ 1024 : OPT_ORDER OPT_CLIENT
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+).
+
+
+
+'@' => (
+	['Work Directory' "Model\Common\View\ResetDateForView.n"],
+
+	IdSiteSelected = {} => (
+		sqlIdSite = "",
+		;
+		sqlIdSite = (" AND s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+	),
+
+	sqlWhereSiteSelected = (" WHERE s.id=p.idSite1 OR s.id=p.idSite2"), % Chen 1024
+
+	postfix = (postfix0 = "" ? "" : idUserLogin),
+	
+	viewFile =  ("MapClient" postfix),
+
+	[viewDirectory viewFile ".view"] <- '@',
+
+
+
+	['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+	% Data: SITE
+	@ "Data ",
+
+	% ID
+	@ "ORDER '", % Chen 1024
+
+	% Caption
+	@ TAG_SITE,
+
+	% Group
+	@ "' ORDER ",
+
+	% Source type
+	@ typeDataUser,
+
+	% Editable
+	@ " 1 ",
+
+	% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+	@ "'[TYPE=SITE;MAP=VRP;WIDTH=-30;]' ",
+
+	@ " _ \\\n",
+
+	% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+	@ ("\"[10;(string,IDSITE,IDSITE);(string,NAME,NAME);(string,ID,ID);(string,IDVEHICLE,IDVEHICLE);(int,X,X);(int,Y,Y);"),
+	@ ("(float,LONGITUDE,LONGITUDE);(float,LATITUDE,LATITUDE);(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);]\" \\\n"),
+
+
+	@ (VIEWSQL SQL_DataSiteSiteMap sqlWhereSiteSelected " " SQL_UnionDataSiteSiteMap "\"\n\n"), % Chen 1024
+
+	% Data : VEHICLE2
+	%['Work Directory' "Model\View\Data\DataVehicle2.n"],
+	%@(";QUERY=" SQL_SelectVehicleClubIdNameWhereTrue sql_AND_CLUB_VEHICLE " ORDER BY 1,2\"\n\n"), % Chen 1107
+
+
+	'@' <- [viewDirectory viewFile ".view"],
+),

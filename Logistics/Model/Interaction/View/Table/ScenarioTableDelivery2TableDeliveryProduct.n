@@ -1,0 +1,54 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	ScenarioTableDelivery2TableDeliveryProduct.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableDeliveryProduct ",
+
+% Caption
+@ ("'" TAG_PRODUCTS "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_DELIVERY,
+
+% Label
+@ (" '" TAG_PRODUCTS "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableDeliveryProduct.view" OPENTABLE_END),
+
+% JZ 0926 TITLEOBJ
+@ (TABLE_ARGUMENTS "TITLEOBJ=" TAG_PRODUCT_FOR_DELIVERY " {/*Selected(tableDELIVERY;1;(string,ID))*/};IDDELIVERY={/*Selected(tableDELIVERY;1;(string,ID))*/}]\"\n\n"),
+

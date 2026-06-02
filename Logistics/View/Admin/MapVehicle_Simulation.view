@@ -1,0 +1,147 @@
+View 'Carte véhicule' 'Carte véhicule' 'Carte véhicule' (255 255 255) _ _ _ _ _  100 100 100 100 '[ITINERARYMODE=0;TRACELEVEL=0;TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=1;FLIPHORIZONTALLY=0;NATURESCALE=1;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);\
+POEMSERVER=(SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/),UID=,PWD=,TIMEOUT=1000ms);DSN=(DSN=,UID=,PWD=,);\
+MATRIX_COMPUTE=(CRITERIA=Dist,COMPUTERADIUS=5,SPEED=50KM/H,DISTRATIO=1.4,INTRADIST=3,MAXCOMPUTEWIDTH=300,);\
+MATRIXTABLE=(TABLE=OPT_SITE_SITE,CLUBID=idClub,SITE0=idSite1,SITE1=idSite2,DIST=distance,TIME=time,CLUBVAL={/*CLUBID*/},CRITERIA=,IDZONE=TYPE,ZONEVAL=0);\
+MAPLOGFILE=;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=3;NEIGHBOURHOOD=;PERCENTAGEBAR=0;NAVIGATIONICON=1;SHOWSITE=1;SHOWPATH=1;SHOWNAME=1;\
+ROUTESHEET=(DEFAULT=1,DSN=);TABLESITE=(DEFAULT=1,TABLE=OPT_SITE,DSN=);ITINERARY_MODE=0;AUTOUPDATESITE=1;AUTORUNDLG=0;AUTORUN=]'
+
+Map VRP _ _ [SCALE=1;LONGILATITUDE=0;VIRTUAL=1;TEXT_RTF8=0] "[DIRECTORY=(/*CLIENTDIRECTORY*/)Map/IgnRoute500_2018]" _ _ _ _ 9 \
+"[ZONE_OCCUPATION_SOL;[TYPE=GroundOccupation,LABEL=Occpation sol];[IDCOLUMN=, CAPTIONCOLUMN=NATURE];[SHOW=1,FONTNAME=Arial, FONTSIZE=-6, COLOR=(0 0 0), ITALIC=0, UNDERLINE=0, BOLD=0];[SHOW=1, SELECT=0, TIPINFO=0, FIND=0, DRAW=-1];1,1,1;(118 178 248),(128 198 148),(218 218 218);(118 178 248),(128 198 148),(218 218 218);NATURE,Eau|2000|1,Forêt|2000|2,Bâti|2000|3;]" \
+"[COTE_FRONTIERE;[TYPE=Frontier,LABEL=Frontier];[C_ID=ID_RTE500, CAPTIONCOLUMN=];[SHOW=1,FONTSIZE=-6,FONTNAME=Arial,COLOR=(0 0 0),BK=(255 255 255)];[SHOW=1, SELECT=0, TIPINFO=0, FIND=0, DRAW=-1];3;(255 200 200);]" \
+"[LIMITE_ADMINISTRATIVE;[TYPE=AdminCurve,LABEL=Limite admin];[C_ID=ID_RTE500, CAPTIONCOLUMN=];[SHOW=1,FONTSIZE=-6,FONTNAME=Arial,COLOR=(0 0 0),BK=(255 255 255)];[SHOW=1, SELECT=0, TIPINFO=0, FIND=0, DRAW=-1];3,3,3,2,2,1,1;(255 200 200),(255 200 200),(255 200 200),(255 200 200),(255 200 200),(255 200 200),(255 200 200);,,,,,,;NATURE,Frontière internationale|2000|1,Limite côtière|2000|2,Limite de région|500|3,Limite de département|300|4,Limite d'arrondissement|300|5,Limite de canton|200|6,Limite de commune|20|7;]" \
+"[NOEUD_COMMUNE;[TYPE=Locality,LABEL=Noeud commune,CONTOUR=COMMUNE,STATIC=1,CONTOURID=1];[C_ID=ID_RTE500, C_CAPTION=NOM_COMM, C_INSEE=INSEE_COMM];[FONTNAME=Arial, FONTSIZE=11, COLOR=(0 0 0), ITALIC=0, UNDERLINE=0, BOLD=0];[SHOW=1, SELECT=1, TIPINFO=0, FIND=1, DRAW=-1];8,7,6,5,4,4;(64 0 64),(64 0 64),(64 0 64),(64 0 64),(64 0 64),(92 92 92);(255 0 0),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255);STATUT,Capitale d'état|2000|1,Préfecture|1000|2,Préfecture de région|600|3,Sous-préfecture|300|4,Chef-lieu de canton|100|5,Commune simple|80|6;]" \
+"[COMMUNE;[TYPE=AdminContour,LABEL=Limite commune,LOCALITY=NOEUD_COMMUNE,STATIC=1,LOCALITYID=1];[C_ID=ID_RTE500];;[SHOW=0, SELECT=1, TIPINFO=0, FIND=0, ZOOMCOUNT=200];1;(200 100 100);(255 255 255),(255 255 200),(255 200 255),(200 255 255),(255 200 200),(200 255 200),(200 200 255),(200 200 200),(255 255 100),(255 100 255),(100 255 255),(255 200 100),(255 100 200),(200 255 100),(200 100 255),(100 200 255)]" \
+"[NOEUD_ROUTIER;[TYPE=RouteNode,LABEL=Noeud routier];[C_ID=ID_RTE500, C_CAPTION=NATURE, C_STATUS=NATURE];[FONTNAME=Arial, FONTSIZE=-10, COLOR=(0 0 0), ITALIC=0, UNDERLINE=0, BOLD=0];[SHOW=0, SELECT=1, TIPINFO=0, FIND=0, DRAW=-1];3;(100 100 100);;;]" \
+"[TRONCON_ROUTE;[TYPE=RouteCurve,LABEL=Troncon route,STREET=0];[C_ID=ID_RTE500, C_CAPTION=NUM_ROUTE, C_ROUTENUM=NUM_ROUTE, C_SPEEDCAT=VOCATION];[FONTNAME=Arial, FONTSIZE=-12, COLOR=(0 0 0), ITALIC=0, UNDERLINE=0, BOLD=0];[SHOW=1, SELECT=1, TIPINFO=0, FIND=1, DRAW=-1];5,4,3,3,2;(255 238 158),(255 223 72),(128 64 64),(192 192 192),(192 192 192);(255 238 158),(255 255 255),(255 255 255),(255 255 255),(255 255 255);VOCATION,Type autoroutier|450|1,Liaison principale|250|2,Liaison régionale|150|3,Liaison locale|50|4,Bretelle|50|5;LONGUEUR,1000;SENS,3,3:Double sens,2:Sens inverse,1:Sens unique]" \
+"[COMMUNICATION_RESTREINTE;[TYPE=NodeLimit,LABEL=Limite acces routier,STATIC=1];[IDCOLUMN=ID_RTE500, CAPTIONCOLUMN=INTERDIT];[SHOW=0,FONTSIZE=-6,FONTNAME=Arial,COLOR=(0 0 0),BK=(255 255 255)];[SHOW=0, SELECT=1, TIPINFO=0, FIND=1, DRAW=-1, ZOOMCOUNT=500];1,1;(255 0 0),(0 100 0);(255 255 0),(255 255 0);INTERDIT,Partielle|-1|2,Totale|-1|1;ID_ND_RTE;ID_TRO_INI;ID_TRO_FIN;INTERDIT,2,2:Partielle,1:Totale;REST_POIDS;REST_HAUT]" \
+"[TRONCON_HYDROGRAPHIQUE;[TYPE=River,LABEL=Rivers];[IDCOLUMN=ID_RTE500];[FONTNAME=Arial, FONTSIZE=-10, COLOR=(0 0 0), ITALIC=0, UNDERLINE=0, BOLD=0];[SHOW=1, SELECT=0, TIPINFO=0, FIND=0, DRAW=1];2;(128 178 248);;;]"
+
+Data MAP_ICON 'Icône' MAP_ICON HTTPSQL 0 "[TYPE=ICON;GLOBAL=1]" _ \
+"[2;(string,ID,ID,,100,0);(File,ICON,ICON,,200,0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT id,hexadecimal AS ICON FROM ICON"
+
+
+Data VRP_SITE 'Commande' VRP_SITE HTTPSQL 1 '[TYPE=SITE;MAP=VRP;FIND={IDORDER};WIDTH=-30;TIPINFO=#Commande [/*NBORDER*/]\nNo. [/*IDX*/]    [/*IDORDER*/]    [/*IDTOUR*/]    [/*ID*/]  [/*NAME*/]    ([/*LATITUDE*/], [/*LONGITUDE*/])    #Palette [/*QUANTITY*/]\nService [/*T1PLAN*/] - [/*T2SERVICEPLAN*/]    KM [/*MILEAGE*/]    Temps de route [/*TIMEROUTE*/]]''[DROP=MoveOrder;]' \
+"[19;(string,ID,Lieu);(string,NAME,Nom du site);(int,IDX,No.);(string,IDORDER,Commande);(string,IDORDERNEXT,Successeur);(int,QUANTITY,Quantité,,10,0);(int,MILEAGE,KM,,10,0);(duration,WORKTIME,WORKTIME);(duration,TIMEROUTE,TIMEROUTE);(string,IDVEHICLE,Véhicule);(int,TOURVEHICLE,Véhicule);(string,IDTOUR,Tournée);(int,NBORDER,#Commande);(string,T1PLAN,Début service);(string,T2SERVICEPLAN,Fin service);(string,T2PLAN,Fin de route);(float,LATITUDE,Latitude);(float,LONGITUDE,Longitude);(int,X,X);(int,Y,Y);(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT DISTINCT s.id 		AS ID, \
+					c.name+'  '+s.name	AS NAME, \
+					''			AS IDTOUR, \
+					0			AS IDX, \
+					o.id			AS IDORDER, \
+					''			AS IDORDERNEXT, \
+					(select count(1) from OPT_ORDER o1 where o1.idSite2=o.idSite2)  AS NBORDER, \
+					0 			AS QUANTITY, \
+					0	 		AS MILEAGE, \
+					0			AS WORKTIME, \
+					0 			AS TIMEROUTE, \
+					''			AS IDVEHICLE, \
+					0			AS TOURVEHICLE, \
+					''			AS T1PLAN, \
+					''			AS T2SERVICEPLAN, \
+					''			AS T2PLAN, \
+					NULL			AS X, \
+					NULL 			AS Y, \
+					s.latitude		AS LATITUDE, \
+					s.longitude		AS LONGITUDE, \
+					c.idIcon		AS ICON, \
+					c.sizeIcon 		AS WIDTH \
+		               	FROM  OPT_ORDER o,OPT_CLIENT c,SITE s \
+				WHERE o.idClient=c.id AND o.idSite2=s.id AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=s.idClub) AND o.state='1' UNION SELECT DISTINCT s.id 			AS ID, \
+				s.name				AS NAME, \
+				p.idTour			AS IDTOUR, \
+				p.idx-1				AS IDX, \
+				p.idOrder			AS IDORDER, \
+				p.idOrderNext			AS IDORDERNEXT, \
+				(select count(1) from OPT_PLAN p1 where p1.idSite1=p.idSite1)  AS NBORDER, \
+				p.quantity 			AS QUANTITY, \
+				p.mileage 			AS MILEAGE, \
+				p.timeService+p.timeRoute 	AS WORKTIME, \
+				p.timeRoute 			AS TIMEROUTE, \
+				p.idResource			AS IDVEHICLE, \
+				p.tourResource			AS TOURVEHICLE, \
+				p.t1Service			AS T1PLAN, \
+				p.t2Service			AS T2SERVICEPLAN, \
+				p.t2				AS T2PLAN, \
+				NULL				AS X, \
+				NULL 				AS Y, \
+				s.latitude			AS LATITUDE, \
+				s.longitude			AS LONGITUDE, \
+				s.idIcon			AS ICON, \
+				s.sizeIcon 			AS WIDTH \
+			FROM SITE s,OPT_PLAN p \
+			WHERE s.id=p.idSite1 AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=p.idClub) AND LEFT(p.t1service,10)>='2022-09-22' AND LEFT(p.t2Service,10) <= '2022-09-22'  ORDER BY 2,3"
+
+Data VRP_TASK 'Tâche' VRP_TASK HTTPSQL 0 "[TYPE=TASK;MAP=VRP ;SITEDATA=VRP_SITE;SITEID=IDSITE; PATHDATA=VRP_PATH;PATHID=IDTOUR; FIND={IDSITE};WIDTH=-35;]" _ \
+"[12;(string,ID,Commande,,10,0);(string,NAME,Commandes,,100,0);(string,IDTOUR,Tournée,,10,0);(string,IDSITE,Lieu,,10,0);(date,DateBegin,Date début,,,,YYYY-MM-DD|DD/MM/YYYY);(date,DateEnd,Date fin,,,,YYYY-MM-DD|DD/MM/YYYY);(time,TimeBegin,Temps début,,,,HH:MM);(time,TimeEnd,Temps fin,,,,HH:MM);(duration(M),DURATION,DURATION);(string,ICON,ICON,,50,0);(int,WIDTH,WIDTH,,,0);(color,COLOR,COLOR);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT p.idOrder AS ID, \
+				p.idOrder AS NAME, \
+				p.idTour AS IDTOUR, \
+				p.idSite1 AS IDSITE, \
+				LEFT(p.t1Service,10) AS DateBegin, \
+				LEFT(p.t2Service,10) AS DateEnd, \
+				RIGHT(p.t1Service,5) AS TimeBegin, \
+				RIGHT(p.t2,5) AS TimeEnd, \
+				DateDiff('n',p.t1Service,p.t2Service) AS DURATION, \
+				v.idIcon AS ICON, \
+				v.sizeIcon AS WIDTH, \
+				v.color AS COLOR \
+			FROM OPT_PLAN p,RESOURCE v \
+			WHERE v.id=p.idResource AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub)"
+
+Data VRP_PATH 'Tournée' VRP_PATH HTTPSQL 1 '[TYPE=PATH;MAP=VRP; FIND={ID}; TASKDATA=VRP_TASK;SITEDATA=VRP_SITE; PATHID=IDTOUR;SITEID=IDSITE; SPEED=0;TIPINFO=[/*IDTOUR*/]    [/*T1TOUR*/] - [/*T2TOUR*/]    #Commande [/*NBORDER*/]    #Palette [/*QUANTITY*/]    Poids [/*WEIGHT*/]    KM [/*MILEAGE*/]    Temps travail [/*WORKTIME*/]]' '_' \
+"[14;(string,ID,Tournée);(string,IDVEHICLE,IDVEHICLE);(int,TOURVEHICLE,TOURVEHICLE);(string,IDTOUR,IDTOUR);(int,NBORDER,NBORDER);(int,MILEAGE,MILEAGE);(duration,WORKTIME,WORKTIME);(duration,TIMEROUTE,TIMEROUTE);(int,QUANTITY,QUANTITY);(float,WEIGHT,WEIGHT);(datetime,T1TOUR,T1TOUR,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2TOUR,T2TOUR,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(int,LINEWIDTH,LINEWIDTH);(color,LINECOLOR,LINECOLOR);(color,FILLCOLOR,FILLCOLOR);(int,ARROWWIDTH,ARROWWIDTH);(color,ARROWCOLOR,ARROWCOLOR);(string,ICON,ICON,,,0);(int,WIDTH,WIDTH,,,0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT DISTINCT t.id AS ID, \
+				t.id AS IDTOUR, \
+				t.idResource AS IDVEHICLE, \
+				t.tourResource AS TOURVEHICLE, \
+				t.nbOrder AS NBORDER, \
+				t.mileage AS MILEAGE, \
+				t.timeService+t.timeRoute 	AS WORKTIME, \
+				t.timeRoute AS TIMEROUTE, \
+				t.quantity AS QUANTITY, \
+				t.weight AS WEIGHT, \
+				t.t1 AS T1TOUR, \
+				t.t2 AS T2TOUR, \
+				v.widthLine AS LINEWIDTH, \
+				v.colorLine AS LINECOLOR, \
+				v.colorFill AS FILLCOLOR, \
+				v.widthArrow AS ARROWWIDTH, \
+				v.colorArrow AS ARROWCOLOR, \
+				v.idIcon AS ICON, \
+				v.sizeIcon AS WIDTH \
+			FROM OPT_TOUR t,RESOURCE v \
+			WHERE t.idResource=v.id AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub)"
+
+Schedule SimulationVehicle 'Simulation' _ 0 0 1000 0 \
+_ \
+"[DATEFORMAT=YYYY-MM-DD;TIMEFORMAT=HH:MM:SS]" \
+_ \
+"[DATEFIRST=2022-09-22;DATELAST=2022-09-22;TIMEFIRST=03:43;TIMELAST=18:15;TIMER=300MS;TIMESCALE=5M;]" \
+_ _ "[DATAOBJ=VRP_PATH]" "[DATAOBJ=VRP_SITE]" "[DATAOBJ=VRP_TASK;ITEMID=IDSITE;GROUPID=IDTOUR]"
+
+
+Script TourOrder  'Feuille de route' _ 20 'Feuille de route' _ 'VRP_PATH' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\View\Map\GenerateTableTourOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*selected(VRP_PATH;2;(string,IDTOUR);(string,IDVEHICLE))*/}' \
+Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableTourOrderMenu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);]"
+
+
+Script MoveOrder 'Déplacer commande' _ 7 'Déplacer commande'  _ 'VRP_SITE' '( 0 0 0 0 )' _ _ 'Déplacer commande ?''[COUNT=3;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Solver\Order\MoveOrderMap.n'\
+ '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*selected(VRP_SITE;3;(string,IDORDER);(string,IDVEHICLE);(int,TOURVEHICLE))*/}  \
+{/*Drop(VRP_PATH;2;(string,IDVEHICLE);(int,TOURVEHICLE))*/}' \
+Reload "[VIEWID=Carte véhicule]"\
+Reload "[VIEWID=ViewTableRESULT]"
+
+Script OptimizeTour 'Optimiser par tournée' _ 8 'Optimiser par tournée'  _ 'VRP_PATH' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;;AUTOCLOSE=1]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptTSP.n'\
+ '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(VRP_PATH;1;(string,IDTOUR))*/}' \
+Reload _ _ _ _
+
+
+Script MapTour 'Carte' _ 41 'Carte' _ 'VRP_PATH' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\View\Map\GenerateMapVehicleTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*selected(VRP_PATH;2;(string,IDTOUR);(string,IDVEHICLE))*/}' \
+Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)MapVehicle(/*USERID*/).view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);]"
+
+

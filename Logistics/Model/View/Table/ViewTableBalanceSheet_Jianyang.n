@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableBalanceSheet.n     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableBalanceSheet.n"],
+
+'@' => (
+	tableBalanceSheet("", TAG_TABLE,"", TAG_TABLE_BALANCE_SHEET),	% JZ 0825
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

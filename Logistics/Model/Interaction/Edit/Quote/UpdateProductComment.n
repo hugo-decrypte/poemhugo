@@ -1,0 +1,59 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductForQuoteComment.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idQuoteBuffer :: "",
+	
+	idQuoteBuffer = (),
+	
+
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idProductBuffer_{i} 				:: "",
+		
+		idProductBuffer_{i} 				= (),
+		
+		i < nbSelected =>(
+			strIdProductBuffer_{i} = ("'" idProductBuffer_{i} "',"),
+			;
+			strIdProductBuffer_{i} = ("'" idProductBuffer_{i} "'"),
+		),
+	),
+	
+	IDPRODUCTBUFFER :: "",
+	IDPRODUCTBUFFER = [\forall i \in [1, nbSelected] strIdProductBuffer_{i}],
+	
+	
+	commentBuffer		:: "",
+	comment2Buffer		:: "",
+	
+	commentBuffer		= (),
+	comment2Buffer		= (),
+
+	'()' <- database,
+	
+	UpdateProductForQuoteComment_SQL1 = (
+		"Update " DB_PREFIX "QUOTE_PRODUCT set Comments='"commentBuffer"', Comments_1='"comment2Buffer"'"
+		"  WHERE IdQuote in ("idQuoteBuffer")"
+		"   and IdProduct in ("IDPRODUCTBUFFER") "
+	),
+
+	(SQL : UpdateProductForQuoteComment_SQL1), 
+
+	
+	
+	database <- '()',
+),

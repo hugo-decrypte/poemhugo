@@ -1,0 +1,13 @@
+%==================================================%
+%                                                  %
+%		ReadConfigLogin.n	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	idClubActive = idClubLogin,
+),
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+

@@ -1,0 +1,34 @@
+%===============================================%
+%						%
+%		 Vehicle Routing		%
+%						%
+%		ReadSiteSelected.n		%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+	% li 0701
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+% Read input buffer
+'()' => (
+	nbSiteSelected			= (),
+	nbParameterSelected		= (),
+
+	\forall i \in [1,nbSiteSelected] (
+		idClubSelected_{i}	:: "",
+		idSiteSelected_{i}	:: "",
+
+		idClubSelected_{i}	= (),
+		idSiteSelected_{i}	= (),
+	),
+
+	IdSiteSelected = \{ \forall i \in [1, nbSiteSelected] idSiteSelected_{i} \},
+
+),
+
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+

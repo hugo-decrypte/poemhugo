@@ -1,0 +1,52 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	ScenarioTableSupplyProduct2TableOfferSupplier.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableOffer ",
+
+% Caption
+@ (" '" TAG_SUPPLIER_OFFER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_SUPPLIER,
+
+% Label
+@ (" '" TAG_OFFERS "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSUPPLY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (PREFIX_OPENTABLE_BEGIN "TableOfferSupplier.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS 
+"TITLEOBJ={/*Selected(tableSUPPLY;1;(string,NAMESUPPLIER))*/};OWNEROBJ=idSupplier;IDOBJ={/*Selected(tableSUPPLY;1;(string,IDSUPPLIER))*/};IDPRODUCT={/*Selected(tableSUPPLY;1;(string,IDPRODUCT))*/}]\"\n\n"),

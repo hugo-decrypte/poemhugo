@@ -1,0 +1,88 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateSupplyProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	
+	idSupplySelectedBuffer	:: "",
+	idProductSelectedBuffer	:: "",
+	
+	idSupplySelectedBuffer	= (),
+	idProductSelectedBuffer	= (),
+
+	
+	quantityBuffer				:: "",
+	priceBuffer					:: "",
+	dateDeliveryBuffer			:: 0,
+
+	quantityBuffer				= (),
+	priceBuffer					= (),
+	dateDeliveryBuffer			= (),
+	
+	
+
+	'()' <- database,
+	
+
+	UpdateSupplyProduct_SQL1 = (
+		"UPDATE " DB_PREFIX "SUPPLY_PRODUCT SET 
+		Quantity="quantityBuffer", 
+		PriceUnit="priceBuffer",
+		DateDelivery='"dateDeliveryBuffer"' 
+		WHERE IdSupply='"idSupplySelectedBuffer"' and IdProduct = '"idProductSelectedBuffer"' "
+	),
+
+	UpdateSupplyProduct_SQL2 = (
+		"UPDATE " DB_PREFIX "SUPPLY_PRODUCT SET 
+			PriceUnit=0 
+		WHERE IdSupply='"idSupplySelectedBuffer"' and PriceUnit is NULL "
+	),
+
+	databaseType = "ACCESS" => (
+		UpdateSupplyProduct_SQL3 = (
+			"UPDATE " DB_PREFIX "SUPPLY s SET
+				s.Quantity=0,
+				s.AmountHT=0 
+			WHERE s.Id='"idSupplySelectedBuffer"' "
+		),
+		UpdateSupplyProduct_SQL4 = (
+			"UPDATE " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT sp on sp.IdSupply=s.Id SET
+				s.Quantity=s.Quantity+sp.Quantity,
+				s.AmountHT=s.AmountHT+sp.Quantity*sp.PriceUnit 
+			WHERE s.Id='"idSupplySelectedBuffer"' "
+		),
+		;
+
+		UpdateSupplyProduct_SQL3 = (
+			"UPDATE " DB_PREFIX "SUPPLY s SET
+				s.Quantity=(select sum(sp.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT sp where sp.IdSupply=s.Id),
+				s.AmountHT=(select sum(sp.Quantity*sp.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT sp where sp.IdSupply=s.Id)
+			WHERE s.Id='"idSupplySelectedBuffer"' "
+		),
+		UpdateSupplyProduct_SQL4 = (
+			"UPDATE " DB_PREFIX "SUPPLY SET
+				Quantity=0,
+				AmountHT=0 
+			WHERE Id='"idSupplySelectedBuffer"' and Quantity is NULL"
+		),
+	),
+	(SQL : UpdateSupplyProduct_SQL1), 
+	(SQL : UpdateSupplyProduct_SQL2),
+	(SQL : UpdateSupplyProduct_SQL3),
+	(SQL : UpdateSupplyProduct_SQL4),
+	
+	
+	database <- '()',
+),

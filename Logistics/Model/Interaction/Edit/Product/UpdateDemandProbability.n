@@ -1,0 +1,56 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateDemandProbability.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idClubBuffer :: "",
+	idClubBuffer = (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	
+	priceProbabilityBuffer :: 0.0,
+	priceProbabilityBuffer = (),
+
+	
+	
+	'()' <- database,
+	
+	% update probability
+	
+	UpdateProbability_SQL1 = (
+		"UPDATE " DB_PREFIX "PRODUCT_DEMAND pd "
+		"SET pd.probability="priceProbabilityBuffer[(4,12)] "*pd.minQuantity "  
+		"WHERE pd.id in ("IDOBJSELECTEDBUFFER") AND pd.idClub = '"idClubBuffer"'"
+	),
+	
+
+	(SQL : UpdateProbability_SQL1), 
+
+	
+	database <- '()',
+),

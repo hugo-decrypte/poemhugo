@@ -1,0 +1,208 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ReadSheet.n		           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	TYPE_DATE		= "date",
+	TYPE_TIME		= "time",
+	TYPE_DATETIME		= "datetime",
+	TYPE_TEXT		= "text",
+
+	TYPE_FLOAT		= "f",
+	TYPE_INT		= "i",
+
+	TYPE_NON0_FLOAT		= "f<>0",
+	TYPE_NON0_INT		= "i<>0",
+	TYPE_NONNEGATIVE_FLOAT	= "f>=0",
+	TYPE_NONNEGATIVE_INT	= "i>=0",
+	TYPE_POSITIVE_FLOAT	= "f>0",
+	TYPE_POSITIVE_INT	= "i>0",
+
+	TYPE_SET		= "s",
+	TYPE_NONEMPTY_SET	= "s<>{}",
+
+
+	% Create an uninstantiated varaible by macro variable of "XXXXXX" which is wrote into SHEET table if f_{l,c} unknown
+
+	
+
+	'()' <- database,
+
+	sqlLineSheet = (
+		"SELECT MAX (s.line)
+		FROM " DB_PREFIX "SHEET s
+		WHERE s.idClub IN " IDDOMCLUBLOGIN " AND s.category='" SHEET_TECHNIQUE "' AND s.id='001'"),
+
+	(SQL:  sqlLineSheet),
+
+	1 = (),
+	LINE = [1, ()],
+
+
+	sqlColumnSheet = (
+		"SELECT MAX (s.column)
+		FROM " DB_PREFIX "SHEET s
+		WHERE s.idClub IN " IDDOMCLUBLOGIN " AND s.category='" SHEET_TECHNIQUE "'"),
+
+	(SQL:  sqlColumnSheet),
+
+	1 = (),
+	COLUMN = [1, ()],
+
+
+	\forall l \in LINE (
+		sqlColumnLine_{l} = (
+			"SELECT "SQL_TOP_PERCENT "s.column
+			FROM " DB_PREFIX "SHEET s
+			WHERE s.idClub IN " IDDOMCLUBLOGIN " AND s.category='" SHEET_TECHNIQUE "' AND s.line=" l "
+			ORDER BY s.column"),
+
+		(SQL:  sqlColumnLine_{l}),
+
+
+		#ColumnLine_{l} = (),
+
+		ColumnLine_{l} \subset COLUMN,
+		ColumnLine_{l} = \{ \forall i \in [1,#ColumnLine_{l}] () \},
+
+
+
+		sqlSheetLine_{l} = (
+			"SELECT "SQL_TOP_PERCENT "s.name,s.type,s.idFormula,s.value
+			FROM " DB_PREFIX "SHEET s
+			WHERE s.idClub IN " IDDOMCLUBLOGIN " AND s.category='" SHEET_TECHNIQUE "' AND s.line=" l "
+			ORDER BY s.column"),
+
+
+		%sqlSheetLine_{l} = (
+		%	"SELECT "SQL_TOP_PERCENT "t.name,s.type,s.idFormula,s.value
+		%	FROM " DB_PREFIX "SHEET s," DB_PREFIX "TYPESHEET t
+		%	WHERE s.idClub IN " IDDOMCLUBLOGIN
+		%		" AND t.column=s.column AND s.category='" SHEET_TECHNIQUE
+		%		"' AND s.line=" l "
+		%	ORDER BY s.column"),
+
+
+		(SQL:  sqlSheetLine_{l}),
+
+		#ColumnLine_{l} = (),
+
+		\forall c \in ColumnLine_{l} (
+			nameColumnLine_{l,c}		:: "",
+			typeColumnLine_{l,c}		:: "",
+			idFormulaColumnLine_{l,c}	:: "",
+
+			x_{l,c}				:: "",
+
+			nameColumnLine_{l,c}		= (),
+			typeColumnLine_{l,c}		= (),
+			idFormulaColumnLine_{l,c}	= (),
+
+			namedColumnLine_{l,c} 		== nameColumnLine_{l,c} <> "",
+			formulatedColumnLine_{l,c} 	== namedColumnLine_{l,c} && idFormulaColumnLine_{l,c} \in IDFORMULA,
+
+
+			%{2;t;text;f;float;i;int;f<>0;non-0 float;i<>0;non-0 int;f>=0;non-negative float;i>=0;non-negative int;f>0;positive float;i>0;positive int;s;set;s<>{};non-empty set;}
+			intColumnLine_{l,c}		== typeColumnLine_{l,c} \in {TYPE_INT,TYPE_NON0_INT,TYPE_NONNEGATIVE_INT,TYPE_POSITIVE_INT},
+
+			floatNot0ColumnLine_{l,c}	== typeColumnLine_{l,c} = TYPE_NON0_FLOAT,
+			intNot0ColumnLine_{l,c}		== typeColumnLine_{l,c} = TYPE_NON0_INT,
+
+			floatGeq0ColumnLine_{l,c}	== typeColumnLine_{l,c} = TYPE_NONNEGATIVE_FLOAT,
+			intGeq0ColumnLine_{l,c}		== typeColumnLine_{l,c} = TYPE_NONNEGATIVE_INT,
+			floatGt0ColumnLine_{l,c}	== typeColumnLine_{l,c} = TYPE_POSITIVE_FLOAT,
+			intGt0ColumnLine_{l,c}		== typeColumnLine_{l,c} = TYPE_POSITIVE_INT,
+
+			setColumnLine_{l,c}		== typeColumnLine_{l,c} \in {TYPE_SET,TYPE_NONEMPTY_SET},
+			setNonEmptyColumnLine_{l,c}	== typeColumnLine_{l,c} = TYPE_NONEMPTY_SET,
+
+			namedColumnLine_{l,c} => (
+				x_{l,c}	= (),
+				;
+
+				_	= (),		% skip
+				x_{l,c}	= "",			
+			),
+		),
+
+
+
+		ColumnIntLine_{l} = \{
+			\forall c \in ColumnLine_{l} (intColumnLine_{l,c} ? c : 0)
+		\} \setminus 0,
+
+		ColumnSetLine_{l} = \{
+			\forall c \in ColumnLine_{l} (setColumnLine_{l,c} ? c : 0)
+		\} \setminus 0,
+
+		ColumnFloatLine_{l} = ColumnLine_{l} \setminus ColumnIntLine_{l} \setminus ColumnSetLine_{l},
+	),
+
+
+
+	sqlTypeSheet = (
+		"SELECT "SQL_TOP_PERCENT"a.id,a.name
+		 FROM " DB_PREFIX "ALIAS a
+		 WHERE	a.category='TYPE'
+		 ORDER BY a.id"),
+
+	(SQL:  sqlTypeSheet),
+
+
+	ALIASSHEET = [1,()],
+
+	\forall a \in ALIASSHEET (
+		typeAliasSheet_{a} :: "",
+		aliasAliasSheet_{a} :: "",
+
+		typeAliasSheet_{a} = (),
+		aliasAliasSheet_{a} = (),
+	),
+
+	database <- '()',
+
+
+
+	\forall l \in LINE
+	\forall c \in ColumnLine_{l}
+		( TAG_FORMULA_ID_INVALID idFormulaColumnLine_{l,c} :
+			idFormulaColumnLine_{l,c} \in IDFORMULA \cup {""},
+		),
+
+
+
+	TYPESHEET = \{ \forall a \in ALIASSHEET typeAliasSheet_{a} \},
+	ALIASTYPESHEET = \{ \forall a \in ALIASSHEET aliasAliasSheet_{a} \},
+
+
+	\forall t \in TYPESHEET
+		aliasTypeSheet_{t} :: "",
+	\forall a \in ALIASSHEET
+		aliasTypeSheet_{typeAliasSheet_{a}} = aliasAliasSheet_{a},
+
+
+	\forall c \in COLUMN (
+		nameColumn_{c}	= ("N" c),
+		valueColumn_{c}	= ("V" c),
+	),
+
+	NAMECOLUMN	= \{ \forall c \in COLUMN nameColumn_{c} \},
+	VALUECOLUMN	= \{ \forall c \in COLUMN valueColumn_{c} \},
+
+
+	IDCOLUMN = NAMECOLUMN \cup VALUECOLUMN,
+
+	\forall i \in IDCOLUMN
+		columnId_{i} \in COLUMN,
+
+	\forall c \in COLUMN (
+		columnId_{nameColumn_{c}}	= c,
+		columnId_{valueColumn_{c}}	= c,
+	),
+),
+

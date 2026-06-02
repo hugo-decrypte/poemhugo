@@ -1,0 +1,192 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTableProductForOffer2EditOnView.n		%
+%                                                       %
+% 	(c)2000 Enginest. All rights reserved.		        %
+%=======================================================%
+
+%==========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddProductToOffer ",
+
+% Caption
+@ (" '" TAG_INCREMENT_QUANTITY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INCREMENT_QUANTITY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFOROFFER' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+AddProductToOfferSupplier_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "OFFER_PRODUCT (IdSupplier, IdOffer, IdProduct, MinQuantity, Comments, DateOffer, DateValidity) \
+	select o.IdSupplier, o.IdOffer, prd.Id, 0, ' ', o.DateOffer, o.DateValidity\
+	from " DB_PREFIX "SUPPLIEROFFER o, " DB_PREFIX "PRODUCT prd\
+	WHERE o.IdSupplier in ((/*IDSUPPLIER*/)) and o.IdOffer in ((/*IDOFFER*/))\
+	and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\
+	and not exists (select 1 from " DB_PREFIX "OFFER_PRODUCT op where op.IdSupplier=o.IdSupplier and op.IdOffer=o.IdOffer and op.IdProduct=prd.Id) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	AddProductToOfferSupplier_SQL2 = (
+		"\"Update " DB_PREFIX "OFFER_PRODUCT op inner join " DB_PREFIX "PRODUCT prd on prd.Id=op.IdProduct\
+			set op.MinQuantity=op.MinQuantity+prd.QuantityPackaging \
+		WHERE op.IdSupplier in ((/*IDSUPPLIER*/)) \
+			and op.IdOffer=(/*IDOFFER*/)\
+			and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+	),
+	AddProductToOfferSupplier_SQL3 = (
+		"\"Update " DB_PREFIX "OFFER_PRODUCT op inner join " DB_PREFIX "PRODUCT prd on prd.Id=op.IdProduct\
+			set op.PriceUnit=prd.PurchasePrice \
+		WHERE op.IdSupplier in ((/*IDSUPPLIER*/)) \
+			and op.IdOffer=(/*IDOFFER*/)\
+			and prd.Id in ('[/*PRODUCT.IDPRODUCT*/]')\
+			and (op.PriceUnit is NULL or op.PriceUnit<=0)\
+			and (prd.PurchasePrice is not NULL and prd.PurchasePrice>0) \"\\\n"
+	),
+
+	;
+
+	AddProductToOfferSupplier_SQL2 = (
+		"\"Update " DB_PREFIX "OFFER_PRODUCT set\
+			MinQuantity=MinQuantity+(select prd.QuantityPackaging from  " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+		WHERE IdSupplier in ((/*IDSUPPLIER*/)) and IdOffer=(/*IDOFFER*/)\
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	AddProductToOfferSupplier_SQL3 = (
+		"\"Update " DB_PREFIX "OFFER_PRODUCT set\
+			PriceUnit=(select prd.PurchasePrice from  " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct and (prd.PurchasePrice is not NULL and prd.PurchasePrice>0) )\
+		WHERE IdSupplier in ((/*IDSUPPLIER*/)) and IdOffer=(/*IDOFFER*/)\
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \
+			and (PriceUnit is NULL or PriceUnit<=0) \"\\\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\AddProductToOfferSupplier.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTFOROFFER;1;(string,IDPRODUCT);)*/} \\\n"),
+		@ (" (/*IDSUPPLIER*/) (/*IDOFFER*/) \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ AddProductToOfferSupplier_SQL1,
+		@ AddProductToOfferSupplier_SQL2,
+		@ AddProductToOfferSupplier_SQL3,
+),
+
+
+
+%======================================================================================================
+%
+@ "// 2. Remove Product from offer\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveProduct ",
+
+% Caption
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTFOROFFER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+% Instruction... (When Count>0)
+RemoveProduct_SQL1 = (
+	"\"Delete from " DB_PREFIX "OFFER_PRODUCT \
+		WHERE IdSupplier in ((/*IDSUPPLIER*/)) and IdOffer=(/*IDOFFER*/)\
+			and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]')\"\\\n"
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\RemoveProductFromOffer.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTFOROFFER;1;(string,IDPRODUCT);)*/} \\\n"),
+		@ (" (/*IDSUPPLIER*/) (/*IDOFFER*/) \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdatePallet_Input),
+		@ ("'\\\n"),
+		@ RemoveProduct_SQL1,
+),
+

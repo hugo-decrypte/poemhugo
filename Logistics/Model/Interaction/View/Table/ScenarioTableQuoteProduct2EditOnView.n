@@ -1,0 +1,340 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTableQuoteProduct2EditOnView.n			%
+%														%
+% 	(c)2000 Enginest. All rights reserved.				%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "RemoveProduct ",
+
+% Caption
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_REMOVE_PRODUCT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTEPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+RemoveProduct_SQL1 = (
+	"\"Delete from " DB_PREFIX "QUOTE_PRODUCT \\\n"
+	" WHERE IdQuote in ((/*IDQUOTE*/))\\\n"
+	"   and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+	%% price referece, VAT
+	RemoveProduct_SQL2 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct\\\n"
+		"   set QP.PriceUnitReference=P.PriceUnit, QP.IdVAT=P.IdVAT \\\n"
+		"  WHERE QP.IdQuote in ((/*IDQUOTE*/))\\\n"
+		"   and QP.IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+
+	%% price
+	RemoveProduct_SQL3 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct \\\n"
+		"  set QP.PriceUnit=P.PriceUnit\\\n"
+		"  WHERE (QP.PriceUnit is NULL or QP.PriceUnit<=0) and QP.IdQuote in ((/*IDQUOTE*/))\"\\\n"
+	),
+
+	%% amount HT
+	RemoveProduct_SQL4 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT QP set QP.AmountHT=QP.Quantity*QP.PriceUnit*(100.0-QP.Discount)/100.0\\\n"
+		"  WHERE QP.IdQuote in ((/*IDQUOTE*/))\\\n"
+		"   and QP.IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+
+	%% quote qty, amount HT
+	RemoveProduct_SQL5 = (
+		"\"Update " DB_PREFIX "QUOTE q set\\\n"
+		"   q.Quantity=0,\\\n"
+		"   q.AmountHT=0 \\\n"
+		"  WHERE q.Id in ((/*IDQUOTE*/))\"\\\n"
+	),
+	RemoveProduct_SQL6 = (
+		"\"Update " DB_PREFIX "QUOTE q inner join " DB_PREFIX "QUOTE_PRODUCT QP on q.Id=QP.IdQuote set\\\n"
+		"   q.Quantity=q.Quantity+QP.Quantity,\\\n"
+		"   q.AmountHT=q.AmountHT+QP.AmountHT \\\n"
+		"  WHERE q.Id in ((/*IDQUOTE*/))\"\n\n"
+	),
+
+;
+	RemoveProduct_SQL2 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT set \\\n"
+		"   PriceUnitReference=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct), \\\n"
+		"   IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct) \\\n"
+		"  WHERE IdQuote in ((/*IDQUOTE*/))\\\n"
+		"   and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	RemoveProduct_SQL3 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT \\\n"
+		"  set PriceUnit=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct) \\\n"
+		"  WHERE (PriceUnit is NULL or PriceUnit<=0) and IdQuote in ((/*IDQUOTE*/))\"\\\n"
+	),
+	RemoveProduct_SQL4 = (
+		"\"Update " DB_PREFIX "QUOTE_PRODUCT set AmountHT=Quantity*PriceUnit*(100.0-Discount)/100.0\\\n"
+		"  WHERE IdQuote in ((/*IDQUOTE*/))\\\n"
+		"   and IdProduct in ('[/*PRODUCT.IDPRODUCT*/]') \"\\\n"
+	),
+	RemoveProduct_SQL5 = (
+		"\"Update " DB_PREFIX "QUOTE set\\\n"
+		"   Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote),\\\n"
+		"   AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote) \\\n"
+		"  WHERE Id in ((/*IDQUOTE*/))\"\\\n"
+	),
+	RemoveProduct_SQL6 = (
+		"\"Update " DB_PREFIX "QUOTE set\\\n"
+		"   Quantity=0,\\\n"
+		"   AmountHT=0 \\\n"
+		"  WHERE Id in ((/*IDQUOTE*/)) and Quantity is NULL \"\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\RemoveProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tableQUOTEPRODUCT;1;(string,IDPRODUCT))*/}'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ RemoveProduct_SQL1,
+		@ RemoveProduct_SQL2,
+		@ RemoveProduct_SQL3,
+		@ RemoveProduct_SQL4,
+		@ RemoveProduct_SQL5,
+		@ RemoveProduct_SQL6,
+),
+
+
+%===========================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyQuote ",
+
+% Caption
+@ ("'" TAG_UPDATE_QUOTE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTEPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateQuoteProduct_Input = (
+	"{/*Input(" TAG_UPDATE_QUOTE " : [/*QUOTE.IDPRODUCT*/];4;\\\n"
+	"(float,QUANTITY,Quantité,[/*QUOTE.QUANTITY*/],10.0.580,0,,);\\\n"
+	"(float,PRICEQUOTE,Prix,[/*QUOTE.PRICEQUOTE*/],10.4.580,0,,);\\\n"
+	"(float,TOOLCOST,Outillage,[/*QUOTE.TOOLCOST*/],15.2.580,1);\\\n"
+	"(float,DISCOUNT,Remise,[/*QUOTE.DISCOUNT*/],10.0.580,0,,);\\\n"
+	")*/}"
+),	% JZ 0906
+	
+UpdateQuoteProduct_SQL1 = (
+	"\"Update " DB_PREFIX "QUOTE_PRODUCT set Quantity=[/*QUANTITY*/], PriceUnit=[/*PRICEQUOTE*/], ToolCost=[/*TOOLCOST*/], Discount=[/*DISCOUNT*/]\
+	WHERE IdQuote in ('[/*QUOTE.IDQUOTE*/]')\
+	AND IdProduct ='[/*QUOTE.IDPRODUCT*/]'\"\\\n"
+),
+ 
+UpdateQuoteProduct_SQL2 = (
+	"\"Update " DB_PREFIX "QUOTE_PRODUCT set Discount=0 \
+	WHERE IdQuote in ('[/*QUOTE.IDQUOTE*/]')\
+	AND Discount is NULL\"\\\n"
+),
+UpdateQuoteProduct_SQL3 = (
+	"\"Update " DB_PREFIX "QUOTE_PRODUCT set AmountHT=Quantity*PriceUnit*(100.0-Discount)/100.0\
+	WHERE IdQuote in ('[/*QUOTE.IDQUOTE*/]')\
+  and IdProduct ='[/*QUOTE.IDPRODUCT*/]'\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateQuoteProduct_SQL4 = (
+		"\"Update " DB_PREFIX "QUOTE  set Quantity=0, AmountHT=0\
+		WHERE Id in ('[/*QUOTE.IDQUOTE*/]')\"\\\n"
+	),
+
+	UpdateQuoteProduct_SQL5 = (
+		"\"Update " DB_PREFIX "QUOTE Q inner join " DB_PREFIX "QUOTE_PRODUCT QP on Q.Id=QP.IdQuote set\
+			Q.Quantity=Q.Quantity+QP.Quantity,\
+			Q.AmountHT=Q.AmountHT+QP.AmountHT \
+		WHERE Q.Id in ('[/*QUOTE.IDQUOTE*/]')\"\n\n"
+	),
+
+	;
+	
+	UpdateQuoteProduct_SQL4 = (""),
+	UpdateQuoteProduct_SQL5 = (
+		"\"Update " DB_PREFIX "QUOTE  set\
+			Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote),\
+			AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote) \
+		WHERE Id in ('[/*QUOTE.IDQUOTE*/]')\"\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuoteProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTEPRODUCT;2;(string,IDQUOTE);(string,IDPRODUCT))*/} \\\n"),
+		@ (UpdateQuoteProduct_Input),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ UpdateQuoteProduct_SQL1,
+		@ UpdateQuoteProduct_SQL2,
+		@ UpdateQuoteProduct_SQL3,
+		@ UpdateQuoteProduct_SQL4,
+		@ UpdateQuoteProduct_SQL5,
+),
+
+
+
+%===========================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyComments ",
+
+% Caption
+@ (" '" TAG_UPDATE_COMMENT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_UPDATE_COMMENT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTEPRODUCT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateQuoteProductComment_Input = (
+	"{/*Input(" TAG_UPDATE_COMMENT " : [/*QUOTE.IDPRODUCT*/];2;\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*QUOTE.COMMENTS*/],100." inputWidth ",1);\\\n"
+	"(string,COMMENTS2,Commentaire Sup,[/*QUOTE.COMMENTS2*/],100." inputWidth ",1);\\\n"
+	")*/}"
+),
+
+UpdateQuoteProductComment_SQL1 = (
+	"\"Update " DB_PREFIX "QUOTE_PRODUCT set Comments='[/*COMMENTS*/]', Comments_1='[/*COMMENTS2*/]'\
+	WHERE IdQuote in ('[/*QUOTE.IDQUOTE*/]')\
+	and IdProduct in ('[/*QUOTE.IDPRODUCT*/]')\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuoteProductComment.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTEPRODUCT;2;(string,IDQUOTE);(string,IDPRODUCT))*/} \\\n"),
+		@ (UpdateQuoteProductComment_Input),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ UpdateQuoteProductComment_SQL1,
+		
+),
+.
+

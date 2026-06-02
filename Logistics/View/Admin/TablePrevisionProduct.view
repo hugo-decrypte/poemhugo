@@ -1,0 +1,74 @@
+View ViewTablePREVISIONPRODUCT 'Prévision vente (quantité)' 'Prévision vente (quantité)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePREVISIONPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Prévision vente (quantité);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right}]"\
+"[DATAOBJ=PREVISIONPRODUCT;FILLCOLOR=LINERGB]"
+
+Data PREVISIONPRODUCT 'Prévision vente (quantité)' PREVISIONPRODUCT HTTPSQL 0 '[FIND={NAMECLUB,ID,DESIGNATION,COST,WEIGHT,QUANTITY,QTY1,QTY2,QTY3,QTY4,QTY5,QTY6,QTY7,QTY8,QTY9,QTY10,QTY11,QTY12}]'   [DOUBLECLICK=] \
+"[18;(string,NAMECLUB,Division,,10,,);(string,ID,Produit,,15,,);(string,DESIGNATION,Désignation,,20,,);(int,COST,CA (K€),,15,,);(int,WEIGHT,Poids,,10,,);(int,QUANTITY,Quantité,,13,,);(int,QTY1,M+1,,10,,);(int,QTY2,M+2,,10,,);(int,QTY3,M+3,,10,,);(int,QTY4,M+4,,10,,);(int,QTY5,M+5,,10,,);(int,QTY6,M+6,,10,,);(int,QTY7,M+7,,10,,);(int,QTY8,M+8,,10,,);(int,QTY9,M+9,,10,,);(int,QTY10,M+10,,10,,);(int,QTY11,M+11,,10,,);(int,QTY12,M+12,,10,,);(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT  Val.ID as ID, Val.ID as REFERENCE,Val.DIVISION as NAMECLUB,\
+		 Val.PU as PRICE,\
+		 sum(Val.Q) as QUANTITY,\
+		 format(sum(Val.C), '0.00') as COST,\
+		 int(sum(Val.W)+0.5) as WEIGHT,\
+		 sum(IIF(Val.NoM=1, Val.Q, 0)) as QTY1, format(sum(IIF(Val.NoM=1, Val.C, 0)),'0.00') as COST1, sum(IIF(Val.NoM=1,  int(Val.W+0.5), 0)) as WEIGHT1,\
+		 sum(IIF(Val.NoM=2, Val.Q, 0)) as QTY2, format(sum(IIF(Val.NoM=2, Val.C, 0)),'0.00') as COST2, sum(IIF(Val.NoM=2,  int(Val.W+0.5), 0)) as WEIGHT2,\
+		 sum(IIF(Val.NoM=3, Val.Q, 0)) as QTY3, format(sum(IIF(Val.NoM=3, Val.C, 0)),'0.00') as COST3, sum(IIF(Val.NoM=3,  int(Val.W+0.5), 0)) as WEIGHT3,\
+		 sum(IIF(Val.NoM=4, Val.Q, 0)) as QTY4, format(sum(IIF(Val.NoM=4, Val.C, 0)),'0.00') as COST4, sum(IIF(Val.NoM=4,  int(Val.W+0.5), 0)) as WEIGHT4,\
+		 sum(IIF(Val.NoM=5, Val.Q, 0)) as QTY5, format(sum(IIF(Val.NoM=5, Val.C, 0)),'0.00') as COST5, sum(IIF(Val.NoM=5,  int(Val.W+0.5), 0)) as WEIGHT5,\
+		 sum(IIF(Val.NoM=6, Val.Q, 0)) as QTY6, format(sum(IIF(Val.NoM=6, Val.C, 0)),'0.00') as COST6, sum(IIF(Val.NoM=6,  int(Val.W+0.5), 0)) as WEIGHT6,\
+		 sum(IIF(Val.NoM=7, Val.Q, 0)) as QTY7, format(sum(IIF(Val.NoM=7, Val.C, 0)),'0.00') as COST7, sum(IIF(Val.NoM=7,  int(Val.W+0.5), 0)) as WEIGHT7,\
+		 sum(IIF(Val.NoM=8, Val.Q, 0)) as QTY8, format(sum(IIF(Val.NoM=8, Val.C, 0)),'0.00') as COST8, sum(IIF(Val.NoM=8,  int(Val.W+0.5), 0)) as WEIGHT8,\
+		 sum(IIF(Val.NoM=9, Val.Q, 0)) as QTY9, format(sum(IIF(Val.NoM=9, Val.C, 0)),'0.00') as COST9, sum(IIF(Val.NoM=9,  int(Val.W+0.5), 0)) as WEIGHT9,\
+		 sum(IIF(Val.NoM=10, Val.Q, 0)) as QTY10, format(sum(IIF(Val.NoM=10, Val.C, 0)),'0.00') as COST10, sum(IIF(Val.NoM=10,  int(Val.W+0.5), 0)) as WEIGHT10,\
+		 sum(IIF(Val.NoM=11, Val.Q, 0)) as QTY11, format(sum(IIF(Val.NoM=11, Val.C, 0)),'0.00') as COST11, sum(IIF(Val.NoM=11,  int(Val.W+0.5), 0)) as WEIGHT11,\
+		 sum(IIF(Val.NoM=12, Val.Q, 0)) as QTY12, format(sum(IIF(Val.NoM=12, Val.C, 0)),'0.00') as COST12, sum(IIF(Val.NoM=12,  int(Val.W+0.5), 0)) as WEIGHT12,\
+		 Val.DES as DESIGNATION,\
+		 '(255 255 255 )' as LINERGB \
+	 FROM  \
+		 (select P.idClub as DIVISION,P.ID as ID, P.Reference as REF, P.PriceUnit as PU, P.designation as DES,\
+				13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \
+			from PRODUCT P, DELIVERY_PRODUCT DP, DELIVERY D , MONTHLABEL M \
+			WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\
+		 		AND D.DateDelivery>=(format(DateAdd('m', -M.NoMonth, Date()),'YYYY-MM')+'-01') \
+		 		AND D.DateDelivery<(format(DateAdd('m', -M.NoMonth, Date()),'YYYY-MM')+'-31') \
+		 		AND p.idClub='(/*CLUBID*/)' AND p.selected='1' \
+			GROUP BY P.ID, P.Reference, P.designation, P.PriceUnit, P.Weight, M.NoMonth,P.idClub, P.selected\
+		 ) Val\
+	 GROUP BY Val.ID, Val.REF,Val.PU, Val.DES, Val.DIVISION\
+	 UNION SELECT 'TOTAL' as ID, 'ZZZ' as REFERENCE, '' as NAMECLUB,\
+		 0 as PRICE,\
+		 sum(Val.Q) as QUANTITY,\
+		 format(sum(Val.C), '0.00') as COST,\
+		 int(sum(Val.W)+0.5) as WEIGHT,\
+		 sum(IIF(Val.NoM=1, Val.Q, 0)) as QTY1, format(sum(IIF(Val.NoM=1, Val.C, 0)),'0.00') as COST1, sum(IIF(Val.NoM=1,  int(Val.W+0.5), 0)) as WEIGHT1,\
+		 sum(IIF(Val.NoM=2, Val.Q, 0)) as QTY2, format(sum(IIF(Val.NoM=2, Val.C, 0)),'0.00') as COST2, sum(IIF(Val.NoM=2,  int(Val.W+0.5), 0)) as WEIGHT2,\
+		 sum(IIF(Val.NoM=3, Val.Q, 0)) as QTY3, format(sum(IIF(Val.NoM=3, Val.C, 0)),'0.00') as COST3, sum(IIF(Val.NoM=3,  int(Val.W+0.5), 0)) as WEIGHT3,\
+		 sum(IIF(Val.NoM=4, Val.Q, 0)) as QTY4, format(sum(IIF(Val.NoM=4, Val.C, 0)),'0.00') as COST4, sum(IIF(Val.NoM=4,  int(Val.W+0.5), 0)) as WEIGHT4,\
+		 sum(IIF(Val.NoM=5, Val.Q, 0)) as QTY5, format(sum(IIF(Val.NoM=5, Val.C, 0)),'0.00') as COST5, sum(IIF(Val.NoM=5,  int(Val.W+0.5), 0)) as WEIGHT5,\
+		 sum(IIF(Val.NoM=6, Val.Q, 0)) as QTY6, format(sum(IIF(Val.NoM=6, Val.C, 0)),'0.00') as COST6, sum(IIF(Val.NoM=6,  int(Val.W+0.5), 0)) as WEIGHT6,\
+		 sum(IIF(Val.NoM=7, Val.Q, 0)) as QTY7, format(sum(IIF(Val.NoM=7, Val.C, 0)),'0.00') as COST7, sum(IIF(Val.NoM=7,  int(Val.W+0.5), 0)) as WEIGHT7,\
+		 sum(IIF(Val.NoM=8, Val.Q, 0)) as QTY8, format(sum(IIF(Val.NoM=8, Val.C, 0)),'0.00') as COST8, sum(IIF(Val.NoM=8,  int(Val.W+0.5), 0)) as WEIGHT8,\
+		 sum(IIF(Val.NoM=9, Val.Q, 0)) as QTY9, format(sum(IIF(Val.NoM=9, Val.C, 0)),'0.00') as COST9, sum(IIF(Val.NoM=9,  int(Val.W+0.5), 0)) as WEIGHT9,\
+		 sum(IIF(Val.NoM=10, Val.Q, 0)) as QTY10, format(sum(IIF(Val.NoM=10, Val.C, 0)),'0.00') as COST10, sum(IIF(Val.NoM=10,  int(Val.W+0.5), 0)) as WEIGHT10,\
+		 sum(IIF(Val.NoM=11, Val.Q, 0)) as QTY11, format(sum(IIF(Val.NoM=11, Val.C, 0)),'0.00') as COST11, sum(IIF(Val.NoM=11,  int(Val.W+0.5), 0)) as WEIGHT11,\
+		 sum(IIF(Val.NoM=12, Val.Q, 0)) as QTY12, format(sum(IIF(Val.NoM=12, Val.C, 0)),'0.00') as COST12, sum(IIF(Val.NoM=12,  int(Val.W+0.5), 0)) as WEIGHT12,\
+		 ' ' as DESIGNATION,\
+		 '(220 220 255 )' as LINERGB \
+	 FROM \
+		 (select 13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \
+			from PRODUCT P, DELIVERY_PRODUCT DP, DELIVERY D , MONTHLABEL M \
+			WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\
+		 		AND D.DateDelivery>=(format(DateAdd('m', -M.NoMonth, Date()),'YYYY-MM')+'-01') \
+		 		AND D.DateDelivery<(format(DateAdd('m', -M.NoMonth, Date()),'YYYY-MM')+'-31') \
+		 		AND p.idClub='(/*CLUBID*/)' AND p.selected='1' \
+			GROUP BY M.NoMonth\
+		 ) Val\
+	 ORDER BY REFERENCE "
+

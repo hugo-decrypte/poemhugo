@@ -1,0 +1,33 @@
+%===============================================%
+%						%
+%		   Vehicle Routing		%
+%						%
+%		ReadProductSelected.n		%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+	
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],% li 0506
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+% Read input buffer
+'()' => (
+	nbProductSelected			= (),
+	nbParameterSelected		= (),
+
+	\forall i \in [1,nbProductSelected] (
+		%idClubSelected_{i}	:: "",
+		idProductSelected_{i}	:: "",
+
+		%idClubSelected_{i}	= (),%li 0507b
+		idProductSelected_{i}	= (),
+	),
+
+	IdProductSelected = \{ \forall i \in [1, nbProductSelected] idProductSelected_{i} \},
+
+),
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+

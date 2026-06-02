@@ -1,0 +1,9 @@
+﻿SHEET_NUMBER=1;
+SHEET_NAME=Bon de Commande;12;6;
+Commande No;ID Produit;Désignation;ID Client;Date de Commande;Date de livraison prévue;ID adresse (livraison);Quantité;Prix d'achat unitaire (€);% Remise;Remise;Montant net H.T (€);
+idOrder;idProduct;designation;idClient;date1;date2;idSite2;quantity;priceUnit;discount;discount;amount;
+string key;string;string;string key;dd/mm/yyyy hh:mm;dd/mm/yyyy hh:mm;string;int;float;float;float;float;
+K23-G0998_00;26/09/2026;53057600_3 ENTRETOISE;NICKELE;09/12/2025;1000;0,5600;560,00;;;;;
+K23-G0998_00;26/09/2026;56163300_2 ENTRETOISE;FE/ZN;09/04/2026;200;0,2100;42,00;;;;;
+K23-G0998_00;26/09/2026;57816900_1 AXE ZBC;;18/01/2026;400;0,6800;272,00;;;;;
+K23-G0998_00;26/09/2026;58558510_0 AXE FE/ZN;;19/12/2025;322;1,0800;347,76;;;;;

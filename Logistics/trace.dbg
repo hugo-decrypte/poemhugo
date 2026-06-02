@@ -1,0 +1,341 @@
+#thread = 32: #lot = 4, #instance = 30000 (size = 50); #public parameter = 1000
+[D:\POEM\Logistics\Model\Script\ScriptGenerateSolution.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Script\ScriptGenerateSolution.n](16,2): included file [D:\POEM\Logistics\Model\Common\Config\ReadMacro.n] neglected; already included
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](204,17): Warning C16: duplicate declaration ' SQL_ADDMONTHEND '  for ' SQL_ADDYEAREND = ("," SQL_CURRENTDATE ")") '
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](201,17): click to related object
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](207,17): Warning C16: duplicate declaration ' SQL_ADDDAYEND '  for ' SQL_ADDYEAREND = ("," SQL_CURRENTDATE ")") '
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](201,17): click to related object
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](422,9): Info C10: input ["Logistics": "": _](1,1) connected instead of input pool [D:\POEM\Logistics\Data\GenerateSolution.dat](2,15)
+[D:\POEM\Logistics\Model\Common\Config\ReadDatabase.n](433,9): Info C10: default input [D:\POEM\Logistics\Data\GenerateSolution.dat](2,15) takes place of input pool ["Logistics": "": _](2,17)
+[D:\POEM\Logistics\Model\Common\Config\ReadClub.n](61,17): Info C9: identified: bi-mapping indexing ' idClub_{clubId_{i}} '
+[D:\POEM\Logistics\Model\Common\Config\ReadUser.n](47,17): Info C9: identified: bi-mapping indexing ' idUser_{userId_{i}} '
+[D:\POEM\Logistics\Model\Common\Config\ReadConfig.n](37,45): Info C9: string ' bufSolution ' is used as buffer for buffer pool ' [bufSolution:_] '
+[D:\POEM\Logistics\Model\Common\Config\ReadConfig.n](327,11): Related Club Domain: ('01')
+[D:\POEM\Logistics\Model\Common\Config\CheckLog.n](13,9): Info C9: variable considered an assignment: sqlInsertLog := ("INSERT	INTO " DB_PREFIX "LOG(idClub,idUser,ip," SQL_FIELD_PERMISSION ",t1)VALUES('" idClubLogin "','" idUserLogin "','" ipClub_{clubId_{idClubLogin}} "','" permissionLogin "','" 'yyyy-mm-dd hh:mm:ss' "')")
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](85,2): Info C9: function <matchingVehicle> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](127,68)) to be parsed before ' matchingVehicle ' (at [D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](151,1)) due to function ' matchingVehicle(VehicleActive,maxBacktrack) ' at input state
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](12,2): Info C9: function <routing> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](161,67)) to be parsed before ' resultLoop ' (at [D:\POEM\Logistics\Model\Solver\ComputeSolution.n](47,1)) due to function ' routing(0,solutionBuf,nameObjectiveTop,mileage0,TourActive0,maxBacktrack,maxTime,stepCost,stepTime,stepDistance) ' at input state
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](51,2): Info C9: function <reoptimize> (included in [D:\POEM\Logistics\Model\Script\ScriptGenerateSolution.n](55,117)) to be parsed before ' reoptimize ' (at [D:\POEM\Logistics\Model\Solver\ComputeSolution.n](59,9)) due to function ' reoptimize(0,solutionBuf,TAG_MILEAGE,maxBacktrack,maxTime,stepCost,stepTime,stepDistance,TourActive0,{},{},0,0,mileage0,0,mileageLoop_{0}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](11,2): Info C9: function <initRelaxation> (included in [D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](19,52)) to be parsed before ' ( ' (at [D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](18,1)) due to function ' initRelaxation(solutionBuf,mileageLoop_{0}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](23,2): Info C9: function <relaxSolution> (included in [D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](31,55)) to be parsed before ' \forall ' (at [D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](23,1)) due to function ' relaxSolution(loop,solutionBuf,maxBacktrack,Swap_oLoop_{loop-1},Swap_iLoop_{loop-1},tour_oLoop_{loop-1},tour_iLoop_{loop-1},mileageNotRelaxedLoop_{loop-1}) ' at input state
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](696,45): Warning C16: simplification: ' (strictTimeOrder_{o}?TimeWin0Order_{o}:[\infTimeWin0Order_{o},\supTimeDateOrder_{o}]) ' equivalent to ' [\inf{TimeWin0Order_{o}},\sup{TimeDateOrder_{o}}] ' due to constant ' strictTimeOrder_{o} ' (= F)
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](819,49): Optimiser SVA  #Véhicule : 6    #Commande : 60    Objectif : #Tournée    Horizon : 2024-12-28 06:00 -> 2024-12-29 18:59
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](826,32): ........................................................................
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](830,79): 08:51:03  ... System Involves Vehicle Multi-Day Routing Constraints
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](835,80): 08:51:03  ... System Involves Vehicle Multi-Tour Routing Constraints
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](840,84): 08:51:03  ... System Involves Tour Completed Within One Day Constraint
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](856,88): 08:51:03  ... System Involves Vehicle Daily Worktime Constraint; Try Getting Rid Of It By Adjusting Shift Times
+[D:\POEM\Logistics\Model\Solver\PreSolving.n](859,88): 08:51:03  ... System Involves Vehicle Daily Makespan Constraint; Try Getting Rid Of It By Adjusting Shift Times
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](47,18): function <routing> parsing starts at function call
+[D:\POEM\Logistics\Model\Solver\Routing.n](1250,21): Info C9: float mean used for evaluating strategy ' instantiatedPreviousTour_{t} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](1267,37): Info C9: float mean used for evaluating strategy ' tSinkSiteTour_{t,s} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](1279,29): Info C9: float mean used for evaluating strategy ' (maxTourToInstantiate>2)*\underline{chainedQueryOrder_{o}} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](1283,29): Info C9: float mean used for evaluating strategy ' slackTourOrder_{n} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](1291,29): Info C9: float mean used for evaluating strategy ' t1QueryNextOrder_{o,n} '
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](12,2): <routing> pre-search starts
+[D:\POEM\Logistics\Model\Solver\Routing.n](440,40): Info C9: identified: ' t \in TourActive ' implies ' #{SourceOrderTour_{t}} > 1 ' for ' \bigcup_{t \in TourActiveVehicle_{v}}{SourceOrderTour_{t}} ' (MULTIUNION)
+[D:\POEM\Logistics\Model\Solver\Routing.n](587,29): Info C9: identified: ' t \in TourActive ' equivalent to ' #{SourceOrderTour_{t}} > 1 ' for ' \bigcup_{t \in TourActive}{SourceOrderTour_{t}} ' (MULTIUNION)
+[D:\POEM\Logistics\Model\Solver\DailyTour.n](84,54): Info C9: identified: ' t \in TourActive ' implies ' #{SourceOrderTour_{t}} > 1 ' for ' \bigcup_{t \in TourActiveDateVehicle_{v,d}}{SourceOrderTour_{t}} ' (MULTIUNION)
+[D:\POEM\Logistics\Model\Solver\Routing.n](84,41): Info C9: identified: coupled-in-dom sum ' \sum_{i \in OrderTour_{t}}{sameTourOrderOrderTour_{t,o,i}} ' for ' \bigcup_{t \in TourActive}{OrderTour_{t}} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](84,41): Info C9: identified: coupled-in-dom sum ' \sum_{i \in OrderTour_{t}}{sameTourOrderOrderTour_{t,o,i}} ' for ' TimeOrder_{nextOrder_{o}} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](84,41): Info C9: identified: coupled-in-dom sum ' \sum_{i \in OrderTour_{t}}{sameTourOrderOrderTour_{t,o,i}} ' for ' \sum_{t \in TourActive}{quantityTour_{t}} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](440,40): Info C9: identified: ' t \in TourActive ' implies ' #{SourceOrderTour_{t}} > 1 ' for ' \bigcup_{t \in TourActiveVehicle_{v}}{SourceOrderTour_{t}} ' (MULTIUNION)
+[D:\POEM\Logistics\Model\Solver\Routing.n](440,40): Info C9: identified: sum sequence ' \bigcup_{t \in TourActiveVehicle_{v}}{SourceOrderTour_{t}} ' for ' \bigcup_{t \in TourActive}{SourceOrderTour_{t}} ' of positive arguments
+[D:\POEM\Logistics\Model\Solver\Routing.n](452,28): Info C9: identified: sum sequence ' \bigcup_{t \in TourActiveVehicle_{v}}{OrderTour_{t}} ' for ' \bigcup_{t \in TourActive}{OrderTour_{t}} ' of positive arguments
+[D:\POEM\Logistics\Model\Solver\DailyTour.n](84,54): Info C9: identified: ' t \in TourActive ' implies ' #{SourceOrderTour_{t}} > 1 ' for ' \bigcup_{t \in TourActiveDateVehicle_{v,d}}{SourceOrderTour_{t}} ' (MULTIUNION)
+[D:\POEM\Logistics\Model\Solver\Routing.n](528,38): Info C9: identified: sum sequence ' \sum_{t \in TourActiveVehicle_{v}}{quantityTour_{t}} ' for ' \sum_{t \in TourActive}{quantityTour_{t}} ' of positive arguments
+[D:\POEM\Logistics\Model\Output\WriteSolutionBuffer.n](53,9): Info C9: identified: argument unification ' weightTour_{t}=\sum_{#1 \in OrderTour_{t}}{weightOrder_{#1}} ' for fuzzy reasoning over arguments of ' \sum_{t \in TourActive}{weightTour_{t}} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionBuffer.n](54,9): Info C9: identified: argument unification ' volumeTour_{t}=\sum_{#1 \in OrderTour_{t}}{volumeOrder_{#1}} ' for fuzzy reasoning over arguments of ' \sum_{t \in TourActive}{volumeTour_{t}} '
+[D:\POEM\Logistics\Model\Solver\Routing.n](222,9): Info C9: identified: argument unification ' mileageOrder_{o}=dOrderOrder_{o,nextOrder_{o}} ' for fuzzy reasoning over arguments of ' \sum_{o \in SourceActiveOrder}{mileageOrder_{o}} '
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](12,2): <routing> pre-search ends
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](44,1): function <routing> parsing ends
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](59,9): function <reoptimize> parsing starts at function call
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](51,2): <reoptimize> pre-search starts
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](51,2): <reoptimize> pre-search ends
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](116,1): function <reoptimize> parsing ends
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](19,9): function <initRelaxation> parsing starts at function call
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](11,2): <initRelaxation> pre-search starts
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](11,2): <initRelaxation> pre-search ends
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](20,1): function <initRelaxation> parsing ends
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](27,17): function <relaxSolution> parsing starts at function call
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](23,2): <relaxSolution> pre-search starts
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](23,2): <relaxSolution> pre-search ends
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](275,1): function <relaxSolution> parsing ends
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](118,2): function <writeSolution> parsing starts at the end of sub-model [D:\POEM\Logistics\Model\Solver\GenerateSolution.n, _, _]
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](151,1): function <matchingVehicle> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](96,17): Warning C16: function definition <matchingVehicle> not encapsulated due to existence of not instantiated global variable ' mappingVehicle_{1} ' (= <1..6>)
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](117,29): Info C9: float mean used for evaluating strategy ' rateMappingQuantityVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](118,29): Info C9: float mean used for evaluating strategy ' rateMappingWeightVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](119,29): Info C9: float mean used for evaluating strategy ' rateMappingVolumeVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](122,29): Info C9: float mean used for evaluating strategy ' maxQuantityPlanVehicle_{m}-quantityPlanVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](123,29): Info C9: float mean used for evaluating strategy ' maxWeightPlanVehicle_{m}-weightPlanVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](124,29): Info C9: float mean used for evaluating strategy ' maxVolumePlanVehicle_{m}-volumePlanVehicle_{v} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](85,2): <matchingVehicle> pre-search starts
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](98,17): Info C9: identified: argument unification ' rateMappingQuantityVehicle_{v}=(quantityPlanVehicle_{v}/maxQuantityPlanVehicle_{mappingVehicle_{v}})*100 ' for fuzzy reasoning over arguments of ' \sum_{v \in Vehicle}{rateMappingQuantityVehicle_{v}} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](100,17): Info C9: identified: argument unification ' rateMappingWeightVehicle_{v}=(weightPlanVehicle_{v}/maxWeightPlanVehicle_{mappingVehicle_{v}})*100 ' for fuzzy reasoning over arguments of ' \sum_{v \in Vehicle}{rateMappingWeightVehicle_{v}} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](101,17): Info C9: identified: argument unification ' rateMappingVolumeVehicle_{v}=(volumePlanVehicle_{v}/maxVolumePlanVehicle_{mappingVehicle_{v}})*100 ' for fuzzy reasoning over arguments of ' \sum_{v \in Vehicle}{rateMappingVolumeVehicle_{v}} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](85,2): <matchingVehicle> pre-search ends
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](147,1): function <matchingVehicle> parsing ends
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](271,9): Info C9: ' t2ServiceOrder_{sinkTour_{t}} ' unified to ' t2Order_{sinkTour_{t}} ' by ' t1Order_{sinkTour_{$0}} '
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](132,18): Warning C16: included file ['Work Directory' "Model\Output\WriteSolutionMappingBuffer.n"] in function <writeSolution> defined under fuzzy switch ' \bigvee_{#0 \in VehicleActive}{mappingVehicle_{#0}<>#0} '
+[D:\POEM\Logistics\Model\Output\WriteSolutionMappingBuffer.n](186,1): Warning C16: set Debug mode or Trace Level 3 (if parallel computing feasible) for breakpoint at parsing
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](118,2): <writeSolution> pre-search starts
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](118,2): <writeSolution> pre-search ends
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](153,1): function <writeSolution> parsing ends
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\Routing.n](1044,21): Info C9: objective ' \min nbTourActive ' takes effect
+[D:\POEM\Logistics\Model\Solver\Routing.n](1045,21): Info C9: objective ' \min mileage0:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\Routing.n](1044,21): C2: lower bound for objective ' nbTourActive ' (= <4..7>) initialized to 4
+[D:\POEM\Logistics\Model\Solver\Routing.n](1045,21): C2: lower bound for objective ' mileage ' (= <592..12499>) initialized to 592
+[D:\POEM\Logistics\Model\Solver\Routing.n](1227,9): <routing> [1] search starts
+[D:\POEM\Logistics\Model\Solver\PredictRouting.n](15,108): 08:51:05  ... #Vehicle minimum: 3  #Tour minimum: 4
+[D:\POEM\Logistics\Model\Solver\PredictRouting.n](18,32): ........................................................................
+[D:\POEM\Logistics\Model\Solver\PredictRouting.n](20,45): 08:51:05  Résolution
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](35,91): 08:51:07  ... Progrès: 100
+[D:\POEM\Logistics\Model\Output\WriteSolutionBuffer.n](206,65): 08:51:08  ... Solution 1: Profit : 173830.00  Coût : 83770.00  #Véhicule : 4  #Tournée : 4  Distance : 1310  Temps travail : 35:56  Durée : 40:04
+[D:\POEM\Logistics\Model\Solver\Routing.n](1044,21): C2: ' nbTourActive ' decreased to 4
+[D:\POEM\Logistics\Model\Solver\Routing.n](1045,21): ' mileage ' decreased to 1310
+[D:\POEM\Logistics\Model\Output\WriteSolutionBuffer.n](206,65): 08:51:08  ... Solution 2: Profit : 173363.00  Coût : 84237.00  #Véhicule : 4  #Tournée : 4  Distance : 1277  Temps travail : 35:36  Durée : 39:44
+[D:\POEM\Logistics\Model\Solver\Routing.n](1044,21): C2: ' nbTourActive ' decreased to 4
+[D:\POEM\Logistics\Model\Solver\Routing.n](1045,21): ' mileage ' decreased to 1277
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](47,18): C8: stopped with solution for function ' routing(0,solutionBuf,nameObjectiveTop,mileage0,TourActive0,maxBacktrack,maxTime,stepCost,stepTime,stepDistance) '
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](56,32): ........................................................................
+[D:\POEM\Logistics\Model\Solver\ComputeSolution.n](57,50): 08:51:05  Optimisation
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](173,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\RelaxTSP.n](308,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](283,10): 08:51:09  ...... Tournée 1 : 21P01-1    #Commande : 17    15 D2311015  18 D2311018  23 D2312001  30 D2312008  32 D2312010  34 D2312012  44 D2401001  45 D2401002  46 D2401005  50 D2402001  51 D2402003  52 E8000000  55 O9999994  56 O9999995  57 O9999996  59 O9999998  60 O9999999      Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](22,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' OrderTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](303,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{1}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <123..207>) initialized to 123
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 207
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](173,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\RelaxTSP.n](308,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](283,10): 08:51:10  ...... Tournée 4 : 30P01-1    #Commande : 19    1 D20200541  2 D20220875  3 D2310001  4 D2311001  5 D2311002  6 D2311003  7 D2311004  8 D2311005  9 D2311006  11 D2311009  13 D2311013  14 D2311014  21 D2311021  22 D2311022  37 D2312015  40 D2312018  47 D2401007  49 D2401009  58 O9999997      Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](22,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' OrderTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](303,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{4}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <162..279>) initialized to 162
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 274
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](173,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\RelaxTSP.n](308,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](283,10): 08:51:12  ...... Tournée 5 : 30P02-1    #Commande : 11    10 D2311007  24 D2312002  26 D2312004  27 D2312005  29 D2312007  31 D2312009  33 D2312011  36 D2312014  48 D2401008  53 E8000001  54 E8000002      Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](22,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' OrderTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](303,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{5}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <196..395>) initialized to 196
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 392
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 385
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 379
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 378
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 374
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\GenerateSolution.n](173,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\RelaxTSP.n](308,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](283,10): 08:51:14  ...... Tournée 6 : 30P03-1    #Commande : 13    12 D2311012  16 D2311016  17 D2311017  19 D2311019  20 D2311020  25 D2312003  28 D2312006  35 D2312013  38 D2312016  39 D2312017  41 D2312019  42 D2312020  43 D2312021      Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](22,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' OrderTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](289,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](303,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{6}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <228..392>) initialized to 228
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 383
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\RelaxTSP.n](310,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,boundMileageTSP,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](134,21): C2: lower bound for objective ' deviationQuantity ' (= <0.000000000000000000..+\infty>) initialized to 0.000000000000000000
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](126,9): <matchingVehicle> [1] search starts
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](134,21): C2: ' deviationQuantity ' decreased to <9.645050048828125000..9.645051002502441406>
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](151,1): C5: optimal solution proved for function ' matchingVehicle(VehicleActive,!2) '
+[D:\POEM\Logistics\Model\Output\WriteSolutionMappingBuffer.n](186,1): programmed break point at function <writeSolution> output
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](145,27): 08:51:16  ...... Solution : Profit : 173363.00  Coût : 84237.00  #Véhicule : 4  #Tournée : 4  Distance : 1238  Temps travail : 35:22  Durée : 39:48
+[D:\POEM\Logistics\Model\Relaxation\WriteRelaxation.n](41,34): Warning C16: extraction of not well defined variable: improvement_i (improvement_i = <-\infty..+\infty>)
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](27,17): Info C9: <relaxSolution> to be called ~ 120 times
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: upper bound for objective ' improvement ' (= <1..+\infty>) initialized to +\infty
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](199,9): <relaxSolution> [1] search starts
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:33  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F8403","F9997"}, {"F9977","F9966","F1314","F9999","F9987","F9981","F9985","F9960"}  Improvement : 27, 51
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 78
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:33  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F8403","F9997"}, {"F9977","F9966","F1314","F9999","F9987","F9981","F9985"}  Improvement : 27, 79
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 106
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:33  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F8403","F9997"}, {"F9977","F9966","F1314","F9999","F9987","F9981"}  Improvement : 27, 125
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 152
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:33  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F8403","F9997"}, {"F9977","F9966","F1314","F9999","F9981"}  Improvement : 27, 155
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 182
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:34  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F9997"}, {"F9977","F9966","F1314","F9999","F9987","F9981"}  Improvement : 90, 125
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 215
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:34  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9978","F9971","F9997"}, {"F9977","F9966","F1314","F9999","F9981"}  Improvement : 90, 155
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 245
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:34  ... 1 Tournées à relaxer : 4 5  30P01-1  30P02-1  Sites : {44} {36}  {"F9996"} {"F9985"}  Sites : {"F8402","F9997"}, {"F9977","F9966","F1314","F9999","F9981"}  Improvement : 95, 155
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 250
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](271,17): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](27,17): C8: stopped with solution for function ' relaxSolution(1,solutionBuf,maxBacktrack,Swap_oLoop_{1-1},Swap_iLoop_{1-1},tour_oLoop_{1-1},tour_iLoop_{1-1},mileageNotRelaxedLoop_{1-1}) '
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](39,9): Info C9: <reoptimize> to be called ~ 120 times
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](43,19): 08:52:34  ... 1 Tournées à relaxer : {4} {5}  Commandes clés : {19,41} {15,18,30,32,34,44..46,50..52}  {"D2311019","D2312019"} {"D2311015","D2311018","D2312008","D2312010","D2312012","D2401001","D2401002","D2401005","D2402001","D2402003","E8000000"}  Sites : {"F8402","F9997"} {"F9977","F9966","F1314","F9999","F9981"}
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](165,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](34,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\ReadRelaxTSP.n](282,2): 08:52:34  Optimiser par tournée 30P01-1    #Commande : 22    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](25,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' quantityTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](28,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{4}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <239..1237>) initialized to 239
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](11,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): C7: stopped without solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): click to related object
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](52,22): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](158,26): 08:52:34  ...... Pas de meilleure solution : 30P01-1
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](160,44): Info C15: failure: assign T to ' false ' (= F)
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](160,44): Warning C22: stopped without solution
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](113,26): 08:52:37  ...... Pas de meilleure solution
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: upper bound for objective ' improvement ' (= <1..+\infty>) initialized to +\infty
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](199,9): <relaxSolution> [2] search starts
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:37  ... 2 Tournées à relaxer : 1 5  21P01-1  30P02-1  Sites : {38} {36}  {"F9989"} {"F9985"}  Sites : {"F3012","F3007","F9982"}, {"F9966"}  Improvement : 7, 1
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 8
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:37  ... 2 Tournées à relaxer : 1 5  21P01-1  30P02-1  Sites : {38} {36}  {"F9989"} {"F9985"}  Sites : {"F3007","F9982"}, {"F9966"}  Improvement : 16, 1
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 17
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:38  ... 2 Tournées à relaxer : 1 4  21P01-1  30P01-1  Sites : {38} {12}  {"F9989"} {"F8403"}  Sites : {"F3012","F3007","F9982"}, {"F9978","F9971"}  Improvement : 7, 18
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 25
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:38  ... 2 Tournées à relaxer : 1 4  21P01-1  30P01-1  Sites : {38} {12}  {"F9989"} {"F8403"}  Sites : {"F3007","F9982"}, {"F9971"}  Improvement : 15, 15
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 30
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](271,17): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](27,17): C8: stopped with solution for function ' relaxSolution(2,solutionBuf,maxBacktrack,Swap_oLoop_{2-1},Swap_iLoop_{2-1},tour_oLoop_{2-1},tour_iLoop_{2-1},mileageNotRelaxedLoop_{2-1}) '
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](43,19): 08:52:38  ... 2 Tournées à relaxer : {1} {4}  Commandes clés : {24,33,48,54} {12}  {"D2312002","D2312011","D2401008","E8000002"} {"D2311012"}  Sites : {"F3007","F9982"} {"F9971"}
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](165,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](34,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\ReadRelaxTSP.n](282,2): 08:52:38  Optimiser par tournée 21P01-1    #Commande : 8    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](25,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' quantityTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](28,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{1}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <216..1237>) initialized to 216
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 424
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 420
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 410
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 401
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 395
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 393
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): C5: optimal solution proved for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](44,18): 08:52:38  ...... 21P01-1 : Véhicule 21P01 Tournée 1 optimisé
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](52,22): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](165,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](34,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\ReadRelaxTSP.n](282,2): 08:52:39  Optimiser par tournée 30P01-1    #Commande : 16    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](25,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' quantityTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](28,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{4}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <205..1237>) initialized to 205
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 389
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 372
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](52,22): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\GenerateSolution.n](113,26): 08:52:41  ...... Pas de meilleure solution
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: upper bound for objective ' improvement ' (= <1..+\infty>) initialized to +\infty
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](199,9): <relaxSolution> [3] search starts
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:41  ... 3 Tournées à relaxer : 1 5  21P01-1  30P02-1  Sites : {38} {36}  {"F9989"} {"F9985"}  Sites : {"F3012","F3007","F9982"}, {"F9966"}  Improvement : 7, 1
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 8
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](236,18): 08:52:41  ... 3 Tournées à relaxer : 1 5  21P01-1  30P02-1  Sites : {38} {36}  {"F9989"} {"F9985"}  Sites : {"F3007","F9982"}, {"F9966"}  Improvement : 16, 1
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](215,21): C2: ' improvement ' increased to 17
+[D:\POEM\Logistics\Model\Relaxation\FuncRelaxation.n](271,17): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Relaxation\RoutingRelaxation.n](27,17): C8: stopped with solution for function ' relaxSolution(3,solutionBuf,maxBacktrack,Swap_oLoop_{3-1},Swap_iLoop_{3-1},tour_oLoop_{3-1},tour_iLoop_{3-1},mileageNotRelaxedLoop_{3-1}) '
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](43,19): 08:52:41  ... 3 Tournées à relaxer : {1} {5}  Commandes clés : {24,33,48,54} {32}  {"D2312002","D2312011","D2401008","E8000002"} {"D2312010"}  Sites : {"F3007","F9982"} {"F9966"}
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](11,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](165,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](34,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\ReadRelaxTSP.n](282,2): 08:52:41  Optimiser par tournée 21P01-1    #Commande : 8    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](25,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' quantityTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](28,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{1}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <251..1237>) initialized to 251
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 443
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 442
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 440
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 436
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 431
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): C5: optimal solution proved for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](44,18): 08:52:41  ...... 21P01-1 : Véhicule 21P01 Tournée 1 optimisé
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](52,22): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Solver\RelaxTSPs.n](165,1)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](34,1)) due to function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) ' at input state
+[D:\POEM\Logistics\Model\Relaxation\ReadRelaxTSP.n](282,2): 08:52:42  Optimiser par tournée 30P02-1    #Commande : 20    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-28 23:59
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Output\WriteBufferTSP.n](25,1): Warning C16: function definition <TSP> not encapsulated due to existence of not instantiated global variable ' quantityTourPlan_{t} '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](14,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](28,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): Info C9: objective ' \min mileageTour_{5}:stepDistance ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: lower bound for objective ' mileage ' (= <67..1071>) initialized to 67
+[D:\POEM\Logistics\Model\Solver\TSP.n](361,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 212
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 189
+[D:\POEM\Logistics\Model\Solver\TSP.n](258,21): C2: ' mileage ' decreased to 188
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](22,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](36,21): C8: stopped with solution for function ' TSP(loop,solutionBuf,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance,tourTSP,TAG_MILEAGE,maxWorktimeDayVehicle,maxMakespanDayVehicle,mileageBuffer,mileageTour_{tourTSP}) '
+[D:\POEM\Logistics\Model\Solver\SolveRelaxTSP.n](52,22): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](134,21): C2: lower bound for objective ' deviationQuantity ' (= <0.000000000000000000..+\infty>) initialized to 0.000000000000000000
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](126,9): <matchingVehicle> [2] search starts
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](134,21): C2: ' deviationQuantity ' decreased to <9.443097114562988281..9.443098068237304688>
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](151,1): C5: optimal solution proved for function ' matchingVehicle(VehicleActive,!2) '
+[D:\POEM\Logistics\Model\Output\WriteSolutionSql.n](151,1): Info C9: <matchingVehicle> called 2 times
+[D:\POEM\Logistics\Model\Output\WriteSolutionMappingBuffer.n](184,9): Info C15: failure: assign T to ' 24 \in OrderTour_{reverseTour_{4}} ' (= F)
+[D:\POEM\Logistics\Model\Output\WriteSolutionMappingBuffer.n](184,9): Info C15: failure: mappingTour_{tourOrder_{24}}=4 (= T) equal to 24 \in OrderTour_{reverseTour_{4}} (= F)
+[D:\POEM\Logistics\Model\Output\WriteSolutionMappingBuffer.n](184,9): Warning C22: failure: mappingTour_{tourOrder_{o}}=t \equiv o \in OrderTour_{reverseTour_{t}} (t: 4; o: 24)

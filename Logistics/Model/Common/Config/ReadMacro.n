@@ -1,0 +1,20 @@
+%==================================================%
+%                                                  %
+%		ReadMacro.n                        %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+
+	% View config files
+	macroConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\Macro.cfg"),
+	[macroConfig],
+
+
+	%viewConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\View.cfg"),
+	%[viewConfig],
+
+
+	TAG_QUOTED_EMPTY_STRING = ("'" TAG_EMPTY_STRING "'"),
+),

@@ -1,0 +1,48 @@
+View ViewTableSTATE 'Tableau état' 'Tableau état'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableSTATE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Tableau état;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Left}]"\
+"[DATAOBJ=STATE;FILLCOLOR=LINERGB]"
+
+Data STATE 'Tableau état' STATE HTTPSQL 0 '[FIND={ID,CATEGORY,LABEL,COMMENTS,COLOR}]'   [DOUBLECLICK=EditState] \
+"[5;(string,ID,ID,,10,,);(string,CATEGORY,Catégorie,,15,,);(string,LABEL,Libellé,,15,,);(string,COMMENTS,Commentaire,,25,,);(string,COLOR,Couleur,,10,,);(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT s.id AS ID,\
+		 s.Label AS LABEL,\
+		 s.Comments AS COMMENTS,\
+		 s.Color AS COLOR,\
+		 s.Category AS CATEGORY,\
+		 s.Color AS LINERGB \
+	 FROM STATE s \
+	 WHERE s.Category=(/*CATEGORY*/) \
+	 ORDER BY s.Category, s.Id "
+
+
+Script CreateState  'Créer état' _ 61 'Créer' _ 'tableSTATE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\State\CreateState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*CATEGORY*/)  \
+{/*Input(Créer état;4;\
+(string,ID,ID,,50.0.580,0,,);\
+(string,LABEL,Libellé,,50.0.580,0,,);\
+(string,COMMENTS,Commentaire,,50.0.580,0,,);\
+(color,COLOR,Couleur,(255 255 255),50.0.580,0,,);\
+)*/}\
+'\
+Reload _ _ _
+
+Script ModifyState  'Modifier état' _ 62 'Modifier' _ 'tableSTATE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\State\UpdateState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*CATEGORY*/) {/*Selected(tableSTATE;1;(string,ID);)*/} \
+{/*Input(Modifier état;3;\
+(string,LABEL,Libellé,[/*STATE.LABEL*/],50.0.580,0,,);\
+(string,COMMENTS,Commentaire,[/*STATE.COMMENTS*/],50.0.580,0,,);\
+(color,COLOR,Couleur,[/*STATE.COLOR*/],50.0.580,0,,);\
+)*/}\
+'\
+Reload _ _ _
+

@@ -1,0 +1,139 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableDeliveryProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableDeliveryProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableDeliveryProduct" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+		@ ("(string,NAMECLIENT," TAG_CLIENT_NAME ",,50.0.150,1);\\\n"),
+		@ ("(string,ADRDELIVERY," TAG_DELIVERY_ADDRESS ",,15.0.170,1);\\\n"),
+		@ ("(string,ID," TAG_DELIVERY_ID ",,20.0.80,0);\\\n"),
+		@ ("(date,DATEDELIVERY," TAG_DELIVERY_DATE ",,15.0.80,0,DD/MM/YYYY);\\\n"),
+		@ ("(int,QUANTITY,Qté Déclarée,,15.0.80,0);\\\n"),
+		@ ("(int,NOLINE,No Ligne,,4.0.50,0);\\\n"),
+		@ ("(int,QUANTITYORDERREST,Qté Reste à Livrer,,20.0.80,0);\\\n"),
+		@ ("(string,IDDELIVORDPRODUCTLINE,Identifiant Ligne,,30.0.20,1);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT\\\n"),
+		@ ("\t\t d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t (select "SQL_CONCAT"trim(pt.Address)"SQL_CONCATWITH"', '"SQL_CONCATWITH"trim(pt.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"pt.City"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY pt where pt.IdClient=d.IdClient and pt.IdPoint=d.IdPointDelivery) as ADRDELIVERY,\\\n"),
+		@ ("\t\t Prd.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t Prd.Family as FAMILY,\\\n"),
+		@ ("\t\t Prd.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(Prd.Weight,"SQL_FORMATSCALE1") as WEIGHTUNIT,\\\n"),
+		@ ("\t\t Prd.QuantityPackaging as QUANTITYPACKAGE,\\\n"),	% JZ QUANTITYPACKING -> QUANTITYPACKAGE
+		@ ("\t\t "SQL_FORMATNUM"(Prd.Weight*Prd.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKING,\\\n"),
+		@ ("\t\t DlPrd.IdOrder as IDORDER,\\\n"),
+		@ ("\t\t DlPrd.NoLine as NOLINE,\\\n"),
+		@ ("\t\t DlPrd.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(DlPrd.Discount,"SQL_FORMATSCALE1") as DISCOUNT,\\\n"),
+		@ ("\t\t DlPrd.LabelDiscount as LABELDISCOUNT,\\\n"),
+		@ ("\t\t DlPrd.AmountHT as AMOUNTHT,\\\n"),
+		@ ("\t\t DlPrd.AmountVAT as AMOUNTVAT,\\\n"),
+		@ ("\t\t DlPrd.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t DlPrd.Quantity AS QUANTITY,\\\n"),
+		@ ("\t\t DlPrd.QuantityReal AS QUANTITYREAL,\\\n"),
+		@ ("\t\t DlPrd.QuantityOrderRest AS QUANTITYORDERREST,\\\n"),
+		@ ("\t\t DlPrd.QuantityDefective AS QUANTITYDEFECTIVE,\\\n"),
+		@ ("\t\t Prd.Weight*DlPrd.QuantityReal as WEIGHT,\\\n"),
+		@ ("\t\t DlPrd.IdPacking as IDPACKING,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DlPrd.NoPallet is NULL" SQL_THEN "0" SQL_ELSE "DlPrd.NoPallet" SQL_CASEEND " as IDPALLET,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DlPrd.NoPalletDelivery is NULL" SQL_THEN "0" SQL_ELSE "DlPrd.NoPalletDelivery" SQL_CASEEND " as NOPALLETDELIVERY,\\\n"),
+		@ ("\t\t (select NoLot from " DB_PREFIX "PALLET_PRODUCT PaPrd where PaPrd.IdPacking=DlPrd.IdPacking and PaPrd.NoPallet=DlPrd.NoPallet and PaPrd.IdProduct=DlPrd.IdProduct) as NOLOT,\\\n"),
+		@ ("\t\t (select DateExpiration from " DB_PREFIX "PALLET_PRODUCT PaPrd where PaPrd.IdPacking=DlPrd.IdPacking and PaPrd.NoPallet=DlPrd.NoPallet and PaPrd.IdProduct=DlPrd.IdProduct) as DATEEXPIRY,\\\n"),
+		@ ("\t\t (select "SQL_FORMATNUM"(sum(DlPrd0.QuantityReal*Prd0.Weight), "SQL_FORMATSCALE1") from " DB_PREFIX "DELIVERY_PRODUCT DlPrd0 inner join " DB_PREFIX "PRODUCT Prd0 on Prd0.Id=DlPrd0.IdProduct where DlPrd0.IdDelivery=d.Id and DlPrd0.NoPalletDelivery=DlPrd.NoPalletDelivery) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t\\\n"),
+		@ ("\t\t "SQL_CONCAT"trim(DlPrd.IdDelivery)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(DlPrd.IdOrder)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(DlPrd.IdProduct)"SQL_CONCATWITH"'-'"SQL_CONCATWITH""SQL_FORMATNUM"(DlPrd.NoLine,"SQL_FORMATSCALE0")"SQL_CONCATEND" as IDDELIVORDPRODUCTLINE,\\\n"),
+		@ ("\t\t DlPrd.IdProduct as IDPARENT,\\\n"),
+		@ ("\t\t 1 as BEPARENT,\\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DlPrd.IdPacking='STOCK'" SQL_THEN "'En Préparation'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.Quantity<>DlPrd.QuantityReal" SQL_THEN "'Quantité incorrecte'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityOrderRest<0" SQL_THEN "'Trop Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityDefective>0" SQL_THEN "'Pièces déffectueuses'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityOrderRest>0" SQL_THEN "'Livrée Partielle'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityOrderRest=0" SQL_THEN "'Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t   ' ' " SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND " AS STATE, \\\n"),
+		@ ("\t\t " SQL_CASEWHEN "DlPrd.IdPacking='STOCK'" SQL_THEN "'(250 220 20)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.Quantity<>DlPrd.QuantityReal or DlPrd.QuantityOrderRest<0" SQL_THEN "'(255 120 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityDefective>0" SQL_THEN "'(255 120 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityOrderRest>0" SQL_THEN "'(255 255 60)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "DlPrd.QuantityOrderRest=0" SQL_THEN "'(120 255 120)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   '(200 200 200)' " SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl, " DB_PREFIX "DELIVERY_PRODUCT DlPrd, " DB_PREFIX "PRODUCT Prd \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id and d.Id=DlPrd.IdDelivery and Prd.Id=DlPrd.IdProduct and d.Id in ((/*IDDELIVERY*/)) \\\n"),
+		@ ("\t ORDER BY d.Id, " SQL_CASEWHEN "DlPrd.NoPallet is NULL" SQL_THEN "0" SQL_ELSE "DlPrd.NoPallet" SQL_CASEEND ", Prd.Weight*Prd.QuantityPackaging desc, Prd.Family, Prd.Designation\\\n"), 
+
+		@ ("\t UNION ALL \\\n"),
+		@ ("\t SELECT\\\n"),
+		@ ("\t\t d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t (select "SQL_CONCAT"trim(pt.Address)"SQL_CONCATWITH"', '"SQL_CONCATWITH"trim(pt.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"pt.City"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY pt where pt.IdClient=d.IdClient and pt.IdPoint=d.IdPointDelivery) as ADRDELIVERY,\\\n"),
+		@ ("\t\t Prd.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t Prd.Family as FAMILY,\\\n"),
+		@ ("\t\t Prd.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(Prd.Weight,"SQL_FORMATSCALE1") as WEIGHTUNIT,\\\n"),
+		@ ("\t\t Prd.QuantityPackaging as QUANTITYPACKAGE,\\\n"),	% JZ 1003
+		@ ("\t\t "SQL_FORMATNUM"(Prd.Weight*Prd.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKING,\\\n"),
+		@ ("\t\t DlPrd.IdOrder as IDORDER,\\\n"),
+		@ ("\t\t -1 as NOLINE,\\\n"),
+		@ ("\t\t Prd.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t ' ' as DISCOUNT,\\\n"),
+		@ ("\t\t ' ' as LABELDISCOUNT,\\\n"),
+		@ ("\t\t NULL as AMOUNTHT,\\\n"),
+		@ ("\t\t NULL as AMOUNTVAT,\\\n"),
+		@ ("\t\t ' ' as DATEDELIVERY,\\\n"),
+		@ ("\t\t DlPrd.Quantity*PrdC.Quantity AS QUANTITY,\\\n"),
+		@ ("\t\t NULL AS QUANTITYREAL,\\\n"),
+		@ ("\t\t NULL AS QUANTITYORDERREST,\\\n"),
+		@ ("\t\t NULL AS QUANTITYDEFECTIVE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(Prd.Weight*DlPrd.QuantityReal*PrdC.Quantity,"SQL_FORMATSCALE1") as WEIGHT,\\\n"),
+		@ ("\t\t ' ' as IDPACKING,\\\n"),
+		@ ("\t\t NULL as IDPALLET,\\\n"),
+		@ ("\t\t NULL as NOPALLETDELIVERY,\\\n"),
+		@ ("\t\t ' ' as NOLOT,\\\n"),
+		@ ("\t\t ' ' as DATEEXPIRY,\\\n"),
+		@ ("\t\t ' ' as WEIGHTPALLET,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t "SQL_CONCAT"trim(DlPrd.IdDelivery)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(DlPrd.IdOrder)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"trim(Prd.Id)"SQL_CONCATWITH"'-x'"SQL_CONCATEND" as IDDELIVORDPRODUCTLINE,\\\n"),
+		@ ("\t\t DlPrd.IdProduct as IDPARENT,\\\n"),
+		@ ("\t\t 2 as BEPARENT,\\\n"),
+		@ ("\t\t  '' AS STATE,\\\n"),
+		@ ("\t\t '(180 180 200)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl, " DB_PREFIX "DELIVERY_PRODUCT DlPrd, \\\n"),
+		@ ("\t  " DB_PREFIX "PRODUCT Prd, " DB_PREFIX "PRODUCT_COMPONENT PrdC \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id and d.ID=DlPrd.IdDelivery \\\n"),
+		@ ("\t\t and DlPrd.IdProduct=PrdC.IdProduct and Prd.Id=PrdC.IdSubProduct \\\n"),
+		@ ("\t\t and d.Id in ((/*IDDELIVERY*/)) \\\n"),
+		@ ("\t \\\n"),
+		@ ("\t ORDER BY IDPARENT,BEPARENT, ID, IDPALLET, FAMILY, IDPRODUCT, DESIGNATION \"\n\n\n"),
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryProduct2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryProduct2EditDelivery.n"],	% JZ 1003
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

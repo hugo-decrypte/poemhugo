@@ -1,0 +1,90 @@
+/********************************************************/
+/*							*/
+/*			Test.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+x = 0.00000000001,
+%x = 166.1345678,
+
+@ x : (2, 9),
+@"\n",
+
+@ x[(2, 9)],
+
+.
+
+
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	id = (),
+	name = (),
+
+f = 2.31,
+g = 2.3198987,
+),
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ ("Test Program(" id ", " name ") successful"),
+
+	'@' <- messageBuffer,		% Sent to solution message
+
+
+
+	( message : !! ),
+),
+
+.
+
+
+
+
+x = 166.1345678,
+
+
+@ x : (3, 9),
+
+.
+
+
+@ x[(2, 8)],
+
+.
+
+
+@ 166.1345678[(5, 9)],
+
+.
+
+
+
+
+@ x : (4, 8),
+
+.
+
+@x,
+
+.
+
+@ 2.1345678 : (6, 8),
+
+
+.
+
+
+
+
+.

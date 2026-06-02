@@ -1,0 +1,261 @@
+%==================================================%
+%                                                  %
+%		ReadMacroView.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+'()' => (
+	% User visibility
+	SQL_ViewUserIs = " '(/*USERID*/)'=",
+	SQL_ViewClubIs = " '(/*CLUBID*/)'=",
+
+	SQL_ViewUserVisibleClubIs	= (
+		" EXISTS (SELECT 1 FROM " SQL_TABLE_USER " usr," DB_PREFIX "CLUB_CLUB cc WHERE"
+		SQL_ViewUserIs "usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated="),
+
+	% Only user resource visible
+	SQL_ViewUserOnly = (
+		" EXISTS (SELECT 1 FROM " SQL_TABLE_USER " usr WHERE " SQL_ViewUserIs "usr.id"),
+
+
+	SQL_ClubNameIdIs = ("(SELECT clb.name FROM " DB_PREFIX "CLUB clb WHERE clb.id="),
+
+
+
+	? databaseType (
+	"ACCESS" :
+		SQL_LastYear = ("DateAdd("SQL_DATEPART_YEAR", -1, "SQL_CURRENTDATE")"),
+		;
+
+	"SQLSERVER" :
+		SQL_LastYear = ("DateAdd("SQL_DATEPART_YEAR", -1, "SQL_CURRENTDATE")"),
+		;
+
+	"MYSQL" :
+		SQL_LastYear = ("date_Add("SQL_CURRENTDATE", INTERVAL -12 MONTH)"), 
+		;
+
+	"ORACLE" :
+		SQL_LastYear = ("ADD_MONTHS("SQL_CURRENTDATE",-12)"),
+	),
+
+
+
+
+	SQL_UserPermissionAbove		= (" usr." SQL_FIELD_PERMISSION ">='"),
+	SQL_UserWritePermissionOrIdIs 	= (SQL_UserPermissionAbove STATE_WRITE "' OR usr.id="),
+
+
+
+
+
+	% Alias
+	SQL_AliasCategoryIs = (
+		"(SELECT al.name FROM " DB_PREFIX "ALIAS al WHERE al.category="),
+	SQL_ColorCategoryIs = (
+		"(SELECT al.color FROM " DB_PREFIX "ALIAS al WHERE al.category="),
+
+
+
+
+	% Alert
+	SQL_RGB_ALERT_3 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='alert' AND al.id='2')"),
+	SQL_RGB_ALERT_2 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='alert' AND al.id='1')"),
+	SQL_RGB_ALERT_1 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='alert' AND al.id='0')"),
+
+
+	SQL_RGB_ATTENTION_3 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='attention' AND al.id='3')"),
+	SQL_RGB_ATTENTION_2 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='attention' AND al.id='2')"),
+	SQL_RGB_ATTENTION_1 = (
+		SQL_ColorCategoryIs "'HIGHLIGHT' AND al.field='attention' AND al.id='1')"),
+
+
+
+	% State
+	SQL_TypeStateName = (
+		SQL_AliasCategoryIs "'STATE' AND al.id=t.state)"),
+	SQL_TypeStateColor = (
+		SQL_ColorCategoryIs "'STATE' AND al.id=t.state)"),
+
+	SQL_StateInactiveName = (
+		SQL_AliasCategoryIs "'STATE' AND al.id='1')"),
+	SQL_StateActiveName = (
+		SQL_AliasCategoryIs "'STATE' AND al.id='2')"),
+
+
+
+	? timeFormat (
+	"hh":
+		% For Gantt Calendar and TimeSlot
+		Slot2Day	= "[2,08,16]",
+		Slot24Day	= "[24,00,01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,17,18,19,20,21,22,23]",
+	;
+
+	"hh:mm":
+		% For Gantt Calendar and TimeSlot
+		Slot2Day	= "[2,08:00,16:00]",
+		Slot24Day	= "[24,00:00,01:00,02:00,03:00,04:00,05:00,06:00,07:00,08:00,09:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00,19:00,20:00,21:00,22:00,23:00]",
+		;
+
+	"hh:mm:ss":
+		% For Gantt Calendar and TimeSlot
+		Slot2Day	= "[2,08:00:00,16:00:00]",
+		Slot24Day	= "[24,00:00:00,01:00:00,02:00:00,03:00:00,04:00:00,05:00:00,06:00:00,07:00:00,08:00:00,09:00:00,10:00:00,11:00:00,12:00:00,13:00:00,14:00:00,15:00:00,16:00:00,17:00:00,18:00:00,19:00:00,20:00:00,21:00:00,22:00:00,23:00:00]",
+	),
+
+
+
+
+
+	? dateTimeFormat(
+	"yyyy-mm-dd":
+		timeFormatSql = "HH",
+		;
+
+	"yyyy-mm-dd hh":
+		timeFormatSql = "HH",
+		;
+
+	"yyyy-mm-dd hh:mm":
+		timeFormatSql = "HH:MM",
+		;
+
+	"yyyy-mm-dd hh:mm:ss":
+		timeFormatSql = "HH:MM:SS",
+	),
+
+	timeFormatSqlSS		= "HH:MM:SS",
+
+	dateTimeFormatSql	= (dateFormatSql " " timeFormatSql),
+	dateTimeFormatSqlSS	= (dateFormatSql " " timeFormatSqlSS),
+
+
+	timeFormatView		= timeFormatSql,
+	timeFormatViewSS	= "HH:MM:SS",
+
+	dateFormatView		= (dateFormatSql "|" dateFormatInterface),
+	dateTimeFormatView	= (dateFormatSql " " timeFormatView	"|" dateFormatInterface " " timeFormatView),
+	dateTimeFormatViewSS	= (dateFormatSql " " timeFormatViewSS	"|" dateFormatInterface " " timeFormatViewSS),
+
+
+
+
+	TypeView = {"float", "int", "string", "set", "date", "time", "datetime","duration"},
+
+	\forall t \in TypeView
+		formatViewType_{t} :: "",
+
+	formatViewType_{"date"} = dateFormatView,
+	formatViewType_{"time"} = timeFormatView,
+	formatViewType_{"datetime"} = dateTimeFormatView,
+
+	\forall t \in TypeView \setminus {"date", "time", "datetime"}
+		formatViewType_{t} = "",  %formatViewType_{t} = "0",
+
+
+
+
+
+	% Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+	scriptSolverType = "PoemServer" => (
+		VIEWPREFIX 	= ("NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=" maxTimeHttpSolver ";MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;"),	% JZ 1105
+		;
+		VIEWPREFIX 	= "MESSAGE=0;CANCEL=0;SKIP=0",
+	),
+
+	scriptSolverType = "PoemServer" => (
+		MESSAGEPREFIX 	= ("NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=" maxTimeHttpSolver ";MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;"),
+		;
+		MESSAGEPREFIX 	= "MESSAGE=1;CANCEL=1;SKIP=0",
+	),
+
+
+
+
+	% VIEWEXEC	= "WinExec \"[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]\"",
+	VIEWEXEC	= " WinExec \"[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"",
+
+
+
+
+	% PoemData
+	DSNPOEMDATA 	= "DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/))",
+	DSNPOEMPRINT 	= "DSN=(/*DBNAME*/);USR=(/*DBUSER*/);DBPWD=(/*DBPWD*/);OWNER=(/*DBOWNER*/);CLUBID=(/*CLUBID*/);DEVICENAME=(/*POEMPRINTDEVICE*/)",
+
+	USERPOEMDATA 	= "PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/))",
+	SERVERPOEMDATA 	= "SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=(/*USERID*/),PWD=(/*PASSWORD*/),PROXYNAME=,PROXYBYPASS=)",
+%	SERVERPOEMDATA 	= "SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=)",
+
+	VIEWPOEMDATACFG	= ("(/*POEMDATACONFIG*/)?[" USERPOEMDATA ";" DSNPOEMDATA ";" SERVERPOEMDATA ";]"),
+	VIEWPOEMDATA	= (VIEWEXEC " '(/*POEMDATAEXEPATH*/)" poemDataExe "' \"" VIEWPOEMDATACFG),	% \" later at the end
+
+	POEMDATA_OPEN 		= (VIEWPOEMDATA "?OPEN TABLE "),
+
+	PREFIX_POEMDATA_OPEN 	= ("'[COUNT=2;" VIEWPREFIX "]' " VIEWPOEMDATA "?OPEN TABLE "),
+	POEMDATA_RELOAD		= "Reload _ _ _ _ \n\n\n",
+
+
+
+
+
+	% PoemPrint
+	POEMPRINT_RUN	= (VIEWEXEC " (/*POEMPRINTEXEPATH*/)" poemPrintExe),
+	POEMPRINT_OPEN	= (VIEWEXEC " '" poemPrintBrowser "'"),
+
+
+
+
+
+	% Open View File
+	OPENTABLE_BEGIN	= "Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)",
+
+	PREFIX_OPENTABLE_BEGIN = ("'[COUNT=1;" VIEWPREFIX "]'\\\n " OPENTABLE_BEGIN),
+	PREFIX_OPENTABLE_BEGIN_SINGLESEL = ("'[SINGLESEL=1;COUNT=1;" VIEWPREFIX "]'\\\n " OPENTABLE_BEGIN),
+%??????
+
+	TABLE_ARGUMENTS	= "\"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);",
+
+	OPENTABLE_END	= "]' _ _ \\\n",
+
+
+
+
+	% Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+	NCLPREFIX 			= VIEWPREFIX,
+	NCLPREFIX_MESSAGE 		= (MESSAGEPREFIX ";AUTOCLOSE=1"),
+	NCLPREFIX_BREAK		 	= (MESSAGEPREFIX ";AUTOCLOSE=0"),
+
+
+
+	% NCL Script
+	NCLSCRIPT			= " Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)",
+
+
+	% Only one execution
+	PREFIX_NCLSCRIPT 		= ("'[COUNT=1;" NCLPREFIX 		"]'\\\n " NCLSCRIPT),	% No message
+	PREFIX_NCLSCRIPT_MESSAGE 	= ("'[COUNT=1;" NCLPREFIX_MESSAGE	"]'\\\n " NCLSCRIPT),	% With message, after script auto-close
+	PREFIX_NCLSCRIPT_BREAK	 	= ("'[COUNT=1;" NCLPREFIX_BREAK 	"]'\\\n " NCLSCRIPT),	% With message, after script break
+
+
+	% Arguments for NCL script
+	NCL_ARGUMENT_BEGIN		= " '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) ",
+	NCL_ARGUMENT_PARALLEL_BEGIN	= " '(/*SERVERDIRECTORY*/)parallel.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) ",
+
+	NCL_ARGUMENT_END		= "' \n\n",
+	NCL_ARGUMENT_END_WITH		= "' \\\n",
+
+
+
+	% Special : no directory known for login 
+	NCLSCRIPT_LOGIN			= ("'[COUNT=1;" NCLPREFIX "]'\\\n Ncl './' './"),
+	NCL_ARGUMENT_BEGIN_LOGIN	= " './ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) ",
+),
+
+

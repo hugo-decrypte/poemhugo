@@ -1,0 +1,81 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableQuote.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableQuote>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableQuote" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableQuote" postfix), 
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,IDAGENCY,"		TAG_AGENCY " " TAG_ID	",,15,0);\\\n"),
+		@ ("(string,IDCLIENT,"		TAG_CLIENT_ID	",,15.0.80,0);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT q.id AS ID, q.idClient AS IDCLIENT, cl.name as NAMECLIENT,\\\n"),
+ 		@ ("\t\t q.idAgency AS IDAGENCY, \\\n"),
+ 		@ ("\t\t (select City from " DB_PREFIX "POINTDELIVERY p where p.IdClient=q.IdClient and p.IdPoint=q.IdPointDelivery) as PTDELIVERY,\\\n"),
+ 		@ ("\t\t q.DateQuote as DATEQUOTE,\\\n"),
+ 		@ ("\t\t q.DateValid as DATEVALIDITY,\\\n"),
+ 		@ ("\t\t q.DateDelivery as DATEDELIVERY,\\\n"),
+ 		@ ("\t\t q.AmountHT   AS AMOUNTHT,\\\n"),
+ 		@ ("\t\t q.Reference  AS REFERENCE,\\\n"),
+ 		@ ("\t\t q.ProductCondition AS PRODUCTCONDITION,\\\n"),
+ 		@ ("\t\t q.PayCondition AS PAYCONDITION,\\\n"),
+ 		@ ("\t\t q.Packaging AS PACKAGING,\\\n"),
+ 		@ ("\t\t q.CustomsInfo AS CUSTOMSINFO,\\\n"),
+ 		@ ("\t\t q.Incoterm AS INCOTERM,\\\n"),
+ 		@ ("\t\t q.Comments AS COMMENTS,\\\n"),
+ 		@ ("\t\t (select "SQL_CONCAT"trim(LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" ID "SQL_CONCATWITH" ')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.ID=q.idState and s.CATEGORY='QUOTE') as STATE,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"q.idState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='QUOTE') "SQL_THEN" (select Color from " DB_PREFIX "STATE s where s.Id=q.idState and s.CATEGORY='QUOTE')"SQL_ELSE"\\\n"),
+   		@ ("\t\t '(255 255 255)') AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "QUOTE q, " DB_PREFIX "CLIENT cl \\\n"),
+		@ ("\t WHERE q.IdClient=cl.id\\\n"), 
+  		@ ("\t AND q.DateQuote>"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"')-30000\\\n"),
+		@ ("\t ORDER BY q.id\"\n\n\n"), 
+
+		%Date()-360
+
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2EditQuote.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2TableQuoteproduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2TableProductForQuote.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2PrintQuote.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuote2TableState.n"],
+	
+
+
+
+		%====================
+		['Work Directory' "Model\View\Data\DataClient.n"],
+		['Work Directory' "Model\View\Data\DataState.n"],
+		%===========================
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

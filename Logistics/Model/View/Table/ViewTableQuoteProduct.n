@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableQuoteProduct.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableQuoteProduct.n"],
+
+'@' => (
+	tableQuoteProduct("QUOTEPRODUCT",TAG_TABLE,"QUOTEPRODUCT",true,"",(TAG_PRODUCT_FOR_QUOTE " (/*TITLEOBJ*/)"),""), % JZ 0919
+),

@@ -1,0 +1,336 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/* 		FuncMapVehicle.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapVehicle>(IdVehicle,IdTour, date1,date2, doubleclick,title,related,idUserPostfix)
+(
+	'@' => (
+		['Work Directory' "Model\Common\View\ResetDateForView.n"],
+
+		postfix = (idUserPostfix = "" ? (related = "" ? "" : ("_" related)) : idUserLogin),
+		viewFile = ("MapVehicle" postfix),
+		
+
+
+		IdVehicle = {} => (
+			sqlVehicleSelected = (SQL_ViewUserVisibleClubIs "v.idClub)"),
+			;
+
+			sqlVehicleSelected = (SQL_ViewUserVisibleClubIs "v.idClub) AND v.id IN (" concatSetQuoted(IdVehicle) ")"),
+		),
+
+
+
+		IdTour = {} => (
+			IdVehicle = {} => (
+				sqlSiteSelected		= (SQL_ViewUserVisibleClubIs "p.idClub)"),
+				;
+
+				sqlSiteSelected		= (SQL_ViewUserVisibleClubIs "p.idClub) AND p.idResource IN (" concatSetQuoted(IdVehicle)") "),
+			),
+			;
+
+			sqlSiteSelected		= (SQL_ViewUserVisibleClubIs "p.idClub) AND p.idTour IN (" concatSetQuoted(IdTour)") "),	
+		),
+
+
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+		
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+		['Work Directory' "Model\Interaction\Solver\Vehicle\ScenarioMapVehicle2MoveOrder.n"],
+		['Work Directory' "Model\Interaction\View\Map\ScenarioMapVehicle2TableTourOrder.n"],
+
+
+
+		% Data: SITE
+		@ "Data ",
+
+		% ID
+		@ "VRP_SITE '", % Chen 1024
+
+		% Caption
+		@ TAG_ORDER,
+
+		% Group
+		@ "' VRP_SITE ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;MAP=VRP;FIND={IDORDER};WIDTH=-30;TIPINFO=" TIPINFO_MAP_TASK "]'"),
+
+
+
+		@ "'[DROP=MoveOrder;]' \\\n",
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[15;(string,ID,"TAG_SITE");(string,NAME,"TAG_SITE_NAME");(string,IDORDER,"TAG_ORDER");"),
+		@ ("(int,QUANTITY,"TAG_QUANTITY",,10,0);(int,MILEAGE,"TAG_MILEAGE",,10,0);(duration,TIMEROUTE,TIMEROUTE);"),
+		@ ("(string,IDVEHICLE,"TAG_VEHICLE");(int,TOURVEHICLE,"TAG_VEHICLE");(string,IDTOUR,"TAG_TOUR");"),
+		@ ("(string,T1PLAN,"TAG_SERVICE_T1");(string,T2SERVICEPLAN,"TAG_SERVICE_T2");(string,T2PLAN,"TAG_ROUTE_T2");"),
+
+		@ ("(float,LATITUDE,"TAG_LATITUDE");(float,LONGITUDE,"TAG_LONGITUDE");(int,X,X);(int,Y,Y);"),
+		@ ("(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]\" \\\n"),
+
+
+
+		sqlDataSitePlanned = (
+			"SELECT DISTINCT s.id 		AS ID, \
+				s.name			AS NAME, \
+				p.idTour		AS IDTOUR, \
+				p.idx			AS IDX, \
+				p.idOrder		AS IDORDER, \
+				p.quantity 		AS QUANTITY, \
+				p.mileage 		AS MILEAGE, \
+				p.timeRoute 		AS TIMEROUTE, \
+				p.idResource		AS IDVEHICLE, \
+				p.tourResource		AS TOURVEHICLE, \
+				p.t1Service		AS T1PLAN, \
+				p.t2Service		AS T2SERVICEPLAN, \
+				p.t2			AS T2PLAN, \
+				NULL			AS X, \
+				NULL 			AS Y, \
+				s.latitude		AS LATITUDE, \
+				s.longitude		AS LONGITUDE, \
+				s.idIcon		AS ICON, \
+				s.sizeIcon 		AS WIDTH \
+			FROM " DB_PREFIX "SITE s,OPT_PLAN p \
+			WHERE s.id=p.idSite1 AND " sqlSiteSelected ),
+
+		sqlDatePlanSelected = (" AND LEFT(p.t1service,10)>='" date1 "' AND LEFT(p.t2Service,10) <= '" date2 "' "),
+
+		IdTour = {} && IdVehicle = {} => (
+			sqlSiteCandidate = (SQL_ViewUserVisibleClubIs "s.idClub) AND o.state='" STATE_CANDIDATE "'"),
+	
+			sqlDataSiteCandidate = (
+				"SELECT DISTINCT s.id 		AS ID, \
+					c.name+'  '+s.name	AS NAME, \
+					''			AS IDTOUR, \
+					0			AS IDX, \
+					o.id			AS IDORDER, \
+					0 			AS QUANTITY, \
+					0	 		AS MILEAGE, \
+					0 			AS TIMEROUTE, \
+					''			AS IDVEHICLE, \
+					0			AS TOURVEHICLE, \
+					''			AS T1PLAN, \
+					''			AS T2SERVICEPLAN, \
+					''			AS T2PLAN, \
+					NULL			AS X, \
+					NULL 			AS Y, \
+					s.latitude		AS LATITUDE, \
+					s.longitude		AS LONGITUDE, \
+					c.idIcon		AS ICON, \
+					c.sizeIcon 		AS WIDTH \
+		               	FROM  " DB_PREFIX "OPT_ORDER o," DB_PREFIX "OPT_CLIENT c," DB_PREFIX "SITE s \
+				WHERE o.idClient=c.id AND o.idSite2=s.id AND " sqlSiteCandidate),
+			
+			@ (VIEWSQL sqlDataSiteCandidate " UNION " sqlDataSitePlanned sqlDatePlanSelected
+				" ORDER BY 2,3\"\n\n"),
+			;
+
+			@ (VIEWSQL sqlDataSitePlanned "\"\n\n"),
+		),
+
+
+
+
+
+		% Data: TASK
+		@ "Data ",
+
+		% ID
+		@ "VRP_TASK '",
+
+		% Caption
+		@ TAG_TASK,
+
+		% Group
+		@ "' VRP_TASK ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 0 ",
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ "\"[TYPE=TASK;MAP=VRP ;SITEDATA=VRP_SITE;SITEID=IDSITE; PATHDATA=VRP_PATH;PATHID=IDTOUR; FIND={IDSITE};WIDTH=-35;]\" ",
+
+		% Script item "[Scripts when delete, insert or update]"
+		@ "_ \\\n",
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"(string,Successor,Successor,,10,0);
+		@ ("\"[12;(string,ID,"TAG_ORDER",,10,0);(string,NAME,"TAG_ORDERS",,100,0);"),
+		@ ("(string,IDTOUR,"TAG_TOUR",,10,0);(string,IDSITE,"TAG_SITE",,10,0);"),
+		@ ("(date,DateBegin,"TAG_DATE1",,,,"dateFormatView");(date,DateEnd,"TAG_DATE2",,,,"dateFormatView");"),
+		@ ("(time,TimeBegin,"TAG_TIME1",,,,"timeFormatView");(time,TimeEnd,"TAG_TIME2",,,,"timeFormatView");"),
+		@ ("(duration(M),DURATION,DURATION);(string,ICON,ICON,,50,0);(int,WIDTH,WIDTH,,,0);(color,COLOR,COLOR);]\"\\\n"),
+
+
+		sqlDataTask = (
+			"SELECT p.idOrder AS ID, \
+				p.idOrder AS NAME, \
+				p.idTour AS IDTOUR, \
+				p.idSite1 AS IDSITE, \
+				LEFT(p.t1Service,10) AS DateBegin, \
+				LEFT(p.t2Service,10) AS DateEnd, \
+				" (timeFormat = "hh:mm" ? "RIGHT(p.t1Service,5)" : "RIGHT(p.t1Service,8)") " AS TimeBegin, \
+				" (timeFormat = "hh:mm" ? "RIGHT(p.t2,5)" : "RIGHT(p.t2,8)") " AS TimeEnd, \
+				DateDiff('n',p.t1Service,p.t2Service) AS DURATION, \
+				v.idIcon AS ICON, \
+				v.sizeIcon AS WIDTH, \
+				v.color AS COLOR \
+			FROM " DB_PREFIX "OPT_PLAN p," DB_PREFIX "RESOURCE v \
+			WHERE v.id=p.idResource AND " sqlVehicleSelected 
+		),
+ 
+		%p.idIconResource AS ICON, \
+		%p.sizeIconResource AS WIDTH, \
+
+		@ (VIEWSQL sqlDataTask  "\"\n\n" ),
+
+
+
+
+
+
+
+		% Data: PATH
+		@ "Data ",
+
+		% ID
+		@ "VRP_PATH '",
+
+		% Caption
+		@ TAG_TOUR,
+
+		% Group
+		@ "' VRP_PATH ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=PATH;MAP=VRP; FIND={ID}; TASKDATA=VRP_TASK;SITEDATA=VRP_SITE; PATHID=IDTOUR;SITEID=IDSITE; SPEED="
+			pathSpeed ";TIPINFO=" TIPINFO_MAP_TOUR "]'"),
+
+		@ " '_' \\\n",
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[12;(string,ID,"TAG_TOUR");"),
+		@ ("(string,IDVEHICLE,IDVEHICLE);(string,IDTOUR,IDTOUR);(int,NBORDER,NBORDER);(int,MILEAGE,MILEAGE);(duration,TIMEROUTE,TIMEROUTE);(int,QUANTITY,QUANTITY);(float,WEIGHT,WEIGHT);(datetime,T1TOUR,T1TOUR,,,,"dateTimeFormatView");(datetime,T2TOUR,T2TOUR,,,,"dateTimeFormatView");"),
+		@ ("(int,LINEWIDTH,LINEWIDTH);(color,LINECOLOR,LINECOLOR);(color,FILLCOLOR,FILLCOLOR);(int,ARROWWIDTH,ARROWWIDTH);(color,ARROWCOLOR,ARROWCOLOR);(string,ICON,ICON,,,0);(int,WIDTH,WIDTH,,,0);]\" \\\n"),
+
+
+
+
+		sqlDataTour = (
+			"SELECT DISTINCT t.id AS ID, \
+				t.id AS IDTOUR, \
+				t.idResource AS IDVEHICLE, \
+				t.nbOrder AS NBORDER, \
+				t.mileage AS MILEAGE, \
+				t.timeRoute AS TIMEROUTE, \
+				t.quantity AS QUANTITY, \
+				t.weight AS WEIGHT, \
+				t.t1 AS T1TOUR, \
+				t.t2 AS T2TOUR, \
+				v.widthLine AS LINEWIDTH, \
+				v.colorLine AS LINECOLOR, \
+				v.colorFill AS FILLCOLOR, \
+				v.widthArrow AS ARROWWIDTH, \
+				v.colorArrow AS ARROWCOLOR, \
+				v.idIcon AS ICON, \
+				v.sizeIcon AS WIDTH \
+			FROM " DB_PREFIX "OPT_TOUR t," DB_PREFIX "RESOURCE v \
+			WHERE t.idResource=v.id AND " sqlVehicleSelected
+		),
+
+		@ (VIEWSQL sqlDataTour  "\"\n\n"),
+
+
+
+
+
+%		['Work Directory' "Model\View\Data\DataVehicle2.n"],
+
+
+
+
+
+		related = "Simulation" => (
+			% OBJECT : SCHEDULE
+			@ "Schedule ",
+
+			% ID 	
+			@ "SimulationVehicle ",
+
+			% Caption
+			@ ("'" TAG_SIMULATION "' "),
+
+			% Group	
+			@ "_ ",
+
+			% Position	
+			@ "0 0 ",
+
+			% Size	
+			@ "1000 0 \\\n",
+
+			% Drawing options
+			@ "_ \\\n",
+
+			% Data convention item	
+			@ ("\"[DATEFORMAT="dateFormatSql";TIMEFORMAT="timeFormatSqlSS"]\" \\\n"),
+
+			% Title options	
+			@ "_ \\\n",
+
+			% Time axis options
+			@ ("\"[DATEFIRST=" (date1View-dateMargin) ";DATELAST=" (date2View+dateMargin) ";TIMEFIRST=" (time1View-timeMargin) ";TIMELAST=" (time2View+timeMargin)),
+
+
+			@ (";TIMER=" simulationTimer "MS;TIMESCALE=" simulationPrecision "M;]\" \\\n"),
+
+			% Item axis options
+			@ "_ ",
+
+			% Task drawing options
+			@ "_ ",
+
+
+			% "[Item data-object]" or "(nItems nCols)" 
+			@ "\"[DATAOBJ=VRP_PATH]\" \"[DATAOBJ=VRP_SITE]\" \"[DATAOBJ=VRP_TASK;ITEMID=IDSITE;GROUPID=IDTOUR]\"\n",
+			@ "\n\n",
+		),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

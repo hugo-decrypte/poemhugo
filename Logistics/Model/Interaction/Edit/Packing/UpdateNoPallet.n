@@ -1,0 +1,41 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateNoPallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	
+	nbParameter	= (),
+	
+	nbSelected	= (),
+	
+	idPackingSelectedBuffer 	:: "",
+	noPalletSelectedBuffer		:: 0,
+	
+	idPackingSelectedBuffer	= (),
+	noPalletSelectedBuffer	= (),
+
+	noPalletBuffer	:: 0,
+	noPalletBuffer	= (),
+	
+	'()' <- database,
+	
+	UpdateNoPallet_SQL1=(
+		"update " DB_PREFIX "PALLET
+		 set NoPallet="noPalletBuffer"
+		 where not exists (select 1 from " DB_PREFIX "PALLET p0 where p0.IdPacking=PALLET.IdPacking and p0.NoPallet = "noPalletBuffer")
+		 and IdPacking ='"idPackingSelectedBuffer"' and NoPallet="noPalletSelectedBuffer" "
+	),
+	
+	(SQL : UpdateNoPallet_SQL1), 	
+	
+	database <- '()',
+),

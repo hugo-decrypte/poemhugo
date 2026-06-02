@@ -1,0 +1,627 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableProductKit2EditOnView.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+%
+%
+@ "// Script 1. Create Product\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreateProduct ",
+
+% Caption
+@ (" '" TAG_INSERT_PRODUCT_KIT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),	% JZ 1001
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+CreateProduct_Input=(
+	"{/*Input(CPRD;" TAG_INSERT_PRODUCT_KIT ";4;\\\n"
+	"(string,IDNEW,Nouveau ID,,20." inputWidth ",0);\\\n"
+	"(string,FAMILY,Famille,,50." inputWidth ",0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\\\n"
+	"(string,DESIGNATION," TAG_DESIGNATION ",,50." inputWidth ",1);\\\n"
+	"(string,TYPEPRODUCT," TAG_PRODUCT_TYPE ",,100." inputWidth ",0,0,[/*TYPEPRODUCT.LABELTYPE*/]);\\\n"
+	")*/}"
+),	% JZ 0908
+
+CreateProduct_SQL1=(
+	"\"INSERT INTO " DB_PREFIX "PRODUCT (IdClub,Id, Family, Designation, TypeProduct, IdState) \
+	values ('(/*CLUBID*/)', '[/*IDNEW*/]', ' ', '[/*DESIGNATION*/]', 'P', '1')\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	CreateProduct_SQL2=(
+		"\"Update " DB_PREFIX "PRODUCT p, " DB_PREFIX "FAMILYPRODUCT f \
+		SET p.Family=f.ID, p.Category=f.Category\
+		WHERE p.Id ='[/*IDNEW*/]'\
+			and "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]'\"\\\n"
+	),
+	CreateProduct_SQL3=(
+		"\"UPDATE " DB_PREFIX "PRODUCT p, " DB_PREFIX "TYPEPRODUCT tp \
+		SET p.TypeProduct=tp.ID\
+		where p.Id ='[/*IDNEW*/]'\
+			and "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='[/*TYPEPRODUCT*/]'\"\n\n\n"
+	),
+	;
+
+	CreateProduct_SQL2=(
+		"\"Update " DB_PREFIX "PRODUCT set  \
+			Family=(select f.ID from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]'), \
+			Category=(select f.Category from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]')\
+		WHERE Id ='[/*IDNEW*/]' \"\\\n"
+	),
+	CreateProduct_SQL3=(
+		"\"UPDATE " DB_PREFIX "PRODUCT   \
+		SET TypeProduct=select tp.ID from " DB_PREFIX "TYPEPRODUCT tp where "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='[/*TYPEPRODUCT*/]')\
+		where Id ='[/*IDNEW*/]' \"\n\n\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\CreateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+		@ CreateProduct_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" CreateProduct_Input),
+		@ ("'\\\n"),
+		@ CreateProduct_SQL1,
+		@ CreateProduct_SQL2,
+		@ CreateProduct_SQL3,
+),
+
+
+
+%=======================================================%
+%
+%
+@ "// Script 2. Duplicate Product\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "DuplicateProduct ",
+
+% Caption
+@ (" '" TAG_COPY_PRODUCT_KIT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_COPY "' "),	% JZ 1001
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DuplicateProduct_Input=(
+	"{/*Input(DPRD;" TAG_COPY_PRODUCT_KIT ";1;\\\n"
+	"(string,IDNEW,Nouveau ID,,20." inputWidth ",0);\\\n"
+	")*/}"
+),
+
+DuplicateProduct_SQL1=(
+	"\"INSERT INTO " DB_PREFIX "PRODUCT (Id, Family, Designation,DesignationTech, TypeProduct,Category, PriceUnit, PurchasePrice,WeightUnity, LengthUnity, Length,Height,Width,Depth,Volume,Weight, IdState) \
+	select '[/*IDNEW*/]', p.Family, p.Designation,p.DesignationTech, p.TypeProduct, Category, PriceUnit, PurchasePrice,p.WeightUnity, p.LengthUnity, p.Length,p.Height,p.Width,p.Depth,p.Volume,p.Weight, '0'\
+	from " DB_PREFIX "PRODUCT p\
+	where p.Id ='[/*PRODUCTKIT.ID*/]'\"\\\n"
+),
+
+DuplicateProduct_SQL2=(
+	"\"INSERT INTO " DB_PREFIX "PRODUCT_COMPONENT (IdProduct,IdSubProduct, Quantity,PriceUnit, OrderByLength, OrderByHeight, OrderByWidth, OrderByDepth, LengthByPiece,HeightByPiece, WidthByPiece, DepthByPiece, VolumeByPiece) \
+	select '[/*IDNEW*/]', pc.IdSubProduct, pc.Quantity,pc.PriceUnit, pc.OrderByLength, pc.OrderByHeight, pc.OrderByWidth, pc.OrderByDepth, pc.LengthByPiece,pc.HeightByPiece, pc.WidthByPiece, pc.DepthByPiece, pc.VolumeByPiece\
+	from " DB_PREFIX "PRODUCT_COMPONENT pc\
+	where pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\"\n\n"
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DuplicateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePRODUCTKIT;1;(string,ID))*/} \\\n"),
+		@ DuplicateProduct_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" DuplicateProduct_Input),
+		@ ("'\\\n"),
+		@ DuplicateProduct_SQL1,
+		@ DuplicateProduct_SQL2,
+),
+@ ("\n\n\n"),
+
+
+
+%=======================================================%
+%
+%
+@ "// Script 3. Modify Product\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyProduct ",
+
+% Caption
+@ ("'" TAG_UPDATE_PRODUCT_KIT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_UPDATE "' "),	% JZ 1001
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateProduct_Input=(
+	"{/*Input(MPRD;" TAG_UPDATE_PRODUCT_KIT ";6;\\\n"
+	"(string,DESIGNATION," TAG_DESIGNATION ",[/*PRODUCTKIT.DESIGNATION*/],50." inputWidth ",0);\\\n"
+	"(string,DESIGNATIONTECH," TAG_DESIGNATIONTECH ",[/*PRODUCTKIT.DESIGNATIONTECH*/],50." inputWidth ",1);\\\n"
+	"(string,FAMILY," TAG_FAMILY ",[/*PRODUCTKIT.LABELFAMILY*/],50." inputWidth ",0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\\\n"
+	"(string,TYPEPRODUCT," TAG_TYPE ",[/*PRODUCTKIT.LABELTYPE*/],50." inputWidth ",0,1,[/*TYPEPRODUCT.LABELTYPE*/],1);\\\n"
+	"(float,PRICE," TAG_PRICE_UNIT ",[/*PRODUCTKIT.PRICE*/],10.4.580,1);\\\n"
+	"(float,WEIGHT," TAG_WEIGHT ",[/*PRODUCTKIT.WEIGHT*/],10.3.580,1);\\\n"
+	")*/}"
+),
+
+
+
+UpdateProduct_SQL1=(
+	"\"UPDATE " DB_PREFIX "PRODUCT SET \
+		Designation='[/*DESIGNATION*/]',\
+		DesignationTech='[/*DESIGNATIONTECH*/]',\
+		Weight=[/*WEIGHT*/],\
+		PriceUnit=[/*PRICE*/]\
+	where Id ='[/*PRODUCTKIT.ID*/]'\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+	%% family, category
+	UpdateProduct_SQL2=(
+		"\"Update " DB_PREFIX "PRODUCT p, " DB_PREFIX "FAMILYPRODUCT f \
+		SET p.Family=f.ID, p.Category=f.Category\
+		WHERE p.Id ='[/*IDNEW*/]'\
+			and "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]'\"\\\n"
+	),
+	%% type
+	UpdateProduct_SQL3=(
+		"\"UPDATE " DB_PREFIX "PRODUCT p, " DB_PREFIX "TYPEPRODUCT tp SET \
+			p.TypeProduct=tp.ID\
+		where p.Id ='[/*IDNEW*/]'\
+			and "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='[/*TYPEPRODUCT*/]'\"\n\n\n"
+	),
+
+	%% price, weight
+	UpdateProduct_SQL4=(
+		"\"Update " DB_PREFIX "PRODUCT set \
+			PriceUnit=0, Weight=0 \
+		where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+	UpdateProduct_SQL5=(
+		"\"Update " DB_PREFIX "PRODUCT p inner join (" DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct) on p.Id=pc.IdProduct set \
+			p.PriceUnit=p.PriceUnit+sp.PriceUnit*pc.Quantity \
+		where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+	UpdateProduct_SQL6=(
+		"\"Update " DB_PREFIX "PRODUCT p inner join (" DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct) on p.Id=pc.IdProduct set \
+			p.Weight=p.Weight+sp.Weight*pc.Quantity \
+		where sp.Weight is not NULL and exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=p.Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+
+	;
+
+	UpdateProduct_SQL2=(
+		"\"Update " DB_PREFIX "PRODUCT set  \
+			Family=(select f.ID from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]'), \
+			Category=(select f.Category from  " DB_PREFIX "FAMILYPRODUCT f where "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*FAMILY*/]')\
+		WHERE Id ='[/*IDNEW*/]' \"\\\n"
+	),
+	UpdateProduct_SQL3=(
+		"\"UPDATE " DB_PREFIX "PRODUCT set \
+			TypeProduct=(select tp.ID from " DB_PREFIX "TYPEPRODUCT tp where "SQL_CONCAT"trim(tp.Name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND"='[/*TYPEPRODUCT*/]')\
+		where Id ='[/*IDNEW*/]' \"\n\n\n"
+	),
+
+	UpdateProduct_SQL4=(
+		"\"Update " DB_PREFIX "PRODUCT set \
+			PriceUnit=(select sum(sp.PriceUnit*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct), \
+			Weight=(select sum(sp.Weight*pc.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sp on sp.Id=pc.IdSubProduct where PRODUCT.Id=pc.IdProduct) \
+		where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+	UpdateProduct_SQL5=(
+		"\"Update " DB_PREFIX "PRODUCT set \
+			PriceUnit=0 \
+		where PriceUnit is NULL and exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+	UpdateProduct_SQL6=(
+		"\"Update " DB_PREFIX "PRODUCT set \
+			Weight=0 \
+		where Weight is NULL and exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT pc0 where pc0.IdProduct=Id and pc0.IdSubProduct='[/*PRODUCTKIT.ID*/]')\"\\\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePRODUCTKIT;1;(string,ID))*/} \\\n"),
+		@ UpdateProduct_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProduct_Input),
+		@ ("'\\\n"),
+		@ UpdateProduct_SQL1,
+		@ UpdateProduct_SQL2,
+		@ UpdateProduct_SQL3,
+		@ UpdateProduct_SQL4,
+		@ UpdateProduct_SQL5,
+		@ UpdateProduct_SQL6,
+),
+
+%=======================================================%
+%
+%
+@ "// Script 4. Delete Product\n\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteProduct ",
+
+% Caption
+@ ("'" TAG_DELETE_PRODUCT_KIT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+@ " ",
+
+% Label
+@ ("'" TAG_DELETE "' "),	% JZ 1001
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("Attention, Vous devez d'abord enlever ses composants et qu'il n'est composant d'autre produit.\\\n"),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+DeleteProduct_SQL1 = (
+	"\"DELETE FROM " DB_PREFIX "PRODUCT  where Id IN ('[/*PRODUCTKIT.ID*/]')\"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DeleteProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTKIT;1;(string,ID))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ DeleteProduct_SQL1,
+),
+
+
+%=======================================================%
+%
+%
+@ "// 10.1  for all component (sub article) , compute their quantity from quantitative measures\n",
+@ "// 10.2  for all component semi-finished having components, compute their price from their components sum(quntity*price)\n",
+@ "// 10.3  the total price of the product is the sum(quantity*price) of all comenents not being component of prd semi-finished component\n",
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyMeasuresForQty ",
+
+% Caption
+@ ("'" TAG_UPDATE_QUANTITY_MESURE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW5,
+@ " ",
+
+% Label
+@ ("'" TAG_UPDATE_QUANTITY_MESURE "' "),	% JZ 1001
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+@ ("'{/*Input(MMQTY;" TAG_UPDATE_QUANTITY_MESURE ";10;\\\n"),
+@ ("(float,LENGTH,Length,[/*PRODUCTKIT.LENGTH*/],10.3.580,1);\\\n"),
+@ ("(float,WIDTH,Width,[/*PRODUCTKIT.WIDTH*/],10.3.580,1);\\\n"),
+@ ("(float,HEIGHT,Height,[/*PRODUCTKIT.HEIGHT*/],10.3.580,1);\\\n"),
+@ ("(float,DEPTH,Depth,[/*PRODUCTKIT.DEPTH*/],10.3.580,1);\\\n"),
+@ ("(float,VOLUME,Volume,[/*PRODUCTKIT.VOLUME*/],12.3.580,1);\\\n"),
+@ ("(float,WEIGHT,Weight,[/*PRODUCTKIT.WEIGHT*/],10.3.580,1);\\\n"),
+@ ("(float,PARAMETER1,Parameter1,[/*PRODUCTKIT.PARAMETER1*/],10.3.580,1);\\\n"),
+@ ("(float,PARAMETER2,Parameter2,[/*PRODUCTKIT.PARAMETER2*/],10.3.580,1);\\\n"),
+@ ("(string,FORMULA1,Formula 1,[/*PRODUCTKIT.FORMULA1*/],200." inputWidth ",1);\\\n"),
+@ ("(string,FORMULA2,Formula 2,[/*PRODUCTKIT.FORMULA2*/],200." inputWidth ",1);\\\n"),
+@ (")*/}'\\\n"),
+@ ("\"Update " DB_PREFIX "PRODUCT SET\
+   Length=[/*LENGTH*/],\
+   Height=[/*HEIGHT*/],\
+   Width= [/*WIDTH*/],\
+   Depth= [/*DEPTH*/],\
+   Volume=[/*VOLUME*/],\
+   Weight=[/*WEIGHT*/],\
+   Parameter1=[/*PARAMETER1*/],\
+   Parameter2=[/*PARAMETER2*/],\
+   Formula1='[/*FORMULA1*/]',\
+   Formula2='[/*FORMULA2*/]' \
+  WHERE Id ='[/*PRODUCTKIT.ID*/]'\"\\\n"),
+
+@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+   Quantity=1\
+  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+   and (\
+     (LengthByPiece is not NULL and LengthByPiece>0) or \
+     (WidthByPiece is not NULL and WidthByPiece>0) or \
+     (DepthByPiece is not NULL and DepthByPiece>0) or \
+     (HeightByPiece is not NULL and HeightByPiece>0) or \
+     (VolumeByPiece is not NULL and VolumeByPiece>0)\
+   ) \"\\\n"),
+
+databaseType = "ACCESS" => (
+
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Length+pc.LengthByPiece-0.001)/pc.LengthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Length is not NULL and prd.Length>0\
+	   and pc.LengthByPiece is not NULL and pc.LengthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Height+pc.HeightByPiece-0.001)/pc.HeightByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Height is not NULL and prd.Height>0\
+	   and pc.HeightByPiece is not NULL and pc.HeightByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Width+pc.WidthByPiece-0.001)/pc.WidthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Width is not NULL and prd.Width>0\
+	   and pc.WidthByPiece is not NULL and pc.WidthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Depth+pc.DepthByPiece-0.001)/pc.DepthByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Depth is not NULL and prd.Depth>0\
+	   and pc.DepthByPiece is not NULL and pc.DepthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT prd on prd.Id=pc.IdProduct SET\
+	   pc.Quantity=pc.Quantity*ROUND((prd.Volume+pc.VolumeByPiece-0.001)/pc.VolumeByPiece,0)\
+	  WHERE pc.IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and prd.Volume is not NULL and prd.Volume>0\
+	   and pc.VolumeByPiece is not NULL and pc.VolumeByPiece>0 \"\\\n"),
+	@ ("\\\n"),
+
+	@ ("\"Update " DB_PREFIX "PRODUCT set\
+		PriceUnit=0,\
+		PurchasePrice=0,\
+		Weight=0\
+	  WHERE Id ='[/*PRODUCTKIT.ID*/]'\"\\\n"),
+
+	@ ("\"Update (" DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "PRODUCT_COMPONENT pc on prd.Id=pc.IdProduct)\
+			inner join " DB_PREFIX "PRODUCT sub on sub.Id=pc.IdSubProduct set\
+		prd.PriceUnit	 =prd.PriceUnit+pc.Quantity*sub.PriceUnit, \
+		prd.PurchasePrice=prd.PurchasePrice+pc.Quantity*sub.PurchasePrice, \
+		prd.Weight		 =prd.Weight+pc.Quantity*sub.Weight \
+	  WHERE prd.Id ='[/*PRODUCTKIT.ID*/]' and pc.Quantity>0 \"\\\n"),
+
+	;
+
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+	   Quantity=Quantity*(select TRUNCATE((prd.Length+LengthByPiece-0.001)/LengthByPiece,0) from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+	  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and exists (select 1 from " DB_PREFIX "PRODUCT where id=idProduct and Length is not NULL and Length>0)\
+	   and LengthByPiece is not NULL and LengthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+	   Quantity=Quantity*(select TRUNCATE((prd.Height+HeightByPiece-0.001)/HeightByPiece,0) from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+	  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and exists (select 1 from " DB_PREFIX "PRODUCT where id=idProduct and Height is not NULL and Height>0)\
+	   and HeightByPiece is not NULL and HeightByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+		Quantity=Quantity*(select TRUNCATE((prd.Width+WidthByPiece-0.001)/WidthByPiece,0) from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+	  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and exists (select 1 from " DB_PREFIX "PRODUCT where id=idProduct and Width is not NULL and Width>0)\
+	   and WidthByPiece is not NULL and WidthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+		Quantity=Quantity*(select TRUNCATE((prd.Depth+DepthByPiece-0.001)/DepthByPiece,0) from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+	  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and exists (select 1 from " DB_PREFIX "PRODUCT where id=idProduct and Depth is not NULL and Depth>0)\
+	   and DepthByPiece is not NULL and DepthByPiece>0\"\\\n"),
+	@ ("\\\n"),
+	@ ("\"Update " DB_PREFIX "PRODUCT_COMPONENT SET\
+		Quantity=Quantity*(select TRUNCATE((prd.Volume+VolumeByPiece-0.001)/VolumeByPiece,0) from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)\
+	  WHERE IdProduct ='[/*PRODUCTKIT.ID*/]'\
+	   and exists (select 1 from " DB_PREFIX "PRODUCT where id=idProduct and Volume is not NULL and Volume>0)\
+	   and VolumeByPiece is not NULL and VolumeByPiece>0\"\\\n"),
+	@ ("\\\n"),
+
+	@ ("\"Update " DB_PREFIX "PRODUCT set\
+	   PriceUnit=(select sum(pc.Quantity*sub.PriceUnit) \
+		from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sub on sub.Id=pc.IdSubProduct \
+		where pc.IdProduct='[/*PRODUCTKIT.ID*/]' and pc.Quantity is not NULL and pc.Quantity>0 and sub.PriceUnit is not NULL and sub.PriceUnit>0),\
+	   PurchasePrice=(select sum(pc.Quantity*sub.PurchasePrice) \
+		from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sub on sub.Id=pc.IdSubProduct \
+		where pc.IdProduct='[/*PRODUCTKIT.ID*/]' and pc.Quantity is not NULL and pc.Quantity>0 and sub.PurchasePrice is not NULL and sub.PurchasePrice>0),\
+	   Weight=(select sum(pc.Quantity*sub.Weight) \
+		from " DB_PREFIX "PRODUCT_COMPONENT pc inner join " DB_PREFIX "PRODUCT sub on sub.Id=pc.IdSubProduct \
+		where pc.IdProduct='[/*PRODUCTKIT.ID*/]' and pc.Quantity is not NULL and pc.Quantity>0 and sub.Weight is not NULL and sub.Weight>0)\
+	  WHERE Id ='[/*PRODUCTKIT.ID*/]'\"\\\n"),
+
+),
+
+@ ("\"Update " DB_PREFIX "PRODUCT SET Weight=0 WHERE Id ='[/*PRODUCTKIT.ID*/]' and Weight is NULL\"\\\n"),
+@ ("\"Update " DB_PREFIX "PRODUCT SET PurchasePrice=0 WHERE Id ='[/*PRODUCTKIT.ID*/]' and PurchasePrice is NULL\"\n\n\n"),
+
+%@ ("\"Update " DB_PREFIX "PRODUCT SET  [/*FORMULA1*/]  WHERE Id ='[/*PRODUCTKIT.ID*/]' and Formula1 is not NULL and Formula1>' ' \"\\\n"),
+%@ ("\"Update " DB_PREFIX "PRODUCT SET  [/*FORMULA2*/]  WHERE Id ='[/*PRODUCTKIT.ID*/]' and Formula2 is not NULL and Formula2>' ' \"\\\n"),

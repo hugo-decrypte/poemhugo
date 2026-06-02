@@ -1,0 +1,56 @@
+%=======================================================%
+%							%
+%			Scheduling			%
+%							%
+% 		ScenarioTableLog2EditLog.n       	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "EditLog ",
+
+% Caption
+@ ("'" TAG_EDIT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT,
+
+% Label
+@ (" '" TAG_EDIT "' "),	%li 0731
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableLOG' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (PREFIX_POEMDATA_OPEN "LOG&idUser in ({/*selected(tableLOG;1;(string,IDUSERLOG))*/}) AND t1 in ({/*selected(tableLOG;1;(string,T1LOG))*/}) \"\\\n"),
+%@ (PREFIX_POEMDATA_OPEN "LOG&idUser in ({/*selected(tableLOG;1;(string,IDUSERLOG))*/}) AND t1 in ({/*selected(tableLOG;1;(string,T1LOG,T1LOG,,19,,'" dateTimeFormatSqlSS "'))*/}) \"\\\n"),
+
+@ POEMDATA_RELOAD,
+
+
+
+

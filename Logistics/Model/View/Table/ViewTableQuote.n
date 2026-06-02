@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableQuote.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableQuote.n"],
+
+'@' => (
+	tableQuote("QUOTE",TAG_TABLE,"QUOTE",true,"TableQuoteProduct","Devis",""),
+),

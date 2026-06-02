@@ -1,0 +1,37 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	 FuncHistogramBalanceSheetQuantity.n	%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+<histogramBalanceSheetQuantity>(aliasHistogram,bestfit, labelX,labelY, labelLegend,colorLegend, IdSheetSelected, title, postfix0)	% JZ 1022
+(
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("HistogramBalanceSheetQuantity" postfix ".view"),
+
+		sqlAxisMonth = (
+			SQL_FORMATDATE"(max(DP.DateDelivery),'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"
+		),
+
+		sqlRate = "int(sum(DP.QuantityReal)/1000)",
+		sqlDataXY = ("SELECT "sqlAxisMonth " AS X, " sqlRate " AS Y, "),
+
+		sqlFrom = (
+			"FROM " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M  \
+			WHERE 	DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct<>'F'\
+				AND D.DateDelivery>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and D.DateDelivery<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\
+				AND M.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \
+			GROUP BY M.NoMonth, M.NameFR \
+			ORDER BY "sqlAxisMonth
+		),
+
+
+		['Work Directory' "Model\Common\View\HistogramBar1.n"],	
+	),
+),
+

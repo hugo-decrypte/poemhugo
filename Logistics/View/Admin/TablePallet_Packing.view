@@ -1,0 +1,99 @@
+View ViewTablePALLET '(/*TITLEOBJ*/)' '(/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePALLET _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=(/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Center,Center,Left,Left}]"\
+"[DATAOBJ=PALLET;FILLCOLOR=LINERGB]"
+
+Data PALLET '(/*TITLEOBJ*/)' PALLET HTTPSQL 0 '[FIND={NOPALLET,NBPRODUCT,QUANTITY,QUANTITYREAL,QUANTITYDEFECTIVE,WEIGHTNET,WEIGHT,WEIGHTGLOBAL,LENGTH,WIDTH,HEIGHT,DATEINPUT,DATESTART,COMMENTS,STATE}]'   [DOUBLECLICK=] \
+"[15;(int,NOPALLET,Palette,,10,,);(int,NBPRODUCT,#Produit,,13,,);(int,QUANTITY,Quantité,,12,,);(float,QUANTITYREAL,Qté livrée,,15,,);(float,QUANTITYDEFECTIVE,Qté défectueuse,,22,,);(int,WEIGHTNET,Poids net,,14,,);(int,WEIGHT,Poids,,14,,);(int,WEIGHTGLOBAL,Poids total,,16,,);(string,LENGTH,Longueur,,14,,);(string,WIDTH,Largeur,,12,,);(string,HEIGHT,Hauteur,,12,,);(date,DATEINPUT,Date entrée,,18,,YYYY-MM-DD|DD/MM/YYYY);(date,DATESTART,Date départ,,18,,YYYY-MM-DD|DD/MM/YYYY);(string,COMMENTS,Commentaire,,18,,);(string,STATE,Etat,,15,,);(string,NAMESENDER,Expéditeur,,15.0.300,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT pl.idPacking AS IDPACKING, \
+		 pl.NoPallet as NOPALLET,\
+		 IIF(exists (select Name from COMPANY c where c.Id=pc.IdSender),(select Name from COMPANY c where c.Id=pc.IdSender),pc.IdSender) as NAMESENDER,\
+		 pc.DateCreate as DATESTART,\
+		 pc.DateDelivery as DATEINPUT,\
+		 pl.Quantity AS QUANTITY,\
+		 pl.QuantityReal AS QUANTITYREAL,\
+		 pl.QuantityStock AS QUANTITYSTOCK,\
+		 pl.QuantityDefective AS QUANTITYDEFECTIVE,\
+		 pl.WeightNet AS WEIGHTNET,\
+		 pl.WeightPallet AS WEIGHTPALLET,\
+		 pl.WeightGlobal AS WEIGHTGLOBAL,\
+		 format(pl.Length,'0') AS LENGTH,\
+		 format(pl.Width,'0') AS WIDTH,\
+		 format(pl.Height,'0') AS HEIGHT,\
+		 pl.Designation AS COMMENTS,\
+		 pl.IDZONE AS STOCKZONE,\
+		 pl.IDROW AS STOCKROW,\
+		 pl.IDCOLUMN AS STOCKCOLUMN,\
+		 (select count(1) from PALLET_PRODUCT PD where PD.IdPacking=pl.IdPacking and PD.NoPallet=pl.NoPallet) as NBPRODUCT,\
+		 (IIF(exists (select 1 from STATE s where s.Id=pc.IdState and s.Category='SUPPLY'),(select Label from STATE s where s.Id=pc.IdState and s.Category='SUPPLY'),\
+		   IIF(pl.Quantity<>pl.QuantityReal or pl.QuantityStock<0 or pl.QuantityDefective>0,'Quantit  incorrecte',\
+		   IIF(pl.QuantityStock=pl.QuantityReal,'A Livrer',\
+		   IIF(pl.QuantityStock<pl.QuantityReal and pl.QuantityStock>0,'Livrée Partielle',\
+		   IIF(pl.QuantityStock=0,'Livrée',\
+		   ' ')))))) as STATE,\
+		 (IIF(pc.IdState in (select s.Id from STATE s where s.CATEGORY='SUPPLY'),(select Color from STATE s where s.Id=pc.IdState and s.CATEGORY='SUPPLY'),\
+		   IIF(pl.Quantity<>pl.QuantityReal or pl.QuantityStock<0 or pl.QuantityDefective>0,'(255 120 120)',\
+		   IIF(pl.QuantityStock=pl.QuantityReal,'(160 160 255)',\
+		   IIF(pl.QuantityStock<pl.QuantityReal and pl.QuantityStock>0,'(255 255 60)',\
+		   IIF(pl.QuantityStock=0,'(120 255 120)',\
+		    '(200 200 160)')))))) AS LINERGB \
+	 FROM PACKING pc inner join PALLET pl on pc.Id=pl.IdPacking \
+	 WHERE (pl.IdPacking in ((/*IDPACKING*/)) or 'XXX' in ((/*IDPACKING*/)) ) \
+		  and (exists (select 1 from PALLET_PRODUCT PD where pl.IdPacking=PD.IdPacking and PD.NoPallet=pl.NoPallet and PD.IdProduct in ((/*IDPRODUCT*/))) or 'XXX' in ((/*IDPRODUCT*/)) ) \
+	 ORDER BY pl.IdPacking, pl.NoPallet "
+
+
+Script EditPallet 'Editer' _ 1 'Editer' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'  WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=(/*USERID*/),PWD=(/*PASSWORD*/),PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE PALLET&IdPacking in ({/*selected(tablePALLET;1;(string,IDPACKING))*/}) and NoPallet in ({/*selected(tablePALLET;1;(int,NOPALLET))*/})"\
+Reload _ _ _ _ 
+
+
+Script TablePalletProduct  'Produits en palette' _ 36 'Produits' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TablePalletProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits en palette {/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPACKING={/*Selected(tablePALLET;1;(string,IDPACKING))*/};NOPALLET={/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPRODUCT='XXX']"
+
+Script TableProductForPallet  'Produits pour palette' _ 22 'Produits pour palette' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductForPackingPallet.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDPACKING={/*Selected(tablePALLET;1;(string,IDPACKING))*/};NOPALLET={/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPRODUCT='XXX';FAMILY='XXX']"
+
+Script CreatePallet  'Créer palette' _ 61 'Créer palette' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\CreatePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;1;(string,IDPACKING))*/}' \
+Reload _ _ _
+
+Script ModifyPallet 'Modify Pallet' _ 62 'Modifier Palette' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;2;(string,IDPACKING);(int,NOPALLET))*/} \
+{/*Input(Modifier Palette;8;\
+(int,LENGTH,Longueur(CM),[/*PALLET.LENGTH*/],10.0.580,0);\
+(int,WIDTH,Largeur(CM),[/*PALLET.WIDTH*/],10.0.580,0);\
+(int,HEIGHT,Hauteur(CM),[/*PALLET.HEIGHT*/],10.0.580,0);\
+(float,WEIGHTPALLET,Poids Palette,[/*PALLET.WEIGHTPALLET*/],10.3.580,0);\
+(string,STOCKZONE,Secteur,[/*PALLET.STOCKZONE*/],5.0.580,1);\
+(string,STOCKROW,Rang,[/*PALLET.STOCKROW*/],5.0.580,1);\
+(string,STOCKCOLUMN,Colonne,[/*PALLET.STOCKCOLUMN*/],5.0.580,1);\
+(string,COMMENTS,Commentaire,[/*PALLET.COMMENTS*/],50.0.580,1);\
+)*/}'\
+Reload _ _ _
+
+Script DeletePallet  'Supprimer palette' _ 63 'Supprimer palette' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\DeletePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;2;(string,IDPACKING);(int,NOPALLET))*/}' \
+Reload _ _ _
+
+Script ModifyNoPallet 'Modify No. Pallet' _ 64 'Modifier Numéro Palette' _ 'tablePALLET' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdateNoPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;2;(string,IDPACKING);(int,NOPALLET))*/} \
+{/*Input(Modifier Numéro Palette;1;\
+(int,NOPALLET,No. palette,[/*PALLET.NOPALLET*/],10.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+

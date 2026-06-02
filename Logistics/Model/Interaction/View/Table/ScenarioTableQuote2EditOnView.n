@@ -1,0 +1,539 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableQuote2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "CreateQuote ",
+
+
+
+% Caption
+@ (" '" TAG_INSERT_QUOTE "' "),	% JZ 0906
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+dateValid :: "",
+? databaseType (
+	"ACCESS" : 
+		dateValid = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 1, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"SQLSERVER" :
+		dateValid = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_MONTH", 1, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"MYSQL" :
+		dateValid = (SQL_FORMATDATE"(Date_Add("SQL_CURRENTDATE", INTERVAL 1 MONTH),'"SQL_FORMATDATESTR"')" ),
+	;
+
+	"ORACLE" :
+		dateValid = (SQL_FORMATDATE"(Add_Months("SQL_CURRENTDATE", 1),'"SQL_FORMATDATESTR"')" ),
+),
+
+
+% Instruction... (When Count>0)  
+CreateQuote_Input=(
+	"{/*Input(" TAG_INSERT_QUOTE ";3;\\\n"
+	"(string,IDQUOTE," TAG_QUOTE_ID ",,50." inputWidth ",0,0,);\\\n"
+	" (string,LABELCLIENT,Client,,50." inputWidth ",0,,[/*CLIENT.LABELCLIENT*/]);\\\n"
+	" (date,DATEDELIVERY," TAG_DELIVERY_DATE ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	" )*/}"
+),
+CreateQuote_SQL1=(
+	" \"INSERT INTO " DB_PREFIX "QUOTE (Id, IdClient, IdPointDelivery, DateQuote, DateValid, DateDelivery, IdAgency, IdState)  \
+	select '[/*IDQUOTE*/]', cl.Id, p.IdPoint, format("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), "dateValid", [/*DATEDELIVERY*/], cl.IdAgency, '0' \
+	FROM " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id \
+	where "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*LABELCLIENT*/]' \"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\CreateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+		@ CreateQuote_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" CreateQuote_Input),
+		@ ("'\\\n"),
+		@ CreateQuote_SQL1,
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DuplicateQuote ",
+
+
+
+% Caption
+@ ("'" TAG_COPY_QUOTE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_COPY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DuplicateQuote_Input=(
+	"{/*Input(L;" TAG_COPY_QUOTE " [/*QUOTE.ID*/];2;\\\n"
+	"(string,IDQUOTE," TAG_QUOTE_ID ",,50." inputWidth ",0,0,);\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*QUOTE.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}"
+),
+DuplicateQuote_SQL1=(
+	"\"INSERT INTO " DB_PREFIX "QUOTE (Id, IdClient, IdPointDelivery, DateQuote, DateValid, DateDelivery, IdAgency, Quantity,Comments, Reference, IdState) \
+	select '[/*IDQUOTE*/]', IdClient, IdPointDelivery, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), "dateValid", [/*DATEDELIVERY*/], \
+		IdAgency, Quantity, "SQL_CONCAT"'Dupliquée de '"SQL_CONCATWITH"Id"SQL_CONCATEND", Id, '0' \
+	from " DB_PREFIX "QUOTE \
+	where Id = '[/*QUOTE.ID*/]' \"\\\n"
+),
+
+DuplicateQuote_SQL2=(
+	"\"INSERT INTO " DB_PREFIX "QUOTE_PRODUCT (IdQuote, IdProduct, Quantity, PriceUnit, Discount, Comments, IdVAT) \
+	select '[/*IDQUOTE*/]', IdProduct,\
+		Quantity, PriceUnit, Discount, Comments, IdVAT\
+	from " DB_PREFIX "QUOTE_PRODUCT \
+	where IdQuote = '[/*QUOTE.ID*/]'\"\\\n"
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\DuplicateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTE;2;(string,ID);(date, DATEDELIVERY);)*/} \\\n"),
+		@ DuplicateQuote_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" DuplicateQuote_Input),
+		@ ("'\\\n"),
+		@ DuplicateQuote_SQL1,
+		@ DuplicateQuote_SQL2,
+),
+
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyQuote ",
+
+
+% Caption
+@ ("'" TAG_UPDATE_QUOTE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateQuote_Input = (
+	"{/*Input(MCM;" TAG_UPDATE_QUOTE " [/*QUOTE.ID*/];4;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*QUOTE.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(date,DATEVALIDITY," TAG_DATE_VALIDITY ",[/*QUOTE.DATEVALIDITY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*QUOTE.COMMENTS*/],50." inputWidth ",1,,);\\\n"
+	"(string,STATE," TAG_STATE ",[/*QUOTE.STATE*/],50." inputWidth ",0,,[/*STATE.LABELSTATE*/]);\\\n"
+	")*/}"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateQuote_SQL1 = (
+		"\"Update " DB_PREFIX "QUOTE Q, " DB_PREFIX "STATE s\
+		set Q.DateDelivery=[/*DATEDELIVERY*/],\
+		Q.DateValid=[/*DATEVALIDITY*/],\
+		Q.Comments='[/*COMMENTS*/]',\
+		Q.IdState=s.Id\
+		where Q.Id in (trim( [/*QUOTE.ID*/] )) \
+		 and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='QUOTE'\"\n\n"
+	),
+	;
+	UpdateQuote_SQL1 = (
+		"\"Update " DB_PREFIX "QUOTE \
+		set DateDelivery=[/*DATEDELIVERY*/],\
+		DateValid=[/*DATEVALIDITY*/],\
+		Comments='[/*COMMENTS*/]',\
+		IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='QUOTE')\
+		where Id in (trim( [/*QUOTE.ID*/] )) \"\n\n"
+	),
+),
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableQUOTE;1;(string,ID))*/} \\\n"),
+		@ UpdateQuote_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateQuote_Input),
+		@ ("'\\\n"),
+		@ UpdateQuote_SQL1,
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteQuote ",
+
+% Caption
+@ ("'" TAG_DELETE_QUOTE "' "),
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" '" TAG_DELETE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("\'Attention,Vous ne pouvez supprimer que des devis qui ne sont pas validés et mis en commande\' "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeleteQuote_SQL1 = (
+	"\"Delete from " DB_PREFIX "QUOTE_PRODUCT \
+	where IdQuote IN ('[/*QUOTE.ID*/]')\
+	and exists (select 1 from " DB_PREFIX "QUOTE where Id=IdQuote and (IdState is NULL or IdState='0') )\"\\\n"
+),
+DeleteQuote_SQL2 = (
+	"\"delete from " DB_PREFIX "QUOTE \
+	where Id IN ('[/*QUOTE.ID*/]') and (IdState is NULL or IdState='0') \
+	and not exists (select 1 from " DB_PREFIX "QUOTE_PRODUCT where Id=IdQuote)\"\\\n"
+),
+DeleteQuote_SQL3 = (
+	"\"Update " DB_PREFIX "QUOTE \
+	set Comments='NON Supprimée'\
+	where Id IN ('[/*QUOTE.ID*/]') \"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\DeleteQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableQUOTE;1;(string,ID))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ DeleteQuote_SQL1,
+		@ DeleteQuote_SQL2,
+		@ DeleteQuote_SQL3,
+),
+
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "SetToOrder ",
+
+% Caption
+@ ("'" TAG_SET_QUOTE_TO_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW5,
+
+% Label
+@ (" '" TAG_SET_QUOTE_TO_ORDER "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+SetToOrder_Input = (
+	"{/*Input(ML;" TAG_SET_QUOTE_TO_ORDER " : " TAG_QUOTE " [/*QUOTE.ID*/];1;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*QUOTE.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	" )*/}"
+),	% JZ 0919
+
+codeOrder = (SQL_CONCAT"'CO'"SQL_CONCATWITH"'[/*QUOTE.ID*/]'"SQL_CONCATEND ),
+
+SetToOrder_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "CLIENTORDER\
+	(IdClub, Id, IdClient, IdPointDelivery, DateDelivery, IdAgency, Quantity, QuantityRest,\
+	Comments, IdState, Reference) \
+	select IdClub, "codeOrder", IdClient, IdPointDelivery, [/*DATEDELIVERY*/], IdAgency, Quantity, Quantity,\
+	'Devis '+ Id, '0', Id\
+	from " DB_PREFIX "QUOTE \
+	where Id = '[/*QUOTE.ID*/]'\
+	and IdState>='1'\
+	and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.Id="codeOrder")\"\\\n"
+),
+
+SetToOrder_SQL2 = (
+	"\"INSERT INTO " DB_PREFIX "ORDER_PRODUCT (IdOrder, IdProduct, Quantity, QuantityDelivered, QuantityRest, PriceUnit, Comments, DateDelivery,NoPallet) \
+	select "codeOrder", IdProduct, \
+	0, 0, 0, PriceUnit, Comments, [/*DATEDELIVERY*/], 1\
+	from " DB_PREFIX "QUOTE_PRODUCT QP\
+	where IdQuote='[/*QUOTE.ID*/]'\
+	and not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder="codeOrder" and LO.IdProduct=QP.IdProduct) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	SetToOrder_SQL3 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdProduct=QP.IdProduct\
+		set LO.Quantity=QP.Quantity, LO.QuantityRest=QP.Quantity, LO.QuantityDelivered=0\
+		where QP.IdQuote='[/*QUOTE.ID*/]' and LO.IdOrder="codeOrder" \"\\\n"
+	),
+
+	SetToOrder_SQL4 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdOrder='CO'+QP.IdQuote and LO.IdProduct=QP.IdProduct\
+		set LO.PriceUnit=QP.PriceUnit\
+		where QP.IdQuote='[/*QUOTE.ID*/]' and LO.IdOrder='CO'+'[/*QUOTE.ID*/]' \
+		and (LO.PriceUnit is NULL or LO.PriceUnit<=0) \"\\\n"
+	),
+
+	SetToOrder_SQL5 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdOrder='CO'+QP.IdQuote and LO.IdProduct=QP.IdProduct\
+		set LO.IdVAT=QP.IdVAT\
+		where QP.IdQuote='[/*QUOTE.ID*/]' and LO.IdOrder='CO'+'[/*QUOTE.ID*/]' \
+		and (LO.IdVAT is NULL or LO.IdVAT<=' ') \"\\\n"
+	),
+
+	SetToOrder_SQL6 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "PRODUCT P on LO.IdProduct=P.Id\
+		set LO.IdVAT=P.IdVAT\
+		where LO.IdOrder='CO'+'[/*QUOTE.ID*/]'\
+		and (LO.IdVAT is NULL or LO.IdVAT<=' ') \"\\\n"
+	),
+
+	;
+
+	SetToOrder_SQL3 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT \
+		set Quantity=(select QP.Quantity from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='[/*QUOTE.ID*/]' and ORDER_PRODUCT.IdProduct=QP.IdProduct),\
+			QuantityRest=(select QP.Quantity from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='[/*QUOTE.ID*/]' and ORDER_PRODUCT.IdProduct=QP.IdProduct),\
+			QuantityDelivered=0\
+		where IdOrder="codeOrder" \"\\\n"
+	),
+
+	SetToOrder_SQL4 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT \
+		set PriceUnit=(select QP.PriceUnit from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='[/*QUOTE.ID*/]' and ORDER_PRODUCT.IdProduct=QP.IdProduct)\
+		where IdOrder="codeOrder" \
+		and (PriceUnit is NULL or PriceUnit<=0) \"\\\n"
+	),
+
+	SetToOrder_SQL5 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT \
+		set IdVAT=(select QP.IdVAT from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='[/*QUOTE.ID*/]' and ORDER_PRODUCT.IdProduct=QP.IdProduct)\
+		where IdOrder="codeOrder" \
+		and (IdVAT is NULL or IdVAT<=' ') \"\\\n"
+	),
+
+	SetToOrder_SQL6 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT \
+		set IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where IdProduct=Id)\
+		where IdOrder="codeOrder"\
+		and (IdVAT is NULL or IdVAT<=' ') \"\\\n"
+	),
+),
+
+SetToOrder_SQL7 = (
+	"\"Update " DB_PREFIX "QUOTE \
+	set DateDelivery=[/*DATEDELIVERY*/], IdState='3'\
+	where Id='[/*QUOTE.ID*/]'\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\SetToOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTE;1;(string,ID))*/} \\\n"),
+		@ SetToOrder_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'\\\n"),
+		@ SetToOrder_Input,
+		@ ("'\\\n"),
+		@ SetToOrder_SQL1,
+		@ SetToOrder_SQL2,
+		@ SetToOrder_SQL3,
+		@ SetToOrder_SQL4,
+		@ SetToOrder_SQL5,
+		@ SetToOrder_SQL6,
+		@ SetToOrder_SQL7,
+),
+.
+
+
+
+

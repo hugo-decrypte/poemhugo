@@ -1,0 +1,148 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   		%
+%                                                  %
+% 		 UpdateDeliveryProductDiscount.n		   	 		  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idOrderProductLineBuffer_{i}		:: "",
+		
+		idObjSelectedBuffer_{i}				= (),
+		idOrderProductLineBuffer_{i}		= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} 				= ("'" idObjSelectedBuffer_{i} "',"),
+			strIdOrderProductLineBuffer_{i} 		= ("'" idOrderProductLineBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} 				= ("'" idObjSelectedBuffer_{i} "'"),
+			strIdOrderProductLineBuffer_{i}	 		= ("'" idOrderProductLineBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER 	:: "",
+	IDORDERPRODUCTLINE 	:: "",
+	
+	IDOBJSELECTEDBUFFER 	= [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	IDORDERPRODUCTLINE		= [\forall i \in [1, nbSelected] strIdOrderProductLineBuffer_{i}],
+
+	
+	discountBuffer			:: "",
+	labelBuffer				:: "",
+	discountBuffer			= (),
+	labelBuffer				= (),
+	
+	
+	idOrderProductLineCondition = ( 
+		SQL_CONCAT"trim(IdOrder)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH"trim(IdProduct)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH""SQL_FORMATNUM"(NoLine,"SQL_FORMATSCALE0")"
+		SQL_CONCATEND" in ("IDORDERPRODUCTLINE") "
+	),
+
+	
+	
+	'()' <- database,
+	
+	UpdateDeliveryDiscount_SQL1 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set Discount="discountBuffer", LabelDiscount='"labelBuffer"'
+		WHERE IdDelivery in ("IDOBJSELECTEDBUFFER") and "idOrderProductLineCondition" "
+	),
+
+
+	databaseType = "ACCESS" => (
+		UpdateDeliveryDiscount_SQL2 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "DELIVERY_PRODUCT DP on P.Id=DP.IdProduct
+			set DP.IdVAT=P.IdVAT
+			where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and (DP.IdVAT is NULL or DP.IdVAT<= ' ') "
+		),
+		UpdateDeliveryDiscount_SQL3 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP set DP.Discount=0
+			WHERE DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and DP.Discount is NULL "
+		),
+		UpdateDeliveryDiscount_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP set 
+				DP.AmountHT = round(DP.QuantityReal*DP.PriceUnit*(100.0-DP.Discount))/100.0
+			WHERE DP.IdDelivery in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateDeliveryDiscount_SQL5 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "VAT t on t.Id=DP.IdVAT
+			set DP.AmountVAT= round(round(DP.QuantityReal*DP.PriceUnit*(100.0-DP.Discount))/100.0*t.VAT)/100.0
+			WHERE DP.IdDelivery in ("IDOBJSELECTEDBUFFER")"
+		),
+		UpdateDeliveryDiscount_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY d set d.AmountHT=0, d.AmountVAT=0 WHERE d.ID in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateDeliveryDiscount_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY d inner join " DB_PREFIX "DELIVERY_PRODUCT DP on d.ID=DP.IdDelivery set
+			d.AmountHT=d.AmountHT+DP.AmountHT,
+			d.AmountVAT=d.AmountVAT+DP.AmountVAT
+			WHERE d.ID in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateDeliveryDiscount_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY d set d.AmountTotal = d.AmountHT + d.AmountVAT  WHERE d.ID in ("IDOBJSELECTEDBUFFER")"
+		),
+		
+		;
+
+		UpdateDeliveryDiscount_SQL2 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT 
+			set IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct)
+			where IdDelivery in ("IDOBJSELECTEDBUFFER") and (IdVAT is NULL or IdVAT<= ' ') "
+		),
+		UpdateDeliveryDiscount_SQL3 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set Discount=0
+			WHERE IdDelivery in ("IDOBJSELECTEDBUFFER") and Discount is NULL "
+		),
+		UpdateDeliveryDiscount_SQL4 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set 
+				AmountHT = round(QuantityReal*PriceUnit*(100.0-Discount))/100.0
+			WHERE IdDelivery in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateDeliveryDiscount_SQL5 = (
+			"Update " DB_PREFIX "DELIVERY_PRODUCT 
+			set AmountVAT= (select round(AmountHT*t.VAT)/100.0 from " DB_PREFIX "VAT t where t.Id=IdVAT)
+			WHERE IdDelivery in ("IDOBJSELECTEDBUFFER")"
+		),
+		UpdateDeliveryDiscount_SQL6 = (
+			"Update " DB_PREFIX "DELIVERY set
+				AmountHT=(select sum(DP.AmountHT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery),
+				AmountVAT=(select sum(DP.AmountVAT) from " DB_PREFIX "DELIVERY_PRODUCT DP where ID=DP.IdDelivery)
+			WHERE ID in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateDeliveryDiscount_SQL7 = (
+			"Update " DB_PREFIX "DELIVERY set AmountHT=0  WHERE ID in ("IDOBJSELECTEDBUFFER") and AmountHT is NULL "
+		),
+		UpdateDeliveryDiscount_SQL8 = (
+			"Update " DB_PREFIX "DELIVERY set AmountVAT=0  WHERE ID in ("IDOBJSELECTEDBUFFER") and AmountVAT is NULL "
+		),
+		UpdateDeliveryDiscount_SQL9 = (
+			"Update " DB_PREFIX "DELIVERY set AmountTotal = AmountHT + AmountVAT  WHERE ID in ("IDOBJSELECTEDBUFFER")"
+		),
+	),
+
+	(SQL : UpdateDeliveryDiscount_SQL1), 
+	(SQL : UpdateDeliveryDiscount_SQL2), 
+	(SQL : UpdateDeliveryDiscount_SQL3), 
+	(SQL : UpdateDeliveryDiscount_SQL4), 
+	(SQL : UpdateDeliveryDiscount_SQL5), 
+	(SQL : UpdateDeliveryDiscount_SQL6), 
+	(SQL : UpdateDeliveryDiscount_SQL7), 
+	(SQL : UpdateDeliveryDiscount_SQL8), 
+	databaseType <> "ACCESS" => (
+		(SQL : UpdateDeliveryDiscount_SQL9), 
+	),
+	
+	database <- '()',
+),

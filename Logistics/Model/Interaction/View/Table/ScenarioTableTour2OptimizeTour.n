@@ -1,0 +1,76 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableTour2OptimizeTour.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ ("Script "),
+
+% ID
+@ ("OptimizeTour '"),
+
+% Caption
+@ (TAG_OPTIMIZE_TOUR "' "),
+
+% Group	
+@ ("_ "),
+
+% Integer Code [0..1000]
+@ SCRIPT_OPTIMIZE_TOUR,
+
+
+% Label	
+@ (" '" TAG_OPTIMIZE_TOUR "' "),
+
+% Object Group Set "{G1, G2, ...}"	
+@ ("_ "),
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'( 0 0 0 0 )' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("_ "),
+%@ ("'" TAG_ASK_OPTIMIZE_TOUR "' "),
+
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_NCLSCRIPT_MESSAGE "Model\Script\ScriptTSP.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*Selected(tableTOUR;1;(string,ID))*/}"),
+@ NCL_ARGUMENT_END,
+
+
+
+
+
+
+.
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=1;" MESSAGEPREFIX ";AUTOCLOSE=1;]'\\\n"),
+
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Script\ScriptTSP.n'\\\n"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*Selected(tableTOUR;1;(string,ID))*/}"),
+@ NCL_ARGUMENT_END,
+

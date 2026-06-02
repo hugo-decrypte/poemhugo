@@ -1,0 +1,125 @@
+%====================================================%
+%						     %
+%		     Logistics		             %
+%						     %
+%  	ScenarioTableTour2PrintDelivery.n	     %
+%						     %
+%       (c)2000. Enginest. All rights reserved.	     %
+%====================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "PrintDelivery ",
+
+% Caption
+@ ("'" TAG_PRINT_DELIVERY_NODE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_PRINT3,
+
+% Label
+@ (" '" TAG_PRINT_DELIVERY_NODE "' "),	% JZ 0906
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+% Instruction... (When Count>0)
+
+
+%% 2025.09.30 Jianyi
+%filePrintCfg = "PrintTourDelivery.ini",
+%fileOutput	 = "Delivery_TOUR",
+%dataTable	 = "tableTOUR",
+
+% print 
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+
+		@ ("\t Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ ("\t '(/*SERVERPORT*/) (/*USERID*/)  PrintTourDelivery.ini  Delivery_TOUR \\\n"),
+		@ ("\t {/*selected(tableTOUR;1;(string,ID))*/}' \\\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+
+		@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t (/*POEMPRINTEXEPATH*/)PoemPrint.exe\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)PrintTourDelivery.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTAPPPATH*/)/SupplyOrder{/*selected(tableSUPPLY;1;(string,ID))*/}.pdf]'\\\n"),
+		@ ("\t '{/*selected(tableTOUR;1;(string,ID))*/}' '(/*CLUBID*/)'\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)' _ _ _ _ \\\n"),
+	),
+
+
+
+? typeExecute (
+
+	"SQLVIEW" :
+		%  open pdf file by Edge
+		@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Delivery_TOUR{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+
+	"NCL" :
+		%  open pdf file by View Open Command
+		%@ (" Open '(/*OUTPUTPATH*/)/Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' \n\n")
+	%%	@ (" Open 'http://(/*SERVERIP*/):(/*SERVERPORT*/)/(/*OUTPUTPATH*/)/Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' \n\n")
+		
+		@ ("\t WinExec \"[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Delivery_TOUR{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+	),
+
+.
+
+
+
+%%%%%%%%%%%%%%%%%%
+@ (" WinExec \"[WAITTIME=300S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+@ ("\t '(/*POEMPRINTEXE*/)'\\\n"),
+%@ ("\t '(/*POEMPRINTPATH*/)\(/*POEMPRINTEXE*/)'\\\n"),
+@ ("\t '(/*POEMPRINTPATH*/)\PrintTourDelivery.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTPATH*/)/Delivery_Tour{/*selected(tableTour;1;(string,ID))*/}.pdf]'\\\n"),
+@ ("\t \"IdClub='(/*CLUBID*/)' and IdTour in ({/*selected(tableTOUR;1;(string,ID))*/})\"\\\n"),
+@ ("\t '(/*POEMPRINTPATH*/)' _ _ _ _ \\\n"),
+
+%  execute the bat file for open pdf file
+@ (" WinExec \"[WAITTIME=0S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+@ ("\t 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTPATH*/)Delivery_TOUR{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+
+%  execute the bat file for open pdf file
+%@ (" WinExec \"[WAITTIME=0S;CONSOLE=0;]\" '(/*POEMPRINTPATH*/)\Tour(/*USERID*/).pdf' _ _ _ _ _ \n\n"),
+
+
+
+%PoemPrint\Tour(/*USERID*/).pdf"
+

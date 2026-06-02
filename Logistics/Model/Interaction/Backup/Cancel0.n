@@ -1,0 +1,49 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		 Cancel0.n                         %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"], % bai 0429
+
+['Work Directory' "Model\Common\Config\ReadUser.n"],
+%['Work Directory' "Model\Common\Config\ReadRule.n"],
+
+['Work Directory' "Model\Common\Config\CheckPermission.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Interaction\Backup\Restore.n"],
+
+
+'@' => ( 
+	sqlFile <- '@',
+
+	databaseType = "SQLSERVER" =>( % bai 0510
+		@ ( "DELETE FROM [BACKUP] WHERE id='" idBackup "' AND type='" TAG_TYPE_BACKUP "' AND idClub='" idClubLogin "'\n"),
+		;
+		@ ( "DELETE FROM BACKUP WHERE id='" idBackup "' AND type='" TAG_TYPE_BACKUP "' AND idClub='" idClubLogin "'\n"),
+	),
+
+	@ ( SQL_DeleteVehicleBackupIs idBackup "'\n"),
+	@ ( SQL_DeleteProjectBackupIs idBackup "'\n"),
+	@ ( SQL_DeletePlanBackupIs idBackup "'\n"),
+
+	'@' <- sqlFile,
+
+	% ExecuteSql
+	[['Work Directory' "Model\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+),
+
+'()' => (
+	'()' <- database,
+
+	sqlOperationLog := TAG_CANCEL_INTERACTION,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+
+	('hh:mm:ss' "  " TAG_CANCEL_INTERACTION "\n" : ),
+),

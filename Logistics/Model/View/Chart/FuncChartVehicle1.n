@@ -1,0 +1,340 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/*	 	FuncChartVehicle.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+%timetable,viewtask, structured,expanded,bestfit : true,true, true,false,true
+
+%idTask		: TASK
+%idItem		: PROJECT
+%idDropScript	: MoveTask
+%idSelected	: Selected
+
+<chartVehicle>(type, timetable,viewtask, expanded,bestfit, id, idTask,idItem,idDropScript,idSelected,chartItemWidth, title, IdVehicle, postfix)	% JZ 1023
+(
+	'()' => (
+		['Work Directory' "Model\Common\Config\ReadMonthDay.n"],
+	),
+
+	'@' => (
+		%['Work Directory' "Model\Common\View\ResetDateForView.n"],
+		
+
+
+
+		IdVehicle = {} => (
+			sqlAndVehicleSelected =	(" AND " SQL_ViewUserVisibleClubIs "v.idClub)"),
+			;
+
+			sqlAndVehicleSelected = (" AND " SQL_ViewUserVisibleClubIs "v.idClub) AND v.id IN (" concatSetQuoted(IdVehicle) ") "),
+		),
+
+
+		viewFile = ("ChartVehicle" postfix ".view"),
+
+
+
+
+
+		[viewDirectory viewFile] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\BeginChart.n"],
+
+
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idItem "' "),
+
+		% Caption
+		@ (" '" title "' "),
+
+		% Group	
+		@ (" '" idItem "' "),
+
+		% Source type (Data/DB/File/Clicked/Selected)
+		@ typeDataUser,
+
+
+
+		@ (" 0 '[FIND={ID,IDTYPEVEHICLE,IDVEHICLE,T1};TIPINFO=" TIPINFO_CHART_VEHICLE "]'  '_' \\\n"),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[21;(int,ID,"TAG_ID",,10,0);"),
+
+		@ ("(string,TEXT,Text,,10,0);"),
+		@ ("(string,PARENTID,PARENTID,,255,0);"),
+		@ ("(string,COLOR,COLOR,,,);"),
+		@ ("(string,Calendar,Calendar,,,," dateFormatSql ");"),
+		@ ("(string,TimeSlot,TimeSlot,,,,"timeFormatView");"),
+
+		@ ("(string,IDTYPEVEHICLE,"TAG_RESOURCE_TYPE_ID");"),
+		@ ("(string,IDVEHICLE,"TAG_RESOURCE_ID");"),
+		@ ("(string,T1,"TAG_PLAN_T1");"),
+		@ ("(string,T2,"TAG_PLAN_T2");"),
+		@ ("(int,QUANTITY,"TAG_QUANTITY");"),
+		@ ("(float,WEIGHT,"TAG_WEIGHT");"),
+		@ ("(float,VOLUME,"TAG_VOLUME");"),
+		@ ("(float,RATEQUANTITY,"TAG_QUANTITY_RATE",,14.3.14,0);"),
+		@ ("(float,RATEWEIGHT,"TAG_WEIGHT_RATE",,14.3.14,0);"),
+		@ ("(float,RATEVOLUME,"TAG_VOLUME_RATE",,14.3.14,0);"),
+		@ ("(int,SERVICETIME,"TAG_SERVICE_TIME");"),
+		@ ("(int,ROUTETIME,"TAG_ROUTE_TIME");"),
+		@ ("(int,MILEAGE,"TAG_MILEAGE");"),
+		@ ("(float,COST,"TAG_COST",,14.3.14,0);"),
+		@ ("float,RECEIPTS,"TAG_RECEIPTS",,14.3.14,0);]\"\\\n"),
+
+
+
+
+		% Planned Vehicles
+		SQL_DataPlannedVehicle = (
+			"SELECT DISTINCT v.id AS ID, \
+				v.id AS IDVEHICLE, \
+				0 AS TOURVEHICLE, \
+				v.idTypeResource+' '+v.id+'  '+CSTR(" SQL_CASEWHEN "v.nbTour IS NULL" SQL_THEN "0" SQL_ELSE "v.nbTour" SQL_CASEEND ") AS [TEXT], \
+				'' AS PARENTID, \
+				v.idTypeResource AS IDTYPEVEHICLE, \
+				v.quantity AS QUANTITY, \
+				v.weight AS WEIGHT, \
+				v.volume AS VOLUME, \
+				v.rateQuantity AS RATEQUANTITY, \
+				v.rateWeight AS RATEWEIGHT, \
+				v.rateVolume AS RATEVOLUME, \
+				" SQL_CASEWHEN "v.t1 IS NULL"
+					SQL_THEN "'" t1 "'" SQL_ELSE "'" t2 "'"
+				  SQL_CASEEND "			AS T1, \
+				" SQL_CASEWHEN "v.t2 IS NULL"
+					SQL_THEN "'" t2 "'" SQL_ELSE "'" t2 "'"
+				  SQL_CASEEND "			AS T2, \
+				v.timeService AS SERVICETIME, \
+				v.timeRoute AS ROUTETIME, \
+				v.mileage AS MILEAGE, \
+				v.cost AS COST, \
+				v.receipts AS RECEIPTS, \
+				v.state AS STATE, \
+				v.DateView AS Calendar, \
+				v.SlotView AS TimeSlot, \
+				'" RGB_WHITE "' AS COLOR \
+			FROM	OPT_PLAN p,RESOURCE v \
+			WHERE	p.idResource=v.id AND v.state>='" STATE_PLANNED "' " sqlAndVehicleSelected),
+
+		% Candidate Vehicles
+		SQL_DataCandidateVehicle = (
+			"SELECT	DISTINCT v.id 			AS ID, \
+				v.id 				AS IDVEHICLE, \
+				0 				AS TOURVEHICLE, \
+				v.idTypeResource+' '+v.id  	AS [TEXT], \
+				'' 				AS PARENTID, \
+				v.idTypeResource 		AS IDTYPEVEHICLE, \
+				v.quantity 			AS QUANTITY, \
+				v.weight 			AS WEIGHT, \
+				v.volume 			AS VOLUME, \
+				v.rateQuantity 			AS RATEQUANTITY, \
+				v.rateWeight 			AS RATEWEIGHT, \
+				v.rateVolume 			AS RATEVOLUME, \
+				" SQL_CASEWHEN "v.t1 IS NULL"
+					SQL_THEN "'" t1 "'" SQL_ELSE "'" t2 "'"
+				  SQL_CASEEND "			AS T1, \
+				" SQL_CASEWHEN "v.t2 IS NULL"
+					SQL_THEN "'" t2 "'" SQL_ELSE "'" t2 "'"
+				  SQL_CASEEND "			AS T2, \
+				v.timeService 			AS SERVICETIME, \
+				v.timeRoute 			AS ROUTETIME, \
+				v.mileage 			AS MILEAGE, \
+				v.cost 				AS COST, \
+				v.receipts 			AS RECEIPTS, \
+				v.state, \
+				v.DateView 			AS Calendar, \
+				v.SlotView 			AS TimeSlot, \
+				" SQL_CASEWHEN "v.state>='" STATE_CANDIDATE "'"
+					SQL_THEN "'" RGB_CANDIDATE "'" SQL_ELSE "'" RGB_UNAVAILABLE "'"
+				  SQL_CASEEND " 		AS COLOR \
+			FROM	RESOURCE v \
+			WHERE 	(v.state IS NULL OR v.state<'" STATE_PLANNED "') " sqlAndVehicleSelected),
+
+		% Tours
+		SQL_DataTour = (
+			"SELECT DISTINCT t.id AS ID, \
+				v.id AS IDVEHICLE, \
+				t.tourResource AS TOURVEHICLE, \
+				t.id+'  '+CSTR(" SQL_CASEWHEN "t.nbOrder IS NULL" SQL_THEN "0" SQL_ELSE "t.nbOrder" SQL_CASEEND ") AS [TEXT], \
+				v.id AS PARENTID, \
+				v.idTypeResource AS IDTYPEVEHICLE, \
+				t.quantity AS QUANTITY, \
+				t.weight AS WEIGHT, \
+				t.volume AS VOLUME, \
+				t.rateQuantity AS RATEQUANTITY, \
+				t.rateWeight AS RATEWEIGHT, \
+				t.rateVolume AS RATEVOLUME, \
+				t.t1 AS T1, \
+				t.t2 AS T2, \
+				t.timeService AS SERVICETIME, \
+				t.timeRoute AS ROUTETIME, \
+				t.mileage AS MILEAGE, \
+				v.cost AS COST, \
+				v.receipts AS RECEIPTS, \
+				v.state, \
+				v.DateView AS Calendar, \
+				v.SlotView AS TimeSlot, \
+				'" RGB_WHITE "' AS COLOR \
+			FROM	OPT_TOUR t,RESOURCE v \
+			WHERE	t.idResource=v.id AND v.state>='" STATE_PLANNED "' " sqlAndVehicleSelected),
+
+
+
+		@ (VIEWSQL SQL_DataPlannedVehicle " UNION " SQL_DataCandidateVehicle " UNION " SQL_DataTour
+		  " ORDER BY 20 DESC,2,3 \"\n\n"),
+
+
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idTask "' "),
+
+		% Caption	
+		@ (" '" idTask "' "),
+
+		% Group	
+		@ (" '" idTask "' "),
+
+		% Source type
+		@ typeDataUser,
+
+
+		@ (" 0 '[FIND={ID,IDVEHICLE,TOURVEHICLE,IDORDER,T1PLAN};TIPINFO=" TIPINFO_CHART_TASK "]'  '_' \\\n"),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[24;(string,ID,"TAG_ID",,10,0);"),
+
+		@ ("(string,GroupID,GroupID,,10,0);"),
+
+		@ ("(string,ItemID,ItemID,,10,0);"),
+		@ ("(string,Successor,Successor,,10,0);"),
+		@ ("(date,DateBegin,DateBegin,,,,"  dateFormatSql  ");"),
+		@ ("(date,DateEnd,DateEnd,,,,"  dateFormatSql  ");"),
+		@ ("(time,TimeBegin,TimeBegin,,,," timeFormatView ");"),
+		@ ("(time,TimeEnd,TimeEnd,,,," timeFormatView ");"),
+		@ ("(string,TEXT,Text,,10,0);"),
+		@ ("(int,SELECTED,Selected,,,);"),
+		@ ("string,COLOR,COLOR,,,);"),
+
+		@ ("(string,IDVEHICLE,"TAG_RESOURCE_ID",,10,0);"),
+		@ ("(int,TOURVEHICLE,"TAG_RESOURCE_TOUR",,10,0);"),
+		@ ("(datetime,T1PLAN,"TAG_SERVICE_T1",,,," dateTimeFormatView ");"),
+		@ ("(datetime,T2SERVICEPLAN,"TAG_SERVICE_T2",,,," dateTimeFormatView ");"),
+		@ ("(datetime,T2PLAN,"TAG_ROUTE_T2",,,," dateTimeFormatView ");"),
+		@ ("(string,IDORDER,"TAG_ORDER_ID");"),
+		@ ("(string,SITE1NAME,"TAG_SITE1");"),
+		@ ("(string,SITE2NAME,"TAG_SITE2");"),
+		@ ("(int,SERVICETIME,"TAG_SERVICE_TIME");"),
+		@ ("int(int,ROUTETIME,"TAG_ROUTE_TIME");"),
+		@ ("(int,MILEAGE,"TAG_MILEAGE");"),
+		@ ("(float,COST,"TAG_COST",,14.3.14,0);"),
+		@ ("(float,RECEIPTS,"TAG_RECEIPTS",,14.3.14,0);]\"\\\n"),
+
+
+
+		SQL_DataTaskPlannedVehicle = (
+			"SELECT p.idOrder 							AS ID, \
+				p.idOrder 							AS [TEXT], \
+				NULL 								AS GroupID, \
+				p.idResource 							AS IDVEHICLE, \
+				p.tourResource 							AS TOURVEHICLE, \
+				p.idTour 							AS ItemID, \
+				p.idOrderNext 							AS Successor, \
+				LEFT(p.t1Service,10) 						AS DateBegin, \
+				LEFT(p.t2,10) 							AS DateEnd, \
+				"(timeFormat = "hh:mm" ? "RIGHT(p.t1Service,5)" : "RIGHT(p.t1Service,8)") "	AS TimeBegin, \
+				"(timeFormat = "hh:mm" ? "RIGHT(p.t2,5)" : "RIGHT(p.t2,8)") "	AS TimeEnd, \
+				p.t1Service 							AS T1PLAN, \
+				p.t2Service 							AS T2SERVICEPLAN, \
+				p.t2 								AS T2PLAN, \
+				p.idOrder 							AS IDORDER, \
+				s1.name 							AS SITE1NAME, \
+				s2.name 							AS SITE2NAME, \
+				p.timeService 							AS SERVICETIME, \
+				p.timeRoute 							AS ROUTETIME, \
+				p.mileage 							AS MILEAGE, \
+				p.cost 								AS COST, \
+				p.receipts 							AS RECEIPTS, \
+				p.selected 							AS SELECTED, \
+				" SQL_CASEWHEN "p.selected='" STATE_TRUE "'"
+				  SQL_THEN "'" RGB_RED "'" SQL_ELSE "'" RGB_TASK "'"
+				  SQL_CASEEND " 						AS COLOR \
+			FROM RESOURCE v, OPT_PLAN p, SITE s1, SITE s2 \
+			WHERE	p.idResource=v.id AND s1.id=p.idSite1 AND s2.id=p.idSite2 " sqlAndVehicleSelected
+		),
+
+		SQL_DataTaskCandidateVehicle = (
+			"SELECT v.id	AS ID, \
+			'' 		AS [TEXT], \
+			NULL 		AS GroupID, \
+			v.id 		AS IDVEHICLE, \
+			0 		AS TOURVEHICLE, \
+			v.id 		AS ItemID, \
+			'' 		AS Successor,\
+			'' 		AS DateBegin, \
+			'' 		AS DateEnd, \
+			'' 		AS TimeBegin, \
+			'' 		AS TimeEnd, \
+			'' 		AS T1PLAN, \
+			''		AS T2SERVICEPLAN, \
+			'' 		AS T2PLAN, \
+			'' 		AS IDORDER, \
+			'' 		AS SITE1NAME, \
+			'' 		AS SITE2NAME, \
+			0 		AS SERVICETIME, \
+			0 		AS ROUTETIME, \
+			0 		AS MILEAGE, \
+			0 		AS COST, \
+			0 		AS RECEIPTS, \
+			0 		AS SELECTED,\
+			'" RGB_WHITE "' AS COLOR \
+			FROM RESOURCE v \
+			WHERE 	(v.state IS NULL OR v.state='" STATE_CANDIDATE "')" sqlAndVehicleSelected
+		),
+
+
+		@ (VIEWSQL SQL_DataTaskPlannedVehicle " UNION " SQL_DataTaskCandidateVehicle " ORDER BY 8,10 \n\n"),
+
+
+
+
+
+		['Work Directory' "Model\Common\View\EndChart.n"],
+
+
+
+
+
+
+		%TAG_MOVE_ORDER \in NameMenuSelected =>	%li 0715
+		%['Work Directory' "Model\\Interaction\\Solver\\Vehicle\\ScenarioChartVehicle2MoveOrder.n"],
+		%TAG_ACCEPT_RESOURCE \in NameMenuSelected =>
+		%['Work Directory' "Model\\Interaction\\Solver\\Vehicle\\ScenarioChartVehicle2AcceptVehicle.n"],
+		%TAG_REJECT_RESOURCE \in NameMenuSelected =>
+		%['Work Directory' "Model\\Interaction\\Solver\\Vehicle\\ScenarioChartVehicle2RejectVehicle.n"],
+		%['Work Directory' "Model\\Interaction\\Solver\\Order\\ScenarioChartVehicle2AcceptOrder.n"],
+		%TAG_REJECT_ORDER \in NameMenuSelected =>
+		%['Work Directory' "Model\\Interaction\\Solver\\Order\\ScenarioChartVehicle2RejectOrder.n"],
+
+
+		'@' <- [viewDirectory viewFile],
+	),
+),

@@ -1,0 +1,5 @@
+
+'()' => (
+	( "TableResource.view,0" : '.'),
+),
+

@@ -1,0 +1,70 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		DataResourceAbsence.n  		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Data
+@ "Data ",
+
+% ID
+@ "RESOURCE_ABSENCE '",
+
+% Caption
+@ TAG_RESOURCE_ABSENCE,
+
+% Group
+@ "' RESOURCE_ABSENCE ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ "\"[6;",
+@ ("(datetime,T1RESOURCE,T1RESOURCE,,,," dateTimeFormatView ");"),
+@ ("(datetime,T2RESOURCE,T2RESOURCE,,,," dateTimeFormatView ");"),
+@ ("(datetime,T10RESOURCE,T10RESOURCE,,,," dateTimeFormatView ");"),
+@ ("(datetime,T20RESOURCE,T20RESOURCE,,,," dateTimeFormatView ");"),
+@ ("(date,DATE1,DATE1,,,,"dateFormatView");"),
+@ ("(date,DATE2,DATE2,,,,"dateFormatView");]\"\\\n"),
+
+@ VIEWSQL,
+
+? databaseType ( 
+	"ACCESS":
+	@("SELECT LEFT(MIN(t1Task),10) AS DATE1, \
+			LEFT(MAX(t2Task),10) AS DATE2, \
+			MIN(t1Task) AS T1RESOURCE, \
+			MAX(t2Task) AS T2RESOURCE, \
+			LEFT(MIN(t1Task),10)+' " midnight00 "' AS T10RESOURCE, \
+			LEFT(MAX(t2Task),10)+' " midnight24 "' AS T20RESOURCE \
+			FROM	" DB_PREFIX "PLAN \
+			WHERE	idResource='[/*RESOURCE.IDRESOURCE*/]'\"\n\n"),
+	;
+
+	"ORACLE","MYSQL":
+	@("SELECT SUBSTR(MIN(t1Task),1,10) AS DATE1, \
+			SUBSTR(MAX(t2Task),1,10) AS DATE2, \
+			MIN(t1Task) AS T1RESOURCE, \
+			MAX(t2Task) AS T2RESOURCE, \
+			SUBSTR(MIN(t1Task),1,10)||' " midnight00 "' AS T10RESOURCE, \
+			SUBSTR(MAX(t2Task),1,10)||' " midnight24 "' AS T20RESOURCE \
+			FROM	" DB_PREFIX "PLAN \
+			WHERE	idResource='[/*RESOURCE.IDRESOURCE*/]'\"\n\n"),
+	;
+
+	"SQLSERVER":
+	@("SELECT SUBSTRING(MIN(t1Task),1,10) AS DATE1, \
+			SUBSTRING(MAX(t2Task),1,10) AS DATE2, \
+			MIN(t1Task) AS T1RESOURCE, \
+			MAX(t2Task) AS T2RESOURCE, \
+			SUBSTRING(MIN(t1Task),1,10)+' " midnight00 "' AS T10RESOURCE, \
+			SUBSTRING(MAX(t2Task),1,10)+' " midnight24 "' AS T20RESOURCE \
+			FROM	" DB_PREFIX "PLAN \
+			WHERE	idResource='[/*RESOURCE.IDRESOURCE*/]'\"\n\n"),
+),

@@ -1,0 +1,67 @@
+%==================================================%
+%                                                  %
+% 		GetLoginConfig.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+'@' => (
+	httpView = (serverViewRoot directoryClub_{clubId_{idClubLogin}} "/" ),	% JZ 1208
+	%httpView = (serverViewRoot),
+	
+
+
+
+	httpDeclaration = (httpView "Declaration.view"),
+
+
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+
+/*	( TAG_USER_CLUB_IS idClubLogin : ),
+	( TAG_USER_SERVER_IS serverIpLogin ":" serverPortLogin : ),
+
+	( TAG_USER_VIEW_DIRECTORY_IS httpView : ),
+
+	( TAG_UPLOAD_DIRECTORY_IS uploadDirectory : ),
+	( TAG_DOWNLOAD_DIRECTORY_IS downloadDirectory : ),
+	( TAG_GET_CLIENT_CONFIG_PROGRAM_IS clientConfigProgram : ),
+*/
+
+
+
+
+	% Server parameters
+	@ ("club=" 			idClubLogin "\t"),
+
+	@ ("serverIP=" 			serverIpLogin "\t"),
+	@ ("serverPort=" 		serverPortLogin "\t"),
+
+	@ ("permission=" 		permissionLogin "\t"),
+	@ ("passwordDB=" 		databasePassword "\t"),
+
+
+	@ ("serverDirectory=" 		serverDirectory "\t"),	% JZ 0711
+
+
+	@ ("httpView=" 			httpView "\t"),
+	@ ("httpDeclaration=" 		httpDeclaration "\t"),
+
+	@ ("clientConfigProgram=" 	clientConfigProgram "\t"),
+
+	@ ("uploadDirectory=" 		uploadDirectory 	directoryClub_{clubId_{idClubLogin}} "/\t"),
+	@ ("downloadDirectory=" 	downloadDirectory 	directoryClub_{clubId_{idClubLogin}} "/\n"),
+% JZ 1208
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+
+	( message : '.'),
+),
+

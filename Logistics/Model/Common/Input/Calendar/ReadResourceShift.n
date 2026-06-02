@@ -1,0 +1,58 @@
+%==================================================%
+%                                                  %
+% 		ReadResourceShift.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+(SQL : "SELECT DISTINCT s.idResource FROM " DB_PREFIX "RESOURCE_SHIFT s,"
+	SQL_TABLE_RESOURCE " r WHERE s.idResource=r.id AND s.state>'" STATE_DELETED "' AND r.state>'" STATE_DELETED
+	"' AND r.idClub IN " IDDOMCLUBLOGIN),
+
+ResourceShift0 = [1,()],
+
+\forall s \in ResourceShift0 (
+	idResourceResourceShift_{s} :: "",
+	idResourceResourceShift_{s} = (),
+),
+
+
+ResourceShift = \{
+	\forall s \in ResourceShift0 (
+		idResourceResourceShift_{s} \in IDRESOURCE ? s : 0
+	)
+\} \setminus 0,
+
+
+\forall s \in ResourceShift (
+	sqlResourceShift_{s} = (
+		"SELECT	" SQL_TOP_PERCENT " dayStart,dayEnd,idShift
+		FROM   	" DB_PREFIX "RESOURCE_SHIFT
+		WHERE  	idResource='" idResourceResourceShift_{s}
+		"' AND state>'" STATE_DELETED "' ORDER BY dayStart,dayEnd,idShift"),
+
+	(SQL : sqlResourceShift_{s}),
+
+	IdxResourceShift_{s} \subset [1,#SHIFT],
+	IdxResourceShift_{s} = [1,()],
+
+	\forall i \in IdxResourceShift_{s} (
+		DayIdxResourceShift_{s,i} :: DAY,
+		idShiftIdxResourceShift_{s,i} \in IDSHIFT,
+
+		DayIdxResourceShift_{s,i} = [(),()] \cap DAY,
+		idShiftIdxResourceShift_{s,i} = (),
+
+		shiftIdxResourceShift_{s,i} = shiftId_{idShiftIdxResourceShift_{s,i}},
+	),
+),
+
+
+
+\forall s \in ResourceShift (
+	( TAG_SHIFT_DAYS_NOT_DISJOINT_FOR_RESOURCE idResourceResourceShift_{s} :
+		\forall i<j \in IdxResourceShift_{s}
+			DayIdxResourceShift_{s,i} \cap DayIdxResourceShift_{s,j} = {},
+	),
+),

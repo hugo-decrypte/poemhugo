@@ -1,0 +1,46 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataTypeTrip.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: TYPETRIP
+@ "Data ",
+
+% ID
+@ ("DATATYPETRIP '"),	
+
+% Caption
+@ TAG_TRIP_TYPE,
+
+% Group
+@ "' TYPETRIP ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field 
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,ID,ID,,255,0);"), 
+@ ("(string,NAME,NAME,,255,0)]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT tt.id AS ID, tt.name AS NAME \
+	FROM " DB_PREFIX "TYPETRIP tt \
+	ORDER BY tt.id\"\n\n"),
+

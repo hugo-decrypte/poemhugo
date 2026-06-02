@@ -1,0 +1,55 @@
+Compte rendu de notre réunion :
+
+
+Etat de l'art :
+
+Langage mathématique
+
+
+Platforme
+
+
+3 cartographies :
+IGN
+HERE
+Google
+
+
+IA Générative (Gemini, ChatGPT, Claude, Olama, local, ...)
+traduction
+Saisie de document
+prévision
+
+
+Agent IA
+Assistance d'utilisation
+Intéligence desisionnelle
+
+
+
+Automatisation + Optimisation
+
+
+Solution totale
+
+
+
+
+Solution :
+POEM SCM (Supply Chain Management)
+- gestion logistique
+- optimisation de tournées
+
+
+
+
+
+Questions à client :
+- Globalement ils ont déjà un système de gestion commerciale ?
+- Localement ils ont un petit système de gestion de livraison basé sur Excel ?
+
+- Ils ont un cahier de charge pour le projet ou il faut que Mohamed et Enginest fait une proposition ? Optimisation de tournées ?
+
+
+
+

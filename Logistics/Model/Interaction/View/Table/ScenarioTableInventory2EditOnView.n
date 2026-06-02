@@ -1,0 +1,136 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableInventory2EditOnView.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+%===========================================================================================
+%
+
+@ ("// Script . Synchronization quantities between Product, ClientOrder, Delivery, Packing List\n"),
+@ ("// SINGLESEL=0;\n\n"),
+
+% Script
+@ "Script ",
+
+% ID
+@ "UpdateQuantities ",
+
+% Caption
+@ (" '" TAG_CLEAN_QUANTITY_DATA "' "),	% JZ 1001
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_CLEAN_QUANTITY_DATA "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableINVENTORY' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateStock_SQL1 = (
+	"\"Update " DB_PREFIX "DELIVERY_PRODUCT set QuantityReal=Quantity where QuantityReal is NULL\"\\\n"
+),
+UpdateStock_SQL2 = (
+	"\"Update " DB_PREFIX "DELIVERY_PRODUCT set QuantityDefective=0 where QuantityDefective is NULL\"\\\n"
+),
+
+UpdateStock_SQL3 = (
+	"\"Update " DB_PREFIX "ORDER_PRODUCT LO set \
+	LO.QuantityDelivered=(select sum(LD.QuantityReal-LD.QuantityDefective) from " DB_PREFIX "DELIVERY_PRODUCT LD where LO.IdOrder=LD.IdOrder and LO.IdProduct=LD.IdProduct),\
+	LO.QuantityPicked=(select sum(LD.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT LD where LO.IdOrder=LD.IdOrder and LO.IdProduct=LD.IdProduct and LD.IdPacking<>'STOCK')\
+	where not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=LO.IdOrder and O.IdState='9')\"\\\n"
+),
+
+UpdateStock_SQL4 = (
+	"\"Update " DB_PREFIX "ORDER_PRODUCT LO set LO.QuantityPicked=0\
+	where LO.QuantityPicked is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=LO.IdOrder and O.IdState='9')\"\\\n"
+),
+UpdateStock_SQL5 = (
+	"\"Update " DB_PREFIX "ORDER_PRODUCT LO set LO.QuantityDelivered=0 \
+	where LO.QuantityDelivered is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=LO.IdOrder and O.IdState='9')\"\\\n"
+),
+UpdateStock_SQL6 = (
+	"\"Update " DB_PREFIX "ORDER_PRODUCT LO set LO.QuantityRest=LO.Quantity-LO.QuantityDelivered \
+	where not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=LO.IdOrder and O.IdState='9')\"\\\n"
+),
+
+UpdateStock_SQL7 = (
+	"\"Update " DB_PREFIX "CLIENTORDER O set \
+	O.Quantity=(select sum(LO.Quantity) from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder=O.Id),\
+	O.QuantityRest=(select sum(LO.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder=O.Id)\
+	where O.IdState<>'9'\"\\\n"
+),
+
+UpdateStock_SQL8 = (
+	"\"Update " DB_PREFIX "PRODUCT A set \
+	A.QuantityOrdered=(select sum(LO.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "CLIENTORDER O on O.Id=LO.IdOrder where A.Id=LO.IdProduct and O.IdState<>'9' ),\
+	A.QuantityStock=(select sum(LP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT LP inner join " DB_PREFIX "PACKING P on P.Id=LP.IdPacking where A.Id=LP.IdProduct and P.IdState<>'9' ),\
+	A.QuantitySupplied=(select sum(LS.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT LS inner join " DB_PREFIX "SUPPLY S on S.Id=LS.IdSupply where A.Id=LS.IdProduct and S.IdState<>'9' ) \"\\\n"
+),
+
+UpdateStock_SQL9 = (
+	"\"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0 where QuantityOrdered is NULL\"\\\n"
+),
+UpdateStock_SQL10 = (
+	"\"Update " DB_PREFIX "PRODUCT set QuantityStock=0 where QuantityStock is NULL\"\\\n"
+),
+UpdateStock_SQL11 = (
+	"\"Update " DB_PREFIX "PRODUCT set QuantitySupplied=0 where QuantitySupplied is NULL\"\n\n\n"
+),
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptUpdateProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  ' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1;MESSAGE=1;CANCEL=0;WAITCURSOR=0;]' \\\n"),
+		@ UpdateStock_SQL1,
+		@ UpdateStock_SQL2,
+		@ UpdateStock_SQL3,
+		@ UpdateStock_SQL4,
+		@ UpdateStock_SQL5,
+		@ UpdateStock_SQL6,
+		@ UpdateStock_SQL7,
+		@ UpdateStock_SQL8,
+		@ UpdateStock_SQL9,
+		@ UpdateStock_SQL10,
+		@ UpdateStock_SQL11,
+),

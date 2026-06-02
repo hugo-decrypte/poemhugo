@@ -1,0 +1,115 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableBalanceSheetRevenue.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableBalanceSheetRevenue>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+
+	%%% 2025.10.10 Jianyi to define Feilds
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableBalanceSheetRevenueClient" postfix),
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		%%% 2025.10.10 Jianyi to define fields
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		/*@ ("\"[16;(string,CLIENTNAME,"	TAG_CLIENT	",,10,0);\\\n"),
+			@ ("(int,QUANTITY, "	TAG_QUANTITY	",,10,0);\\\n"),
+			@ ("(int,WEIGHT,"	TAG_WEIGHT	",,10,0);\\\n"),
+			@ ("(int,COST1," 	TAG_MONTH01	",,10,0);\\\n"),
+			@ ("(int,COST2," 	TAG_MONTH02	",,10,0);\\\n"),
+			@ ("(int,COST3," 	TAG_MONTH03	",,10,0);\\\n"),
+			@ ("(int,COST4," 	TAG_MONTH04	",,10,0);\\\n"),
+			@ ("(int,COST5," 	TAG_MONTH05	",,10,0);\\\n"),
+			@ ("(int,COST6," 	TAG_MONTH06	",,10,0);\\\n"),
+			@ ("(int,COST7," 	TAG_MONTH07	",,10,0);\\\n"),
+			@ ("(int,COST8," 	TAG_MONTH08	",,10,0);\\\n"),
+			@ ("(int,COST9," 	TAG_MONTH09	",,10,0);\\\n"),
+			@ ("(int,COST10," 	TAG_MONTH10	",,10,0);\\\n"),
+			@ ("(int,COST11," 	TAG_MONTH11	",,10,0);\\\n"),
+			@ ("(int,COST12," 	TAG_MONTH12	",,10,0);\\\n"),
+			@ ("(string,COST,"	TAG_TOTAL	",,10,0);\\\n"),
+			@ ("(string,ID,"	TAG_ID		",,12,0);\\\n"),*/
+
+
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+		@ ("SELECT  CL.ID as ID, CL.name as CLIENTNAME,\\\n"),
+ 		@ ("\t\t 0 as PRICE,\\\n"),	% JZ 1021
+ 		@ ("\t\t sum(DP.QuantityReal) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*DP.PriceUnit), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t int(sum(DP.QuantityReal*P.Weight)+0.5) as WEIGHT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY1, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST1, sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT1,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY2, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST2, sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT2,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY3, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST3, sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT3,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY4, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST4, sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT4,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY5, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST5, sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT5,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY6, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST6, sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT6,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY7, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST7, sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT7,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY8, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST8, sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT8,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY9, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST9, sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT9,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY10,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST10,sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT10,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY11,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST11,sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT11,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY12,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST12,sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT12,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "CLIENT CL," DB_PREFIX "MONTHLABEL M  \\\n"),
+		@ ("\t WHERE DP.IdDelivery=D.id and D.IdClient=CL.id and DP.IdProduct=P.ID and P.TypeProduct<>'F'\\\n"),
+		@ ("\t AND D.DateDelivery>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and D.DateDelivery<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+ 		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \\\n"),		
+		@ ("\t GROUP BY CL.ID, CL.name \\\n"),
+
+		@ ("\t UNION SELECT '" TAG_TOTAL "' as ID, '" TAG_TOTAL "' as CLIENTNAME, \\\n"),
+ 		@ ("\t\t 0 as PRICE,\\\n"),	% JZ 1021
+ 		@ ("\t\t sum(DP.QuantityReal) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*DP.PriceUnit), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t sum(int(DP.QuantityReal*P.Weight+0.5)) as WEIGHT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY1, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST1, sum("SQL_CASEWHEN"M.NoMonth=1"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT1,\\\n"),
+	 	@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY2, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST2, sum("SQL_CASEWHEN"M.NoMonth=2"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT2,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY3, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST3, sum("SQL_CASEWHEN"M.NoMonth=3"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT3,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY4, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST4, sum("SQL_CASEWHEN"M.NoMonth=4"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT4,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY5, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST5, sum("SQL_CASEWHEN"M.NoMonth=5"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT5,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY6, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST6, sum("SQL_CASEWHEN"M.NoMonth=6"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT6,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY7, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST7, sum("SQL_CASEWHEN"M.NoMonth=7"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT7,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY8, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST8, sum("SQL_CASEWHEN"M.NoMonth=8"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT8,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN" DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY9, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN" DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST9, sum("SQL_CASEWHEN"M.NoMonth=9"SQL_THEN"  int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT9,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY10,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST10,sum("SQL_CASEWHEN"M.NoMonth=10"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT10,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY11,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST11,sum("SQL_CASEWHEN"M.NoMonth=11"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT11,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN"DP.QuantityReal"SQL_ELSE" 0"SQL_CASEEND") as QTY12,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN"DP.QuantityReal*DP.PriceUnit"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST12,sum("SQL_CASEWHEN"M.NoMonth=12"SQL_THEN" int(DP.QuantityReal*P.Weight+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT12,\\\n"),
+ 		@ ("\t\t '(220 220 255 )' as LINERGB \\\n"),
+ 		@ ("\t FROM " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M  \\\n"),
+		@ ("\t WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct<>'F'\\\n"),
+		@ ("\t AND D.DateDelivery>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and D.DateDelivery<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+ 		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \\\n"),
+
+		@ ("\t ORDER BY CLIENTNAME \"\n\n"),
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

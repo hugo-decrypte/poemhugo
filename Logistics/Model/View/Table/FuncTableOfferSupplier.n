@@ -1,0 +1,58 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableOfferSupplier.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%% 2025.10.27 Jianyi pass 
+%%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupplier2TableProductForOffer.n"], 
+%%  from TableSupplier
+%%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOfferSupplier2TableProductForOffer.n"], 
+
+<tableOfferSupplier>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableOfferSupplier" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableOfferSupplier" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+	
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT sof.idSupplier AS IDSUPPLIER,\\\n"),
+ 		@ ("\t\t s.Name as NAMESUPPLIER,\\\n"),
+ 		@ ("\t\t sof.IdOffer AS IDOFFER,\\\n"),
+ 		@ ("\t\t sof.DateOffer as DATEOFFER,\\\n"),
+ 		@ ("\t\t sof.DateValidity as DATEVALIDITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sof.TransportCost,"SQL_FORMATSCALE2") AS TRANSPORTCOST,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sof.TransportTime,"SQL_FORMATSCALE0") AS TRANSPORTTIME,\\\n"),
+ 		@ ("\t\t sof.Comments AS COMMENTS,\\\n"),
+ 		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "SUPPLIEROFFER sof, " DB_PREFIX "SUPPLIER s \\\n"),
+		@ ("\t\t WHERE s.id=sof.idSupplier\\\n"),
+  		@ ("\t\t and sof.(/*OWNEROBJ*/) in ((/*IDOBJ*/))\\\n"),
+		@ ("\t\t Order BY sof.IdSupplier, sof.IdOffer\"\n\n\n"), 
+
+	
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOfferSupplier2EditSupplier.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableOfferSupplier2TableProductForOffer.n"], 
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

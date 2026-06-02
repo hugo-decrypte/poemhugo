@@ -1,0 +1,48 @@
+/******************************************************/
+/*	                                              */
+/*		  ReadSiteSite.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' <- database,
+
+\forall s,i \in SITE (
+	d0SiteSite_{s,i} :: 0.0,
+	t0SiteSite_{s,i} :: 0.0,
+),
+
+
+sqlReadSiteSite = (
+	"SELECT idSite1,idSite2,distance,duration FROM " DB_PREFIX
+	"SITE_SITE WHERE idClub='" idClubActive
+		"' AND idSite1 IN(" DomIdSiteOrder
+		") AND idSite2 IN(" DomIdSiteOrder ") ORDER BY idSite1,idSite2"
+	%"' AND idTypeResource='30P' AND idTypeRisk='none' ORDER BY idSite1,idSite2"),
+),
+
+
+(SQL : sqlReadSiteSite),
+
+
+() = sizeMatrix,
+
+( TAG_DISTANCE_MATRIX_SIZE_ERROR " : " sizeMatrix " / (" #SITE " * " #SITE ")" :
+	sizeMatrix = nbSite*nbSite,
+),
+
+( TAG_DISTANCE_MATRIX_ERROR :
+	\forall s,i \in SITE (
+		idSite_{s} = (),
+		idSite_{i} = (),
+		d0SiteSite_{s,i} = (),	% meter
+		t0SiteSite_{s,i} = (),	% second
+	),
+),
+
+
+database <- '()',
+
+
+

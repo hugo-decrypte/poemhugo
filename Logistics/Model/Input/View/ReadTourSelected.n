@@ -1,0 +1,32 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ReadTourSelected.n		%
+%						%
+%	(c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+% Read input buffer
+'()' => (
+	nbTourSelected		= (),
+	nbParameterSelected	= (),
+
+	\forall i \in [1,nbTourSelected] (
+		idTourSelected_{i}	:: "",
+		idVehicleSelected_{i}	:: "",
+
+		idTourSelected_{i}	= (),
+		idVehicleSelected_{i}	= (),
+	),
+
+	IdTourSelected = \{ \forall i \in [1, nbTourSelected] idTourSelected_{i} \},
+	IdVehicleSelected = \{ \forall i \in [1, nbTourSelected] idVehicleSelected_{i} \},	% li 0731
+),
+
+
+%['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+%['Work Directory' "Model\Common\Function\FuncConcatSet.n"],

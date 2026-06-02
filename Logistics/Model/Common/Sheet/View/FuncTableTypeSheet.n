@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	    	           %
+%                                                  %
+%  		FuncTableTypeSheet.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableTypeSheet>(id,type,aliasTable,bestfit, doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		viewFile = ("TableTypeSheet" postfix),
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB,,,13.0.0);(string,CATEGORY,Category,,10,,0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		% merci de d finir la cl  primaire pour ce table
+
+
+	    	@("SELECT t.category 					AS CATEGORY,\
+			"SQL_AliasCategoryIs "'SHEET' AND al.field='category' AND al.id=t.category) AS NAMECATEGORY,\
+			t.column 						AS COLUMN,\
+			t.id 							AS ID,\
+			t.name 							AS NAME,\
+			t.type 							AS TYPE,\
+			"SQL_AliasCategoryIs "'TYPE' AND al.id=t.type) AS NAMETYPE,\
+			t.alignment 						AS ALIGNMENT,\
+			"SQL_AliasCategoryIs "'ALIGNMENT' AND al.field='alignment' AND al.id=t.alignment) AS NAMEALIGNMENT,\
+			t.comments 						AS COMMENTS,\
+			t.color							AS NAMECOLOR,\
+			" SQL_TypeStateName 					" AS NAMESTATE,\
+			t.color 						AS LINERGB \
+			FROM " DB_PREFIX "TYPESHEET t\
+			ORDER BY t.state DESC,t.category,t.column\"\n\n\n"),
+
+
+			%" SQL_TypeStateColor 					" AS LINERGB \
+			%t.field 						AS FIELD,\
+
+
+
+
+		['Work Directory' "Model\Common\Sheet\Interaction\ScenarioTableTypeSheet2EditTypeSheet.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

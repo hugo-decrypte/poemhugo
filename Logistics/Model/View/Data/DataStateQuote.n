@@ -1,0 +1,26 @@
+%==================================================%
+%                                                  %
+%           	Logistics                %
+%                                                  %
+%  		   DataState.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+@ ("Data STATE 'State' STATE "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE," TAG_LABEL ",,50.0.300,0);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("select s.Id AS IDSTATE, \
+ "SQL_CONCAT"trim(LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELSTATE \
+ FROM " DB_PREFIX "STATE s \
+ WHERE s.Category='QUOTE' \
+ ORDER BY s.Id\"\n\n"),
+
+
+

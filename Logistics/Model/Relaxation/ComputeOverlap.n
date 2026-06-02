@@ -1,0 +1,122 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ComputeOverlap.n		   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+
+\forall o,i \in SourceOrderSinkActiveBuffer (
+	dOrderOrder_{o,i} :: defaultTime,
+	dOrderOrder_{o,i} >= 0,
+
+	dOrderOrder_{o,i} = dSiteSite_{siteOrderBuffer_{o},siteOrderBuffer_{i}},
+),
+
+
+
+\forall o \in SourceOrderSinkActiveBuffer
+	prevOrderBuffer_{o} :: 0,
+
+\forall o \in SourceActiveOrderBuffer
+	prevOrderBuffer_{nextOrderBuffer_{o}} = o,
+
+\forall t \in TourActiveBuffer
+	prevOrderBuffer_{sourceTour_{t}} = prevOrderBuffer_{sinkTour_{t}},
+
+
+
+
+% dChainOrder
+\forall o \in ORDER (
+	dChainOrderBuffer_{o} :: defaultTime,
+	dChainOrderBuffer_{o} = dOrderOrder_{prevOrderBuffer_{o},o} + timeToNextOrderBuffer_{o},
+),
+
+
+% dSwapOrderOrder
+\forall o,i \in ORDER (
+	dPrevPrev_{o,i} = dOrderOrder_{prevOrderBuffer_{o},prevOrderBuffer_{i}},
+	dNextNext_{o,i} = dOrderOrder_{nextOrderBuffer_{o},nextOrderBuffer_{i}},
+
+	dOrderPrev_{i,o} = dOrderOrder_{prevOrderBuffer_{i},o},
+	dNextOrder_{o,i} = dOrderOrder_{o,nextOrderBuffer_{i}},
+
+	dNextPrev_{o,i} = dOrderOrder_{prevOrderBuffer_{o},nextOrderBuffer_{i}},
+
+	%dOrderNext_{o,i} = dOrderOrder_{nextOrderBuffer_{o},i},
+),
+
+
+%  p_o         p_i
+%  \          /
+%   \        /
+%    o      i
+%     \    /
+%      \  /
+%       \/
+%       /\
+%      /  \
+%     /    \
+%    /      \
+%   /        \
+%   n_i       n_o
+
+%  p_o         p_i
+%  \          /
+%   \        /
+%    \      /
+%     \    /
+%      \  /
+%       \/
+%       /\
+%      /  \
+%     i    o
+%    /      \
+%   /        \
+%   n_i       n_o
+\forall o,i \in ORDER (
+	% p_o -> o -> n_i, p_i -> i -> n_o
+	dSwap1OrderOrder_{o,i} = (
+		dOrderPrev_{o,o} + dNextOrder_{o,i}  + dOrderPrev_{i,i} + dNextOrder_{i,o}
+	),
+
+	% p_o -> o -> i, p_i -> n_o -> n_i
+	dSwap2OrderOrder_{o,i} = (
+		dOrderPrev_{o,o} + dOrderOrder_{o,i} + dNextPrev_{i,o}  + dNextNext_{o,i}
+	),
+
+	% p_o -> p_i -> i, o -> n_i -> n_o
+	dSwap3OrderOrder_{o,i} = (
+		dPrevPrev_{o,i}  + dOrderPrev_{i,i}  + dNextOrder_{o,i} + dNextNext_{i,o}
+	),
+
+	% p_o -> p_i -> o, i -> n_o -> n_i
+	dSwap4OrderOrder_{o,i} = (
+		dPrevPrev_{o,i}  + dOrderPrev_{i,o}  + dNextOrder_{i,o} + dNextNext_{o,i}
+	),
+
+	% p_o -> i -> n_i, p_i -> o -> n_o
+	dSwap5OrderOrder_{o,i} = (
+		dOrderPrev_{o,i} + dNextOrder_{i,i}  + dOrderPrev_{i,o} + dNextOrder_{o,o}
+	),
+
+	% p_o -> i -> n_o, p_i -> o -> n_i
+	dSwap6OrderOrder_{o,i} = (
+		dOrderPrev_{o,i} + dNextOrder_{i,o}  + dOrderPrev_{i,o} + dNextOrder_{o,i}
+	),
+
+
+	dSwapOrderOrderBuffer_{o,i} = \min(
+		dSwap1OrderOrder_{o,i}, dSwap2OrderOrder_{o,i}, dSwap3OrderOrder_{o,i},
+		dSwap4OrderOrder_{o,i}, dSwap5OrderOrder_{o,i}, dSwap6OrderOrder_{o,i}
+	),
+
+),
+
+% overlapOrderOrder
+\forall o<>i \in ORDER
+	overlapOrderOrder_{o,i} = dChainOrderBuffer_{o} + dChainOrderBuffer_{i} - dSwapOrderOrderBuffer_{o,i},
+

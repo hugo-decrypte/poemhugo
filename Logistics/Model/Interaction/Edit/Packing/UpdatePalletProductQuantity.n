@@ -1,0 +1,166 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdatePalletProductQuantity.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idPackingBuffer :: "",
+	noPalletBuffer  :: 0,
+	
+	idPackingBuffer = (),
+	noPalletBuffer  = (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+
+	idProductBuffer 	:: "",
+	idProductBuffer		= (),
+	
+	qtyBuffer		:: "",
+	qtyBuffer		= (),
+
+	'()' <- database,
+	
+	dateExpiration :: "",
+	? databaseType (
+		"ACCESS" : 
+			dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"SQLSERVER" :
+			dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"MYSQL" :
+	%%		dateExpiration = (SQL_FORMATDATE"(Date_Add("SQL_CURRENTDATE", INTERVAL NbDaysExpiration DAY),'"SQL_FORMATDATESTR"')" ),
+			dateExpiration = (SQL_FORMATDATE"(AddDate("SQL_CURRENTDATE", NbDaysExpiration),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"ORACLE" :
+			dateExpiration = (SQL_FORMATDATE"("SQL_CURRENTDATE"+ NbDaysExpiration,'"SQL_FORMATDATESTR"')" ),
+	),
+	
+	
+	UpdateProductNbPaquet_SQL1 = (
+		"INSERT INTO " DB_PREFIX "PALLET_PRODUCT (IdPacking, NoPallet, IdProduct, Quantity, QuantityReal, QuantityStock, QuantityDefective, WeightNet, Comments, DateCreate, DateExpiration) 
+		select PL.IdPacking, PL.NoPallet, '"idProductBuffer"', 0, 0, 0,0, 0, ' ',
+		"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),
+		(" SQL_CASEWHEN " A.NbDaysExpiration is not NULL and A.NbDaysExpiration>0" SQL_THEN " "dateExpiration" " SQL_ELSE "NULL" SQL_CASEEND ")
+		from " DB_PREFIX "PALLET PL, " DB_PREFIX "PRODUCT A
+		WHERE PL.IdPacking in ("idPackingBuffer") and PL.NoPallet in ("noPalletBuffer") 
+		and A.Id in ('"idProductBuffer"') 
+		and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet and lp.IdProduct='"idProductBuffer"') "
+	),
+
+	databaseType = "ACCESS" => (
+		UpdateProductNbPaquet_SQL2 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT a on a.Id=lp.IdProduct
+				set lp.Quantity="qtyBuffer"*a.QuantityPackaging,
+				lp.QuantityReal="qtyBuffer"*a.QuantityPackaging,
+				lp.QuantityStock="qtyBuffer"*a.QuantityPackaging,
+				lp.WeightNet="qtyBuffer"*a.Weight 
+			WHERE lp.IdPacking in ("idPackingBuffer") and lp.NoPallet in ("noPalletBuffer") 
+			and lp.IdProduct in ('"idProductBuffer"') "
+		),
+
+		%% PALLET : qty
+		UpdateProductNbPaquet_SQL3 = (
+			"Update " DB_PREFIX "PALLET PL set PL.Quantity=0, PL.QuantityReal=0, PL.QuantityStock=0, PL.WeightNet=0 
+			WHERE PL.IdPacking in ("idPackingBuffer") and PL.NoPallet in ("noPalletBuffer") "
+		),
+		UpdateProductNbPaquet_SQL4 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PALLET PL on lp.IdPacking=PL.IdPacking and lp.NoPallet=PL.NoPallet 
+				set PL.Quantity=PL.Quantity+lp.Quantity, PL.QuantityReal = PL.QuantityReal + lp.QuantityReal,
+				PL.QuantityStock = PL.QuantityStock + lp.QuantityStock, PL.QuantityDefective = PL.QuantityDefective + lp.QuantityDefective,
+				PL.WeightNet=PL.WeightNet+lp.WeightNet
+				WHERE PL.IdPacking in ("idPackingBuffer") and PL.NoPallet in ("noPalletBuffer") "
+		),
+		%% PRODUCT
+		UpdateProductNbPaquet_SQL5 = (
+			"Update " DB_PREFIX "PRODUCT A set a.QuantityStock=0
+			WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ("idPackingBuffer") and lp0.NoPallet in ("noPalletBuffer") )"
+		),
+		UpdateProductNbPaquet_SQL6 = (
+			"Update (" DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking) inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct 
+			set a.QuantityStock=a.QuantityStock + lp.QuantityStock
+			WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking in ("idPackingBuffer") and lp0.NoPallet in ("noPalletBuffer"))
+			and pk.IdState not in ('0','9') "
+		),
+		%% PACKING
+		UpdateProductNbPaquet_SQL7 = (
+			"Update " DB_PREFIX "PACKING set Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0, WeightNet=0 
+			WHERE Id in ("idPackingBuffer") "
+		),
+		UpdateProductNbPaquet_SQL8 = (
+			"Update " DB_PREFIX "PACKING pk inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pk.Id set
+			   pk.Quantity=pk.Quantity+pl.Quantity, 
+			   pk.QuantityReal=pk.QuantityReal+pl.QuantityReal, 
+			   pk.QuantityStock=pk.QuantityStock+pl.QuantityStock, 
+			   pk.QuantityDefective=pk.QuantityDefective+pl.QuantityDefective, 
+			   pk.WeightNet=pk.WeightNet+pl.WeightNet 
+			 WHERE Id in ("idPackingBuffer") "
+		),
+
+		;
+
+		UpdateProductNbPaquet_SQL2 = (
+			"Update " DB_PREFIX "PALLET_PRODUCT set 
+				Quantity=(select "qtyBuffer"*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),
+				QuantityReal=(select "qtyBuffer"*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),
+				QuantityStock=(select "qtyBuffer"*P.QuantityPackaging from " DB_PREFIX "PRODUCT P where id=idProduct),
+				WeightNet=(select "qtyBuffer"*P.Weight from " DB_PREFIX "PRODUCT P where id=idProduct) 
+				WHERE IdPacking in ("idPackingBuffer") and NoPallet in ("noPalletBuffer") 
+				and IdProduct in ('"idProductBuffer"') "
+		),
+		UpdateProductNbPaquet_SQL3 = (
+			"Update " DB_PREFIX "PALLET set
+			Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), 
+			QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), 
+			QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), 
+			QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet), 
+			WeightNet=(select sum(lp.WeightNet) from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=PALLET.IdPacking and lp.NoPallet=PALLET.NoPallet) 
+			WHERE IdPacking in ("idPackingBuffer") and NoPallet in ("noPalletBuffer") "
+		),
+		UpdateProductNbPaquet_SQL4 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityStock=
+			(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PACKING pk on pk.Id=lp.IdPacking 
+				where PRODUCT.Id=lp.IdProduct and pk.IdState not in ('0','9') )
+			WHERE Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0
+				where lp0.IdPacking in ("idPackingBuffer") and lp0.NoPallet in ("noPalletBuffer"))"
+		),
+
+		UpdateProductNbPaquet_SQL5 = (
+			"Update " DB_PREFIX "PACKING set
+			   Quantity=(select sum(pl.Quantity) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), 
+			   QuantityReal=(select sum(pl.QuantityReal) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), 
+			   QuantityStock=(select sum(pl.QuantityStock) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), 
+			   QuantityDefective=(select sum(pl.QuantityDefective) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id), 
+			   WeightNet=(select sum(pl.WeightNet) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) 
+			 WHERE Id in ("idPackingBuffer") "
+		),
+
+	),
+
+	(SQL : UpdateProductNbPaquet_SQL1), 
+	(SQL : UpdateProductNbPaquet_SQL2), 
+	(SQL : UpdateProductNbPaquet_SQL3), 
+	(SQL : UpdateProductNbPaquet_SQL4), 
+	(SQL : UpdateProductNbPaquet_SQL5), 
+	databaseType = "ACCESS" => (
+		(SQL : UpdateProductNbPaquet_SQL6), 
+		(SQL : UpdateProductNbPaquet_SQL7), 
+		(SQL : UpdateProductNbPaquet_SQL8), 
+	),
+	
+	database <- '()',
+),

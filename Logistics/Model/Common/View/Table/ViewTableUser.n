@@ -1,0 +1,19 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+%		ViewTableUser.n             	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableUser.n"],
+
+'@' => (
+	tableUser("USER",TAG_TABLE,"USER",true,"EditUser",TAG_ONLINE_USER,	"Log",	""),	% JZ 1021
+	tableUser("USER",TAG_TABLE,"USER",true,"EditUser",TAG_TABLE_USER,	"User",	""),
+	tableUser("USER",TAG_TABLE,"USER",true,"EditUser",TAG_TABLE_USER,	"",	""),
+
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_USER TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),

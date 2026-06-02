@@ -1,0 +1,284 @@
+/********************************************************/
+/*	        	Routing	          		*/
+/*	                                        	*/
+/*			ReadVehicle.n   		*/
+/*                                                	*/
+/* Copyright (C) 2000 ENGINEST SOFTWARE        		*/
+/* All rights reserved.                         	*/
+/********************************************************/
+
+['Work Directory'  "Model\Input\Vehicle\ReadTypeVehicle.n"],
+
+'()' => (
+	'()' <- database,
+
+	sqlReadVehicle = (
+		"SELECT id,idTypeResource,idSite1,idSite2,idShift,t1,t2,minTour,maxTour,minOrder,maxOrder,minMakespan,maxMakespan,minWorktime,maxWorktime,minQuantity,maxQuantity,minWeight,maxWeight,minVolume,maxVolume,state,idIcon,sizeIcon FROM " DB_PREFIX
+		"RESOURCE WHERE idClub='" idClubActive "' AND state>='" STATE_CANDIDATE
+		"' ORDER BY idTypeResource,id,t1,t2,idShift,idSite1,idSite2"),
+		%"' ORDER BY idTypeResource DESC,idSite1,idSite2,idShift,t1,t2,id"),
+
+	(SQL: sqlReadVehicle),
+
+	%(SQL: SQL_SelectVehicleStateGreater STATE_INVALID " " sql_AND_CLUB_VEHICLE SQL_OrderByVehicleTypeSite1Site2ShiftId), % Chen 0823
+
+
+
+	nbVehicle = (),
+	RESOURCE = [1, nbVehicle],
+
+	\forall v \in RESOURCE \cup {0}
+		idResource_{v} 			:: "",
+	idResource_{0}	= "",
+
+	\forall v \in RESOURCE (
+		idTypeVehicleVehicle_{v}	:: "",
+		idSite10Vehicle_{v}		:: "",
+		idSite20Vehicle_{v}		:: "",
+		idShiftVehicle_{v}		:: "",
+
+		t100Vehicle_{v}			:: defaultDateTime,
+		t200Vehicle_{v}			:: defaultDateTime,
+
+
+		minTour0Vehicle_{v}		:: 0,
+		maxTour0Vehicle_{v}		:: 0,
+
+		minOrderTour0Vehicle_{v}	:: 0,
+		maxOrderTour0Vehicle_{v}	:: 0,
+
+		minMakespanDay0Vehicle_{v}	:: 0,
+		maxMakespanDay0Vehicle_{v}	:: 0,
+
+		minWorktimeDay0Vehicle_{v}	:: 0,
+		maxWorktimeDay0Vehicle_{v}	:: 0,
+
+		minQuantityTour0Vehicle_{v} 	:: 0,
+		maxQuantityTour0Vehicle_{v} 	:: 0,
+
+		minWeightTour0Vehicle_{v} 	:: 0.0,
+		maxWeightTour0Vehicle_{v} 	:: 0.0,
+
+		minVolumeTour0Vehicle_{v}	:: 0.0,
+		maxVolumeTour0Vehicle_{v}	:: 0.0,
+
+
+		stateVehicle_{v}		:: "",
+
+
+		idIconVehicle_{v}		:: "",
+		sizeIconVehicle_{v}		:: 0,
+
+
+		idResource_{v} 			= (),
+		idTypeVehicleVehicle_{v}	= (),
+
+		idSite10Vehicle_{v}		= (),
+		idSite20Vehicle_{v}		= (),
+
+		idShiftVehicle_{v}		= (),
+
+		t100Vehicle_{v}			= (),
+		t200Vehicle_{v}			= (),
+
+		
+
+		minTour0Vehicle_{v}		= (),
+		maxTour0Vehicle_{v}		= (),
+
+		minOrderTour0Vehicle_{v}	= (),
+		maxOrderTour0Vehicle_{v}	= (),
+
+		minMakespanDay0Vehicle_{v}	= (),
+		maxMakespanDay0Vehicle_{v}	= (),
+
+		minWorktimeDay0Vehicle_{v}	= (),
+		maxWorktimeDay0Vehicle_{v}	= (),
+
+
+		minQuantityTour0Vehicle_{v} 	= (),
+		maxQuantityTour0Vehicle_{v}	= (),
+
+		minWeightTour0Vehicle_{v} 	= (),
+		maxWeightTour0Vehicle_{v} 	= (),
+
+		minVolumeTour0Vehicle_{v}	= (),
+		maxVolumeTour0Vehicle_{v}	= (),
+
+
+		stateVehicle_{v}		= (),
+
+
+		idIconVehicle_{v}		= (),
+		sizeIconVehicle_{v}		= (),
+
+		idSite10Vehicle_{v} <> "" \vee idSite20Vehicle_{v} <> "",
+	),
+
+
+	(SQL : "SELECT DISTINCT g.idSite FROM " DB_PREFIX "GROUPRESOURCE g WHERE "
+		SQL_UserVisibleClubIs "g.idClub)"),
+
+	maxSiteGroupResource = (),
+
+
+	(SQL : "SELECT DISTINCT rs.idSite FROM " DB_PREFIX "RESOURCE_SITE rs WHERE "
+		SQL_UserVisibleClubIs "rs.idClub)"),
+
+	maxSiteResource = (),
+
+
+
+	(SQL: "SELECT COUNT(p.id) FROM " DB_PREFIX "PRODUCT p WHERE "
+		SQL_UserVisibleClubIs "p.idClub)"),  % JZ 1022
+
+	1 = (),
+	maxProduct = (),
+	
+
+
+	\forall v \in RESOURCE (
+		(SQL : "SELECT g.idSite FROM " DB_PREFIX "GROUPRESOURCE g," DB_PREFIX "RESOURCE r WHERE r.idGroupResource=g.id AND r.id='" idResource_{v} "' "),
+
+		IdxDepotVehicle_{v} = [1,()],
+		IdxDepotVehicle_{v} \subset [1,maxSiteGroupResource],
+
+		IdSiteDepotVehicle_{v} :: \{""\},
+		IdSiteDepotVehicle_{v} = \{ \forall i \in IdxDepotVehicle_{v} () \},
+
+
+		(SQL : "SELECT idSite FROM " DB_PREFIX "RESOURCE_SITE WHERE idResource='" idResource_{v} "' "),
+
+		IdxSiteVehicle_{v} = [1,()],
+		IdxSiteVehicle_{v} \subset [1,maxSiteResource],
+
+		IdSiteVehicle_{v} :: \{""\},
+		IdSiteVehicle_{v} = \{ \forall i \in IdxSiteVehicle_{v} () \} \cap IdSiteDepotVehicle_{v},
+
+
+
+		(SQL :	"SELECT idProduct,quantity0,weight0,volume0,minQuantity,maxQuantity,maxWeight,maxVolume FROM " DB_PREFIX
+			"RESOURCE_PRODUCT WHERE idResource='" idResource_{v} "' "),
+		%(SQL : SQL_SelectVehicleProductVehicleIs idResource_{v} "' "),
+
+		nbProductVehicle_{v} = (),
+		nbProductVehicle_{v} =< maxProduct,
+
+		\forall i \in [1,nbProductVehicle_{v}] (
+			idProductIdxVehicle_{v,i} 	:: "",
+			quantity0IdxVehicle_{v,i} 	:: 0,
+			weight0IdxVehicle_{v,i} 	:: 0.0,
+			volume0IdxVehicle_{v,i} 	:: 0.0,
+			minQuantityIdxVehicle_{v,i} 	:: 0,
+			maxQuantityIdxVehicle_{v,i} 	:: 0,
+			maxWeightIdxVehicle_{v,i} 	:: 0.0,
+			maxVolumeIdxVehicle_{v,i} 	:: 0.0,
+
+			idProductIdxVehicle_{v,i} 	= (),
+
+			quantity0IdxVehicle_{v,i} 	= (),
+			weight0IdxVehicle_{v,i} 	= (),
+			volume0IdxVehicle_{v,i} 	= (),
+
+			minQuantityIdxVehicle_{v,i} 	= (),
+
+			maxQuantity0IdxVehicle_{v,i} 	= (),
+			maxWeight0IdxVehicle_{v,i} 	= (),
+			maxVolume0IdxVehicle_{v,i} 	= (),
+
+
+			maxQuantityIdxVehicle_{v,i} 	= (maxQuantity0IdxVehicle_{v,i} = 0 ? +\infty : maxQuantity0IdxVehicle_{v,i}),
+			maxWeightIdxVehicle_{v,i} 	= (maxWeight0IdxVehicle_{v,i} = 0.0 ? +\infty : maxWeight0IdxVehicle_{v,i}),
+			maxVolumeIdxVehicle_{v,i} 	= (maxVolume0IdxVehicle_{v,i} = 0.0 ? +\infty : maxVolume0IdxVehicle_{v,i}),
+		),
+	),
+
+
+	database <- '()',
+
+
+
+	IDRESOURCE = \{ \forall i \in RESOURCE idResource_{i} \},
+
+
+	\forall i \in IDRESOURCE \cup {""} (
+		resourceId_{i} \in RESOURCE \cup {0},
+		idResource_{resourceId_{i}} = i,
+	),
+
+
+
+	% TOUR
+	\forall v \in RESOURCE (
+		typeVehicleVehicle_{v} = typeVehicleId_{idTypeVehicleVehicle_{v}},
+
+		minTourByVehicle_{v} = (minTour0Vehicle_{v} = 0 ? minTourTypeVehicle_{typeVehicleVehicle_{v}}: minTour0Vehicle_{v}),
+		maxTourByVehicle_{v} = (
+			maxTour0Vehicle_{v} > 0 ?
+			maxTour0Vehicle_{v} : (
+				maxTourTypeVehicle_{typeVehicleVehicle_{v}} > 0 ?
+				maxTourTypeVehicle_{typeVehicleVehicle_{v}} :
+				(maxTourVehicle > 0 ? maxTourVehicle : 1)
+			)
+		),
+
+		tour0Vehicle_{v} = \sum_{v_1 \in [1,v-1]}{maxTourByVehicle_{v_1}},
+
+		tour1Vehicle_{v} = tour0Vehicle_{v}+1,
+		tour2Vehicle_{v} = tour0Vehicle_{v}+maxTourByVehicle_{v},
+
+		TourVehicle_{v} = [tour1Vehicle_{v}, tour2Vehicle_{v}],
+	),
+
+
+	TOUR = \bigcup_{v \in RESOURCE}{TourVehicle_{v}},
+	nbTour = #TOUR,
+
+
+
+	\forall t \in TOUR
+		vehicleTour_{t} :: 0,
+
+	\forall v \in RESOURCE
+	\forall t \in TourVehicle_{v}
+		vehicleTour_{t} = v,
+
+
+	% vehicleTour
+	\forall t \in TOUR (
+		idxTourVehicleTour_{t} = t - tour1Vehicle_{vehicleTour_{t}} + 1,
+
+		idTour_{t} = (idResource_{vehicleTour_{t}} "-" idxTourVehicleTour_{t}),
+
+		sourceTour_{t}	= -t,
+		sinkTour_{t}	= -t - nbTour,
+	),
+
+
+	SOURCE	= [-nbTour, -1],
+	SINK	= [-nbTour - nbTour, -nbTour - 1],
+
+
+	% tourId
+	IDTOUR = \{ \forall t \in TOUR idTour_{t} \},
+
+	\forall i \in IDTOUR \cup {""}
+		tourId_{i} :: 0,
+
+	\forall i \in IDTOUR
+		tourId_{i} \in TOUR,
+
+	tourId_{""} = 0,
+
+	\forall t \in TOUR
+		tourId_{idTour_{t}} = t,
+
+
+	IdVehiclePlanned = \{ \forall v \in RESOURCE (stateVehicle_{v} = STATE_PLANNED ? idResource_{v} : "") \} \setminus "",
+	IdVehicleCandidate = \{ \forall v \in RESOURCE (stateVehicle_{v} = STATE_CANDIDATE ? idResource_{v} : "") \} \setminus "",
+
+	VehiclePlanned = \{ \forall i \in IdVehiclePlanned resourceId_{i} \},
+	VehicleCandidate = \{ \forall i \in IdVehicleCandidate resourceId_{i} \},
+),
+
+

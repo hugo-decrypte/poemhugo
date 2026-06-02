@@ -1,0 +1,93 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/* 		 FuncMapSite.n  	    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapSite>(IdSiteSelected, doubleclick,title,related,idUserPostfix)
+(
+	'@' => (
+		postfix = (idUserPostfix = "" ? (related = "" ? "" : ("_" related)) : idUserLogin),
+		viewFile = ("MapSite" postfix),
+		
+
+		IdSiteSelected = {} => (
+			sqlIdSite = "",
+			;
+			sqlIdSite = (" s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+		),
+
+		sqlWhereSiteSelected = (" WHERE s.id=p.idSite1 OR s.id=p.idSite2"),
+		
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+
+
+		% Data: SITE
+		@ "Data ",
+
+		% ID
+		@ "SITE '", 
+
+		% Caption
+		@ title, 
+
+		% Group
+		@ "' SITE ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;FIND={ID,NAME,IDZONE,POSTCODE,LATITUDE,LONGITUDE};MAP=VRP;WIDTH=-30;TIPINFO=" TIPINFO_MAP_SITE "]' _ \\\n"),
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[8;(string,ID,"TAG_ID");(string,NAME,"TAG_NAME");(string,IDZONE,"TAG_ZONE_ID");"),
+		@ ("(string,POSTCODE,"TAG_POSTCODE");(float,LATITUDE,"TAG_LATITUDE");(float,LONGITUDE,"TAG_LONGITUDE");"),
+		@ ("(int,X,X);(int,Y,Y);"),
+		@ ("(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]\" \\\n"),
+
+
+
+		@ VIEWSQL,
+
+	     @("SELECT DISTINCT	s.id AS ID, \
+				s.name AS NAME, \
+				s.idZone AS IDZONE, \
+				s.postcode AS POSTCODE, \
+				NULL AS X, \
+				NULL AS Y, \
+                                s.longitude AS LONGITUDE, \
+                                s.latitude AS LATITUDE, \
+                                s.sizeIcon AS WIDTH, \
+                                s.idIcon AS ICON \
+		FROM " DB_PREFIX "SITE s," DB_PREFIX "OPT_ORDER o WHERE "
+			sqlIdSite SQL_ViewUserVisibleClubIs "o.idClub) AND o.idSite2=s.id\"\n\n"),
+			   
+
+		% Data : VEHICLE2
+		%['Work Directory' "Model\View\Data\DataVehicle2.n"],
+		%@(";QUERY=" SQL_SelectVehicleClubIdNameWhereTrue sql_AND_CLUB_VEHICLE " ORDER BY 1,2\"\n\n"), % wu 23/11/2022 pourquoi faire ?
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

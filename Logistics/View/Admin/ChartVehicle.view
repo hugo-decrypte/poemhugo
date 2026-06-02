@@ -1,0 +1,163 @@
+View ViewChartVEHICLE 'Véhicule' 'Véhicule'255 255 255 _ 0 0 0 0  5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=1;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(192 192 255);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;]'
+
+Data  'VEHICLE'  'Véhicule'  'VEHICLE' HTTPSQL 0 '[FIND={ID,IDTYPEVEHICLE,IDVEHICLE,T1};TIPINFO=[/*T1*/] - [/*T2*/]    Temps de service : [/*SERVICETIME*/]    Temps de route : [/*ROUTETIME*/]    KM : [/*MILEAGE*/]    Quantité : [/*QUANTITY*/]  [/*RATEQUANTITY*/]%    Poids : [/*WEIGHT*/]  [/*RATEWEIGHT*/]%    Volume : [/*VOLUME*/]  [/*RATEVOLUME*/]%    Coût : [/*COST*/]    Recette : [/*RECEIPTS*/]]'  '_' \
+"[21;(int,ID,ID,,10,0);(string,TEXT,Text,,10,0);(string,PARENTID,PARENTID,,255,0);(string,COLOR,COLOR,,,);(string,Calendar,Calendar,,,,YYYY-MM-DD);(string,TimeSlot,TimeSlot,,,,HH:MM);(string,IDTYPEVEHICLE,ID type ressource);(string,IDVEHICLE,ID ressource);(string,T1,Planification Début);(string,T2,Planification fin);(int,QUANTITY,Quantité);(float,WEIGHT,Poids);(float,VOLUME,Volume);(float,RATEQUANTITY,Taux quantité,,14.3.14,0);(float,RATEWEIGHT,Taux poids,,14.3.14,0);(float,RATEVOLUME,Taux volume,,14.3.14,0);(int,SERVICETIME,Temps de service);(int,ROUTETIME,Temps de route);(int,MILEAGE,KM);(float,COST,Coût,,14.3.14,0);float,RECEIPTS,Recette,,14.3.14,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT DISTINCT v.id AS ID, \
+				v.id AS IDVEHICLE, \
+				0 AS TOURVEHICLE, \
+				v.idTypeResource+' '+v.id+'  '+CSTR(IIF(v.nbTour IS NULL,0,v.nbTour)) AS [TEXT], \
+				'' AS PARENTID, \
+				v.idTypeResource AS IDTYPEVEHICLE, \
+				v.quantity AS QUANTITY, \
+				v.weight AS WEIGHT, \
+				v.volume AS VOLUME, \
+				v.rateQuantity AS RATEQUANTITY, \
+				v.rateWeight AS RATEWEIGHT, \
+				v.rateVolume AS RATEVOLUME, \
+				IIF(v.t1 IS NULL,'2022-09-22 04:00','2022-09-22 23:59')			AS T1, \
+				IIF(v.t2 IS NULL,'2022-09-22 23:59','2022-09-22 23:59')			AS T2, \
+				v.timeService AS SERVICETIME, \
+				v.timeRoute AS ROUTETIME, \
+				v.mileage AS MILEAGE, \
+				v.cost AS COST, \
+				v.receipts AS RECEIPTS, \
+				v.state AS STATE, \
+				v.DateView AS Calendar, \
+				v.SlotView AS TimeSlot, \
+				'(255 255 255)' AS COLOR \
+			FROM	OPT_PLAN p,RESOURCE v \
+			WHERE	p.idResource=v.id AND v.state>='2'  AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub) UNION SELECT	DISTINCT v.id 			AS ID, \
+				v.id 				AS IDVEHICLE, \
+				0 				AS TOURVEHICLE, \
+				v.idTypeResource+' '+v.id  	AS [TEXT], \
+				'' 				AS PARENTID, \
+				v.idTypeResource 		AS IDTYPEVEHICLE, \
+				v.quantity 			AS QUANTITY, \
+				v.weight 			AS WEIGHT, \
+				v.volume 			AS VOLUME, \
+				v.rateQuantity 			AS RATEQUANTITY, \
+				v.rateWeight 			AS RATEWEIGHT, \
+				v.rateVolume 			AS RATEVOLUME, \
+				IIF(v.t1 IS NULL,'2022-09-22 04:00','2022-09-22 23:59')			AS T1, \
+				IIF(v.t2 IS NULL,'2022-09-22 23:59','2022-09-22 23:59')			AS T2, \
+				v.timeService 			AS SERVICETIME, \
+				v.timeRoute 			AS ROUTETIME, \
+				v.mileage 			AS MILEAGE, \
+				v.cost 				AS COST, \
+				v.receipts 			AS RECEIPTS, \
+				v.state, \
+				v.DateView 			AS Calendar, \
+				v.SlotView 			AS TimeSlot, \
+				IIF(v.state>='1','(224 224 224)','(192 192 192)') 		AS COLOR \
+			FROM	RESOURCE v \
+			WHERE 	v.state='1'  AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub) UNION SELECT DISTINCT t.id AS ID, \
+				v.id AS IDVEHICLE, \
+				t.tourResource AS TOURVEHICLE, \
+				t.id+'  '+CSTR(IIF(t.nbOrder IS NULL,0,t.nbOrder)) AS [TEXT], \
+				v.id AS PARENTID, \
+				v.idTypeResource AS IDTYPEVEHICLE, \
+				t.quantity AS QUANTITY, \
+				t.weight AS WEIGHT, \
+				t.volume AS VOLUME, \
+				t.rateQuantity AS RATEQUANTITY, \
+				t.rateWeight AS RATEWEIGHT, \
+				t.rateVolume AS RATEVOLUME, \
+				t.t1 AS T1, \
+				t.t2 AS T2, \
+				t.timeService AS SERVICETIME, \
+				t.timeRoute AS ROUTETIME, \
+				t.mileage AS MILEAGE, \
+				v.cost AS COST, \
+				v.receipts AS RECEIPTS, \
+				v.state, \
+				v.DateView AS Calendar, \
+				v.SlotView AS TimeSlot, \
+				'(255 255 255)' AS COLOR \
+			FROM	OPT_TOUR t,RESOURCE v \
+			WHERE	t.idResource=v.id AND v.state>='2'  AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub) ORDER BY 20 DESC,2,3 "
+
+Data  'ORDER'  'ORDER'  'ORDER' HTTPSQL 0 '[FIND={ID,IDVEHICLE,TOURVEHICLE,IDORDER,T1PLAN};TIPINFO=Commande : [/*IDORDER*/]    [/*SITE1NAME*/]    Coût : [/*COST*/]    Recette : [/*RECEIPTS*/]\nService : [/*T1PLAN*/] - [/*T2SERVICEPLAN*/]    Fin de route : [/*T2PLAN*/]    KM : [/*MILEAGE*/]    Temps : [/*ROUTETIME*/]\n]'  '_' \
+"[24;(string,ID,ID,,10,0);(string,GroupID,GroupID,,10,0);(string,ItemID,ItemID,,10,0);(string,Successor,Successor,,10,0);(date,DateBegin,DateBegin,,,,YYYY-MM-DD);(date,DateEnd,DateEnd,,,,YYYY-MM-DD);(time,TimeBegin,TimeBegin,,,,HH:MM);(time,TimeEnd,TimeEnd,,,,HH:MM);(string,TEXT,Text,,10,0);(int,SELECTED,Selected,,,);string,COLOR,COLOR,,,);(string,IDVEHICLE,ID ressource,,10,0);(int,TOURVEHICLE,Ressource tournée,,10,0);(datetime,T1PLAN,Début service,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2SERVICEPLAN,Fin service,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2PLAN,Fin de route,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(string,IDORDER,ID commande);(string,SITE1NAME,Site 1);(string,SITE2NAME,Site 2);(int,SERVICETIME,Temps de service);int(int,ROUTETIME,Temps de route);(int,MILEAGE,KM);(float,COST,Coût,,14.3.14,0);(float,RECEIPTS,Recette,,14.3.14,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT p.idOrder 							AS ID, \
+				p.idOrder 							AS [TEXT], \
+				NULL 								AS GroupID, \
+				p.idResource 							AS IDVEHICLE, \
+				p.tourResource 							AS TOURVEHICLE, \
+				p.idTour 							AS ItemID, \
+				p.idOrderNext 							AS Successor, \
+				LEFT(p.t1Service,10) 						AS DateBegin, \
+				LEFT(p.t2,10) 							AS DateEnd, \
+				RIGHT(p.t1Service,5)	AS TimeBegin, \
+				RIGHT(p.t2,5)	AS TimeEnd, \
+				p.t1Service 							AS T1PLAN, \
+				p.t2Service 							AS T2SERVICEPLAN, \
+				p.t2 								AS T2PLAN, \
+				p.idOrder 							AS IDORDER, \
+				s1.name 							AS SITE1NAME, \
+				s2.name 							AS SITE2NAME, \
+				p.timeService 							AS SERVICETIME, \
+				p.timeRoute 							AS ROUTETIME, \
+				p.mileage 							AS MILEAGE, \
+				p.cost 								AS COST, \
+				p.receipts 							AS RECEIPTS, \
+				p.selected 							AS SELECTED, \
+				IIF(p.selected='1','(255 0 0)','(128 168 198)') 						AS COLOR \
+			FROM RESOURCE v, OPT_PLAN p, SITE s1, SITE s2 \
+			WHERE	p.idResource=v.id AND s1.id=p.idSite1 AND s2.id=p.idSite2  AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub) UNION SELECT v.id	AS ID, \
+			'' 		AS [TEXT], \
+			NULL 		AS GroupID, \
+			v.id 		AS IDVEHICLE, \
+			0 		AS TOURVEHICLE, \
+			v.id 		AS ItemID, \
+			'' 		AS Successor,\
+			'' 		AS DateBegin, \
+			'' 		AS DateEnd, \
+			'' 		AS TimeBegin, \
+			'' 		AS TimeEnd, \
+			'' 		AS T1PLAN, \
+			''		AS T2SERVICEPLAN, \
+			'' 		AS T2PLAN, \
+			'' 		AS IDORDER, \
+			'' 		AS SITE1NAME, \
+			'' 		AS SITE2NAME, \
+			0 		AS SERVICETIME, \
+			0 		AS ROUTETIME, \
+			0 		AS MILEAGE, \
+			0 		AS COST, \
+			0 		AS RECEIPTS, \
+			0 		AS SELECTED,\
+			'(255 255 255)' AS COLOR \
+			FROM RESOURCE v \
+			WHERE 	(v.state IS NULL OR v.state='1') AND  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=v.idClub) ORDER BY 8,10 
+
+Schedule VEHICLEORDER 'Véhicule' _ 0 0 1000 0 \
+"[HORIZONTALLINEWIDTH=1;VERTICALLINEWIDTH=0;WORKCOLOR=(255 255 255);NOWORKCOLOR=(224 224 224);DEADLINECOLOR=(0 255 0);SEPARATIONLINEWIDTH=1;SEPARATIONLINECOLOR=(192 192 255);]" \
+"[DATEFORMAT=YYYY-MM-DD;TIMEFORMAT=HH:MM;DURATIONFORMAT=HH;DAYSTRINGS={Lundi,Mardi,Mercredi,Jeudi,Vendredi,Samedi,Dimanche};MONTHSTRINGS={Janv,Févr,Mars,Avri,Mai,Juin,Juil,Août,Sept,Octo,Nove,Déce};]" \
+"[TITLE=Véhicule;LINESEPARATOR=\n;FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTNAME=Courier New;FONTSIZE=10;]" \
+ "[CELLSIZE=0;DATEFIRST=;DATELAST=;\
+TIMEFIRST=00:00;TIMELAST=18:59;TIMESLOTS=[24,00:00,01:00,02:00,03:00,04:00,05:00,06:00,07:00,08:00,09:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00,19:00,20:00,21:00,22:00,23:00];TIMEPRECISION=SLOT;\
+ROWCOUNT=2; BORDERWIDTH=0; LINEWIDTH=1;BORDERCOLOR=(192 192 255);LINECOLOR=(192 192 255);FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Courier New;ALIGNTEXT=LeftCenter;]" \
+"[BORDERWIDTH=1;LINEWIDTH=0;BORDERCOLOR=(192 192 255);LINECOLOR=(192 192 255);FILLCOLOR=(255 255 255);FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Courier New;WIDTH=200;INTERLINE=0.5;]" \
+"[TIMETABLE=1; \
+  VIEWTASK=1; \
+  EXPANDALL=0; \
+  EXPANSIBILITY=1; \
+  DEFLATEHEIGHT=0.3; \
+  DEFLATEWIDTH=1.0; \
+  LINEWIDTH=0; \
+  LINECOLOR=(192 192 255); \
+  FILLCOLOR=(255 255 255); \
+  FONTCOLOR=(0 0 0); \
+  LINKCOLOR=(255 0 0); \
+  FONTSIZE=8; \
+  FONTNAME=Courier New; \
+  ALIGNTEXT=LeftCenter;]" \
+_ "[DATAOBJ=VEHICLE;]" "[DATAOBJ=ORDER;DROPSCRIPT=MoveOrder;SELECTED=selected]"
+
+Script MoveOrder 'Déplacer commande' _ 7 'Déplacer commande'  _ '[OBJECTIDS={VEHICLEORDER}; SUBOBJTYPE={VEHICLE,ORDER}]' '( 0 0 0 0 )' _ _ 'Déplacer commande ?''[COUNT=3;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Solver\Order\MoveOrderChart.n'\
+ '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(ORDER;3;(string,ID);(string,IDVEHICLE);(int,TOURVEHICLE))*/} \
+{/*Drop(VEHICLE;3;(string,ITEMID);(datetime,DRAGTIME,,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,DROPTIME,,,,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM))*/}' \
+Reload "[VIEWID=ViewChartVEHICLE]"\
+Reload "[VIEWID=ViewTableRESULT]"
+

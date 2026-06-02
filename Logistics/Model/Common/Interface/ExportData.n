@@ -1,0 +1,118 @@
+%==================================================%
+%                                                  %
+%		ExportData.n		           %
+%                                                  %
+% (c)2000 Enginest. All rights reserved.           %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+
+'()' => (
+	dataFormat = ('Work Directory' downloadDirectory directoryClub_{clubId_{idClubLogin}} "/" DataFormatName ".cfg"),
+
+	['Work Directory' "Model\Common\Data\DataFormat.n"],
+
+
+
+	exportData = ('Work Directory' downloadDirectory directoryClub_{clubId_{idClubLogin}} "/" ExcelExportDataName ".txt"),
+
+
+	( TAG_DATABASE " : " ListTableDB TAG_INTO
+		TAG_EXCEL_FILE " " ExcelExportDataName ".xls" " : " ListTableExcel  : '()'),
+
+
+
+
+	'()' <- database,
+
+	\forall t \in TABLE (
+		(TAG_EXPORT " " idTable_{t} TAG_INTO nameTable_{t} : '()'),
+
+
+		sqlFieldTable_{t} = [\forall f \in FieldTable_{t} ( idFieldTable_{t,f} (f = \sup FieldTable_{t} ? "" : ",") )],
+		sqlOrderTable_{t} = [\forall k \in KeyTable_{t} ( idFieldTable_{t,k} (k = \sup KeyTable_{t} ? "" : ",") )],
+
+		sqlSelectTable_{t} = (
+			"SELECT " sqlFieldTable_{t} " FROM " DB_PREFIX idTable_{t}
+			" WHERE idClub='" idClubLogin
+			"' ORDER BY " sqlOrderTable_{t}
+		),
+
+
+		( TAG_SQL_ERROR :
+			oksqlSelectTable_{t} == (SQL : sqlSelectTable_{t}),
+
+			oksqlSelectTable_{t} => (
+				RecordTable_{t} \subset [1,ExcelImportLineMaximum],
+				RecordTable_{t} = [1, ()],
+
+				\forall r \in RecordTable_{t} (
+					\forall f \in Field0Table_{t}
+						value0FieldRecordTable_{t,r,f} :: "",
+
+					\forall f \in FieldTable_{t}
+						value0FieldRecordTable_{t,r,f} = (),
+				),
+			),
+		),
+
+		nbRecordExportedTable_{t} = #RecordTable_{t} * oksqlSelectTable_{t},
+
+
+		(TAG_RECORDS_EXPORTED nbRecordExportedTable_{t} : '()'),
+	),
+
+	database <- '()',
+),
+
+
+
+
+'@' => (
+	[exportData] <- '@',
+
+
+	@ (ExcelSheetNumberPrefix "=2;\n"),
+
+	\forall t \in TABLE (
+		%(TAG_EXPORT " " idTable_{t} TAG_INTO nameTable_{t} : '@'),
+
+		% Under title, nbRecord + 2 lines for Excel (DB field name + type)
+		@ (ExcelSheetNamePrefix "=" nameTable_{t} ";" #Field0Table_{t} ";" (nbRecordExportedTable_{t} + 2) ";\n"),
+
+		\forall f \in Field0Table_{t} (
+			@(nameFieldTable_{t,f} ";"),
+		),
+		@ "\n",
+		\forall f \in Field0Table_{t} (
+			@(idFieldTable_{t,f} ";"),
+		),
+		@ "\n",
+		\forall f \in Field0Table_{t} (
+			@(type0FieldTable_{t,f} ";"),
+		),
+		@ "\n",
+
+
+		\forall r \in RecordTable_{t} (
+			\forall f \in Field0Table_{t} \setminus FieldTable_{t}
+				value0FieldRecordTable_{t,r,f} = "",
+
+			\forall f \in Field0Table_{t} (
+				@ (value0FieldRecordTable_{t,r,f} ";"),
+			),
+			@ ("\n"),
+		),
+		@ ("\n"),
+	),
+
+	'@' <- [exportData],
+
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+).
+
+

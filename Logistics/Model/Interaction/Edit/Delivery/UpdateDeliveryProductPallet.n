@@ -1,0 +1,201 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateDeliveryProductPallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+%% 2025.10.09 Jianyi ReadMacro TAG_DELIVERY_PALLET
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 				:: "",
+		idOrderProductLineBuffer_{i} 			:: "",
+		
+		idObjSelectedBuffer_{i}					= (),
+		idOrderProductLineBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} 			= ("'" idObjSelectedBuffer_{i} "',"),
+			strIdOrderProductLineBuffer_{i} 	= ("'" idOrderProductLineBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} 			= ("'" idObjSelectedBuffer_{i} "'"),
+			strIdOrderProductLineBuffer_{i} 	= ("'" idOrderProductLineBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	
+	IDORDERPRODUCTLINEBUFFER :: "",
+	IDORDERPRODUCTLINEBUFFER	= [\forall i \in [1, nbSelected] strIdOrderProductLineBuffer_{i}],
+	
+
+	palletBuffer			:: 0,
+	palletBuffer			= (),
+	
+	idOrderProductLineCondition = ( 
+		SQL_CONCAT"trim(IdOrder)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH"trim(IdProduct)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH""SQL_FORMATNUM"(NoLine,"SQL_FORMATSCALE0")"
+		SQL_CONCATEND" in ("IDORDERPRODUCTLINEBUFFER") "
+	),
+	
+	
+	'()' <- database,
+	
+	UpdatePallet_SQL1 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set NoPalletDelivery="palletBuffer"
+		WHERE IdDelivery in ("IDOBJSELECTEDBUFFER")
+		AND "idOrderProductLineCondition" "
+	),
+	UpdatePallet_SQL2 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set NoPalletDelivery=1 
+		WHERE IdDelivery in ("IDOBJSELECTEDBUFFER")
+		and NoPalletDelivery is NULL"
+	),
+	UpdatePallet_SQL3 = (
+		"insert into " DB_PREFIX "PACKING (Id, IdState, IdSender, Country, NbPallet, DateCreate, DateDelivery, DateClosed, IdDelivery, Comments,
+		Quantity, QuantityStock, QuantityReal, QuantityDefective, Volume, WeightNet, WeightGlobal, OriginPacking) 
+		select distinct D.Id, '9', ag.Name, ag.Country, 0, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), D.DateDelivery, D.DateDelivery, D.Id, '" TAG_DELIVERY_PALLET "',
+		0,0,0,0, 0, 0,0, 'D' 
+		FROM " DB_PREFIX "DELIVERY D
+		left join " DB_PREFIX "AGENCY ag on ag.Id=D.IdAgency
+		where D.ID in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "PACKING PK where PK.Id = D.ID) "
+	),
+	UpdatePallet_SQL4 = (
+		"insert into " DB_PREFIX "PALLET (IdPacking, NoPallet, DatePreparation, DateDelivery,
+		Quantity, QuantityStock, QuantityReal, QuantityDefective, Volume, WeightNet,WeightGlobal, Length, Width, Height)
+		select distinct DP.IdDelivery, DP.NoPalletDelivery, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), D.DateDelivery, 0,0,0,0, 0, 0,0, 0,0,0
+		from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "DELIVERY D on D.ID=DP.IdDelivery
+		where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and DP.NoPalletDelivery is not NULL
+		and not exists (select 1 from " DB_PREFIX "PALLET PL where PL.IdPacking = D.ID and PL.NoPallet=DP.NoPalletDelivery) "
+	),
+
+
+	databaseType = "ACCESS" => (
+		UpdatePallet_SQL5 = (
+			"update " DB_PREFIX "PALLET set Quantity=0, QuantityReal=0, QuantityDefective=0, WeightNet=0, Dimension='0' where IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL6 = (
+			"update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY_PRODUCT DP on PL.IdPacking=DP.IdDelivery and PL.NoPallet=DP.NoPalletDelivery set 
+				PL.Quantity = PL.Quantity + DP.Quantity,
+				PL.QuantityReal = PL.QuantityReal + DP.QuantityReal,
+				PL.QuantityDefective = PL.QuantityDefective + DP.QuantityDefective
+			where PL.IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL7 = (
+			"update (" DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY_PRODUCT DP on PL.IdPacking=DP.IdDelivery and PL.NoPallet=DP.NoPalletDelivery) inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct set 
+				PL.WeightNet = PL.WeightNet + DP.Quantity*P.Weight 
+			where PL.IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+	
+		%% PALLET weight
+		UpdatePallet_SQL8 = (
+			"update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY D on PL.IdPacking=D.ID set PL.WeightGlobal= PL.WeightNet + D.WeightPallet where D.ID in ("IDOBJSELECTEDBUFFER") and D.WeightPallet is not NULL and D.WeightPallet>0 "
+		),	
+		UpdatePallet_SQL9 = (
+			"update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY D on PL.IdPacking=D.ID set PL.WeightGlobal= PL.WeightNet + 30 where D.ID in ("IDOBJSELECTEDBUFFER") and (D.WeightPallet is NULL or D.WeightPallet<=0) "
+		),
+		UpdatePallet_SQL10 = (
+			"update (" DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY D on PL.IdPacking=D.ID) inner join " DB_PREFIX "CLIENT cl on cl.Id=D.IdClient set PL.Designation= (trim(cl.Name) + ' - ' + cl.City) where D.ID in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL11 = (
+			"update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "DELIVERY_PRODUCT DP on PL.IdPacking=DP.IdDelivery and PL.NoPallet=DP.NoPalletDelivery set 
+				PL.Dimension = "SQL_FORMATNUM"(PL.Dimension + 1, "SQL_FORMATSCALE0")
+			where PL.IdPacking in ("IDOBJSELECTEDBUFFER")"
+		),
+		UpdatePallet_SQL12 = (
+			"update " DB_PREFIX "PALLET PL set PL.Dimension="SQL_CONCAT"trim(PL.Dimension) "SQL_CONCATWITH" ' colis'"SQL_CONCATEND" where PL.IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL13 = (
+			"delete from " DB_PREFIX "PALLET where IdPacking in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and PALLET.NoPallet=DP.NoPalletDelivery) "
+		),
+		UpdatePallet_SQL14 = (
+			"delete from " DB_PREFIX "PACKING where Id in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "PALLET PL where PL.IdPacking in ("IDOBJSELECTEDBUFFER")) "
+		),
+
+		;
+		
+		%% PALLET Qty
+		UpdatePallet_SQL5 = (
+			"update " DB_PREFIX "PALLET set 
+				Quantity= (select sum(DP.Quantity) from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET.IdPacking=DP.IdDelivery and PALLET.NoPallet=DP.NoPalletDelivery),
+				QuantityReal=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET.IdPacking=DP.IdDelivery and PALLET.NoPallet=DP.NoPalletDelivery),
+				QuantityDefective = (select sum(DP.QuantityDefective) from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET.IdPacking=DP.IdDelivery and PALLET.NoPallet=DP.NoPalletDelivery),
+				WeightNet= (select sum(DP.Quantity*P.Weight) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct where PALLET.IdPacking=DP.IdDelivery and PALLET.NoPallet=DP.NoPalletDelivery)
+			where IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL6 = (
+			"update " DB_PREFIX "PALLET set Quantity=0 where IdPacking in ("IDOBJSELECTEDBUFFER") and Quantity is NULL "
+		),
+		UpdatePallet_SQL7 = (
+			"update " DB_PREFIX "PALLET set QuantityReal=0 where IdPacking in ("IDOBJSELECTEDBUFFER") and QuantityReal is NULL "
+		),
+		UpdatePallet_SQL8 = (
+			"update " DB_PREFIX "PALLET set QuantityDefective=0 where IdPacking in ("IDOBJSELECTEDBUFFER") and QuantityDefective is NULL "
+		),
+		UpdatePallet_SQL9 = (
+			"update " DB_PREFIX "PALLET set WeightNet=0 where IdPacking in ("IDOBJSELECTEDBUFFER") and WeightNet is NULL "
+		),
+
+		%% PALLET weight
+		UpdatePallet_SQL10 = (
+			"update " DB_PREFIX "PALLET set 
+				WeightGlobal= WeightNet + (select D.WeightPallet from  " DB_PREFIX "DELIVERY D where D.ID in ("IDOBJSELECTEDBUFFER") and D.WeightPallet is not NULL and D.WeightPallet>0 )
+			WHERE IdPacking in ("IDOBJSELECTEDBUFFER")"
+		),
+		UpdatePallet_SQL11 = (
+			"update " DB_PREFIX "PALLET set 
+				WeightGlobal= WeightNet + 30
+			WHERE IdPacking in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "DELIVERY D where D.ID in ("IDOBJSELECTEDBUFFER") and D.WeightPallet is not NULL and D.WeightPallet>0) "
+		),
+		UpdatePallet_SQL12 = (
+			"update " DB_PREFIX "PALLET set 
+				Designation=(select "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' - ' "SQL_CONCATWITH" cl.City "SQL_CONCATEND" from " DB_PREFIX "DELIVERY D inner join " DB_PREFIX "CLIENT CL on CL.Id=D.IdClient where D.ID in ("IDOBJSELECTEDBUFFER")) 
+			WHERE IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL13 = (
+			"update " DB_PREFIX "PALLET set Dimension= (select "SQL_FORMATNUM"(count(1),"SQL_FORMATSCALE0") from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET.IdPacking=DP.IdDelivery and PALLET.NoPallet=DP.NoPalletDelivery) where IdPacking in ("IDOBJSELECTEDBUFFER")"
+		),
+		UpdatePallet_SQL14 = (
+			"update " DB_PREFIX "PALLET set Dimension="SQL_CONCAT"trim(Dimension) "SQL_CONCATWITH" ' colis'"SQL_CONCATEND" where PALLET.IdPacking in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdatePallet_SQL15 = (
+			"delete from " DB_PREFIX "PALLET where IdPacking in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and PALLET.NoPallet=DP.NoPalletDelivery) "
+		),
+		UpdatePallet_SQL16 = (
+			"delete from " DB_PREFIX "PACKING where Id in ("IDOBJSELECTEDBUFFER") and not exists (select 1 from " DB_PREFIX "PALLET PL where PL.IdPacking in ("IDOBJSELECTEDBUFFER")) "
+		),
+	),
+
+	(SQL : UpdatePallet_SQL1), 
+	(SQL : UpdatePallet_SQL2), 
+	(SQL : UpdatePallet_SQL3), 
+	(SQL : UpdatePallet_SQL4), 
+	(SQL : UpdatePallet_SQL5), 
+	(SQL : UpdatePallet_SQL6), 
+	(SQL : UpdatePallet_SQL7), 
+	(SQL : UpdatePallet_SQL8), 
+	(SQL : UpdatePallet_SQL9), 
+	(SQL : UpdatePallet_SQL10), 
+	(SQL : UpdatePallet_SQL11), 
+	(SQL : UpdatePallet_SQL12), 
+	(SQL : UpdatePallet_SQL13), 
+	(SQL : UpdatePallet_SQL14), 
+	
+	databaseType <> "ACCESS" => (
+		(SQL : UpdatePallet_SQL15), 
+		(SQL : UpdatePallet_SQL16), 
+	),
+	
+	database <- '()',
+),

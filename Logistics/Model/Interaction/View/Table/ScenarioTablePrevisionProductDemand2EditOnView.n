@@ -1,0 +1,92 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTablePrevisionProductDemand2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "UPDATEPROBABILITY ",
+
+% Caption
+@ (" '" TAG_SALES_PREVISION_DEMAND "' "),	
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+
+% Label
+@ (" '" TAG_SALES_PREVISION_DEMAND "' "),
+
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCT_DEMAND' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateProbability_Input = (
+	"{/*Input(MCM;" TAG_SALES_PREVISION_DEMAND ";1;\\\n"
+	"(float,DEMANDPB,Prévision évolution besoins,0.7,20.0.580,0,,);\\\n"
+	")*/}"
+),
+
+UpdateProbability_SQL1 = (
+		"UPDATE " DB_PREFIX "PRODUCT_DEMAND pd "
+		"SET pd.probability=[/*PRICEPB*/]*pd.minQuantity "  
+		"WHERE pd.id in (trim([/*PRODUCT_DEMAND.ID*/]))"
+	),
+	
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateDemandProbability.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) (/*CLUBID*/) {/*Selected(tablePRODUCT_DEMAND;1;(string,ID))*/}  \\\n"),
+		@ UpdateProbability_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateProbability_Input),
+		@ ("'\\\n"),
+		@ UpdateProbability_SQL1,
+		@ ("Reload _ _ _ \n\n\n"),
+),
+
+.
+
+

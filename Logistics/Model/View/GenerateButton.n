@@ -1,0 +1,35 @@
+%=============================================%
+%                                             %
+% 	      GenerateButton.n                %
+%                                             %
+% (c)2000. Enginest. All rights reserved.     %
+%=============================================%
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+
+'@' => (
+	% Common
+	%[['Work Directory' "Model\Common\Button\ButtonDeploySystem.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Declaration.n"], 			['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\Common\Button\ButtonDeploySystem.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Button\ButtonImportData.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Button\ButtonExportData.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Button\ButtonLogout.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Button\ButtonModifyPassword.n"],	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Button\ButtonGenerateView.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	% Optimization
+	[['Work Directory' "Model\View\Button\ButtonGenerateSolution.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Button\ButtonOptimizeTSP.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],	% JZ 0912
+
+
+	% Clean data
+	[['Work Directory' "Model\View\Button\ButtonUpdateProductQuantity.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Button\ButtonUpdateOrderSite.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+),
+
+

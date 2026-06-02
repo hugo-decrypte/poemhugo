@@ -1,0 +1,39 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateTour.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	nbSelected	= (),
+	nbParameter	= (),
+
+	idTourBuffer	:: "",
+	idTourBuffer	= (),
+	
+	dateTourBuffer		:: "",
+	timeTourBuffer		:: "",
+	
+	dateTourBuffer		= (),
+	timeTourBuffer		:: "",
+
+	'()' <- database,
+	
+	UpdateTour_SQL1 = (
+		"UPDATE " DB_PREFIX "TOUR set TimeStart="timeTourBuffer",
+		   T1="SQL_CONCAT"mid(T1,1,11)"SQL_CONCATWITH"format("timeTourBuffer",'"defaultTime"')"SQL_CONCATEND",
+		   DateTour="dateTourBuffer"
+		  where ID='"idTourBuffer"'"
+	),
+	
+	(SQL : UpdateTour_SQL1), 
+	
+
+	database <- '()',
+),

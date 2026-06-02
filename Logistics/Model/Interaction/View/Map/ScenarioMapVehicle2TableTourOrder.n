@@ -1,0 +1,63 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioMapVehicle2TableTourOrder.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TourOrder ",
+
+% Caption
+@ (" '" TAG_ROUTE_SHEET	"' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_ORDER,
+
+% Label
+@ (" '" TAG_ROUTE_SHEET "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'VRP_PATH' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\View\Map\GenerateTableTourOrder.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(VRP_PATH;2;(string,IDTOUR);(string,IDVEHICLE))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+
+@ (OPENTABLE_BEGIN "TableTourOrderMenu.view" OPENTABLE_END),
+@ (TABLE_ARGUMENTS "]\"\n\n\n"),
+
+
+

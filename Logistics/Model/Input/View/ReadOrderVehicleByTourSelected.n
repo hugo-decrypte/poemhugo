@@ -1,0 +1,18 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%	ReadOrderVehicleByTourSelected.n	%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\Input\View\ReadTourSelected.n"], % li 0614
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Config\ReadConfigDate.n"],
+['Work Directory' "Model\Common\Config\ReadDateTime.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+

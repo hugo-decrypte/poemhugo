@@ -1,0 +1,677 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableOrder2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "CreateOrder ",
+
+% Caption
+@ (" '" TAG_INSERT_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT "' "),	% JZ 0908
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+CreateOrder_Input = (
+	"{/*Input(" TAG_INSERT_ORDER ";4;\\\n"
+	"(string,IDORDER," TAG_ORDER_ID ",,50." inputWidth ",0,0,);\\\n"
+	"(string,REFERENCE," TAG_REFERENCE ",,50." inputWidth ",0,0,);\\\n"
+	"(string,LABELCLIENT,Client,,50." inputWidth ",0,,[/*CLIENT.LABELCLIENT*/]);\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",,10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+
+CreateOrder_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "CLIENTORDER (IdClub, Id, Reference, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, IdState) "
+	"select cl.IdClub, '[/*IDORDER*/]', '[/*REFERENCE*/]', cl.Id, p.IdPoint, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), [/*DATEDELIVERY*/], cl.IdAgency, '0' "
+	"from " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id "
+	"where "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH"')'"SQL_CONCATEND" = '[/*LABELCLIENT*/]'\"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\CreateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+		@ CreateOrder_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" CreateOrder_Input),
+		@ ("'\\\n"),
+		@ CreateOrder_SQL1,
+	),
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DuplicateOrder ",
+
+% Caption
+@ (" '" TAG_COPY_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_COPY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DuplicateOrder_Input = (
+	"{/*Input(L;" TAG_COPY_ORDER " [/*ORDER.ID*/];3;\\\n"
+	"(string,IDORDER," TAG_ORDER_ID ",,50." inputWidth ",0,0,);\\\n"
+	"(string,REFERENCE," TAG_REFERENCE ",,50." inputWidth ",0,0,);\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*ORDER.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),
+
+
+DuplicateOrder_SQL1 = (
+	"\"INSERT INTO " DB_PREFIX "CLIENTORDER\
+  (IdClub, Id, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, Quantity, QuantityRest,\
+   Comments, Reference, IdState) \
+  select O.IdClub, '[/*IDORDER*/]', O.IdClient, O.IdPointDelivery, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), [/*DATEDELIVERY*/], O.IdAgency, O.Quantity, O.Quantity,\
+  "SQL_CONCAT"'Dupliquée de '"SQL_CONCATWITH" O.Id"SQL_CONCATEND", '[/*REFERENCE*/]', '0'\
+  from " DB_PREFIX "CLIENTORDER O\
+  where O.Id = '[/*ORDER.ID*/]'\"\\\n"
+),
+DuplicateOrder_SQL2 = (
+	"\"INSERT INTO " DB_PREFIX "ORDER_PRODUCT (IdOrder, IdProduct, Quantity, QuantityDelivered, QuantityRest, PriceUnit, Discount, Comments, DateOrder, DateDelivery,NoPallet) \
+  select O.Id, LO.IdProduct,\
+   LO.Quantity, 0, LO.Quantity, LO.PriceUnit, LO.Discount, LO.Comments, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), [/*DATEDELIVERY*/], LO.NoPallet\
+  from " DB_PREFIX "CLIENTORDER O," DB_PREFIX "ORDER_PRODUCT LO\
+  where O.Id='[/*IDORDER*/]'\
+   and LO.IdOrder = '[/*ORDER.ID*/]'\"\n\n"
+),
+	
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\DuplicateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \\\n"),
+		@ DuplicateOrder_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" DuplicateOrder_Input),
+		@ ("'\\\n"),
+		@ DuplicateOrder_SQL1,
+		@ ("\\\n"),
+		@ DuplicateOrder_SQL2,
+),
+
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyOrder ",
+
+% Caption
+@ (" '" TAG_UPDATE_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+
+% Instruction... (When Count>0)
+UpdateOrder_Input = (
+	"{/*Input(MO;" TAG_UPDATE_ORDER " [/*ORDER.ID*/];7;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE "*,[/*ORDER.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	"(string,INCOTERM," TAG_INCOTERMS ",[/*ORDER.INCOTERM*/],50." inputWidth ",1,,);\\\n"
+	"(string,REFERENCE," TAG_REFERENCE ",[/*ORDER.REFERENCE*/],50." inputWidth ",1,,);\\\n"
+	"(string,IDINVOICE," TAG_INVOICE_ID ",[/*ORDER.IDINVOICE*/],50." inputWidth ",1,,);\\\n"
+	"(string,IDPROFORMA," TAG_PROFORMA_ID ",[/*ORDER.IDPROFORMA*/],50." inputWidth ",1,,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*ORDER.COMMENTS*/],50." inputWidth ",1,,);\\\n"
+	"(string,STATE," TAG_STATE ",[/*ORDER.STATEORDER*/],50." inputWidth ",1,,[/*STATE.LABELSTATE*/]);\\\n"
+	" )*/}\\\n"
+),
+UpdateOrder_SQL1 = (
+	"\"Update " DB_PREFIX "CLIENTORDER set \
+		DateDelivery=[/*DATEDELIVERY*/],\
+		Incoterm='[/*INCOTERM*/]',\
+		Reference='[/*REFERENCE*/]',\
+		Comments='[/*COMMENTS*/]',\
+		IdInvoice='[/*IDINVOICE*/]',\
+		IdProforma='[/*IDPROFORMA*/]'\
+	where Id in ([/*ORDER.ID*/])\"\n\n"
+),
+
+
+databaseType = "ACCESS" => (
+
+	UpdateOrder_SQL2 = (
+		"\"Update " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "STATE s\
+		set O.IdState=s.Id\
+		where O.Id in ([/*ORDER.ID*/])\
+		and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='ORDER'\"\n\n\n"
+	),
+	;
+
+	UpdateOrder_SQL2 = (
+		"\"Update " DB_PREFIX "CLIENTORDER \
+		set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='ORDER')\
+		where Id in ([/*ORDER.ID*/])\"\n\n\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\UpdateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDER;1;(string,ID))*/} \\\n"),
+		@ UpdateOrder_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateOrder_Input),
+		@ ("'\\\n"),
+		@ UpdateOrder_SQL1,
+		@ UpdateOrder_SQL2,
+),
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteOrder ",
+
+% Caption
+@ ("'" TAG_DELETE_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ ("'" TAG_DELETE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+DeleteOrder_SQL1 = (
+	"\"Delete from " DB_PREFIX "ORDER_PRODUCT \
+	where IdOrder='[/*ORDER.ID*/]'\
+	and not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO0 where LO0.QuantityDelivered>0 and ORDER_PRODUCT.IdOrder=LO0.IdOrder)\
+	and exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=ORDER_PRODUCT.IdOrder and (O.IdState is NULL or O.IdState='0') )\"\\\n"
+),
+
+DeleteOrder_SQL2 = (
+	"\"Delete from " DB_PREFIX "CLIENTORDER \
+	where Id = '[/*ORDER.ID*/]' and (IdState is NULL or IdState='0') \
+	and not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO0 where LO0.QuantityDelivered>0 and CLIENTORDER.Id=LO0.IdOrder)\"\\\n"
+),
+DeleteOrder_SQL3 = (
+	"\"Update " DB_PREFIX "CLIENTORDER\
+	set Comments='NON Supprimée'\
+	where Id='[/*ORDER.ID*/]'\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\DeleteOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDER;1;(string,ID))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ DeleteOrder_SQL1,
+		@ DeleteOrder_SQL2,
+		@ DeleteOrder_SQL3,
+),
+
+
+
+
+%===========================================================================================
+%
+@ "Script ",
+
+% ID
+@ "SetOrderState ",
+
+% Caption
+@ (" '" TAG_UPDATE_ORDERR_STATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW6,
+
+
+
+% Label
+@ (" '" TAG_UPDATE_STATE "' "),	% 0912
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+
+SetOrderState_Input = (
+	"{/*Input(MCS;" TAG_UPDATE_ORDERR_STATE ";1;\\\n"
+	" (string,STATE," TAG_STATE ",[/*ORDER.IDSTATE*/],50." inputWidth ",0,,[/*STATE.LABELSTATE*/]);\\\n"
+	" )*/}\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	SetOrderState_SQL1 = (
+		"\"Update " DB_PREFIX "CLIENTORDER O, " DB_PREFIX "STATE s\
+		set O.IdState=s.Id\
+		where O.Id in ([/*ORDER.ID*/])\
+		and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='ORDER'\"\n\n\n"
+	),
+	;
+
+	SetOrderState_SQL1 = (
+		"\"Update " DB_PREFIX "CLIENTORDER \
+		set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATE*/]' and s.CATEGORY='ORDER')\
+		where Id in ([/*ORDER.ID*/])\"\n\n\n"
+	),
+),
+
+
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SetOrderState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \\\n"),
+		@ SetOrderState_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" SetOrderState_Input),
+		@ ("'\\\n"),
+		@ SetOrderState_SQL1,
+),
+
+
+% JZ 0912
+
+
+%===========================================================================================
+%
+@ "Script ",
+
+% ID
+@ "SetToDelivery ",
+
+% Caption
+@ (" '" TAG_SET_ORDER_TO_DELIVERY "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW5,
+
+% Label
+@ (" '" TAG_SET_ORDER_TO_DELIVERY "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+
+% Instruction... (When Count>0)
+SetToDelivery_Input = (
+	"{/*Input(ML;" TAG_SET_ORDER_TO_DELIVERY " : " TAG_ORDER " [/*ORDER.ID*/];1;\\\n"
+	"(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*ORDER.DATEDELIVERY*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"
+	")*/}\\\n"
+),	% JZ 0919 : 8.0.450
+
+databaseType = "ACCESS" => (
+
+	SetToDelivery_SQL1 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO set LO.QuantityDelivered=0 where LO.IdOrder='[/*ORDER.ID*/]' \"\\\n"
+	),
+	SetToDelivery_SQL2 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO set LO.QuantityRest=LO.Quantity where LO.IdOrder='[/*ORDER.ID*/]' \"\\\n"
+	),
+	SetToDelivery_SQL3 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "DELIVERY_PRODUCT LD on LD.IdOrder=LO.IdOrder and LD.IdProduct=LO.IdProduct set\
+		LO.QuantityDelivered=LO.QuantityDelivered+LD.QuantityReal,\
+		LO.QuantityRest=LO.QuantityRest-LD.QuantityReal\
+		where LO.IdOrder='[/*ORDER.ID*/]'\"\\\n"
+	),
+	;
+
+	SetToDelivery_SQL1 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT  set\
+			QuantityDelivered=(select sum(LD.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT LD where LD.IdOrder=ORDER_PRODUCT.IdOrder and LD.IdProduct=ORDER_PRODUCT.IdProduct),\
+			QuantityRest=Quantity-(select sum(LD.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT LD where LD.IdOrder=ORDER_PRODUCT.IdOrder and LD.IdProduct=ORDER_PRODUCT.IdProduct)\
+		where IdOrder='[/*ORDER.ID*/]'\"\\\n"
+	),
+	SetToDelivery_SQL2 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT set QuantityDelivered=0 where IdOrder='[/*ORDER.ID*/]' and QuantityDelivered is NULL \"\\\n"
+	),
+	SetToDelivery_SQL3 = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=Quantity where IdOrder='[/*ORDER.ID*/]' and QuantityRest is NULL \"\\\n"
+	),
+),
+SetToDelivery_SQL4 = (
+	"\"INSERT INTO " DB_PREFIX "DELIVERY\
+	(IdClub, Id, IdClient, IdPointDelivery, DateDelivery, IdAgency, Quantity, QuantityReal,\
+	Comments, IdState) \
+	select O.IdClub, "SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND", O.IdClient, O.IdPointDelivery, [/*DATEDELIVERY*/], O.IdAgency, O.QuantityRest, O.QuantityRest,\
+	"SQL_CONCAT"'Commande '"SQL_CONCATWITH" '[/*ORDER.ID*/]'"SQL_CONCATEND", '0'\
+	from " DB_PREFIX "CLIENTORDER O\
+	where O.Id = '[/*ORDER.ID*/]'\
+   and not exists (select 1 from " DB_PREFIX "DELIVERY d where d.Id="SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND") \"\\\n"
+),
+SetToDelivery_SQL5 = (
+	"\"INSERT INTO " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery,IdOrder, IdProduct, NoLine, Quantity, QuantityReal, QuantityOrderRest, QuantityDefective, PriceUnit, Comments, DateDelivery, NoPallet,NoPalletDelivery) \
+	select "SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND", O.Id, LO.IdProduct, 1 as NoLine,\
+	0, 0, 0, 0, LO.PriceUnit, LO.Comments, [/*DATEDELIVERY*/], 1, LO.NoPallet\
+	from " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT LO on LO.IdOrder=O.Id\
+	where O.Id='[/*ORDER.ID*/]'\
+	and LO.QuantityRest>0\
+	and not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT LD where LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"O.Id"SQL_CONCATEND" and LD.IdOrder=O.Id and LD.IdProduct=LO.IdProduct) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	SetToDelivery_SQL6 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT LD inner join " DB_PREFIX "ORDER_PRODUCT LO on LD.IdOrder=LO.IdOrder and LD.IdProduct=LO.IdProduct\
+		set LD.Quantity=LD.Quantity+LO.QuantityRest, LD.QuantityReal=LD.QuantityReal+LO.QuantityRest\
+		where LO.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and LO.QuantityRest>0 \"\\\n"
+	),
+	SetToDelivery_SQL6b = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT LD inner join " DB_PREFIX "ORDER_PRODUCT LO on LD.IdOrder=LO.IdOrder and LD.IdProduct=LO.IdProduct\
+		set LO.QuantityDelivered=LO.QuantityDelivered+LO.QuantityRest, LO.QuantityRest=0\
+		where LO.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and LO.QuantityRest>0 \"\\\n"
+	),
+
+	SetToDelivery_SQL7 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT LD inner join " DB_PREFIX "ORDER_PRODUCT LO on LD.IdOrder=LO.IdOrder and LD.IdProduct=LO.IdProduct\
+		set LD.PriceUnit=LO.PriceUnit\
+		where LO.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (LD.PriceUnit is NULL or LD.PriceUnit<=0) \"\\\n"
+	),
+	SetToDelivery_SQL8 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT LD inner join " DB_PREFIX "ORDER_PRODUCT LO on LD.IdOrder=LO.IdOrder and LD.IdProduct=LO.IdProduct\
+		set LD.IdVAT=LO.IdVAT\
+		where LO.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (LD.IdVAT is NULL or LD.IdVAT<=' ') \"\\\n"
+	),
+
+	SetToDelivery_SQL9 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT LD inner join " DB_PREFIX "PRODUCT A on LD.IdProduct=A.Id\
+		set LD.IdVAT=A.IdVAT\
+		where LD.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (LD.IdVAT is NULL or LD.IdVAT<=' ') \"\\\n"
+	),
+	;
+
+	SetToDelivery_SQL6 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT set\
+			Quantity=Quantity+(select LO.QuantityRest from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='[/*ORDER.ID*/]' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct), \
+			QuantityReal=QuantityReal+(select LO.QuantityRest  from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='[/*ORDER.ID*/]' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct) \
+		where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND" \"\\\n"
+	),
+	SetToDelivery_SQL6b = (
+		"\"Update " DB_PREFIX "ORDER_PRODUCT set\
+			QuantityDelivered=QuantityDelivered+QuantityRest, \
+			QuantityRest=0\
+		where IdOrder='[/*ORDER.ID*/]'\
+		and QuantityRest>0 \"\\\n"
+	),
+
+	SetToDelivery_SQL7 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT set\
+			PriceUnit= (select LO.PriceUnit from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='[/*ORDER.ID*/]' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct)\
+		where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (PriceUnit is NULL or PriceUnit<=0) \"\\\n"
+	),
+	SetToDelivery_SQL8 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT set\
+			IdVAT=(select LO.IdVAT from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder='[/*ORDER.ID*/]' and DELIVERY_PRODUCT.IdProduct=LO.IdProduct)\
+		where LO.IdOrder='[/*ORDER.ID*/]' and LD.IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (IdVAT is NULL or IdVAT<=' ') \"\\\n"
+	),
+
+	SetToDelivery_SQL9 = (
+		"\"Update " DB_PREFIX "DELIVERY_PRODUCT set\
+			LD.IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where DELIVERY_PRODUCT.IdProduct=P.Id)\
+		where IdDelivery="SQL_CONCAT"'D'"SQL_CONCATWITH"'[/*ORDER.ID*/]'"SQL_CONCATEND"\
+		and (IdVAT is NULL or IdVAT<=' ') \"\\\n"
+	),
+),
+
+SetToDelivery_SQL10 = (
+	"\"Update " DB_PREFIX "CLIENTORDER \
+	set DateDelivery=[/*DATEDELIVERY*/], IdState='2'\
+	where Id='[/*ORDER.ID*/]'\"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SetToDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \\\n"),
+		@ SetToDelivery_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" SetToDelivery_Input),
+		@ ("'\\\n"),
+		@ SetToDelivery_SQL1,
+		@ SetToDelivery_SQL2,
+		@ SetToDelivery_SQL3,
+		@ SetToDelivery_SQL4,
+		@ SetToDelivery_SQL5,
+		@ SetToDelivery_SQL6,
+		@ SetToDelivery_SQL6b,
+		@ SetToDelivery_SQL7,
+		@ SetToDelivery_SQL8,
+		@ SetToDelivery_SQL9,
+		@ SetToDelivery_SQL10,
+),
+
+
+

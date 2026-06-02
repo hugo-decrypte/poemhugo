@@ -1,0 +1,101 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableStockReport.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableStockReport>(id,type,aliasTable,bestfit,doubleclick,title)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+
+	'@' => (
+		
+		viewFile = "TableStockReport",
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,REFERENCE," TAG_REFERENCE	",,10,0);\\\n"),
+		@ ("(string,LEVELTECH," TAG_LEVEL_TECH	"Niveau Tech,,10,0);\\\n"),
+		@ ("(color,LINERGB,"	RGB_WHITE	",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT a.ID as ID, a.Reference as REFERENCE, a.LevelTech as LEVELTECH,\\\n"),
+ 		@ ("\t\t a.PriceUnit as PRICE,\\\n"),
+ 		@ ("\t\t a.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t a.QuantityOrdered as QUANTITYCOMMAND,\\\n"),
+ 		@ ("\t\t a.MinQuantityStock as MINQUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QTYINSTOCK,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN"QTY "SQL_ELSE" 0 "SQL_CASEEND")*a.PriceUnit, "SQL_FORMATSCALE2") as COSTINSTOCK,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND")* a.Weight,"SQL_FORMATSCALE0") as WEIGHTINSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY,0 "SQL_CASEEND") as QTYTRANSIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND")*a.PriceUnit, "SQL_FORMATSCALE2") as COSTTRANSIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND")* a.Weight,"SQL_FORMATSCALE0") as WEIGHTTRANSIT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QTYDELIVERY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND")*a.PriceUnit, "SQL_FORMATSCALE2") as COSTDELIVERY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND")* a.Weight,"SQL_FORMATSCALE0") as WEIGHTDELIVERY,\\\n"),
+ 		@ ("\t\t a.designation as DESIGNATION,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"a.idStockState='NOK'"SQL_THEN" '(255 120 120)' "SQL_ELSE" '(220 220 255)') as LINERGB \\\n"),
+		@ ("\t FROM (/*DBOWNER*/)" DB_PREFIX "PRODUCT a inner join \\\n"),
+ 		@ ("\t\t (select LnP.IdProduct as IdA, LnP.IdPacking as IdP, LnP.NoPallet as NoL, LnP.QuantityStock as QTY, "SQL_CASEWHEN"pk.idState='0'"SQL_THEN"'T' "SQL_ELSE" 'S'"SQL_CASEEND" as TypeS \\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "PALLET_PRODUCT LnP left join (/*DBOWNER*/)" DB_PREFIX "PACKING pk on LnP.IdPacking=pk.id\\\n"),
+   		@ ("\t\t where LnP.QuantityStock>0\\\n"),
+ 		@ ("\t\t union\\\n"),
+  		@ ("\t\t select LnD.IdProduct as IdA, LnD.idOrder as IdP, LnD.NoLine as NoL, LnD.Quantity as QTY, 'D' as TypeS\\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "DELIVERY_PRODUCT LnD left join (/*DBOWNER*/)" DB_PREFIX "DELIVERY D on LnD.IdDelivery=D.id\\\n"),
+   		@ ("\t\t where "SQL_FORMATNUM"(D.DateDelivery,"SQL_FORMATSCALE0")>"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"')\\\n"),
+ 		@ ("\t\t ) tabPK on tabPK.IdA=a.ID \\\n"),
+		@ ("\t WHERE a.TypeProduct<>'F' \\\n"),
+		@ ("\t GROUP BY a.ID, a.Reference, a.LevelTech, a.QuantityStock, a.QuantityOrdered, a.MinQuantityStock, a.PriceUnit, a.Weight, a.designation, a.idStockState \\\n"),
+		@ ("\t ORDER BY a.Reference, a.LevelTech \\\n"),
+		@ ("\t UNION\\\n"),
+		@ ("\t SELECT '" TAG_TOTAL "' as ID, '" TAG_TOTAL "' as REFERENCE, ' ' as LEVELTECH,\\\n"),
+ 		@ ("\t\t 0 as PRICE,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='A'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='C'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QUANTITYCOMMAND,\\\n"),
+ 		@ ("\t\t 0 as MINQUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QTYINSTOCK,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"*a.PriceUnit), "SQL_FORMATSCALE2") as COSTINSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='S'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"* a.Weight) as WEIGHTINSTOCK,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QTYTRANSIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"*a.PriceUnit), "SQL_FORMATSCALE2") as COSTTRANSIT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='T'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"* a.Weight) as WEIGHTTRANSIT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND") as QTYDELIVERY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"*a.PriceUnit), "SQL_FORMATSCALE2") as COSTDELIVERY,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"TypeS='D'"SQL_THEN" QTY "SQL_ELSE" 0 "SQL_CASEEND"* a.Weight) as WEIGHTDELIVERY,\\\n"),
+ 		@ ("\t\t ' ' as DESIGNATION,\\\n"),
+ 		@ ("\t\t '(220 255 220 )' as LINERGB \\\n"),
+		@ ("\t FROM (/*DBOWNER*/)" DB_PREFIX "PRODUCT a inner join \\\n"),
+ 		@ ("\t\t (select LnP.IdProduct as IdA, LnP.IdPacking as IdP, LnP.NoPallet as NoL, LnP.QuantityStock as QTY, "SQL_CASEWHEN"pk.idState='0'"SQL_THEN"'T'"SQL_ELSE"'S'"SQL_CASEEND" as TypeS \\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "PALLET_PRODUCT LnP left join (/*DBOWNER*/)" DB_PREFIX "PACKING pk on LnP.IdPacking=pk.id\\\n"),
+   		@ ("\t\t where LnP.QuantityStock>0\\\n"),
+ 		@ ("\t\t union\\\n"),
+  		@ ("\t\t select LnD.IdProduct as IdA, LnD.idOrder as IdP, LnD.NoLine as NoL, LnD.Quantity as QTY, 'D' as TypeS\\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "DELIVERY_PRODUCT LnD left join (/*DBOWNER*/)" DB_PREFIX "DELIVERY D on LnD.IdDelivery=D.id\\\n"),
+   		@ ("\t\t where "SQL_FORMATNUM"(D.DateDelivery,"SQL_FORMATSCALE0")>"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"') \\\n"),
+ 		@ ("\t\t union\\\n"),
+  		@ ("\t\t select a1.Id as IdA, 'XXX' as IdP, 0 as NoL, a1.QuantityStock as QTY, 'A' as TypeS\\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "PRODUCT a1\\\n"),
+   		@ ("\t\t where a1.TypeProduct<>'F'\\\n"),
+ 		@ ("\t\t union\\\n"),
+  		@ ("\t\t select a1.Id as IdA, 'XXX' as IdP, 0 as NoL, a1.QuantityOrdered as QTY, 'C' as TypeS\\\n"),
+   		@ ("\t\t from (/*DBOWNER*/)" DB_PREFIX "PRODUCT a1\\\n"),
+   		@ ("\t\t where a1.TypeProduct<>'F'\\\n"),
+ 		@ ("\t\t ) tabPK on tabPK.IdA=a.ID \\\n"),
+		@ ("\t WHERE a.TypeProduct<>'F' \\\n"),
+		@ ("\t ORDER BY REFERENCE, LEVELTECH\"\n\n"),
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

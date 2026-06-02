@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableDelivery.n     	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableDelivery.n"],
+
+'@' => (
+	tableDelivery("DELIVERY", TAG_TABLE,"DELIVERY",true,"TableDeliveryProduct", TAG_TABLE_DELIVERY, "", 	""),
+	tableDelivery("DELIVERY", TAG_TABLE,"DELIVERY",true,"TableDeliveryProduct", TAG_TABLE_DELIVERY, "Menu",	""), % JZ 0926 A
+),

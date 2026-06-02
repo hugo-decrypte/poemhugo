@@ -1,0 +1,84 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableSupply.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableSupply>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableSupply" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableSupply" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		
+		@ ("(string,IDAGENCY," TAG_AGENCY_ID ",,15,0);(string,NAMEAGENCY," TAG_AGENCY_NAME ",,50,0);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT s.id AS ID, s.id AS IDSUPPLIER,\\\n"),
+		@ (" (select Name from " DB_PREFIX "SUPPLIER sr where sr.Id=s.Id) as NAMESUPPLIER,\\\n"),
+		@ (" s.DateSupply as DATESUPPLY,\\\n"),
+		@ (" s.DateDelivery as DATEDELIVERY,\\\n"),
+		@ (" s.DateLimit as DATELIMIT,\\\n"),
+		@ (" s.Quantity   AS QUANTITY, s.AmountHT   AS AMOUNTHT, s.Reference  AS REFERENCE,\\\n"),
+		@ (" s.ProductCondition AS PRODUCTCONDITION,\\\n"),
+		@ (" s.PayCondition  AS PAYCONDITION, s.Packaging AS PACKAGING,\\\n"),
+		@ (" s.CustomsInfo  AS CUSTOMSINFO, s.Incoterm  AS INCOTERM,\\\n"),
+		@ (" s.Comments AS COMMENTS,\\\n"),
+		@ (" s.idAgency AS IDAGENCY, ay.Name as NAMEAGENCY,\\\n"),
+		@ (" '(255 255 255)' AS LINERGB \\\n"),
+	 	@ ("FROM " DB_PREFIX "SUPPLY s, " DB_PREFIX "AGENCY ay \\\n"),
+	 	@ ("WHERE s.IdAgency=ay.Id \\\n"),
+		@ ("and (s.IdState is NULL or s.IdState not in ('9') )\\\n"),
+	 	@ ("ORDER BY s.Id\"\n\n\n"), 
+		
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2EditSupply.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2TableSupplier.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2TableSupplyProduct.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2TableProductForSupply.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2PrintSupply.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSupply2TableState.n"],
+
+		
+
+		%=============================================================================
+		['Work Directory' "Model\View\Data\DataSupplier.n"],
+		['Work Directory' "Model\View\Data\DataState.n"],
+		%=============================================================================
+
+		
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),
+
+
+
+
+
+
+
+
+

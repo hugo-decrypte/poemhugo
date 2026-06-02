@@ -1,0 +1,1435 @@
+2 terminated
+STATE=1&MESSAGE=1430
+(non modifiable)
+
+candidate
+scheduled
+released
+launched
+locked
+suspended
+unavailable
+available
+active
+inactive
+external
+critical
+unlimited
+capacity
+inability
+divisible
+continuous
+preventive
+indivisible
+scheduled feedback
+coupled resource
+Optimal
+Feasible
+Incomplete
+Modified
+Empty
+position
+Start of the day
+End of the day
+Start of the tour
+End of the tour
+Start of loading
+End of loading
+Start delivery
+End delivery
+Start of break
+End of break
++
+
+%
+
+(non modifiable)
+Formatted view engine
+Formatted documentation engine
+Generated login menu
+All menus generated
+All views generated
+Min quantity
+Min weight
+Min volume
+Max quantity
+Max weight
+Max volume
+Label
+Detail
+Product ID
+Product name
+Provision detail
+Pallet detail
+Quote detail
+Order detail
+Delivery detail
+Invoice detail
+Truck type
+Truck table
+Provision
+Stock entry
+Delivery
+Suppliers
+Offers
+Supplier offers
+Offer products
+Delivery invoice
+from the supplier
+Stock pallet
+Delivery pallet
+Products for delivery  
+Delivery products  
+Delivery pallets  
+Modify delivery pallet  
+Remove delivery from route  
+Remove product  
+Remove undelivered products  
+Order details  
+Order details for product  
+Provision products  
+Provision deliveries  
+No route for  
+Orders for product  
+Pallets for product  
+Products for client  
+Orders for client  
+Deliveries for client  
+Products for stock entry  
+Products for quote  
+Products for order  
+Deliveries for order  
+Products for order  
+Provision products  
+Products for offer  
+Deliveries for route  
+Products to add for quote  
+Products to add for order  
+Products to add for provision  
+Products to add for offer  
+Orders to add for delivery  
+Orders to add for route  
+Deliveries to add for route  
+Products to complement  
+Orders to complement  
+Deliveries to complement  
+Products for pallet  
+Add order to route  
+Add order  
+Add delivery  
+Add product  
+Pallet  
+#Pallet
+No. palette  
+New palette  
+Palettes in stock  
+Products on pallet  
+Pallets for product  
+Pallets for delivery  
+Invoices for delivery  
+Preparing delivery  
+Preparing products  
+Prepare pallet  
+Prepare delivery  
+Provision ID  
+Supplier  
+Supplier ID  
+Supplier name  
+Provision  
+Quote date  
+Products  
+Product type  
+Product family  
+Product family  
+Product Product  
+#Product  
+Kits  
+Components  
+Product kit  
+Product component  
+Order details for product  
+Order details by date  
+Pallets  
+Deliveries  
+Defect rate  
+CA  
+Orders  
+Invoices  
+Add/modify #package  
+Delivery city  
+Delivery country  
+of the order  
+of the customer  
+of the tour  
+for customer  
+for tour  
+for product  
+for product family  
+Delivery of the order  
+Edit supplier prices  
+Modify stock position  
+Order status  
+Stock entry status  
+Tour status  
+Quote status  
+Delivery status  
+Provision status  
+Delivery note  
+Update quantity data  
+Synchronize quantity data  
+Synchronize delivery addresses  
+Modify quantity
+Modify expiration date  
+Modify comment  
+Modify product comment  
+Create palette  
+Delete palette  
+Modify stock entry  
+Create stock entry  
+Delete stock entry  
+Modify client  
+Create client  
+Delete client  
+Add delivery point  
+Delete delivery point  
+Duplicate product  
+Create product  
+Modify product  
+Delete product  
+Duplicate product kit  
+Create product kit  
+Modify product kit  
+Delete product kit  
+Modify quantitative measure  
+Modify piece measure  
+Modify orders  
+Order / length  
+Order / width  
+Order / height  
+Order / depth  
+Length per piece  
+Width per piece  
+Height per piece  
+Depth per piece  
+Volume per piece  
+Modify family  
+Duplicate family  
+Create family  
+Delete family  
+Duplicate quote  
+Create quote  
+Modify quote  
+Delete quote  
+Print quote  
+Modify delivery date  
+Duplicate order  
+Create order  
+Modify order  
+Delete order  
+Edit order  
+Duplicate route  
+Create route  
+Modify route  
+Delete route
+Duplicate delivery  
+Create delivery  
+Modify delivery  
+Delete delivery  
+Duplicate provision  
+Create provision  
+Modify provision  
+Delete provision  
+Duplicate order status  
+Create order status  
+Modify order status  
+Delete order status  
+Duplicate invoice  
+Create invoice  
+Modify invoice  
+Delete invoice  
+Create status  
+Modify status  
+Order ID  
+Quote ID  
+Order detail ID  
+Print proforma  
+Print order confirmation  
+Print purchase order  
+Print pallet label  
+Print preparation sheet  
+Print delivery note  
+Print invoice  
+Print routing sheet  
+Put products to packing  
+Put products to pallet  
+Put on order  
+Put on delivery  
+Edit quote  
+Edit quote detail  
+Edit invoice detail  
+Truck loading (weight)  
+Truck loading (quantity)  
+Truck loading (volume)  
+Truck cost  
+Truck revenue  
+Truck profit  
+Tour loading (weight)  
+Tour loading (quantity)  
+Tour loading (volume)  
+Revenue histogram  
+Create  
+Modify  
+Duplicate  
+Delete  
+Tour ID  
+Select
+Deselect
+Printed on
+Printed on {/*DATA1.3*/}
+Period: {/*DATA1.2*/}
+Year: from {/*DATA1.1*/} to {/*DATA1.2*/}
+Month: from {/*DATA1.1*/} to {/*DATA1.2*/}
+Week: from {/*DATA1.1*/} to {/*DATA1.2*/}
+First name Last name: {/*DATA1.4*/}
+page {/*PAGENUM*/}/{/*PAGECOUNT*/}
+Reference Work Report Sheet
+Detail of Additional Activities
+After 2 hours of consecutive driving, the driver and passenger are at 100%
+Night hours from 9 PM to 6 AM
+Deposit: specify maintenance/preparation of site ... in Comments
+State of worker presence
+Shotcrete
+Annual Absence Report
+Monthly Activity Report
+Weekly Activity Report
+Annual Activity Report
+Undeclared absence
+Absent
+JT
+Absence rate / working days
+Client products
+Subject
+Time of
+Days
+of days
+of nights
+Break
+Driving
+Passenger
+Personal
+Large
+Basket
+C.P.
+Client/Site
+Comments:
+FOR
+Drilling
+INJ
+Injection
+SCI
+Cutting
+BPJ
+SCA
+Diver
+RFT
+Reinforcement
+DIAG
+Diagnostic
+MPX
+Micro Piles
+Amounts in Letters and Observations:
+Monthly forecast planning  
+Vehicle ID  
+ID  
+Name  
+Type  
+Slot  
+Time  
+Time  
+Initial time  
+Displayed time  
+Time unit  
+Task time  
+Resource time  
+Extended time  
+Resource  
+Resource group  
+Resource type  
+Daily time slot  
+Resource category  
+Directory  
+Archived  
+Date  
+Time  
+Longitude  
+Latitude  
+KM  
+Event  
+Job  
+Task  
+Time slot  
+Time slot type  
+Day  
+Alias  
+Legend  
+Employer  
+Creation  
+Create cell  
+Edit task  
+Edit absence  
+Edit activity  
+Edit event  
+A date of the month  
+A date year  
+Alert  
+Absent entries  
+Duplicate  
+Duplicate alert  
+Invalid date alert  
+Comment  
+Additional comment  
+Contract  
+Name  
+First name  
+Title  
+Nationality  
+ID card  
+Payment method  
+Payment date  
+Social security  
+Phone  
+Mobile  
+Agency  
+Capital  
+RCS  
+SIREN  
+Activity code  
+Reference  
+Project  
+Batch  
+Selected  
+Entry date  
+Order date  
+Deadline  
+Payment date  
+Entry date  
+Validation date  
+Offer date  
+Departure date  
+Expiration date  
+Invoice  
+Invoice detail  
+State  
+Barcode  
+QR code  
+Amount excluding tax (€)  
+VAT (€)
+TTC (€)
+VAT (%)
+Deposit
+Reimbursement
+Exceptional bonus
+End of year bonus
+Saturday bonus
+Risk bonus
+Seizure stop
+Various net deductions
+#Travel Paris
+#Travel abroad
+#Lunch Paris
+#Lunch abroad
+#Night Paris
+#Night abroad
+Collect for delivery
+Collect all possible for delivery
+Cancel Collection
+Lot No.
+Delivery date
+Followed by
+Product
+Realization
+Stock
+Stock alert
+Stock report
+Safety stock
+Min stock capacity
+Max stock capacity
+Depth
+Acquisition
+Minimum time
+Unit weight
+Unit length
+Unit width
+Unit depth
+Unit volume
+Index
+File to upload:
+File to download:
+Copy the file name below to export to EXCEL:
+Today
+Tomorrow
+Bank ID
+Bank name
+Client
+SIRET
+VAT number
+Bank account
+Fax
+Email
+Address2
+Delivery address
+Delivery city
+Billing address
+Additional billing address
+Absence
+Duration
+Extension
+Absent days
+Working days
+Overtime hours
+Night hours
+Day hours
+Break time
+Driving time
+Passenger time
+Overtime
+Holiday hours
+KM
+H/day  
+H/week  
+H overtime week  
+H counter  
+Max H overtime week  
+Max H counter  
+#Annual days  
+Transport costs  
+Transport time  
+Personal vehicle  
+Basket  
+Absences  
+Personnel planning  
+Project planning  
+Activity  
+Daily activities  
+Weekly activities  
+Monthly activities  
+Task type  
+Travel type  
+Risk type  
+Risk  
+Start date  
+End date  
+#Worked days  
+#Lunch  
+#Travel  
+#Night  
+#Saturday  
+#Risk  
+Truck type  
+Lunch  
+Lunch (€)  
+Cutting cost  
+Night cost (€)  
+Day cost (€)  
+Pallet cost  
+Unit cost KM  
+Set time  
+Loading time  
+Loading time unit  
+Unloading time unit  
+Resource type  
+Rate  
+Time rate  
+Color  
+Sheet type  
+In parallel capacity  
+Resource category  
+Timeline  
+In parallel capacity  
+In sequential capacity  
+In stock capacity  
+User  
+Online users  
+Password  
+Change password  
+Current password  
+New password  
+Confirm password  
+Calendar  
+Holiday  
+HOLIDAY  
+Week  
+Wk  
+Tot  
+TT  
+HS  
+C.H  
+Day  
+Paid leave  
+Work summary
+Status table  
+Calculation result  
+Alert  
+Division table  
+Contract table  
+Client table  
+Agency table  
+Calendar table  
+Time slots table  
+Timesheet  
+Project table  
+Product table  
+Employer table  
+Absence types  
+Task types  
+Travel types  
+Risk types  
+Sheet types  
+Resource table  
+Timesheet  
+Personal table  
+Hour tracking  
+Custom work schedules  
+Absences  
+Daily activities  
+Planning table  
+Overall assessment  
+Dashboard defect rate  
+Overall assessment  
+Monthly quantities  
+Monthly weights  
+Monthly sales revenue by product  
+Monthly sales revenue by product family  
+Monthly sales revenue by client  
+Sales revenue over a rolling year  
+Sales forecast  
+Sales forecast (quantity)  
+Price evolution forecast  
+Needs evolution forecast  
+Forecast  
+Current  
+Vehicle card  
+Route card  
+Calculation parameters  
+User table  
+Work log  
+Delivery address  
+Truck  
+Vehicle diagram  
+Route diagram  
+Vehicle tracking  
+Distance matrix  
+Site map  
+Truck tracking map  
+Quantity rate  
+Weight rate  
+Volume rate
+{Mon,Tue,Wed,Thu,Fri,Sat,Sun}
+{Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec}
+: Order Time Window Out Of Horizon
+: coupled work group constraint violated
+: coupled time slot constraint violated
+: coupled time slot type constraint violated
+: coupled resource constraint violated
+: coupled resource type constraint violated
+: coupled site type constraint violated
+: coupled site constraint violated
+: coupled task constraint violated
+: resource constraint violated
+ID resource type
+Name resource type
+Alignment
+Print weekly report
+Edit daily data
+Reject daily data
+Reject absences
+Confirm daily data
+Calculate daily data
+Calculate weekly data
+Calculate monthly data
+Export monthly data
+Calculate monthly report
+Print monthly report
+Export monthly report
+Show historical activities
+Show historical absences
+select a period
+of the month or not archived
+Diagram
+Personal pivot table  
+Year  
+Month  
+Personal pivot table  
+Lunch break  
+Vehicle Person  
+Grand Expense  
+Recovery  
+Comment: See project report form and/or details of ancillary activities  
+Duration in hours  
+DAY_LABEL  
+H.J  
+H.N  
+C 100%  
+P 50%  
+SICK.LEAVE  
+Bonus  
+Salary / TEMP  
+Meal  
+MILEAGE IND  
+Resource Histogram  
+Time Histogram  
+Task Histogram  
+Projects  
+Resources  
+Parent ID  
+Successor  
+Working days are not disjoint for  
+Import  
+Export  
+Print  
+Edit  
+Reject  
+Confirm  
+Total HJ + IN  
+Total NIGHT PARIS  
+Total NIGHT Province  
+Total C 100%  
+Total P 50%  
+Total MILEAGE IND  
+Total MEALS  
+Total MEAL GD  
+Total SICK LEAVE  
+Recorded working time for  
+Generate Daily Activities  
+keyword error in the buffer at  
+subscript error in the buffer at  
+argument error in the buffer at  
+syntax error in the buffer at  
+syntax error in the database field at  
+syntax error in the file at  
+Syntax error around  
+Keyword error around
+Subscript error at
+Argument error around
+Cell error:
+Type error:
+Failure:
+Formula failure:
+Selection error
+Non-modifiable absence
+Non-modifiable holiday
+Input error:
+typed to
+Invalid formula ID:
+Unknown numeric:
+Unknown set:
+XXXXXX
+Division ID is empty
+Deposit
+#Client
+Work time
+Duration
+Profit
+Cost
+KM
+Work time
+Total duration
+#Vehicle
+#Tour
+Distance (meter)
+Time (second)
+Distance
+Roadmap
+Map
+Diagram
+Histogram
+Order
+Sector
+Area
+Location
+10K
+Kilometer
+Tour No.
+Tour
+Tour date
+Pass order
+#Order
+#Order
+Key orders
+Address
+Site ID
+Site name
+Place name
+Street address
+City
+Country
+Postal code
+Order qty
+Stock qty
+Stock weight
+Stock cost
+Transit qty
+Transit weight
+Transit cost
+Delivery qty
+Delivery weight
+Delivery cost
+X
+Y
+Add
+Recipe
+Distance
+Accept
+Move
+Table
+Accept Project
+Accept Vehicle
+Add Project
+Add Vehicle
+Delete Project
+Delete Vehicle
+Edit Project
+Edit Client
+Edit Vehicle  
+Move Project  
+Reject Project  
+Reject Vehicle  
+No proforma  
+No invoice  
+Invoice date  
+Quote  
+Quote detail  
+Delivery no  
+Delivery name  
+Delivery postal code  
+Delivery additional address  
+Delivery point  
+Delivery time  
+Delivery point ID  
+Agency ID  
+Agency name  
+Client ID  
+Client name  
+Edit price  
+Edit unit price  
+Edit discount  
+Stock entry  
+Entry ID  
+Offer ID  
+Today  
+#Guarantee day  
+#Expiration day  
+Line ID  
+Followed by  
+Email  
+Sender  
+Incoterm  
+Proforma  
+Payment method  
+Packaging  
+Client info  
+Delivered qty  
+Remaining qty  
+Total stock  
+Package qty  
+Defective qty  
+Stock qty  
+Minimum sequential quantity  
+Maximum sequential quantity  
+Package weight  
+Remaining weight  
+Net weight  
+Total weight  
+Pallet weight  
+Driver  
+Driver ID  
+Driver name  
+#Pallet  
+#Packages  
+Absence summary  
+Reserved time summary  
+Activity overview  
+Paid leave overview  
+Total reserved time  
+Reduced time  
+Paid time  
+Absence type  
+TOTAL  
+Total absence  
+Total worked  
+Total global  
+Absence rate  
+Length  
+Height  
+Width
+Tech Level  
+Provision Qty  
+No.  
+No vehicle feasible for the customer service schedule of the order  
+Select an employee  
+Process resource requirement indexing invalid  
+Invalid Resource  
+Invalid Resource Type  
+Invalid Resource Category  
+Invalid Resource Group  
+Not scheduled for route  
+No formula selected  
+No time slot selected  
+No Contract  
+No task  
+No Resource  
+No Resource Group  
+No Resource Type  
+: Empty Resource Date  
+: Empty Resource Schedule  
+: task conflicts with resource work calendar  
+: non-rejectable resource; exclusively occupied by the task  
+: task resource group constraint violated  
+: task time conflict  
+excess no longer reducible  
+makespan no longer reducible  
+profit no longer reducible  
+Allocatable Resource(s) for  
+-->  
+Imported records:  
+Existing records:  
+Exported records:  
+Step  
+Swap  
+Relaxation  
+Relaxation complete  
+Optimal solution  
+Feasible solution found  
+Stopped without solution
+No solution  
+increased to  
+decreased to  
+Initial solution calculated  
+Save solution  
+Schedule in advance  
+schedule in reverse  
+involved  
+group(s)  
+resource(s)  
+project(s)  
+job(s)  
+task(s)  
+split task(s)  
+Previously paired  
+Complete  
+Finished  
+No better solution  
+Optimal solution in terms of  
+Reloading  
+Accounting  
+
+...  
+......  
+...........  
+........................................................................  
+No order to schedule  
+#Vehicle minimum:  
+#Tour minimum:  
+Optimize new orders  
+Optimize scheduled + new orders  
+Cost relaxation  
+Cross relaxation  
+Max cross  
+Detour  
+Improvement  
+System Involves Vehicle Daily Worktime Constraint; Try Getting Rid Of It By Adjusting Shift Times  
+System Involves Vehicle Daily Makespan Constraint; Try Getting Rid Of It By Adjusting Shift Times  
+System Involves Tour Completed Within One Day Constraint  
+System Involves Order Time Window Constraint  
+System Involves Maximum Order Route Time Constraint
+System Involves Route Time Not Interruptible Rule  
+System Involves Route Time Completed Within One Day  
+System Terminates At Solution...  
+System Searches For At Least 2 Solutions...  
+System Solves By Iterative Optimization...  
+System Solves By Unlimited Iterative Optimization...  
+System Involves Sequentially Capacitated Resource. It Is Not Supported By Backward Scheduling  
+task time conflict on the resource  
+Terminate At Backtrack Count:  
+Terminate At Backtrack Gap:  
+Terminate At Backtrack Limit:  
+Terminate At Time Limit:  
+Terminate At Solution  
+Read Data  
+Solution  
+Previous  
+Present  
+Result  
+Project ID  
+Calculation State  
+Objective  
+Mode  
+Horizon  
+Objectives  
+Parameters  
+Rules  
+Rule  
+Constraint  
+Operation  
+Constraint  
+start  
+end  
+; Time:  
+EXCEL Tables  
+minute  
+second  
+IP  
+Port  
+Job ID  
+Job Name  
+Task ID  
+Task Name  
+Rate  
+Personnel ID  
+unlimited  
+Unicapacitated  
+Capacity  
+Parallel Capacity  
+Sequential Capacity  
+Min Sequential Capacity  
+Max Sequential Capacity  
+Min Parallel Capacity  
+Max Parallel Capacity  
+Rate %  
+RSC
+Min #vehicle  
+Max #vehicle  
+Max #tour  
+Max work duration  
+Max work time  
+Initial quantity  
+Initial weight  
+Initial volume  
+Depot site  
+:  
+Departure  
+Return  
+non-editable  
+Progress  
+Tours to relax  
+Solving  
+Configuration  
+Clear labels  
+Normal schedule  
+Move task  
+Move order  
+Earliest  
+Latest  
+Departure time  
+Return time  
+Horizon  
+Night  
+Break slot 1  
+Break slot 2  
+Break slot 3  
+Night slot 1  
+Night slot 2  
+Break 1 start  
+Break 1 end  
+Break 2 start  
+Break 2 end  
+Break 3 start  
+Break 3 end  
+Day start  
+Day end  
+Time Slot 1  
+Time Slot 2  
+Time Slot 3  
+Start time  
+End time  
+Night start  
+Night end  
+Time start  
+Time end  
+Service start  
+Service end  
+End of route  
+Planned vehicle  
+Planned tour  
+Planning start  
+Planning end  
+Planned duration  
+Actual start  
+Actual end  
+Recorded  
+Earliest start  
+Latest end  
+Planned start  
+Planned end  
+Priority  
+  
+Click to  
+Deploy system  
+Launch system  
+Close system  
+Generate views  
+Import data  
+Export data  
+Optimize tours
+Optimize by route  
+Optimize  
+Reoptimize  
+Route optimization  
+Import data  
+Authorized  
+Authorized to  
+Index  
+Content  
+Message  
+Database  
+snapshot  
+backup  
+current solution  
+Month  
+Number of searches  
+OK?  
+Local time  
+; Global time:  
+Product diagram  
+Strict  
+Limited number  
+Critical  
+External  
+Continuous  
+Divisible  
+Indivisible  
+Passive  
+Bottleneck  
+Available  
+Candidate  
+Locked  
+Strict  
+Labeled  
+Division  
+Daily allocation  
+Active in planning  
+Icon  
+Save  
+Snapshot  
+Take a snapshot  
+Restore a snapshot  
+Operation canceled  
+Working day  
+Time slot  
+Date slot  
+
+/  
+Division  
+Select/Deselect  
+Select/Deselect Rule  
+Select/Deselect Goal  
+Chosen  
+Resolve formula  
+Spreadsheet  
+
+Formula  
+Sheet  
+Category  
+Profile  
+Row  
+Row No  
+Column  
+Rank  
+Value  
+Excel  
+Revenue  
+Path  
+Field  
+Menu  
+Function  
+Distance  
+#Site  
+Site 1  
+Site 2  
+ID 1  
+ID 2  
+Service  
+Successor  
+to  
+Editable  
+Client schedule  
+Service time  
+Travel time  
+Times New Roman
+Simulation  
+Irreversible deletion. Continue?  
+Snapshot comparison  
+Admin  
+Client  
+User Type  
+User IP  
+User ID  
+User Name  
+Log  
+Feedback  
+Project ID  
+Project Name  
+Resource ID  
+Resource Name  
+Staff  
+Hour tracking  
+Settings  
+Project instance  
+Resolve  
+Operation successful  
+Missing data:  
+Delete snapshots  
+Delete backups  
+Clean data  
+Delete results  
+Parent ID  
+Serial number  
+Results deleted  
+Delete logs  
+Quick interaction  
+Import / Export  
+Initiate result  
+Planned data deleted  
+Resolve data  
+Generated job data  
+Generated task data  
+Generated batch task data  
+Related planned data to read  
+Computation time:  
+Quantity  
+Request  
+Resource quantity  
+Weight  
+Volume  
+Part  
+Super user:  
+Data Table  
+Lock  
+Unlock  
+€/T  
+T  
+KG  
+K€  
+€  
+GPS  
+Paid leave  
+Excel file  
+optimized  
+Zone ID  
+Division ID  
+Time slot ID  
+Time slot name  
+Depot ID  
+Depot name  
+Round resource
+Delete Snapshot  
+Add Site  
+Edit Site  
+Delete Site  
+Add Distance  
+Edit Distance  
+Delete Distance  
+Edit Product  
+Edit Task  
+Add Depot  
+Edit Depot  
+Delete Depot  
+Settings  
+Show/Hide  
+Please check the task:  
+Data already generated  
+Solution already generated  
+: the number of resource groups exceeds the limit  
+: the number of external resource groups exceeds the limit  
+The mileage costs are all zero  
+Calculate working time for  
+Write the result  
+System Involves Vehicle Multi-Day Routing Constraints  
+System Involves Vehicle Multi-Tour Routing Constraints  
+System Involves Vehicle Daily Worktime Constraint; Try Getting Rid Of It By Adjusting Shift Times  
+System Involves Vehicle Daily Makespan Constraint; Try Getting Rid Of It By Adjusting Shift Times  
+System Involves Tour Completed Within One Day Constraint  
+System Involves Order Time Window Constraint  
+Planning Horizon Empty  
+Insufficient vehicle capacity  
+Vehicle Tour Capacity Insufficient; #Tour:
+Vehicle Horizon Capacity Insufficient; Horizon:
+Project Exists!
+: Too Many Projects; Upper Bound:
+: resource schedule allocation fails
+Invalid user
+Unknown work schedule
+No backup
+No snapshot
+Snapshot exists
+Select the snapshot to restore
+Select one to modify
+Select one to add
+: No permission to calculate!
+Only one can be selected
+Please select only one club; Selected clubs:
+Irreversible. Continue?
+Are you sure you want to synchronize the quantities?
+Are you sure you want to synchronize the order addresses?
+Missing Upper Club
+Insufficient resource for type:
+: Resource type Capacity insufficient
+Check 't2' in the CONFIG and RESOURCE tables
+Refresh after this operation
+: The project must be moved to an active vehicle
+: The project is not acceptable for the vehicle
+: Project time window out of horizon
+: Project Out of Horizon
+ID Exists:
+At most three
+: select a candidate project only  
+The project amount must be greater than 0:  
+: select only a planned project  
+Please regenerate the menu  
+Project without a candidate  
+No project  
+Update results  
+Modifying the resource state is prohibited  
+: select an unavailable/candidate project only  
+Peripheral process  
+The selected projects have been published  
+Illegal deletion  
+: service time must be greater than 0  
+Task priority cycle  
+Generated solution  
+Grouped job  
+Sorted job  
+select at least one rule  
+The selected date is empty  
+: Invalid vehicle to lock the project  
+Please select only one vehicle  
+Start date should be earlier than end date  
+empty record  
+duplicate record  
+Intersection with an existing record  
+Input error  
+: Only select planned resource  
+: Only select candidate resource  
+: The same shift's name.  
+Data error  
+Delivery addresses unavailable  
+Advice  
+Monthly CA
+Monthly quantities  
+Monthly weight  
+Edit delivery  
+K€  
+Delivery delay  
+Out of stock for 2 months  
+Insufficient stock  
+Family  
+Designation  
+Material  
+Price  
+Catalog price  
+Unit price  
+Purchase price  
+Selling price  
+Reference price  
+Quote price  
+Minimum price  
+Maximum price  
+Producers  
+Unit quantity  
+Unit weight  
+Unit volume  
+Producers  
+Unit quantity  
+Unit weight  
+Unit volume  
+Probability  
+Turnover  
+Discount (%)  
+Discount label  
+Quantity + one package  
+Volume  
+Delay  
+Turnover (K€)  
+Pieces (1000)  
+January  
+February  
+March  
+April  
+May  
+June  
+July  
+August  
+September  
+October  
+November  
+December  
+Jan  
+Feb  
+Mar  
+Apr  
+May  
+Jun  
+Jul  
+Aug  
+Sep  
+Oct  
+Nov  
+Dec  
+M+1  
+M+2  
+M+3  
+M+4  
+M+5  
+M+6  
+M+7  
+M+8  
+M+9  
+M+10  
+M+11  
+M+12  
+Delivery  
+Inventory  
+Demand  
+Delay  
+2 months  
+3 months  
+4 months  
+>4 months  
+Vehicle  
+Error in distance matrix  
+Error matrix size of distances  
+> 50%  
+< 50%  
+Disconnect?  
+Generate views?  
+Change password?  
+Clean data?  
+Delete results. Irreversible. Continue?  
+Empty labels?  
+Delete logs. Irreversible. Continue?
+Move task?  
+Click to mess around  
+Click to generate views  
+Click to clean data  
+Click to clear results  
+Click to Optimize tours  
+Click to deploy system  
+Import data?  
+Export data?  
+Deploy system?  
+Calculate daily data?  
+Calculate monthly data?  
+Export monthly data?  
+Clear snapshots. Irreversible. Continue?  
+Clear backups. Irreversible. Continue?  
+Restore a snapshot?  
+Click to import data  
+Click to export data  
+Click to calculate daily data  
+Click to calculate monthly data  
+Click to export monthly data  
+
+CODEPAGE=1252;NAME=Get by GetACP();DESC=Default ANSI code page  
+HTTP/1.0 200 OK  
+Server: PoemServer/1.0  
+Date: Fri, 03 Apr 2026 09:49:09 GMT

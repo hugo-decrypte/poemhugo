@@ -1,0 +1,36 @@
+/********************************************************/
+/*							*/
+/*		ParameterizeObjective.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+ConfigObjective = \{
+	\forall i \in [1,nbConfigStr] (idConfigStr_{i} \in IdConfigObj ? i : 0)
+\} \setminus 0,
+
+
+
+OBJECTIVE = [1, #ConfigObjective],
+
+\forall o \in OBJECTIVE (
+	priorityObjective_{o}	:: 0,
+
+	nameObjective_{o}	= valueConfigStr_{ConfigObjective[o]},
+
+	priorityObjective_{o}	= idxConfigStr_{ConfigObjective[o]},
+	selectedObjective_{o}	= selectedConfigStr_{ConfigObjective[o]},
+),
+
+Objective = \{ \forall o \in OBJECTIVE (selectedObjective_{o} ? o : 0) \} \setminus 0,
+
+
+
+priorityTop = \min_{o \in Objective}{priorityObjective_{o}},
+
+nameObjectiveTop = \sup {\{
+	\forall o \in Objective (priorityObjective_{o} = priorityTop ? nameObjective_{o} : "")
+\}},
+
+Objective = {} => nameObjectiveTop = "",

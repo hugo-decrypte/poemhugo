@@ -1,0 +1,28 @@
+1
+
+Feuil1\t 5\t 3\t 2
+SOMME\t MOYENNE\t PRODUIT\t DIVISION\t MODULO
+42\t 18\t 10\t 20\t 423
+42\t 7\t 5\t 4\t 7
+
+SUM((1,1),(2,1))\t AVERAGE((1,2),(2,2))\t PRODUCT((1,3),(2,3)\t QUOTIENT((1,4),(2,4))\t MOD((1,5),(2,5))
+(1,2)+(2,3)\t (1,2)-(2,3)\t (1,2)*(2,3)\t (1,2)/(2,3)
+
+
+Liste de formule
+
+SUM(A2,A3);AVERAGE(B2,B3);PRODUCT(C2,C3);QUOTIENT(D2,D3);MOD(E2,E3);
+
+
+
+
+
+
+1
+
+Feuil1	 	5	 	3	 
+SOMME	 		MOYENNE	 		PRODUIT	 		DIVISION		MODULO	 
+42	 		18	 		10	 		20	 		423	 
+42			 7	 		5			 4	 		7	 
+SUM((1,2),(1,3))	 AVERAGE((2,2),(2,3))	PRODUCT((3,2),(3,3))	 QUOTIENT((4,2),(4,3))	MOD((5,2),(5,3))	 
+

@@ -1,0 +1,64 @@
+/******************************************************/
+/*	        Vehicle Routing 	              */
+/*	                                              */
+/*		ReadSiteOrder.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+DomIdSiteOrder = [ \forall i \in IDSITE ("'" i "',") ] [-\infty..-2],
+
+
+SITE = [1, #IDSITE],
+
+
+
+'()' <- database,
+
+% IMPORTANT : to resort idSite by lexical order
+sqlReadSite = (
+	"SELECT id,name,idZone FROM " DB_PREFIX
+	"SITE WHERE idClub='" idClubActive
+		"' AND id IN(" DomIdSiteOrder ") ORDER BY id"
+),
+
+(SQL: sqlReadSite),
+
+SITE = [1, ()],
+	
+\forall s \in SITE \cup \{0\} (
+	idSite_{s} :: "",
+),
+idSite_{0} = "",
+
+\forall s \in SITE (
+	idSite_{s}	:: "",
+	nameSite_{s}	:: "",
+	idZoneSite_{s}	:: "",
+
+	idSite_{s}	= (),
+	nameSite_{s}	= (),
+	idZoneSite_{s}	= (),
+),
+
+database <- '()',
+
+
+
+\forall i \in IDSITE \cup \{""\}
+	siteId_{i} \in SITE \cup \{0\},
+
+siteId_{""} = 0,
+\forall s \in SITE
+	siteId_{idSite_{s}} = s,
+
+\forall d \in DEPOT (
+	siteDepot_{d} = siteId_{idSiteDepot_{d}},
+),
+
+
+
+SiteOrder = \{ \forall i \in IdSiteOrder siteId_{i} \},
+

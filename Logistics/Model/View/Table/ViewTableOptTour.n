@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		ViewTableOptTour.n                 %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableOptTour.n"], 
+
+'@' => (
+	tableTour("OPT_TOUR",TAG_TABLE, "OPTTOUR",true,"EditTour",	TAG_TOUR, "",		""),
+	tableTour("OPT_TOUR",TAG_TABLE, "OPTTOUR",true,"MapTour",	TAG_TOUR, "OpenMap",	""),
+	tableTour("OPT_TOUR",TAG_TABLE, "OPTTOUR",true,"MapTour",	TAG_TOUR, "MapTour",	""),
+),

@@ -1,0 +1,329 @@
+/******************************************************/
+/*	                                              */
+/*		   ReadConfig.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+%%% 2025.01.29  IIF( = > CASE WHEN  for "SQLSERVER" and "ORACLE"
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+
+'()' => (
+
+	% Rule config files
+	%parameterConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\Parameter.cfg"),
+	%[parameterConfig],
+
+
+
+
+	serverIP	= ipClub_{clubId_{idClubActive}},
+	serverPort	= portClub_{clubId_{idClubActive}},
+
+
+
+
+
+	directoryClubActive = directoryClub_{clubId_{idClubActive}},
+
+	viewDirectory = ('Work Directory' serverViewRoot directoryClubActive "/" ),
+	%httpView = ("http://(/*SERVERIP*/):(/*SERVERPORT*/)/" serverViewRoot "(/*CLUBID*/)/"), 	% IMPORTANT: / not \\
+	
+
+
+	solutionBuf	= [bufSolution : _],
+
+
+
+
+	% Server IP and Port
+	? typeDataUser (	
+	"HTTPSQL" :
+		VIEWSQL = "\"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=",
+	;
+
+	"DB" :
+		VIEWSQL = ("\"DSN=" databaseName ";USR=" databaseUser ";PWD=" databasePassword ";QUERY="),
+	),
+
+
+
+	'()' <- database,
+
+
+
+	% Bool Config Parameters
+	(SQL : "SELECT id,parameter FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='bool'"),	
+
+	nbConfigBool = (),
+	\forall i \in [1,nbConfigBool] (
+		idConfigBool_{i}	:: "",
+		valueConfigBool_{i}	:: true,
+
+		idConfigBool_{i}	= (),
+		valueConfigBool_{i}	= (),
+	),
+	IDCONFIGBOOL = \{ \forall i \in [1,nbConfigBool] idConfigBool_{i} \},
+
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigBool \setminus IDCONFIGBOOL) :
+	%	IdConfigBool \setminus IDCONFIGBOOL = {},
+	%),
+
+%?? `i`,
+
+	\forall i \in [1,nbConfigBool] (
+		& idConfigBool_{i} = valueConfigBool_{i},
+	),
+	\forall i \in IdConfigBool \setminus IDCONFIGBOOL
+		! &{i},
+
+
+
+	% Float Config Parameters
+	(SQL : "SELECT id,parameter FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='float'"),	
+
+
+	nbConfigFloat = (),
+	\forall i \in [1,nbConfigFloat] (
+		idConfigFloat_{i}	:: "",
+		valueConfigFloat_{i}	:: 0.0,
+
+		idConfigFloat_{i}	= (),
+		valueConfigFloat_{i}	= (),
+	),
+	IDCONFIGFLOAT = \{ \forall i \in [1,nbConfigFloat] idConfigFloat_{i} \},
+
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigFloat \setminus IDCONFIGFLOAT) :
+	%	IdConfigFloat \setminus IDCONFIGFLOAT = {},
+	%),
+
+	\forall i \in [1,nbConfigFloat] (
+		& idConfigFloat_{i} = valueConfigFloat_{i},
+	),
+	\forall i \in IdConfigFloat \setminus IDCONFIGFLOAT
+		&{i} = 0.0,
+
+
+
+	% Int Config Parameters
+	(SQL : "SELECT id,parameter,idx,selected FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='int'"),	%li 0815
+
+
+	nbConfigInt = (),
+	\forall i \in [1,nbConfigInt] (
+		idConfigInt_{i}		:: "",
+		valueConfigInt_{i}	:: 0,
+
+		idConfigInt_{i}		= (),
+		valueConfigInt_{i}	= (),
+
+		idxConfigInt_{i}	:: 0,
+		idxConfigInt_{i}	= (),
+
+		selectedConfigInt_{i}	== () = STATE_TRUE,
+	),
+	IDCONFIGINT = \{ \forall i \in [1,nbConfigInt] idConfigInt_{i} \},
+
+
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigInt \setminus IDCONFIGINT) :
+	%	IdConfigInt \setminus IDCONFIGINT = {},
+	%),
+
+	\forall i \in [1,nbConfigInt] (
+		&{idConfigInt_{i}} = valueConfigInt_{i},
+	),
+	\forall i \in IdConfigInt \setminus IDCONFIGINT
+		&{i} = 0,
+
+
+
+	% String Config Parameters
+	(SQL : "SELECT id,parameter,idx,selected FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='string'"),
+	 
+	nbConfigStr = (),
+	\forall i \in [1,nbConfigStr] (
+		idConfigStr_{i}		:: "",
+		valueConfigStr_{i}	:: "",
+
+		idConfigStr_{i}		= (),
+		valueConfigStr_{i}	= (),
+
+		idxConfigStr_{i}	:: 0,
+		idxConfigStr_{i}	= (),
+
+		selectedConfigStr_{i}	== () = STATE_TRUE,
+	),
+	IDCONFIGSTR = \{ \forall i \in [1,nbConfigStr] idConfigStr_{i} \},
+
+
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigStr \setminus IDCONFIGSTR) :
+	%	IdConfigStr \setminus IDCONFIGSTR = {},
+	%),
+
+	\forall i \in [1,nbConfigStr] (
+		& idConfigStr_{i} = valueConfigStr_{i},
+	),
+	\forall i \in IdConfigStr \setminus IDCONFIGSTR
+		&{i} = "",
+	
+
+
+
+	(SQL : "SELECT id,parameter FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='time'"),
+	
+	nbConfigTime = (),
+	\forall i \in [1,nbConfigTime] (
+		idConfigTime_{i}	:: "",
+		valueConfigTime_{i}	:: defaultTime,
+
+		idConfigTime_{i}	= (),
+		valueConfigTime_{i}	= (),
+	),
+	IDCONFIGTIME = \{ \forall i \in [1,nbConfigTime] idConfigTime_{i} \},
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigTime \setminus IDCONFIGTIME) :
+	%	IdConfigTime \setminus IDCONFIGTIME = {},
+	%),
+
+	\forall i \in [1,nbConfigTime] (
+		& idConfigTime_{i} = valueConfigTime_{i},
+	),
+	\forall i \in IdConfigTime \setminus IDCONFIGTIME
+		&{i} = defaultTime,
+
+
+
+	(SQL : "SELECT id,parameter FROM " DB_PREFIX "CONFIG WHERE idClub='" idClubActive "' AND type='datetime'"),
+	
+	nbConfigDateTime = (),
+	\forall i \in [1,nbConfigDateTime] (
+		idConfigDateTime_{i}	:: "",
+		valueConfigDateTime_{i}	:: defaultDateTime,
+
+		idConfigDateTime_{i}	= (),
+		valueConfigDateTime_{i}	= (),
+	),
+	IDCONFIGDATETIME = \{ \forall i \in [1,nbConfigDateTime] idConfigDateTime_{i} \},
+
+	%( TAG_TABLE_CONFIG TAG_DATA_MISSING (IdConfigDateTime \setminus IDCONFIGDATETIME) :
+	%	IdConfigDateTime \setminus IDCONFIGDATETIME = {},
+	%),
+
+
+
+
+	\forall i \in [1,nbConfigDateTime] (
+		& idConfigDateTime_{i} = valueConfigDateTime_{i},
+	),
+	\forall i \in IdConfigDateTime \setminus IDCONFIGDATETIME
+		&{i} = defaultDateTime,
+
+
+
+
+
+	? databaseType (
+	"ACCESS" :
+		sqlConfigIdValueEditableDescription = (
+			"SELECT TOP " maxInputView
+				" id,parameter,IIF(selected='" STATE_TRUE "','" SIGN_YES "','" SIGN_NO "'),comments
+			FROM	" DB_PREFIX "CONFIG
+			WHERE	idClub='" idClubActive "'
+			ORDER BY idx,id"
+		), 
+		;
+
+	"SQLSERVER" :
+		sqlConfigIdValueEditableDescription = (
+			"SELECT TOP " maxInputView
+				" id,parameter,CASE WHEN selected='" STATE_TRUE "' THEN '" SIGN_YES "' ELSE '" SIGN_NO "' END AS selected,comments
+			FROM	" DB_PREFIX "CONFIG
+			WHERE idClub='" idClubActive "'
+			ORDER BY idx,id"
+		),
+		;
+
+	"ORACLE" :
+		sqlConfigIdValueEditableDescription = (
+			"SELECT	id,parameter,CASE WHEN selected='" STATE_TRUE "' THEN '" SIGN_YES "' ELSE '" SIGN_NO "' END,comments
+			FROM 	" DB_PREFIX "CONFIG
+			WHERE	idClub='" idClubActive "' AND ROWNUM<= " maxInputView
+			" ORDER BY idx,id"
+		),
+		;
+
+	"MYSQL" : %benjaminSQL 0913
+		sqlConfigIdValueEditableDescription = (
+			"SELECT id,parameter,IF(selected='" STATE_TRUE "','" SIGN_YES "','" SIGN_NO "') AS selected,comments
+			FROM	" DB_PREFIX "CONFIG
+			WHERE idClub='" idClubActive "' LIMIT " maxInputView
+			" ORDER BY idx,id"
+		),
+	),
+
+
+	(SQL : sqlConfigIdValueEditableDescription), 
+
+
+	nbEditableConfig	= (),
+	EDITABLECONFIG 		= [1, nbEditableConfig],
+
+	\forall c \in EDITABLECONFIG (
+		idConfig_{c}		:: "",
+		valueConfig_{c}		:: "",
+		editableConfig_{c}	:: "",
+		commentsConfig_{c}	:: "",
+
+		idConfig_{c}		= (),
+		valueConfig_{c}		= (),
+		editableConfig_{c}	= (),
+		commentsConfig_{c}	= (),
+	),
+
+	database <- '()',
+
+
+
+
+	% Login Related Club
+	IdRelatedClubActive = IdRelatedClub_{clubId_{idClubActive}},
+
+
+	IdDomClubView = [ \forall i \in IdRelatedClubActive ("'" i "',") ] [-\infty..-2],
+	IDCLUBVIEW = ("(" IdDomClubView ")"),
+
+
+
+	SQL_WHERE_CLUB		= (" WHERE idClub = '"		idClubActive "'"),
+	SQL_WHERE_CLUB_o	= (" WHERE o.idClub = '"	idClubActive "'"),
+
+	SQL_AND_CLUB	= (" AND idClub = '" 	idClubActive "'"),
+
+	SQL_AND_CLUB_o	= (" AND o.idClub = '"	idClubActive "'"),
+	SQL_AND_CLUB_r	= (" AND r.idClub = '"	idClubActive "'"),
+
+	SQL_AND_CLUB_j	= (" AND j.idClub = '"	idClubActive "'"),
+	SQL_AND_CLUB_t	= (" AND t.idClub = '"	idClubActive "'"),
+	SQL_AND_CLUB_p	= (" AND p.idClub = '"	idClubActive "'"),
+
+	%SQL_AND_CLUB_rr	= (" AND rr.idClub = '"	idClubActive "'"),
+
+
+
+
+% JZ 0204
+	viewConfig	= ('Work Directory' "Boot\\" directoryClubActive "\View\View.cfg"),
+	[viewConfig],
+
+
+
+	( TAG_RELATED_CLUB_DOM_IS IDCLUBVIEW : ),
+
+),

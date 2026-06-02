@@ -1,0 +1,382 @@
+/******************************************************/
+/*                                                    */
+/*	         	TSP.n                         */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+/******************************************************/
+/*	Simplified from global model "Routing.n"      */
+/******************************************************/
+
+% tourTsp
+% vehicle
+% source
+% sink
+% site1
+% site2
+
+
+/******************************************************/
+/*                     OrderTSP                       */
+/******************************************************/
+
+\forall o \in SourceOrderSinkTSP (
+	t1Order_{o} :: defaultDateTime,
+	t2Order_{o} :: defaultDateTime,			% special for inactive tours
+
+	timeServiceOrder_{o}	:: defaultTime,
+	timeToNextOrder_{o}	:: defaultTime,
+
+	t1Order_{o} >= t1,
+	t2Order_{o} >= t1,
+
+	TimeOrder_{o} \subset [\inf HorizonTSP,\sup HorizonTSP + 1],
+
+	TimeOrder_{o} = [t1Order_{o},t2Order_{o}],	% time from o to next
+	TimeServiceOrder_{o} = [t1Order_{o}, t2ServiceOrder_{o}],
+
+
+	TimeActiveOrder_{o} :: TimeOrder_{o},		% worktime from o to next
+),
+
+\forall o \in SourceOrderSinkTSP (
+	mileageOrder_{o}	:: 0,
+	quantityOrder_{o}	:: 0,
+	receiptsOrder_{o}	:: 0.0,
+),
+
+% Routing: Recursive Sorting
+\forall o \in SourceOrderTSP (
+	nextOrder_{o} \in OrderSinkTSP,
+
+	t1Order_{o} \in Schedule,
+	t2Order_{o} \in Schedule,
+
+	% Precedence constraint
+	TimeOrder_{o} \prec TimeOrder_{nextOrder_{o}},
+
+%?? nextOrder_{63} = -22,
+
+
+	% Active time constraint
+	( TAG_RESOURCE_HORIZON_CAPACITY_INSUFFICIENT HorizonTSP :
+		TimeActiveOrder_{o} = TimeOrder_{o} \cap Schedule,
+	),
+
+
+	% Rest time constraint
+	TimeRestOrder_{o} = TimeOrder_{o} \setminus Schedule,
+
+	\inf TimeActiveOrder_{o} = t1Order_{o},
+	\sup TimeActiveOrder_{o} = t2Order_{o},
+
+	TimeOrder_{o} = TimeActiveOrder_{o} \cup TimeRestOrder_{o},
+
+	TimeRestOrder_{o} \subset ScheduleRest,
+
+	mileageOrder_{o} = dOrderOrder_{o,nextOrder_{o}},
+
+%?? mileageOrder_{63} >= 101,
+
+
+	timeActiveOrder_{o}	:: defaultTime,
+
+
+	time0ServiceRestOrder_{o} :: defaultTime,
+	time0ServiceOrder_{o} :: defaultTime,
+
+	timeServiceOrder_{o} = #TimeServiceOrder_{o},
+	timeRestOrder_{o} = #TimeRestOrder_{o},
+
+
+	timeToNextOrder_{o} = tOrderOrder_{o,nextOrder_{o}},
+
+	timeServiceRestOrder_{o} = timeServiceOrder_{o} + timeRestOrder_{o},
+	timeServiceRestOrder_{o} = activeOrder_{o} * time0ServiceRestOrder_{o},
+
+
+	timeActiveOrder_{o} = #TimeActiveOrder_{o},
+	timeActiveOrder_{o} = timeServiceOrder_{o} + timeToNextOrder_{o},
+),
+
+
+\forall o \in SourceOrderTSP (
+	timeOrder_{o} = #TimeOrder_{o},
+	timeOrder_{o} = timeToNextOrder_{o} + timeServiceRestOrder_{o},
+),
+
+
+
+timeServiceOrder_{source} =
+	timeFixedTypeVehicle_{typeVehicleTSP} +
+	\lceil quantityTSP * timeLoadingUnitTypeVehicle_{typeVehicleTSP} \rceil,
+
+timeServiceOrder_{sink} = '00:00',
+
+timeToNextOrder_{sink} = '00:00',
+
+
+timeServiceRestOrder_{source} = timeServiceOrder_{source} + timeRestOrder_{source},
+
+\forall o \in OrderTSP (
+	timeServiceOrder_{o} = timeFixedOrder_{o} + \lfloor quantityOrder_{o} * timeUnloadingUnitTypeVehicle_{typeVehicleTSP} + 0.5 \rfloor,
+
+	time0ServiceRestOrder_{o} = timeServiceOrder_{o} + timeRestOrder_{o},
+	time0ServiceOrder_{o} = timeServiceOrder_{o},
+
+	( idOrder_{o} TAG_SERVICE_TIME_GT_0 : timeServiceOrder_{o} > 0),
+),
+
+
+
+% Route time constraint
+%\forall o \in SourceOrderTSP
+%	nextOrder_{o} \in OrderSinkTSP,
+
+\forall o<>i \in SourceOrderTSP
+	nextOrder_{o} <> nextOrder_{i},
+
+\forall o \in OrderSinkTSP
+	prevOrder_{o} \in SourceOrderTSP,
+
+\forall o \in SourceOrderTSP
+\forall n \in OrderSinkTSP
+	nextOrder_{o} = n == o = prevOrder_{n},
+
+
+nextSource = nextOrder_{source},
+prevSink = prevOrder_{sink},
+
+OrderTSP <> {} -> nextSource <> sink,
+OrderTSP <> {} -> prevSink <> source,
+
+
+
+
+(TAG_RESOURCE_HORIZON_CAPACITY_INSUFFICIENT HorizonTSP :
+	TimeActive = \bigcup_{o \in SourceOrderTSP}{TimeActiveOrder_{o}},
+
+
+	Time = \bigcup_{o \in SourceOrderTSP}{TimeOrder_{o}},
+),
+
+
+% Order time constraint
+\forall o \in SourceOrderTSP (
+	ruleRouteTimeInterruptible => (
+		TimeOrder_{o} \subset HorizonTSP,
+		;
+
+		TimeOrder_{o} \subset Schedule,
+	),
+),
+
+
+/******************************************************/
+/*                 PREFIXED/LOCKED                    */
+/******************************************************/
+
+\forall o \in SourceOrderTSP
+	NarrowedTimeWinOrder_{o} = TimeWinOrder_{o} \cap Schedule,
+
+\forall o \in OrderTSP (
+	% Time window constraint
+	TimeServiceOrder_{o} \subset NarrowedTimeWinOrder_{o},
+
+	t1Order_{o} \in NarrowedTimeWinOrder_{o},
+	t2ServiceOrder_{o} \in NarrowedTimeWinOrder_{o},
+),
+
+
+
+
+/******************************************************/
+/*                  	CAPACITY                      */
+/******************************************************/
+
+( TAG_CAPACITY_INSUFFICIENT :
+	quantityTSP = \sum_{o \in OrderTSP}{quantityOrder_{o}},
+	quantityTSP \in [0, maxQuantityTSP],
+
+	weightTSP = \sum_{o \in OrderTSP}{weightOrder_{o}},
+	weightTSP \in [0.0, maxWeightTSP],
+
+	volumeTSP = \sum_{o \in OrderTSP}{volumeOrder_{o}},
+	volumeTSP \in [0.0, maxVolumeTSP],
+),
+
+
+receiptsTSP = \sum_{o \in OrderTSP}{receiptsOrder_{o}}, 
+
+
+
+worktime :: defaultTime,
+makespan :: defaultTime,
+
+mileage	= \sum_{o \in SourceOrderTSP}{mileageOrder_{o}},
+
+worktime = #TimeActive,
+worktime = \sum_{o \in SourceOrderTSP}{timeActiveOrder_{o}},
+%worktime = timeService + timeRoute,
+
+
+makespan = \sup Time - \inf Time + 1,
+
+mileage = \sum_{o \in SourceOrderTSP}{mileageOrder_{o}}, 
+
+cost = quantityTSP * costUnitTSP + mileage * costKilometerTypeVehicle_{typeVehicleTSP},
+
+
+
+mileage =< boundMileage,
+worktime =< boundWorktime,
+makespan =< boundMakespan,
+
+
+
+/********************************************************/
+/*                        OBJECTIVE                     */
+/********************************************************/
+
+%profit = receiptsTSP - cost,
+
+
+? nameObjectiveTop (
+%TAG_PROFIT:
+%	\max	profit : stepCost,
+%	;
+
+%TAG_COST:
+%	\min	cost : stepCost,
+%	;
+
+TAG_RESOURCE_NB, TAG_TOUR_NB, TAG_MILEAGE:
+	mileage < boundMileage,
+	\min	mileage : stepDistance,
+	;
+
+TAG_WORKTIME:
+	worktime < boundWorktime,
+	\min	worktime : stepTime,
+	;
+
+TAG_MAKESPAN:
+	makespan < boundMakespan,
+	\min	makespan : stepTime,
+),
+
+
+
+/********************************************************/
+/*                      PRE-QUERY                       */
+/********************************************************/
+
+% slackPrevOrder, slackNextOrder, slackTimeOrder
+\forall n \in OrderSinkTSP (
+	slackPrevOrder_{n} := #{\Delta{prevOrder_{n}}},
+),
+
+\forall o \in SourceOrderTSP (
+	DeltaNextOrder_{o} := \Delta{nextOrder_{o}} \cap OrderTSP,
+
+	slackNextOrder_{o} := #{\Delta{nextOrder_{o}}},
+
+	slackTimeOrder_{o} := #{\Delta{timeOrder_{o}}},
+
+	%t0Order_{o} = t1Order_{o} - 1,
+	%DistNextOrder_{o} := \{\forall i \in \Delta{nextOrder_{o}}  tOrderOrder_{o,i}\},
+	%diffDistNextOrder_{o} := DistNextOrder_{o}[2] - DistNextOrder_{o}[1],
+
+
+	\forall n \in OrderTSP (
+		timeQueryOrderOrder_{o,n} :: defaultTime,
+		
+		timeQueryOrderOrder_{o,n} = (
+			%\underline{tOrderOrder_{o,n}}
+			\underline{tOrderOrder_{o,n} + timeToNextOrder_{n}}
+		),
+	),
+),
+
+
+
+
+/*
+% t1NextOrder
+\forall o \in SourceOrderTSP
+\forall n \in DeltaNextOrder_{o} (
+	timeNextOrder_{o,n} = time0ServiceOrder_{o} + tOrderOrder_{o,n},
+	t2NextOrder_{o,n} = t0Order_{o} + timeNextOrder_{o,n},
+		
+	lackNextOrder_{o,n} := timeNextOrder_{o,n} + 1 -
+		#{\overline{[\underline{t1Order_{o}}, \underline{t2NextOrder_{o,n}}] \cap Schedule}},
+
+	t0NextOrder_{o,n} := \max(\underline{t2NextOrder_{o,n} + lackNextOrder_{o,n}}, \underline{t1Order_{n}}),
+	t1NextOrder_{o,n} := \inf{\overline{Schedule} \cap \overline{[t0NextOrder_{o,n}, \overline{t1Order_{n}}]}},
+),
+*/
+
+
+/*
+\forall o \in SourceOrderTSP
+	chainedQueryOrder_{o} :: true,
+
+chainedQueryOrder_{source},
+
+\forall o \in OrderTSP
+	chainedQueryOrder_{o} := (#{\Delta{prevOrder_{o}}} = 1),
+*/
+
+
+/********************************************************/
+/*                      QUERY                           */
+/********************************************************/
+
+% To instantiate the "next" of each order as soon as possible
+\forall o \in SourceOrderTSP -> (
+	%\max	\underline{chainedQueryOrder_{o}},
+
+	%\min	slackNextOrder_{o},
+	%\max	diffDistNextOrder_{o}
+)
+\forall n \in DeltaNextOrder_{o} -> (
+	\min	slackNextOrder_{o},,
+
+	% gready: least distance to next
+	\min	timeQueryOrderOrder_{o,n},
+
+	%\min	slackPrevOrder_{n},
+	%\min	slackTimeOrder_{n},		% least slack
+	%\min	slackPrevOrder_{n},
+	%\min	t1NextOrder_{o,n},
+	%\min	tOrderOrder_{o,n},
+
+	% gready: greatest priority
+	\max	priorityOrder_{n},
+)
+( o " " idOrder_{o} " >> next " n " " idOrder_{n} :
+	nextOrder_{o} = n ?,
+),
+
+
+t1Order_{nextSource} = ? (->),
+
+
+% To instantiate at first t1 of each order, as early as possible
+\forall o \in SourceOrderTSP -> (
+	\min	\underline{t1Order_{o}},	% sequential search 
+	\min	slackTimeOrder_{o},		% least slack
+)
+t1Order_{o} = ? (->),
+
+% To instantiate at first t1 of each order, as early as possible
+\forall o \in SourceOrderTSP -> (
+	\min	slackTimeOrder_{o},		% least slack
+)
+timeOrder_{o} = ?,
+
+
+

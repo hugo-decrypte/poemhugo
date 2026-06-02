@@ -1,0 +1,72 @@
+View ViewTablePALLETPRODUCT '(/*TITLEOBJ*/)' '(/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePALLETPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=(/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Right,Left,Left,Right,Right,Right,Right,Right,Left,Left}]"\
+"[DATAOBJ=PALLETPRODUCT;FILLCOLOR=LINERGB]"
+
+Data PALLETPRODUCT '(/*TITLEOBJ*/)' PALLETPRODUCT HTTPSQL 0 '[FIND={IDPACKING,STOCKZONE,STOCKROW,STOCKCOLUMN,NOPALLET,IDPRODUCT,DESIGNATION,QUANTITY,QUANTITYREAL,QUANTITYSTOCK,QUANTITYDEFECTIVE,WEIGHTNET,COMMENTS,STATE}]'   [DOUBLECLICK=] \
+"[14;(string,IDPACKING,ID entrée,,10,,);(string,STOCKZONE,Secteur,,10,,);(string,STOCKROW,Rang,,10,,);(string,STOCKCOLUMN,Colonne,,10,,);(int,NOPALLET,No. palette,,10,,);(string,IDPRODUCT,Produit,,10,,);(string,DESIGNATION,Désignation,,15,,);(int,QUANTITY,Quantité,,10,,);(int,QUANTITYREAL,Qté livrée,,10,,);(int,QUANTITYSTOCK,Qté stock,,10,,);(int,QUANTITYDEFECTIVE,Qté défectueuse,,15,,);(float,WEIGHTNET,Poids net,,10,,);(string,COMMENTS,Commentaire,,15,,);(string,STATE,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT pl.idPacking AS IDPACKING, pl.NoPallet as NOPALLET,\
+		 Prd.ID as IDPRODUCT, Prd.Designation as DESIGNATION, PaPr.Quantity AS QUANTITY,\
+		 PaPr.QuantityReal AS QUANTITYREAL, PaPr.QuantityStock AS QUANTITYSTOCK,\
+		 PaPr.QuantityDefective AS QUANTITYDEFECTIVE, Prd.Weight AS WEIGHTNET,\
+		  PaPr.IDZONE AS STOCKZONE,\
+		  PaPr.IDROW AS STOCKROW,\
+		  PaPr.IDCOLUMN AS STOCKCOLUMN,\
+		  PaPr.comments AS COMMENTS,\
+		 (IIF(PaPr.Quantity<>PaPr.QuantityReal or PaPr.QuantityStock<0 or PaPr.QuantityDefective>0,'Quantit  incorrecte',\
+		   IIF(PaPr.QuantityStock=PaPr.QuantityReal,'A Livrer',\
+		   IIF(PaPr.QuantityStock<PaPr.QuantityReal and PaPr.QuantityStock>0,'Livrée Partielle',\
+		   IIF(PaPr.QuantityStock=0,'Livrée',\
+		    ' '))))) as STATE,\
+		 (IIF(PaPr.Quantity<>PaPr.QuantityReal or PaPr.QuantityStock<0 or PaPr.QuantityDefective>0,'(255 120 120)',\
+		   IIF(PaPr.QuantityStock=PaPr.QuantityReal,'(160 160 255)',\
+		   IIF(PaPr.QuantityStock<PaPr.QuantityReal and PaPr.QuantityStock>0,'(255 255 60)',\
+		   IIF(PaPr.QuantityStock=0,'(120 255 120)',\
+		    '(200 200 160)'))))) AS LINERGB \
+	 FROM ((PACKING Pck inner join PALLET pl on Pck.Id=pl.IdPacking) \
+		 inner join (/*DBOWNER*/)PALLET_PRODUCT PaPr on PaPr.IdPacking=pl.IdPacking and PaPr.NoPallet=pl.NoPallet) \
+		 inner join (/*DBOWNER*/)PRODUCT Prd on Prd.ID=PaPr.IdProduct \
+	 WHERE (pl.IdPacking in ((/*IDPACKING*/)) or 'XXX' in ((/*IDPACKING*/)) ) \
+	  AND ((Pck.idState<>'9' and pl.NoPallet in ((/*NOPALLET*/))) or 0 in ((/*NOPALLET*/)) ) \
+	  AND ((Pck.idState<>'9' and PaPr.IdProduct in ((/*IDPRODUCT*/))) or 'XXX' in ((/*IDPRODUCT*/)) ) \
+	 ORDER BY pl.IdPacking, pl.NoPallet, PaPr.IdProduct "
+
+
+Script PassProductToPallet 'Mettre produits à palette' _ 61 'Mettre produits à palette' _ 'tablePALLETPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\PassProductToPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLETPRODUCT;1;(string,IDPRODUCT))*/} \
+(/*IDPACKING*/) (/*NOPALLET*/) \
+{/*Input(Mettre produits à palette;2;\
+(int,NEWPALLET,Nouvelle palette,[/*PALLET.NOPALLET*/],5.0.580,1);\
+(int,QUANTITY,Quantité,[/*PALLET.QUANTITY*/],5.0.580,1);\
+)*/}'\
+Reload _ _ _
+
+
+
+
+Script ModifyStockPosition 'Modifier position stock' _ 62'Modifier position stock' _ 'tablePALLETPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePalletProductStockPosition.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLETPRODUCT;1;(string,IDPRODUCT))*/} \
+(/*IDPACKING*/) (/*NOPALLET*/) \
+{/*Input(Modifier position stock;4;\
+(string,STOCKZONE,Secteur,[/*PALLET.STOCKZONE*/],5.0.580,1);\
+(string,STOCKROW,Rang,[/*PALLET.STOCKROW*/],5.0.580,1);\
+(string,STOCKCOLUMN,Colonne,[/*PALLET.STOCKCOLUMN*/],5.0.580,1);\
+(string,COMMENTS,Commentaire,[/*PALLET.COMMENTS*/],100.0.580,1);\
+)*/}'\
+Reload _ _ _
+
+
+
+Script EditPallet 'Editer' _ 1 'Editer' _ 'tablePALLETPRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'  WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=(/*USERID*/),PWD=(/*PASSWORD*/),PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE PALLET_PRODUCT&IdPacking in ({/*selected(tablePALLETPRODUCT;1;(string,IDPACKING))*/}) and NoPallet in ({/*selected(tablePALLETPRODUCT;1;(int,NOPALLET))*/}) and IdProduct in ({/*selected(tablePALLET;1;(string,IDPRODUCT))*/})"\
+Reload _ _ _ _ 
+
+

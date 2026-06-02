@@ -1,0 +1,29 @@
+#thread = 0: #lot = 4, #instance = 1000000 (size = 50); #public parameter = 1000
+[D:\POEM\Logistics\Model\Script\ScriptTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Common\Config\ReadConfig.n](327,11): Related Club Domain: ('01')
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](1,1): system parsing starts
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](13,2): Info C9: function <TSP> (included in [D:\POEM\Logistics\Model\Script\ScriptTSP.n](45,132)) to be parsed before ' '@' ' (at [D:\POEM\Logistics\Model\Solver\SolveTSP.n](27,1)) due to function ' TSP(
+		boundWorktimeTSP, boundMakespanTSP, boundMileageTSP,
+		nameObjectiveTop, maxBacktrack*3, maxTime,
+		stepCost,stepTime,stepDistance
+	) ' at input state
+[D:\POEM\Logistics\Model\Input\Solver\ReadTSP.n](10,49): 10:42:29  ... 30P02-1
+[D:\POEM\Logistics\Model\Input\Solver\ReadTSP.n](425,10): 10:42:29  Optimiser par tournée SVA    ID tournée : 30P02-1    #Commande : 19    Objectif : #Tournée    Horizon : 2024-12-28 06:00 .. 2024-12-29 18:59
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](28,18): function <TSP> parsing starts at function call
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](13,2): <TSP> pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](13,2): <TSP> pre-search ends
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](24,1): function <TSP> parsing ends
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](10,1): system pre-search starts
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](10,1): system pre-search ends
+[D:\POEM\Logistics\Model\Solver\TSP.n](251,21): Info C9: objective ' mileage ' takes effect
+[D:\POEM\Logistics\Model\Solver\TSP.n](251,21): C2: lower bound for objective ' mileage ' (= <162..267>) initialized to 162
+[D:\POEM\Logistics\Model\Solver\TSP.n](353,9): <TSP> [1] search starts
+[D:\POEM\Logistics\Model\Solver\TerminateSolving.n](11,9): Info C15: termination state '.' programmed to T
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](28,18): C7: stopped without solution for function ' TSP(boundWorktimeTSP,boundMakespanTSP,boundMileageTSP,nameObjectiveTop,maxBacktrack*3,maxTime,stepCost,stepTime,stepDistance) '
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](13,2): click to related object
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](49,44): Info C15: failure: assign T to ' false ' (= F)
+[D:\POEM\Logistics\Model\Solver\SolveTSP.n](49,44): Warning C22: Arrèté sans solution
+[D:\POEM\Logistics\Model\Script\ScriptTSP.n](54,34): Tâche accomplie
+[D:\POEM\Logistics\Model\Script\ScriptTSP.n](9,1): system pre-search starts
+[D:\POEM\Logistics\Model\Script\ScriptTSP.n](9,1): system pre-search ends
+[D:\POEM\Logistics\Model\Script\ScriptTSP.n](56,1): C4: all solutions found

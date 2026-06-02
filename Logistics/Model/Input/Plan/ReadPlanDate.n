@@ -1,0 +1,48 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		ReadPlanDate.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	'()' <- database,	
+
+	SQL_SelectPlanMakspan = (
+		"SELECT MIN(p.t1Service),MAX(p.t2) FROM " DB_PREFIX
+		"OPT_PLAN p WHERE p.t1Service IS NOT NULL AND " SQL_UserVisibleClubIs "p.idClub)"
+	),
+
+
+	(SQL : SQL_SelectPlanMakspan),
+
+
+	nbPlanDate	= (),
+
+	minT1Plan	:: defaultDateTime,
+	maxT2Plan	:: defaultDateTime,
+
+	nbPlanDate > 0 => (
+		minT1Plan	= (),
+		maxT2Plan	= (),
+		;
+		minT1Plan	= t1,
+		maxT2Plan	= t2,
+	),
+
+	date1Plan	:: defaultDate,
+	date2Plan 	:: defaultDate,
+	
+	time1Plan	:: defaultTime,
+	time2Plan	:: defaultTime,
+
+	date1Plan	= minT1Plan[dateFormat],
+	date2Plan 	= maxT2Plan[dateFormat],
+	time1Plan	= minT1Plan[timeFormat],
+	time2Plan	= maxT2Plan[timeFormat],
+
+	database <- '()',
+),
+

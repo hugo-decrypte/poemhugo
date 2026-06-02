@@ -1,0 +1,172 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*                                                    */
+/*		GenerateSolution.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+['Work Directory' "Model\Input\Site\ReadZone.n"],
+['Work Directory' "Model\Input\Order\ReadOrder.n"],
+
+['Work Directory' "Model\Solver\PreSolving.n"],
+
+/*
+<routing>(
+	loop, solutionBuf, nameObjectiveTop,
+	mileage, TourActive,
+	maxBacktrack, maxTime,
+	stepCost,stepTime,stepDistance)
+(
+
+	% Declaration of principal variables
+	['Work Directory' "Model\Solver\DeclareSolving.n"],
+
+
+	% Relaxation
+	%'()' => (
+	%	['Work Directory' "Model\Relaxation\RelaxPrevious.n"],		
+	%),
+
+
+	% Optimization
+	['Work Directory' "Model\Solver\Routing.n"],
+
+
+	% Output
+	'@' => (
+		['Work Directory' "Model\Output\WriteSolutionBuffer.n"],
+	),
+
+
+	% Prediction
+	['Work Directory' "Model\Solver\PredictRouting.n"],
+
+	% Termination
+	['Work Directory' "Model\Solver\TerminateSolving.n"],
+),
+*/
+
+<reoptimize>(
+	loop, solutionBuf, nameObjectiveTop,
+	maxBacktrack, maxTime, stepCost,stepTime,stepDistance,
+
+	TourTSP, Swap_o,Swap_i, tour_o,tour_i,
+ 	mileage_1, mileageNotRelaxed, mileage_2
+)
+(
+	'()' => (
+		TourTSP \subset TOUR,
+
+		Tour1Relaxed = \{ tour_o \} \setminus 0,
+		Tour2Relaxed = \{ tour_i \} \setminus 0,
+
+		TourRelaxed \subset TOUR,
+		TourRelaxed = Tour1Relaxed \cup Tour2Relaxed,
+
+
+		% Global variable
+		\forall tourTSP \in TourTSP \cup TourRelaxed
+			mileageTour_{tourTSP} :: 0,
+
+
+		% Use sub-model not function because ORDER data already used in Routing and TSP data need to be reconstructed
+		\forall tourTSP \in TourTSP (
+			%resultTour_{tourTSP} == 
+
+			[['Work Directory' "Model\Solver\RelaxTSP.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+
+			%! resultTour_{tourTSP} => (
+			%	mileageTour_{tourTSP} = boundMileageTSP,
+			%),
+		),
+
+
+		% Selected to relax
+		TourRelaxed <> {} =>
+		resultBool == [['Work Directory' "Model\Solver\RelaxTSPs.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+	),
+
+
+	'@' => (
+		mileageNew = mileageNotRelaxed + \sum_{t \in TourTSP \cup TourRelaxed}{mileageTour_{t}},
+
+/*		resultBool => (
+			mileage_2 = mileageNew,
+			writeSolution(loop, solutionBuf, maxBacktrack, ""),
+			;
+			mileage_2 = mileage_1,
+			('hh:mm:ss' TAG_TAB_2
+				TAG_NO_BETTER_SOLUTION : '@'
+			),
+		),*/
+
+		loop = 0 || mileageNew < mileage_1 => (
+			mileage_2 = mileageNew,
+
+			writeSolution(loop, solutionBuf, maxBacktrack, ""),
+			;
+
+			mileage_2 = mileage_1,
+
+			('hh:mm:ss' TAG_TAB_2 TAG_NO_BETTER_SOLUTION : ),
+		),
+	),
+),
+
+<writeSolution>(loop, solutionBuf, maxBacktrack, conclusion)
+(
+	'()' => (
+		['Work Directory'  "Model\Input\Solver\ReadSolutionBuffer.n"],
+	),
+
+
+	'@' => (
+
+		['Work Directory' "Model\Output\WriteSolutionSql.n"],
+
+		
+
+		\bigvee_{v \in VehicleActive}{mappingVehicle_{v} <> v} =>
+		['Work Directory'  "Model\Output\WriteSolutionMappingBuffer.n"],
+
+
+
+		('hh:mm:ss' TAG_TAB_2
+			TAG_SOLUTION	": "
+			TAG_PROFIT	TAG_OPTIMIZED_TO profit[(16,2)]		"  "
+			TAG_COST	TAG_OPTIMIZED_TO cost[(16,2)] 		"  "
+			TAG_RESOURCE_NB	TAG_OPTIMIZED_TO nbVehicleActive	"  "
+			TAG_TOUR_NB	TAG_OPTIMIZED_TO nbTourActive		"  "
+			TAG_DISTANCE	TAG_OPTIMIZED_TO mileage		"  "
+			TAG_WORKTIME	TAG_OPTIMIZED_TO worktime		"  "
+			TAG_MAKESPAN	TAG_OPTIMIZED_TO makespan
+			: '@'
+		),
+
+
+loop = 4 => !!,
+
+
+	),
+),
+
+
+'@' => (
+	['Work Directory' "Model\Solver\InitSolving.n"],
+
+
+	ruleOptimizeCandidate || ruleOptimizePlannedCandidate => (
+		['Work Directory' "Model\Solver\ComputeSolution.n"],
+	),
+
+	ruleOptimizeCandidate || ruleOptimizePlannedCandidate || ruleRelaxation => (
+		['Work Directory' "Model\Relaxation\RoutingRelaxation.n"],
+	),
+
+
+<postSolving>
+	['Work Directory' "Model\Solver\PostSolving.n"],
+),
+

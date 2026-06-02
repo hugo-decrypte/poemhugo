@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableStockReport.n     	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableStockReport.n"],
+
+'@' => (
+	tableStockReport("STOCKREPORT", TAG_TABLE,"STOCKREPORT",true, "",TAG_STOCK_REPORT), 
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

@@ -1,0 +1,76 @@
+%==================================================%
+%                                                  %
+%          		ERP                 	   %
+%                                                  %
+% 		 InsertCell.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+
+'()' => (
+        categorySheet :: "",
+	idSheet :: "",
+        lineSheet :: 0,
+        fieldSheet :: "",
+        valueSheet :: "",
+	
+	nbSelected = (),
+	nbParameter = (),
+	
+        categorySheet	= (),
+	idSheet		= (),
+        lineSheet	= (),
+        fieldSheet	= (),
+        valueSheet	= (),
+
+        columSheet = fieldSheet[2..#fieldSheet],
+
+
+        '()' <- database,
+
+	(SQL : "SELECT	id FROM " DB_PREFIX "SHEET
+		WHERE	category='" categorySheet "' AND id='" idSheet "' AND line=" lineSheet " AND column=" columSheet),
+
+	( TAG_UNEDITABLE :
+		0 = (),
+	),
+
+
+	(TAG_SQL_ERROR :
+		(SQL : "SELECT	name,type FROM " DB_PREFIX "TYPESHEET
+			WHERE	category='" categorySheet "' AND column=" columSheet ),
+
+		1 = (),
+		nameSheet = (),
+		typeSheet = (),
+	),
+
+	sqlInserCell = (
+		"INSERT INTO " DB_PREFIX
+			"SHEET(idClub,category,id,line,column,name,type,parameter")VALUES("
+				"'"	idClubLogin
+				"','"	categorySheet
+				"','"	idSheet
+				"',"	lineSheet
+				","	columSheet
+				",'"	nameSheet
+				"','"	typeSheet
+				"','"	valueSheet "')"),
+
+	(TAG_SQL_ERROR :
+		(SQL : sqlInserCell),
+	),
+
+
+
+	database <- '()',
+		
+).
+
+

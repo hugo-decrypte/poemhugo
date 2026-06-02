@@ -1,0 +1,1739 @@
+/********************************************************/
+/*							*/
+/*		DefineDatabaseTable.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+%%    CONSTRAINT FK_TempSales_SalesReason FOREIGN KEY (TempID)
+%%        REFERENCES Sales.SalesReason(SalesReasonID)
+%%    ON DELETE CASCADE
+%%    ON UPDATE CASCADE
+
+%% 2025.03.25 primary key id = > alias
+CreateField=(
+	"CREATE TABLE " DB_PREFIX "FIELD1 ("
+		"idClub		VARCHAR(10), "
+		"idTable	VARCHAR(50) NOT NULL, "
+		"aliasTable	VARCHAR(50) NOT NULL, "
+		"nameTable	VARCHAR(50), "
+		"idxTable 	DECIMAL(4,0),"
+
+		"typeField	VARCHAR(10),"
+		"idField	VARCHAR(50),"
+		"aliasField	VARCHAR(50),"
+		"nameField	VARCHAR(50),"
+		"alignmentField	VARCHAR(10),"
+		"colorField	VARCHAR(15),"
+		"formatField	VARCHAR(15),"
+		"idxField	DECIMAL(4,0),\n"
+
+		"CONSTRAINT PK_FIELD PRIMARY KEY (alias) "
+	") ;"
+),
+PrimaryKeyField=(
+	"ALTER TABLE " DB_PREFIX "FIELD1 ADD CONSTRAINT PK_FIELD PRIMARY KEY (aliasTable) ;"
+),
+
+
+CreateFieldMobile=(
+	"CREATE TABLE " DB_PREFIX "FIELDMOBILE1 ("
+		"idClub		VARCHAR(10), "
+		"idTable	VARCHAR(50) NOT NULL, "
+		"aliasTable	VARCHAR(50) NOT NULL, "
+		"nameTable	VARCHAR(50), "
+		"idxTable 	DECIMAL(4,0),"
+
+		"typeField	VARCHAR(10),"
+		"idField	VARCHAR(50),"
+		"aliasField	VARCHAR(50),"
+		"nameField	VARCHAR(50),"
+		"alignmentField	VARCHAR(10),"
+		"colorField	VARCHAR(15),"
+		"formatField	VARCHAR(15),"
+		"idxField	DECIMAL(4,0),\n"
+
+		"CONSTRAINT PK_FIELDMOBILE PRIMARY KEY (alias) "
+	") ;"
+),	% JZ 0603
+PrimaryKeyFieldMobile=(
+	"ALTER TABLE " DB_PREFIX "FIELDMOBILE1 ADD CONSTRAINT PK_FIELDMOBILE PRIMARY KEY (aliasTable) ;"
+),
+
+.
+
+
+
+
+CreateAgency = (
+	"CREATE TABLE " DB_PREFIX "AGENCY ("
+		"id		VARCHAR(10) NOT NULL,"
+		"name		VARCHAR(50),"
+		"capital	VARCHAR(50),"
+		"address	VARCHAR(40),"
+		"address2	VARCHAR(40),"
+		"postcode	VARCHAR(10),"
+		"city		VARCHAR(50),"
+		"country	VARCHAR(60),"
+		"phone		VARCHAR(15),"
+		"mobile		VARCHAR(15),"
+		"fax		VARCHAR(15),"
+		"email		VARCHAR(100),"
+		"establishment	VARCHAR(30),"
+		"registry	VARCHAR(50),"
+		"codeTax	VARCHAR(30),"
+		"codeBusiness	VARCHAR(30),"
+		"codeActivity	VARCHAR(30),"
+		"comments	VARCHAR(100),"
+		"state		VARCHAR(2),"
+		"idSite		VARCHAR(10),"
+		"icon		VARCHAR(20),"
+		"activity	VARCHAR(100),"
+		"idClub		VARCHAR(10),"
+		"CONSTRAINT PK_AGENCY PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyAgency=(
+	"ALTER TABLE " DB_PREFIX "AGENCY ADD CONSTRAINT PK_AGENCY PRIMARY KEY (id) ;"),
+
+CreateAlias=(
+	"CREATE TABLE " DB_PREFIX "ALIAS ("
+		"category	VARCHAR(30) NOT NULL,"
+		"field		VARCHAR(30) NOT NULL,"
+		"id		VARCHAR(20) NOT NULL,"
+		"name		VARCHAR(100),"
+		"color		VARCHAR(15),"
+		"comments	VARCHAR(200),"
+		"state	VARCHAR(10),"
+
+		"CONSTRAINT PK_ALIAS PRIMARY KEY (category,field,id)"
+	") ;"
+),
+PrimaryKeyAlias=(
+	"ALTER TABLE " DB_PREFIX "ALIAS ADD CONSTRAINT PK_ALIAS PRIMARY KEY (category,field,id) ;"
+),
+
+CreateCalendar=(
+	"CREATE TABLE " DB_PREFIX "CALENDAR ("
+		"id		VARCHAR(10) NOT NULL,"
+		"weekday	VARCHAR(2),"
+		"type		VARCHAR(2),"
+		"comments	VARCHAR(100),"
+		"CONSTRAINT PK_CALENDAR PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyCalendar=(
+	"ALTER TABLE " DB_PREFIX "CALENDAR ADD CONSTRAINT PK_CALENDAR PRIMARY KEY (id) ;"
+),
+
+CreateCategoryResource=(
+	"CREATE TABLE " DB_PREFIX "CATEGORYRESOURCE ("
+		"id				VARCHAR(20) NOT NULL,"
+		"name				VARCHAR(100),"
+		"comments			VARCHAR(200),"
+		"state				VARCHAR(10),"
+		"color				VARCHAR(15),"
+		"idClub				VARCHAR(10),"
+		"capacitatedParallelly		DECIMAL(10,0),"
+		"capacitatedSequentially	DECIMAL(10,0),"
+		"capacitatedStock		DECIMAL(10,0),"
+		"timelined			DECIMAL(10,0),"
+		"CONSTRAINT PK_CATEGORYRESOURCE PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyCategoryResource=(
+	"ALTER TABLE " DB_PREFIX "CATEGORYRESOURCE ADD CONSTRAINT PK_CATEGORYRESOURCE PRIMARY KEY (id) ;"
+),
+
+% JZ 1126
+CreateClient=(
+	"CREATE TABLE " DB_PREFIX "CLIENT ("
+		"id		VARCHAR(20) NOT NULL,"
+		"name		VARCHAR(50),"
+		"establishment	VARCHAR(30),"
+		"taxCode	VARCHAR(30),"
+		"account	VARCHAR(10),"
+		"address	VARCHAR(100),"
+		"address2	VARCHAR(100),"
+		"postcode	VARCHAR(10),"
+		"city		VARCHAR(50),"
+		"country	VARCHAR(50),"
+		"phone		VARCHAR(15),"
+		"mobile		VARCHAR(15),"
+		"fax		VARCHAR(20),"
+		"email		VARCHAR(60),"
+		"idAgency	VARCHAR(10),"
+		"representing	VARCHAR(60),"
+		"comments	VARCHAR(100),"
+		"idClub		VARCHAR(10),"
+		"CONSTRAINT PK_CLIENT PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyClient=(
+	"ALTER TABLE " DB_PREFIX "CLIENT ADD CONSTRAINT PK_CLIENT PRIMARY KEY (id) ;"
+),
+
+%% 2025.03.25 add column directory
+CraeteClub=(
+	"CREATE TABLE " DB_PREFIX "CLUB ("
+		"id		VARCHAR(10) NOT NULL,"
+		"name		VARCHAR(60),"
+		"ip		VARCHAR(50),"
+		"port		VARCHAR(3),"
+		"comments	VARCHAR(100),"
+		"idAgency	VARCHAR(10),"
+		"directory	VARCHAR(50),"
+		"CONSTRAINT PK_CLUB PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyClub=(
+	"ALTER TABLE " DB_PREFIX "CLUB ADD CONSTRAINT PK_CLUB PRIMARY KEY (id) ;"
+),
+
+CreateClubClub=(
+	"CREATE TABLE " DB_PREFIX "CLUB_CLUB ("
+		"idClub		VARCHAR(10) NOT NULL,"
+		"idClubRelated	VARCHAR(10) NOT NULL,"
+		"comments	VARCHAR(100),"
+		"CONSTRAINT PK_CLUB_CLUB PRIMARY KEY (idClub,idClubRelated)"
+	") ;"
+),
+PrimaryKeyClubClub=(
+	"ALTER TABLE " DB_PREFIX "CLUB_CLUB ADD CONSTRAINT PK_CLUB_CLUB PRIMARY KEY (idClub,idClubRelated) ;"
+),
+
+%% description = > comments; ord = > idx
+CreateConfig=(
+	"CREATE TABLE " DB_PREFIX "CONFIG ("
+		"idClub		VARCHAR(10) NOT NULL,"
+		"id		VARCHAR(100) NOT NULL,"
+		"type		VARCHAR(100),"
+		"idx		DECIMAL(4,0),"
+		"value		VARCHAR(100),"
+		"comments	VARCHAR(100),"
+		"hidden		VARCHAR(5),"
+		"editable	VARCHAR(10),"
+		"CONSTRAINT PK_CONFIG PRIMARY KEY (idClub,id)"
+	") ;"
+),
+PrimaryKeyConfig=(
+	"ALTER TABLE " DB_PREFIX "CONFIG ADD CONSTRAINT PK_CONFIG PRIMARY KEY (idClub,id) ;"
+),
+
+%%% CREATE TABLE CONFIG ( idClub	VARCHAR(10) NOT NULL, id VARCHAR(100) NOT NULL, type VARCHAR(100), idx	DECIMAL(4,0), value VARCHAR(100), comments VARCHAR(100), hidden	VARCHAR(5), editable	VARCHAR(10), CONSTRAINT PK_CONFIG PRIMARY KEY (idClub,id) ) ;
+
+CreateContract=(
+	"CREATE TABLE " DB_PREFIX "CONTRACT ("
+		"idResource		VARCHAR(30) NOT NULL,"
+		"dateStart		VARCHAR(15) NOT NULL,"
+		"dateEnd		VARCHAR(15),"
+		"type			VARCHAR(10),"
+		"lastname		VARCHAR(50),"
+		"firstname		VARCHAR(50),"
+		"idAgency		VARCHAR(10),"
+		"idCategoryResource	VARCHAR(20),"
+		"idTypeResource		VARCHAR(20),"
+		"timeDay		DECIMAL(4,0),"
+		"timeWeek		DECIMAL(4,0),"
+		"reservedWeek		DECIMAL(4,0),"
+		"reservedYear		DECIMAL(4,0),"
+		"nbDayYear		DECIMAL(4,0),"
+		"advance		DECIMAL(8,2),"
+		"comments		VARCHAR(150),"
+		"nationality		VARCHAR(30),"
+		"identityCard		VARCHAR(30),"
+		"birthday		VARCHAR(30),"
+		"birthplace		VARCHAR(100),"
+		"socialSecurity		VARCHAR(30),"
+		"address		VARCHAR(100),"
+		"postcode		VARCHAR(10),"
+		"city			VARCHAR(60),"
+		"phone			VARCHAR(20),"
+		"mobile			VARCHAR(20),"
+		"idShift		VARCHAR(30),"
+		"title			VARCHAR(30),"
+		"qualification		VARCHAR(30),"
+		"reference		VARCHAR(10),"
+		"paymentMethod		VARCHAR(100),"
+		"doctorCode		VARCHAR(20),"
+		"securityNumber		VARCHAR(30),"
+		"professionCard		VARCHAR(30),"
+		"socialSecurity2	VARCHAR(30),"
+		"idClub			VARCHAR(10),"
+		"CONSTRAINT PK_CONTRACT PRIMARY KEY (idResource,dateStart),"
+		"CONSTRAINT FK_CONTR_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_CONTR_CategRes FOREIGN KEY (idCategoryResource) references " DB_PREFIX "CATEGORYRESOURCE (id) ON UPDATE NO ACTION,"
+		"CONSTRAINT FK_CONTR_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION"
+	") ;"
+),
+PrimaryKeyContract=(
+	"ALTER TABLE " DB_PREFIX "CONTRACT ADD CONSTRAINT PK_CONTRACT PRIMARY KEY (idResource,dateStart) ;"
+),
+ForeignKeyContract_Resource=(
+	"ALTER TABLE " DB_PREFIX "CONTRACT ADD CONSTRAINT FK_CONTR_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+%%'FK_CONTR_CategRes' sur la table 'CONTRACT' peut provoquer des cycles ou des acc s en cascade multiples. 
+%%Sp cifiez ON DELETE NO ACTION ou ON UPDATE NO ACTION, ou modifiez d'autres contraintes FOREIGN KEY.
+ForeignKeyContract_CategRes=(
+	"ALTER TABLE " DB_PREFIX "CONTRACT ADD CONSTRAINT FK_CONTR_CategRes FOREIGN KEY (idCategoryResource) references " DB_PREFIX "CATEGORYRESOURCE (id) ON UPDATE NO ACTION;"
+),
+ForeignKeyContract_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "CONTRACT ADD CONSTRAINT FK_CONTR_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION ;"
+),
+
+
+%% hourResource = > timeResource
+CreateEvent=(
+	"CREATE TABLE " DB_PREFIX "EVENT ("
+		"idClub		VARCHAR(10),"
+		"idResource	VARCHAR(30) NOT NULL,"
+		"dateResource	VARCHAR(15) NOT NULL,"
+		"timeResource	VARCHAR(15) NOT NULL, "
+		"idEvent	VARCHAR(10),"
+		"idProject	VARCHAR(30),"
+		"idJob		VARCHAR(30),"
+		"idTask		VARCHAR(30),"
+		"idTypeProcess	VARCHAR(20),"
+		"idTypeTrip	VARCHAR(20),"
+		"workTime	DECIMAL(4,0),"
+		"nightTime	DECIMAL(4,0),"
+		"breakTime	DECIMAL(4,0),"
+		"routeTime	DECIMAL(10,0),"
+		"drivingTime	DECIMAL(10,0),"
+		"KM		DECIMAL(8,0),"
+		"latitude	VARCHAR(30),"		% JZ
+		"longitude	VARCHAR(30),"		% JZ
+		"barcode	VARCHAR(30),"
+		"qrcode		VARCHAR(30),"
+		"comments	VARCHAR(200),"
+		"state		VARCHAR(30),"
+		"dateEvent	VARCHAR(30) NOT NULL,"
+		"CONSTRAINT PK_EVENT PRIMARY KEY (idResource,dateEvent),"
+		"CONSTRAINT FK_EVENT_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_EVENT_TypeProc FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_EVENT_TypeTrip FOREIGN KEY (idTypeTrip) references " DB_PREFIX "TYPETRIP (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyEvent=(
+	"ALTER TABLE " DB_PREFIX "EVENT ADD CONSTRAINT PK_EVENT PRIMARY KEY (idResource,dateEvent) ;"
+),
+ForeignKeyEvent_Resource=(
+	"ALTER TABLE " DB_PREFIX "EVENT ADD CONSTRAINT FK_EVENT_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyEvent_TypeProc=(
+	"ALTER TABLE " DB_PREFIX "EVENT ADD CONSTRAINT FK_EVENT_TypeProc FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyEvent_TypeTrip=(
+	"ALTER TABLE " DB_PREFIX "EVENT ADD CONSTRAINT FK_EVENT_TypeTrip FOREIGN KEY (idTypeTrip) references " DB_PREFIX "TYPETRIP (id) on UPDATE CASCADE ;"
+),
+
+CreateFormula=(
+	"CREATE TABLE " DB_PREFIX "FORMULA ("
+		"category		VARCHAR(50) NOT NULL,"
+		"id			VARCHAR(20) NOT NULL,"
+		"name			VARCHAR(255),"
+		"program		VARCHAR(8000),"
+		"comments		VARCHAR(255),"
+		"line			DECIMAL(10,0),"
+		 SQL_FIELD_COLUMN "	DECIMAL(10,0),"
+		"idClub	VARCHAR(10),"
+		"CONSTRAINT PK_FORMULA PRIMARY KEY (category, id)"
+	") ;"
+),
+PrimaryKeyFormula=(
+	"ALTER TABLE " DB_PREFIX "FORMULA ADD CONSTRAINT PK_FORMULA PRIMARY KEY (category, id) ;"
+),
+
+CreateGroupResource=(
+	"CREATE TABLE " DB_PREFIX "GROUPRESOURCE ("
+		"id		VARCHAR(20) NOT NULL,"
+		"name		VARCHAR(100),"
+		"type		VARCHAR(10),"
+		"idAgency	VARCHAR(20),"
+		"idSite		VARCHAR(20),"
+		"comments	VARCHAR(100),"
+		"state		VARCHAR(2),"
+		"idClub		VARCHAR(10),"
+		"color		VARCHAR(15),"
+		"CONSTRAINT PK_GROUPRESOURCE PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyGroupResource=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE ADD CONSTRAINT PK_GROUPRESOURCE PRIMARY KEY (id) ;"
+),
+
+CreateGroupResourceSite=(
+	"CREATE TABLE " DB_PREFIX "GROUPRESOURCE_SITE ("
+		"idGroupResource	VARCHAR(20) NOT NULL,"
+		"idSite			VARCHAR(20) NOT NULL,"
+		"idClub			VARCHAR(10),"
+		"CONSTRAINT PK_GRPRES_SITE PRIMARY KEY (idGroupResource,idSite),"
+		"CONSTRAINT FK_GRPSIT_idGrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_GRPSIT_idSite FOREIGN KEY (idSite) references " DB_PREFIX "SITE (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyGroupResourceSite=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE_SITE ADD CONSTRAINT PK_GRPRES_SITE PRIMARY KEY (idGroupResource,idSite) ;"
+),
+ForeignKeyGroupResourceSite_GR=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE_SITE ADD CONSTRAINT FK_GRPSIT_idGrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE ;"
+),
+ForeignKeyGroupResourceSite_Site=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE_SITE ADD CONSTRAINT FK_GRPSIT_idSite FOREIGN KEY (idSite) references " DB_PREFIX "SITE (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.18 add table GROUPRESOURCE_TIMELINE
+CreateGroupResourceTimeline=(
+	"CREATE TABLE " DB_PREFIX "GROUPRESOURCE_TIMELINE ("
+		"idGroupResource	VARCHAR(20) NOT NULL,"
+		"timeline		VARCHAR(50) NOT NULL,"
+		"idClub			VARCHAR(10),"
+		"CONSTRAINT PK_GRPRES_TIMELINE PRIMARY KEY (idGroupResource,timeline),"
+		"CONSTRAINT FK_GRPTIMEL_idGrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyGroupResourceTimeline=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE_TIMELINE ADD CONSTRAINT PK_GRPRES_TIMELINE PRIMARY KEY (idGroupResource,timeline) ;"
+),
+ForeignKeyGrpResourceTimeline_GR=(
+	"ALTER TABLE " DB_PREFIX "GROUPRESOURCE_TIMELINE ADD CONSTRAINT FK_GRPTIMEL_idGrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE ;"
+),
+
+CreateIcon=(
+	"CREATE TABLE " DB_PREFIX "ICON ("
+		"idClub		VARCHAR(10),"
+		"id		VARCHAR(20) NOT NULL,"
+		"name		VARCHAR(50),"
+		"hexadecimal	VARCHAR(8000),"
+		"CONSTRAINT PK_ICON PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyIcon=(
+	"ALTER TABLE " DB_PREFIX "ICON ADD CONSTRAINT PK_ICON PRIMARY KEY (id) ;"
+),
+
+%% 2025.02.17 add table JOB
+CreateJob=(
+	"CREATE TABLE " DB_PREFIX "JOB ("
+		"idClub			VARCHAR(10),"
+		"id			VARCHAR(60) NOT NULL,"
+		"name			VARCHAR(200),"
+		"idTypeProcess		VARCHAR(20),"
+		"idProcess		VARCHAR(30),"
+		"idxParent		DECIMAL(15,0),"
+		"idProject		VARCHAR(30),"
+		"stock			DECIMAL(10,0),"
+		"quantity		DECIMAL(10,0),"
+		"nbTask			DECIMAL(16,0),"
+		"maxGroupResource	DECIMAL(10,0),"
+		"maxGroupExternal	DECIMAL(10,0),"
+		"t1			VARCHAR(26),"
+		"t2			VARCHAR(26),"
+		"t1Plan			VARCHAR(26),"
+		"t2Plan			VARCHAR(26),"
+		"step			DECIMAL(8,0),"
+		"idx			DECIMAL(8,0),"
+		"state			DECIMAL(10,0),"
+		"color			VARCHAR(15),"
+		"idIcon			VARCHAR(20),"
+		"CONSTRAINT PK_JOB PRIMARY KEY (id),"
+		"CONSTRAINT FK_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION"
+	") ;"
+),
+PrimaryKeyJob=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT PK_JOB PRIMARY KEY (id) ;"
+),
+ForeignKeyJob_Project=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT FK_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyJob_Process=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT FK_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION ;"
+),
+
+%% 2025.02.22 change table JOB : replace primary key (id) by (idProject,idProcess)
+CreateJob1=(
+	"CREATE TABLE " DB_PREFIX "JOB ("
+		"idClub			VARCHAR(10),"
+		"id			VARCHAR(60) NOT NULL,"
+		"idProject		VARCHAR(30) NOT NULL,"
+		"idProcess		VARCHAR(30) NOT NULL,"
+		"name			VARCHAR(200),"
+		"idTypeProcess		VARCHAR(20),"
+		"idxParent		DECIMAL(15,0),"
+		"stock			DECIMAL(10,0),"
+		"quantity		DECIMAL(10,0),"
+		"nbTask			DECIMAL(16,0),"
+		"maxGroupResource	DECIMAL(10,0),"
+		"maxGroupExternal	DECIMAL(10,0),"
+		"t1			VARCHAR(26),"
+		"t2			VARCHAR(26),"
+		"t1Plan			VARCHAR(26),"
+		"t2Plan			VARCHAR(26),"
+		"step			DECIMAL(8,0),"
+		"idx			DECIMAL(8,0),"
+		"state			DECIMAL(10,0),"
+		"color			VARCHAR(15),"
+		"idIcon			VARCHAR(20),"
+		"CONSTRAINT PK_JOB PRIMARY KEY (idProject,idProcess),"
+		"CONSTRAINT FK_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION"
+	") ;"
+),
+PrimaryKeyJob1=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT PK_JOB PRIMARY KEY (idProject,idProcess) ;"
+),
+ForeignKeyJob_Project1=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT FK_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyJob_Process1=(
+	"ALTER TABLE " DB_PREFIX "JOB ADD CONSTRAINT FK_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION ;"
+),
+
+CreateLog=(
+	"CREATE TABLE " DB_PREFIX "LOG ("
+		"idUser			VARCHAR(10) NOT NULL,"
+		"t1			VARCHAR(30) NOT NULL,"
+		"t2			VARCHAR(30),"
+		"ip			VARCHAR(20),"
+		"port			VARCHAR(4),"
+		SQL_FIELD_PERMISSION "	VARCHAR(5),"		% permission -> SQL_FIELD_PERMISSION
+		"operation		VARCHAR(100),"
+		"comments		VARCHAR(200),"
+		"idClub	VARCHAR(10),"
+		"CONSTRAINT PK_LOG PRIMARY KEY (idUser,t1) "
+	") ;"
+),
+PrimaryKeyLog=(
+	"ALTER TABLE " DB_PREFIX "LOG ADD CONSTRAINT PK_LOG PRIMARY KEY (idUser,t1) ;"
+),
+
+
+%%% CREATE TABLE LOG (idUser VARCHAR(10) NOT NULL,t1 VARCHAR(30) NOT NULL, t2 VARCHAR(30),ip VARCHAR(20), port VARCHAR(4), permission	VARCHAR(5), operation VARCHAR(100), comments VARCHAR(200), idClub VARCHAR(10), CONSTRAINT PK_LOG PRIMARY KEY (idUser,t1)) ;
+
+
+\forall i \in [1,30] (
+	MenuConfig_{i} :: "",
+),
+\forall i \in [1,9] (
+	MenuConfig_{i} = (
+		"selected0"i"	VARCHAR(2),"
+		"name0"i"	VARCHAR(50),"
+	),
+),
+\forall i \in [10,30] (
+	MenuConfig_{i} = (
+		"selected"i"	VARCHAR(2),"
+		"name"i"	VARCHAR(50),"
+	),
+),
+
+CreateMenu=(
+	"CREATE TABLE " DB_PREFIX "MENU ("
+		"idClub	VARCHAR(10),"
+		"id	VARCHAR(50) NOT NULL,"
+		"name	VARCHAR(60),"
+		"type	VARCHAR(10),"
+		"color	VARCHAR(15),"
+		MenuConfig_{1}
+		MenuConfig_{2}
+		MenuConfig_{3}
+		MenuConfig_{4}
+		MenuConfig_{5}
+		MenuConfig_{6}
+		MenuConfig_{7}
+		MenuConfig_{8}
+		MenuConfig_{9}
+		MenuConfig_{10}
+		MenuConfig_{11}
+		MenuConfig_{12}
+		MenuConfig_{13}
+		MenuConfig_{14}
+		MenuConfig_{15}
+		MenuConfig_{16}
+		MenuConfig_{17}
+		MenuConfig_{18}
+		MenuConfig_{19}
+		MenuConfig_{20}
+		"CONSTRAINT PK_MENU PRIMARY KEY (id)"
+	") ;"
+),
+PrimaryKeyMenu=(
+	"ALTER TABLE " DB_PREFIX "MENU ADD CONSTRAINT PK_MENU PRIMARY KEY (id) ;"
+),
+
+%% //////// 2025.02.17 add tables about PROCESS
+%% 2025.03.25
+%% checkTime = > extendedTime
+%% postTime = > endTime
+CreateProcess=(
+	"CREATE TABLE " DB_PREFIX "PROCESS ("
+		"idClub			VARCHAR(10),"
+		"category		VARCHAR(10),"
+		"id			VARCHAR(30) NOT NULL,"
+		"name			VARCHAR(200),"
+		"idTypeProcess		VARCHAR(20),"
+		"idxParent		DECIMAL(10,0),"
+		"ratioQuantity		DECIMAL(10,0),"
+		"unitQuantity		DECIMAL(10,0),"
+		"unitTime		DECIMAL(16,2),"
+		"initTime		DECIMAL(16,2),"
+		"endTime		DECIMAL(16,2),"
+		"extendedTime		DECIMAL(16,2),"
+		"maxGroupResource	DECIMAL(10,0),"
+		"maxGroupExternal	DECIMAL(10,0),"
+		"continuous		VARCHAR(2),"
+		"divisible		VARCHAR(2),"
+		"preemptive		VARCHAR(2),"
+		"minQtyDivision		DECIMAL(10,0),"
+		"maxQtyDivision		DECIMAL(10,0),"
+		"minTimeDivision	DECIMAL(10,0),"
+		"maxTimeDivision	DECIMAL(10,0),"
+		"minBatch		DECIMAL(5,0),"
+		"maxBatch		DECIMAL(5,0),"
+		"minQtyBatch		DECIMAL(10,0),"
+		"maxQtyBatch		DECIMAL(10,0),"
+		"minTimeBatch		DECIMAL(10,0),"
+		"maxTimeBatch		DECIMAL(10,0),"
+		"switch			VARCHAR(20),"
+		"minQtySwitch		DECIMAL(10,0),"
+		"maxQtySwitch		DECIMAL(10,0),"
+		"state			VARCHAR(2),"
+		"nbTask			DECIMAL(10,0),"
+		"exclusiveJob		DECIMAL(10,0),"
+		"exclusiveProject	DECIMAL(10,0),"
+		"coupledTypeProject	DECIMAL(10,0),"
+		"cost			VARCHAR(20),"
+		"costTask		DECIMAL(10,0),"
+		"idIcon			VARCHAR(20),"
+		"color			VARCHAR(15),"
+		"CONSTRAINT PK_PROCESS PRIMARY KEY (id),"
+		"CONSTRAINT FK_PROCESS_idType FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProcess=(
+	"ALTER TABLE " DB_PREFIX "PROCESS ADD CONSTRAINT PK_PROCESS PRIMARY KEY (id) ;"
+),
+ForeignKeyProcess_TypePrcess=(
+	"ALTER TABLE " DB_PREFIX "PROCESS ADD CONSTRAINT FK_PROCESS_idType FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE ;"
+),
+
+CreateProcessProcess=(
+	"CREATE TABLE " DB_PREFIX "PROCESS_PROCESS ("
+		"idProcess1	VARCHAR(30) NOT NULL,"
+		"idProcess2	VARCHAR(30) NOT NULL,"
+		"type		VARCHAR(5),"
+		"idClub		VARCHAR(10),"
+		"CONSTRAINT PK_PROCESS_PROCESS PRIMARY KEY (idProcess1, idProcess2, type),"
+		"CONSTRAINT FK_PROCE_Proc1 FOREIGN KEY (idProcess1) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROCE_Proc2 FOREIGN KEY (idProcess2) references " DB_PREFIX "PROCESS (id) "
+	") ;"
+),
+PrimaryKeyProcessProcess=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_PROCESS ADD CONSTRAINT PK_PROCESS_PROCESS PRIMARY KEY (idProcess1, idProcess2, type) ;"
+),
+ForeignKeyProcessProcess_Process1=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_PROCESS ADD CONSTRAINT FK_PROCE_Proc1 FOREIGN KEY (idProcess1) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProcessProcess_Process2=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_PROCESS ADD CONSTRAINT FK_PROCE_Proc2 FOREIGN KEY (idProcess2) references " DB_PREFIX "PROCESS (id) ;"
+),
+
+CreateProcessTypeResourceTypeSite=(
+	"CREATE TABLE " DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE ("
+		"idClub			VARCHAR(10),"
+		"idProcess		VARCHAR(30) NOT NULL,"
+		"idx			DECIMAL(10,0),"
+		"idTypeResource		VARCHAR(20) NOT NULL,"
+		"idTypeSite		VARCHAR(20) NOT NULL,"
+		"groupResourceSite	VARCHAR(20),"
+		"minResource		DECIMAL(4,0),"
+		"maxResource		DECIMAL(4,0),"
+		"weightParallel		DECIMAL(10,0),"
+		"weightSequence		DECIMAL(10,0),"
+		"CONSTRAINT PK_PROCESS_TYPERESOURCE_TYPESITE PRIMARY KEY (idProcess, idTypeResource, idTypeSite),"
+		"CONSTRAINT FK_PROCTYPERESTYPESITE_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROCTYPERESTYPESITE_idTypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROCTYPERESTYPESITE_idTypeSite FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProcessTypeResTypeSite=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE ADD CONSTRAINT PK_PROCESS_TYPERESOURCE_TYPESITE PRIMARY KEY (idProcess, idTypeResource, idTypeSite) ;"
+),
+ForeignKeyProcessTypeResTypeSite_Process=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE ADD CONSTRAINT FK_PROCTYPERESTYPESITE_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProcessTypeResTypeSite_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE ADD CONSTRAINT FK_PROCTYPERESTYPESITE_idTypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProcessTypeResTypeSite_TypeSite=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE_TYPESITE ADD CONSTRAINT FK_PROCTYPERESTYPESITE_idTypeSite FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE ;"
+),
+
+CreateProcessJobTypeResource=(
+	"CREATE TABLE " DB_PREFIX "PROCESSJOB_TYPERESOURCE ("
+		"idClub		VARCHAR(10),"
+		"idProcessJob	VARCHAR(30) NOT NULL,"
+		"idTypeResource	VARCHAR(20) NOT NULL,"
+		"type		VARCHAR(10),"
+		"CONSTRAINT PK_PROCESSJOB_TYPERESOURCE PRIMARY KEY (idProcessJob, idTypeResource),"
+		"CONSTRAINT FK_PROCESSJOBTYPERES_idProc FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROCESSJOBTYPERES_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProcessJobTypeResource=(
+	"ALTER TABLE " DB_PREFIX "PROCESSJOB_TYPERESOURCE ADD CONSTRAINT PK_PROCESSJOB_TYPERESOURCE PRIMARY KEY (idProcessJob, idTypeResource) ;"
+),
+ForeignKeyProcessJobTypeRes_Process=(
+	"ALTER TABLE " DB_PREFIX "PROCESSJOB_TYPERESOURCE ADD CONSTRAINT FK_PROCESSJOBTYPERES_idProc FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProcessJobTypeRes_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "PROCESSJOB_TYPERESOURCE ADD CONSTRAINT FK_PROCESSJOBTYPERES_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE ;"
+),
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% PROCESSJOB_TYPERESOURCE replace ? PROCESS_TYPERESOURCE
+%% PROCESS_TYPERESOURCE_TYPESITE replae ? PROCESS_TYPERESOURCE
+%% %%%%%%%%%%%%%%%%%%%%%
+
+CreateProcessTypeResource=(
+	"CREATE TABLE " DB_PREFIX "PROCESS_TYPERESOURCE ("
+		"idProcess	VARCHAR(30) NOT NULL,"
+		"idTypeResource	VARCHAR(20) NOT NULL,"
+		"idx		DECIMAL(10,0),"		% grp -> idx
+		"idClub		VARCHAR(10),"
+		"CONSTRAINT PK_PROCESS_TYPERESOURCE PRIMARY KEY (idProcess, idTypeResource),"
+		"CONSTRAINT FK_PROCESSTYPERES_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROCESSTYPERES_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProcessTypeResource=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE ADD CONSTRAINT PK_PROCESS_TYPERESOURCE PRIMARY KEY (idProcess, idTypeResource) ;"
+),
+ForeignKeyProcessTypeRes_Process=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE ADD CONSTRAINT FK_PROCESSTYPERES_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProcessTypeRes_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "PROCESS_TYPERESOURCE ADD CONSTRAINT FK_PROCESSTYPERES_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE ;"
+),
+
+%% idTypeProcess = > idProcess
+CreateProduct=(
+	"CREATE TABLE " DB_PREFIX "PRODUCT ("
+		"id			VARCHAR(30) NOT NULL,"
+		"name			VARCHAR(100),"
+		"idProcess		VARCHAR(30),"
+		"unitWeight		DECIMAL(18,2),"
+		"unitVolume		DECIMAL(18,2),"
+		"unitLength		DECIMAL(18,2),"
+		"unitWidth		DECIMAL(18,2),"
+		"unitHeight		DECIMAL(18,2),"
+		"stock			DECIMAL(10,0),"
+		"minTime		DECIMAL(10,0),"
+		"idClub			VARCHAR(10),"
+		"color			VARCHAR(15),"
+		"minQuantitySequence	DECIMAL(10,0),"
+		"maxQuantitySequence	DECIMAL(10,0),"
+		"minSumPreProduct	DECIMAL(10,0),"
+		"maxSumPreProduct	DECIMAL(10,0),"
+		"CONSTRAINT PK_PRODUCT PRIMARY KEY (id),"
+		"CONSTRAINT FK_PRODUCT_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProduct=(
+	"ALTER TABLE " DB_PREFIX "PRODUCT ADD CONSTRAINT PK_PRODUCT PRIMARY KEY (id) ;"
+),
+ForeignKeyProduct_Process=(
+	"ALTER TABLE " DB_PREFIX "PRODUCT ADD CONSTRAINT FK_PRODUCT_idProc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.17 tables PROJECT
+%% 2025.03.21 add column%
+%		"idSite	VARCHAR(20),"
+%		"selected	VARCHAR(2),"
+
+CreateProject=(
+	"CREATE TABLE " DB_PREFIX "OPT_PROJECT ("
+		"id		VARCHAR(30) NOT NULL,"
+		"name		VARCHAR(20),"
+		"idAgency	VARCHAR(10),"
+		"idClient	VARCHAR(20),"
+		"idSite		VARCHAR(20),"
+		"idProduct	VARCHAR(30),"
+		"quantity	DECIMAL(8,0),"
+		"priority	VARCHAR(10),"
+		"dateOrder	VARCHAR(20),"
+		"dateDelivery	VARCHAR(20),"
+		"strict		VARCHAR(2),"
+		"t0		VARCHAR(30),"
+		"t1		VARCHAR(30),"
+		"t2		VARCHAR(30),"
+		"t1Plan		VARCHAR(30),"
+		"t2Plan		VARCHAR(30),"
+		"unitPenalty	DECIMAL(18,2),"
+		"excess		DECIMAL(5,0),"
+		"nbTask		DECIMAL(5,0),"
+		"receipts	DECIMAL(18,0),"
+		"barcode	VARCHAR(15),"
+		"idx		DECIMAL(10,0),"
+		"comments	VARCHAR(100),"
+		"state		VARCHAR(2),"
+		"selected	VARCHAR(2),"
+		"idClub		VARCHAR(10),"
+		"CONSTRAINT PK_PROJECT PRIMARY KEY (id),"
+		"CONSTRAINT FK_PROJECT_Cli FOREIGN KEY (idClient) references " DB_PREFIX "CLIENT (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROJECT_Prod FOREIGN KEY (idProduct) references " DB_PREFIX "PRODUCT (id) on UPDATE CASCADE,"
+		"CONSTRAINT FK_PROJECT_Agency FOREIGN KEY (idAgency) references " DB_PREFIX "AGENCY (id) on UPDATE CASCADE"
+	") ;"
+),
+PrimaryKeyProject=(
+	"ALTER TABLE " DB_PREFIX "OPT_PROJECT ADD CONSTRAINT PK_PROJECT PRIMARY KEY (id) ;"
+),
+ForeignKeyProject_Client=(
+	"ALTER TABLE " DB_PREFIX "OPT_PROJECT ADD CONSTRAINT FK_PROJECT_Cli FOREIGN KEY (idClient) references " DB_PREFIX "CLIENT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProject_Product=(
+	"ALTER TABLE " DB_PREFIX "OPT_PROJECT ADD CONSTRAINT FK_PROJECT_Prod FOREIGN KEY (idProduct) references " DB_PREFIX "PRODUCT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProject_Product=(
+	"ALTER TABLE " DB_PREFIX "OPT_PROJECT ADD CONSTRAINT FK_PROJECT_Agency FOREIGN KEY (idAgency) references " DB_PREFIX "AGENCY (id) on UPDATE CASCADE ;"
+),
+
+CreateProjectGroupResource=(
+"CREATE TABLE " DB_PREFIX "PROJECT_GROUPRESOURCE (
+	idClub		VARCHAR(30),
+	idProject	VARCHAR(30) NOT NULL,
+	idGroupResource	VARCHAR(20) NOT NULL,
+	CONSTRAINT PK_PROJECT_GROUPRESOURCE PRIMARY KEY (idProject, idGroupResource),
+	CONSTRAINT FK_ProjGrpRes_Proj FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_ProjGrpRes_GrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE
+) ;"
+),
+PrimaryKeyProjectGroupResource=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_GROUPRESOURCE ADD CONSTRAINT PK_PROJECT_GROUPRESOURCE PRIMARY KEY (idProject, idGroupResource) ;"
+),
+ForeignKeyProjectGrpRes_Project=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_GROUPRESOURCE ADD CONSTRAINT FK_ProjGrpRes_Proj FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProjectGrpRes_GrpRes=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_GROUPRESOURCE ADD CONSTRAINT FK_ProjGrpRes_GrpRes FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE ;"
+),
+
+CreateProjectJob=(
+"CREATE TABLE " DB_PREFIX "PROJECT_JOB (
+	idClub		VARCHAR(10),
+	idProject	VARCHAR(30) NOT NULL,
+	idProcess	VARCHAR(30) NOT NULL,
+	t1		VARCHAR(30),
+	t2		VARCHAR(30),
+	state		DECIMAL(2,0),
+	CONSTRAINT PK_PROJECT_JOB PRIMARY KEY (idProject, idProcess),
+	CONSTRAINT FK_PROJECT_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_PROJECT_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION
+) ;"
+),
+PrimaryKeyProjectJob=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_JOB ADD CONSTRAINT PK_PROJECT_JOB PRIMARY KEY (idProject, idProcess) ;"
+),
+ForeignKeyProjectJob_Project=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_JOB ADD CONSTRAINT FK_PROJECT_JOB_idProject FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProjectJob_Process=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_JOB ADD CONSTRAINT FK_PROJECT_JOB_idProcess FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION ;"
+),
+
+CreateProjectProject=(
+"CREATE TABLE " DB_PREFIX "PROJECT_PROJECT (
+	idProject1	VARCHAR(30) NOT NULL,
+	idProject2	VARCHAR(30) NOT NULL,
+	type		DECIMAL(10,0),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_PROJECT_PROJECT PRIMARY KEY (idProject1, idProject2),
+	CONSTRAINT FK_PROJECT_PROJECT_Project1 FOREIGN KEY (idProject1) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_PROJECT_PROJECT_Project2 FOREIGN KEY (idProject2) references " DB_PREFIX "OPT_PROJECT (id)
+) ;"
+),
+PrimaryKeyProjectProject=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_PROJECT ADD CONSTRAINT PK_PROJECT_PROJECT PRIMARY KEY (idProject1, idProject2) ;"
+),
+ForeignKeyProjectProject_Project1=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_PROJECT ADD CONSTRAINT FK_PROJECT_PROJECT_Project1 FOREIGN KEY (idProject1) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProjectProject_Project2=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_PROJECT ADD CONSTRAINT FK_PROJECT_PROJECT_Project2 FOREIGN KEY (idProject2) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE NO ACTION ;"
+),
+
+CreateProjectTask=("
+CREATE TABLE " DB_PREFIX "PROJECT_TASK (
+	idProject	VARCHAR(30) NOT NULL,
+	idProcess	VARCHAR(30) NOT NULL,
+	idProcessJob	VARCHAR(30),
+	idGroupResource	VARCHAR(20),
+	idResource	VARCHAR(30),
+	idSite		VARCHAR(20),
+	t1		VARCHAR(30),
+	t2		VARCHAR(30),
+	t2Extended	VARCHAR(30),
+	quantity	DECIMAL(8,0),
+	duration	DECIMAL(10,0),
+	state		DECIMAL(2,0),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_PROJECT_TASK PRIMARY KEY (idProject, idProcess),
+	CONSTRAINT FK_PROJECT_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_PROJECT_TASK_Process FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION
+) ;
+"),
+PrimaryKeyProjectTask=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_TASK ADD CONSTRAINT PK_PROJECT_TASK PRIMARY KEY (idProject, idProcess) ;"
+),
+ForeignKeyProjectTask_Project=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_TASK ADD CONSTRAINT FK_PROJECT_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyProjectTask_Process=(
+	"ALTER TABLE " DB_PREFIX "PROJECT_TASK ADD CONSTRAINT FK_PROJECT_TASK_Process FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE NO ACTION ;"
+),
+%% //////////////////
+
+%%% tables for RESOURCE
+CreateResource=("
+CREATE TABLE " SQL_TABLE_RESOURCE " (
+	id			VARCHAR(30) NOT NULL,
+	name			VARCHAR(60),
+	idAgency		VARCHAR(10),
+	idCategoryResource	VARCHAR(20),
+	idTypeResource		VARCHAR(20),
+	idGroupResource		VARCHAR(20),
+	idSite			VARCHAR(20),
+	idShift			VARCHAR(20),
+	critical		VARCHAR(2) DEFAULT 0,
+	mobility		DECIMAL(10,0),
+	t1			VARCHAR(26),
+	t2			VARCHAR(26),
+	quantity0		DECIMAL(7,0),
+	minQuantity		DECIMAL(7,0),
+	maxQuantity		DECIMAL(7,0),
+	minWeight		DECIMAL(7,0),
+	maxWeight		DECIMAL(7,0),
+	minVolume		DECIMAL(7,0),
+	maxVolume		DECIMAL(7,0),
+	initTime		DECIMAL(7,0),
+	initCost		DECIMAL(7,0),
+	unitCost		DECIMAL(7,0),
+	length			DECIMAL(7,0),
+	width			DECIMAL(7,0),
+	height			DECIMAL(7,0),
+	gain			DECIMAL(18,2),
+	penalty			DECIMAL(7,0),
+	cost			DECIMAL(18,2),
+	rate			DECIMAL(18,2),
+	makespan		VARCHAR(20),
+	state			VARCHAR(2),
+	idClub			VARCHAR(10),
+	sizeIcon		DECIMAL(10,0),
+	idIcon			VARCHAR(20),
+	color			VARCHAR(15),
+	colorLine		VARCHAR(15),
+	colorFill		VARCHAR(15),
+	colorArrow		VARCHAR(15),
+	widthLine		DECIMAL(10,0),
+	widthArrow		DECIMAL(10,0),
+	idSiteSequence		VARCHAR(20),
+	coupledTask		VARCHAR(2),
+	sameTypeSequence	VARCHAR(2),
+	CONSTRAINT PK_RESOURCE PRIMARY KEY (id),
+	CONSTRAINT FK_RESOURCE_Category FOREIGN KEY (idCategoryResource) references " DB_PREFIX "CATEGORYRESOURCE (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOURCE_Type 	FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOURCE_Group	FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOURCE_Agency 	FOREIGN KEY (idAgency) references " DB_PREFIX "AGENCY (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResource=(
+	"ALTER TABLE " SQL_TABLE_RESOURCE " ADD CONSTRAINT PK_RESOURCE PRIMARY KEY (id) ;"
+),
+ForeignKeyResourceCategory=(
+	"ALTER TABLE " SQL_TABLE_RESOURCE " ADD CONSTRAINT FK_RESOURCE_Category FOREIGN KEY (idCategoryResource) references " DB_PREFIX "CATEGORYRESOURCE (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceType=(
+	"ALTER TABLE " SQL_TABLE_RESOURCE " ADD CONSTRAINT FK_RESOURCE_Type FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceGroup=(
+	"ALTER TABLE " SQL_TABLE_RESOURCE " ADD CONSTRAINT FK_RESOURCE_Group FOREIGN KEY (idGroupResource) references " DB_PREFIX "GROUPRESOURCE (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceAgency=(
+	"ALTER TABLE " SQL_TABLE_RESOURCE " ADD CONSTRAINT FK_RESOURCE_Agency FOREIGN KEY (idAgency) references " DB_PREFIX "AGENCY (id) on UPDATE CASCADE ;"
+),
+
+CreateResourceAbsence=("
+CREATE TABLE " DB_PREFIX "RESOURCE_ABSENCE (
+	idResource	VARCHAR(30) NOT NULL,
+	dateStart	VARCHAR(15) NOT NULL,
+	timeStart	VARCHAR(15) NOT NULL,
+	dateEnd		VARCHAR(15),
+	timeEnd		VARCHAR(15),
+	idTypeAbsence	VARCHAR(20),
+	duration	DECIMAL(18,0),
+	extension	DECIMAL(3,0),
+	comments	VARCHAR(100),
+	state		VARCHAR(10),
+	selected	VARCHAR(2),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_ABSENCE PRIMARY KEY (idResource, dateStart, timeStart),
+	CONSTRAINT FK_RESOURCE_ABSENCE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOURCE_ABSENCE_TypeAbs FOREIGN KEY (idTypeAbsence) references " DB_PREFIX "TYPEABSENCE (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceAbsence=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_ABSENCE ADD CONSTRAINT PK_RESOURCE_ABSENCE PRIMARY KEY (idResource, dateStart, timeStart) ;"
+),
+ForeignKeyResourceAbsence_Resource=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_ABSENCE ADD CONSTRAINT FK_RESOURCE_ABSENCE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceAbsence_TypeAbs=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_ABSENCE ADD CONSTRAINT FK_RESOURCE_ABSENCE_TypeAbs FOREIGN KEY (idTypeAbsence) references " DB_PREFIX "TYPEABSENCE (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.17 add dayTime 
+CreateResourceActivity=("
+CREATE TABLE " DB_PREFIX "RESOURCE_ACTIVITY (
+	type		VARCHAR(2) NOT NULL,
+	idResource	VARCHAR(30) NOT NULL,
+	dateStart	VARCHAR(15) NOT NULL,
+	dateEnd		VARCHAR(15),
+	dayTime		DECIMAL(6,0) DEFAULT 0,
+	nightTime	DECIMAL(6,0) DEFAULT 0,
+	breakTime	DECIMAL(6,0) DEFAULT 0,
+	routeTime	DECIMAL(6,0) DEFAULT 0,
+	drivingTime	DECIMAL(6,0) DEFAULT 0,
+	workTime	DECIMAL(8,0) DEFAULT 0,
+	overtime	DECIMAL(6,0) DEFAULT 0,
+	excesstime	DECIMAL(6,0),
+	reservedTime	DECIMAL(6,0),
+	reservedYear	DECIMAL(6,0),
+	KM		DECIMAL(6,0) DEFAULT 0,
+	nbDay		DECIMAL(4,0),
+	nbLunch		DECIMAL(4,0) DEFAULT 0,
+	nbTrip		DECIMAL(4,0),
+	advance		DECIMAL(8,2),
+	reimbursement	DECIMAL(8,2),
+	bonus		DECIMAL(8,2),
+	bonusYear	DECIMAL(8,2),
+	garnishment	DECIMAL(8,2),
+	deduction	DECIMAL(8,2),
+	comments	VARCHAR(100),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_ACTIVITY PRIMARY KEY (type, idResource, dateStart),
+	CONSTRAINT FK_RESOUACT_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceActivity=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_ACTIVITY ADD CONSTRAINT PK_RESOURCE_ACTIVITY PRIMARY KEY (type, idResource, dateStart) ;"
+),
+ForeignKeyResourceActivity_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_ACTIVITY ADD CONSTRAINT FK_RESOUACT_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.03.21 add columns
+%	transportSubsidy (personalVehicle)	VARCHAR(2),
+%	mealSubsidy	VARCHAR(2),
+%	idTypeRisk	VARCHAR(20),
+
+CreateResourceDate=("
+CREATE TABLE " DB_PREFIX "RESOURCE_DATE (
+	idResource		VARCHAR(30) NOT NULL,
+	dateResource		VARCHAR(15) NOT NULL,
+	idTypeProcess		VARCHAR(20),
+	idProject		VARCHAR(30),
+	idTypeTrip		VARCHAR(20),
+	idTypeRisk		VARCHAR(20),
+	timeStart		VARCHAR(15),
+	timeEnd			VARCHAR(15),
+	dayTime			DECIMAL(4,0) DEFAULT 0,
+	nightTime		DECIMAL(4,0) DEFAULT 0,
+	breakTime		DECIMAL(4,0) DEFAULT 0,
+	routeTime		DECIMAL(10,0) DEFAULT 0,
+	drivingTime		DECIMAL(10,0) DEFAULT 0,
+	workTime		DECIMAL(4,0) DEFAULT 0,
+	overtime		DECIMAL(4,0) DEFAULT 0,
+	KM			DECIMAL(8,0) DEFAULT 0,
+	comments		VARCHAR(100),
+	state			VARCHAR(10) DEFAULT '1',
+	transportSubsidy	VARCHAR(2),
+	mealSubsidy		VARCHAR(2),
+	idClub			VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_DATE PRIMARY KEY (idResource, dateResource),
+	CONSTRAINT FK_RESDAT_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESDAT_TypeProc FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE ,
+	CONSTRAINT FK_RESDAT_TypeTrip FOREIGN KEY (idTypeTrip) references " DB_PREFIX "TYPETRIP (id) on UPDATE CASCADE 
+) ;
+"),
+PrimaryKeyResourceDate=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_DATE ADD CONSTRAINT PK_RESOURCE_DATE PRIMARY KEY (idResource, dateResource) ;"
+),
+ForeignKeyResDat_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_DATE ADD CONSTRAINT FK_RESDAT_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResDat_TypeProc=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_DATE ADD CONSTRAINT FK_RESDAT_TypeProc FOREIGN KEY (idTypeProcess) references " DB_PREFIX "TYPEPROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResDat_TypeTrip=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_DATE ADD CONSTRAINT FK_RESDAT_TypeTrip FOREIGN KEY (idTypeTrip) references " DB_PREFIX "TYPETRIP (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.18 checkTime = > extendedTime
+%% 2025.03.25
+%% postTime = > endTime
+
+CreateResourceProcess=("
+CREATE TABLE " DB_PREFIX "RESOURCE_PROCESS (
+	idResource	VARCHAR(30) NOT NULL,
+	idProcess	VARCHAR(30) NOT NULL,
+	idTypeResource	VARCHAR(20),
+	initTime	DECIMAL(16,0),
+	unitTime	DECIMAL(16,0),
+	endTime		DECIMAL(16,0),
+	extendedTime	DECIMAL(16,0),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_PROCESS PRIMARY KEY (idResource, idProcess) ,
+	CONSTRAINT FK_RESPROC_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ,
+	CONSTRAINT FK_RESPROC_Proc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ,
+	CONSTRAINT FK_RESPROC_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION
+) ;
+"),
+PrimaryKeyResourceProcess=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PROCESS ADD CONSTRAINT PK_RESOURCE_PROCESS PRIMARY KEY (idResource, idProcess) ;"
+),
+ForeignKeyResProc_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PROCESS ADD CONSTRAINT FK_RESPROC_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResProc_Proc=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PROCESS ADD CONSTRAINT FK_RESPROC_Proc FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResProc_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PROCESS ADD CONSTRAINT FK_RESPROC_TypeRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION ;"
+),
+
+CreateResourceProduct=("
+CREATE TABLE " DB_PREFIX "RESOURCE_PRODUCT (
+	idClub		VARCHAR(10),
+	idResource	VARCHAR(30) NOT NULL,
+	idProduct	VARCHAR(30) NOT NULL,
+	quantity0	DECIMAL(5,0),
+	CONSTRAINT PK_RESOURCE_PRODUCT PRIMARY KEY (idResource, idProduct),
+	CONSTRAINT FK_RESPROD_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESPROD_idPro FOREIGN KEY (idProduct) references " DB_PREFIX "PRODUCT (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceProduct=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PRODUCT ADD CONSTRAINT PK_RESOURCE_PRODUCT PRIMARY KEY (idResource, idProduct) ;"
+),
+ForeignKeyResourceProduct_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PRODUCT ADD CONSTRAINT FK_RESPROD_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceProduct_Prd=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_PRODUCT ADD CONSTRAINT FK_RESPROD_idPro FOREIGN KEY (idProduct) references " DB_PREFIX "PRODUCT (id) on UPDATE CASCADE ;"
+),
+
+CreateResourceResource=("
+CREATE TABLE " DB_PREFIX "RESOURCE_RESOURCE (
+	idResource1	VARCHAR(30) NOT NULL,
+	idResource2	VARCHAR(30) NOT NULL,
+	type		VARCHAR(20),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_RESOURCE PRIMARY KEY (idResource1, idResource2, type),
+	CONSTRAINT FK_RESRES_idRes1 FOREIGN KEY (idResource1) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESRES_idRes2 FOREIGN KEY (idResource2) references " SQL_TABLE_RESOURCE " (id)
+) ;
+"),
+PrimaryKeyResourceResource=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_RESOURCE ADD CONSTRAINT PK_RESOURCE_RESOURCE PRIMARY KEY (idResource1, idResource2, type) ;"
+),
+ForeignKeyResourceResource_Res1=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_RESOURCE ADD CONSTRAINT FK_RESRES_idRes1 FOREIGN KEY (idResource1) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceResource_Res2=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_RESOURCE ADD CONSTRAINT FK_RESRES_idRes2 FOREIGN KEY (idResource2) references " SQL_TABLE_RESOURCE " (id) ;"
+),
+
+CreateResourceShift=("
+CREATE TABLE " DB_PREFIX "RESOURCE_SHIFT (
+	idResource	VARCHAR(30) NOT NULL,
+	dayStart	VARCHAR(10) NOT NULL,
+	dayEnd		VARCHAR(10) ,
+	idShift		VARCHAR(20),
+	state		VARCHAR(2),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_SHIFT PRIMARY KEY (idResource, dayStart),
+	CONSTRAINT FK_RESSHIFT_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceShift=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_SHIFT ADD CONSTRAINT PK_RESOURCE_SHIFT PRIMARY KEY (idResource, dayStart) ;"
+),
+ForeignKeyResourceShift_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_SHIFT ADD CONSTRAINT FK_RESSHIFT_idRes FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.18 add table RESOURCE_SITE
+CreateResourceSite=("
+CREATE TABLE " DB_PREFIX "RESOURCE_SITE (
+	idResource	VARCHAR(30) NOT NULL,
+	idSite		VARCHAR(20) NOT NULL,
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_SITE PRIMARY KEY (idResource, idSite),
+	CONSTRAINT FK_RESSITE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESSITE_Site FOREIGN KEY (idSite) references " DB_PREFIX "SITE (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceSite=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_SITE ADD CONSTRAINT PK_RESOURCE_SITE PRIMARY KEY (idResource, idSite) ;"
+),
+ForeignKeyResourceSite_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_SITE ADD CONSTRAINT FK_RESSITE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResourceSite_Site=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_SITE ADD CONSTRAINT FK_RESSITE_Site FOREIGN KEY (idSite) references " DB_PREFIX "SITE (id) on UPDATE CASCADE ;"
+),
+	
+
+%% old version
+CreateResourceTaskOld=(
+"CREATE TABLE " DB_PREFIX "RESOURCE_TASK (
+	idClub		VARCHAR(10),
+	idResource	VARCHAR(30) NOT NULL,
+	dateStart	VARCHAR(15) NOT NULL,
+	timeStart	VARCHAR(15) NOT NULL,
+	dateEnd		VARCHAR(15),
+	timeEnd		VARCHAR(15),
+	idProject	VARCHAR(10),
+	idJob		VARCHAR(30),
+	idTask		VARCHAR(30),
+	comments	VARCHAR(100),
+	idState		VARCHAR(2),
+	worktime	DECIMAL(4,0),
+	overtime	DECIMAL(4,0),
+	nighttime	DECIMAL(4,0),
+	breaktime	DECIMAL(4,0),
+	drivingtime	DECIMAL(10,0)
+) ;
+"),
+
+%% 2025.02.18  version to define primary key
+%% Job = Process of type job ?
+%% Task = Process of type task ?
+%% primary key = idResource, idProject, idProcessJob, idProcess(task)
+%% not need :
+%%	idJob	VARCHAR(60),
+%%	idTask	VARCHAR(100),
+%%	nameProcess	VARCHAR(30),
+%%	nameJob	VARCHAR(30),
+%%	nameResource	VARCHAR(30),
+%%	nameTypeResource	VARCHAR(30),
+
+%% 2025.03.21 nameProcess = > nameTask
+%% 2025.03.25
+%% checkTime = > extendedTime
+%% postTime = > endTime
+
+CreateResourceTask=(
+"CREATE TABLE " DB_PREFIX "RESOURCE_TASK (
+	idClub			VARCHAR(10),
+	idProject		VARCHAR(30) NOT NULL,
+	idJob			VARCHAR(60),
+	idTask			VARCHAR(100),
+	idTaskResourceSucc	VARCHAR(100),
+	idProcess		VARCHAR(30) NOT NULL,
+	idProcessJob		VARCHAR(30) NOT NULL,
+	idxParent		DECIMAL(10,0),
+	idxParentJob		DECIMAL(10,0),
+	idTypeResource		VARCHAR(20),
+	idGroupResource		VARCHAR(20),
+	idResource		VARCHAR(30) NOT NULL,
+	idSite			VARCHAR(20),
+	nameTask		VARCHAR(30),
+	nameJob			VARCHAR(30),
+	nameResource		VARCHAR(30),
+	nameTypeResource	VARCHAR(30),
+	t1			VARCHAR(20),
+	t2			VARCHAR(20),
+	t2Extended		VARCHAR(20),
+	divisible		VARCHAR(2),
+	continuous		VARCHAR(2),
+	quantitySequence	DECIMAL(18,2),
+	quantityBatch		DECIMAL(18,2),
+	quantityResource	DECIMAL(18,2),
+	quantity		DECIMAL(18,2),
+	stock			DECIMAL(18,2),
+	durationResource	DECIMAL(18,2),
+	duration		DECIMAL(18,0),
+	initTime		VARCHAR(20),
+	extendedTime		VARCHAR(20),
+	endTime			VARCHAR(20),
+	advice			VARCHAR(200),
+	selected		VARCHAR(2),
+	idResourceReal		VARCHAR(30),
+	idSiteReal		VARCHAR(20),
+	t1Real			VARCHAR(20),
+	t2Real			VARCHAR(20),
+	t2ExtendedReal		VARCHAR(20),
+	quantityResourceReal	DECIMAL(18,2),
+	state			VARCHAR(2),
+	color			VARCHAR(15),
+	CONSTRAINT PK_RESOURCE_TASK PRIMARY KEY (idResource, idProject, idProcessJob, idProcess),
+	CONSTRAINT FK_RESOUTASK_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOUTASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE NO ACTION,
+	CONSTRAINT FK_RESOUTASK_ProcJob FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESOUTASK_ProcTask FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id)
+) ;
+"),
+PrimaryKeyResourceTask=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TASK ADD CONSTRAINT PK_RESOURCE_TASK PRIMARY KEY (idResource, idProject, idProcessJob, idProcess) ;"
+),
+ForeignKeyResTask_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TASK ADD CONSTRAINT FK_RESOUTASK_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResTask_Project=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TASK ADD CONSTRAINT FK_RESOUTASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE NO ACTION ;"
+),
+ForeignKeyResTask_ProcessJob=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TASK ADD CONSTRAINT FK_RESOUTASK_ProcJob FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResTask_ProcessTask=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TASK ADD CONSTRAINT FK_RESOUTASK_ProcTask FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) ;"
+),
+
+CreateResourceTypeResource=("
+CREATE TABLE " DB_PREFIX "RESOURCE_TYPERESOURCE (
+	idResource		VARCHAR(30) NOT NULL,
+	idTypeResource		VARCHAR(20) NOT NULL,
+	ratioTime		DECIMAL(10,0),
+	idClub			VARCHAR(10),
+	idProduct0Sequence	VARCHAR(30),
+	uniGroupResource	VARCHAR(30),
+	quantity0Sequence	DECIMAL(10,0),
+	CONSTRAINT PK_RESOURCE_TYPERESOURCE PRIMARY KEY (idResource, idTypeResource),
+	CONSTRAINT FK_RESTYPERES_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESTYPERES_TypRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION
+) ;
+"),
+PrimaryKeyResourceTypeResource=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPERESOURCE ADD CONSTRAINT PK_RESOURCE_TYPERESOURCE PRIMARY KEY (idResource, idTypeResource) ;"
+),
+ForeignKeyResTypeRes_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPERESOURCE ADD CONSTRAINT FK_RESTYPERES_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResTypeRes_TypeRes=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPERESOURCE ADD CONSTRAINT FK_RESTYPERES_TypRes FOREIGN KEY (idTypeResource) references " DB_PREFIX "TYPERESOURCE (id) on UPDATE NO ACTION ;"
+),
+
+%% 2025.02.18 add table RESOURCE_TYPESITE
+CreateResourceTypeSite=("
+CREATE TABLE " DB_PREFIX "RESOURCE_TYPESITE (
+	idResource	VARCHAR(30) NOT NULL,
+	idTypeSite	VARCHAR(20) NOT NULL,
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_RESOURCE_TYPESITE PRIMARY KEY (idResource, idTypeSite),
+	CONSTRAINT FK_RESTYPESITE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE,
+	CONSTRAINT FK_RESTYPESITE_TypeSite FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeyResourceTypeSite=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPESITE ADD CONSTRAINT PK_RESOURCE_TYPESITE PRIMARY KEY (idResource, idTypeSite) ;"
+),
+ForeignKeyResTypeSite_Res=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPESITE ADD CONSTRAINT FK_RESTYPESITE_Res FOREIGN KEY (idResource) references " SQL_TABLE_RESOURCE " (id) on UPDATE CASCADE ;"
+),
+ForeignKeyResTypeSite_TypeSite=(
+	"ALTER TABLE " DB_PREFIX "RESOURCE_TYPESITE ADD CONSTRAINT FK_RESTYPESITE_TypeSite FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE ;"
+),
+
+CreateRule=("
+CREATE TABLE " DB_PREFIX SQL_TABLE_RULE " (
+	idClub		VARCHAR(10) NOT NULL,
+	id		VARCHAR(100) NOT NULL,
+	value		VARCHAR(100),
+	type		VARCHAR(20),
+	selected	VARCHAR(2),
+	priority	DECIMAL(2,0),
+	editable	VARCHAR(10),
+	hidden		VARCHAR(100),
+	color		VARCHAR(15),
+	CONSTRAINT PK_RULE PRIMARY KEY (idClub, id)
+) ;
+"),
+PrimaryKeyRule=(
+	"ALTER TABLE " DB_PREFIX SQL_TABLE_RULE " ADD CONSTRAINT PK_RULE PRIMARY KEY (idClub, id) ;"
+),
+
+CreateSheet=("
+CREATE TABLE " DB_PREFIX "SHEET (
+	category		VARCHAR(20) NOT NULL,
+	id			VARCHAR(20) NOT NULL,
+	line			DECIMAL(10,0) NOT NULL,
+	" SQL_FIELD_COLUMN "	DECIMAL(10,0) NOT NULL,
+	name			VARCHAR(20),
+	type			VARCHAR(20),
+	value			VARCHAR(30),
+	idFormula		VARCHAR(30),
+	idClub			VARCHAR(10),
+	CONSTRAINT PK_SHEET PRIMARY KEY (category, id, line, " SQL_FIELD_COLUMN ")
+) ;
+"),
+PrimaryKeySheet=(
+	"ALTER TABLE " DB_PREFIX "SHEET ADD CONSTRAINT PK_SHEET PRIMARY KEY (category, id, line, " SQL_FIELD_COLUMN ") ;"
+),
+
+CreateShift=("
+CREATE TABLE " DB_PREFIX "SHIFT (
+	id		VARCHAR(20) NOT NULL,
+	name		VARCHAR(30),
+	timeStart	VARCHAR(15),
+	timeEnd		VARCHAR(15),
+	night1Start	VARCHAR(15),
+	night1End	VARCHAR(15),
+	night2Start	VARCHAR(15),
+	night2End	VARCHAR(15),
+	break1Start	VARCHAR(15),
+	break1End	VARCHAR(15),
+	break2Start	VARCHAR(15),
+	break2End	VARCHAR(15),
+	break3Start	VARCHAR(15),
+	break3End	VARCHAR(15),
+	type		VARCHAR(20),
+	CONSTRAINT PK_SHIFT PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyShift=(
+	"ALTER TABLE " DB_PREFIX "SHIFT ADD CONSTRAINT PK_SHIFT PRIMARY KEY (id) ;"
+),
+
+
+%% add column 
+%	idTypeTrip	VARCHAR(20),
+%	idTypeRisk	VARCHAR(20),
+%			asbestos (amiante sous-section 4 : SS4)
+
+CreateSite=("
+CREATE TABLE " DB_PREFIX "SITE (
+	id		VARCHAR(20) NOT NULL,
+	name		VARCHAR(100),
+	idTypeSite	VARCHAR(20),
+	idTypeTrip	VARCHAR(20),
+	idTypeRisk	VARCHAR(20),
+	idZone		VARCHAR(10),
+	capacity	DECIMAL(18,2),
+	latitude	DECIMAL(8,5),
+	longitude	DECIMAL(8,5),
+	name2		VARCHAR(100),
+	street		VARCHAR(100),
+	city		VARCHAR(60),
+	country		VARCHAR(50),
+	postalcode	VARCHAR(10),
+	x		DECIMAL(8,0),
+	y		DECIMAL(8,0),
+	state		VARCHAR(2),
+	idClub		VARCHAR(10),
+	color		VARCHAR(15),
+	idIcon		VARCHAR(20),
+	sizeIcon	DECIMAL(10,0),
+	CONSTRAINT PK_SITE PRIMARY KEY (id),
+	CONSTRAINT FK_SITE_idType FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE
+) ;
+"),
+PrimaryKeySite=(
+	"ALTER TABLE " DB_PREFIX "SITE ADD CONSTRAINT PK_SITE PRIMARY KEY (id) ;"
+),
+ForeignKeySite_Type=(
+	"ALTER TABLE " DB_PREFIX "SITE ADD CONSTRAINT FK_SITE_idType FOREIGN KEY (idTypeSite) references " DB_PREFIX "TYPESITE (id) on UPDATE CASCADE ;"
+),
+
+
+CreateSiteSite=("
+CREATE TABLE " DB_PREFIX "SITE_SITE (
+	idSite1		VARCHAR(20) NOT NULL,
+	idSite2		VARCHAR(20) NOT NULL,
+	distance	DECIMAL(10,0),
+	duration	DECIMAL(10,0),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_SITE_SITE PRIMARY KEY (idSite1,idSite2),
+	CONSTRAINT FK_SITESITE_Site1 FOREIGN KEY (idSite1) references " DB_PREFIX "SITE (id) on UPDATE CASCADE,
+	CONSTRAINT FK_SITESITE_Site2 FOREIGN KEY (idSite2) references " DB_PREFIX "SITE (id)
+) ;
+"),
+PrimaryKeySiteSite=(
+	"ALTER TABLE " DB_PREFIX "SITE_SITE ADD CONSTRAINT PK_SITE_SITE PRIMARY KEY (idSite1,idSite2) ;"
+),
+ForeignKeySiteSite_Site1=(
+	"ALTER TABLE " DB_PREFIX "SITE_SITE ADD CONSTRAINT FK_SITESITE_Site1 FOREIGN KEY (idSite1) references " DB_PREFIX "SITE (id) on UPDATE CASCADE ;"
+),
+ForeignKeySiteSite_Site2=(
+	"ALTER TABLE " DB_PREFIX "SITE_SITE ADD CONSTRAINT FK_SITESITE_Site2 FOREIGN KEY (idSite2) references " DB_PREFIX "SITE (id) ;"
+),
+
+%% 2025.02.18 add table STEP
+%% primary key to define
+CreateStep=("	
+CREATE TABLE " DB_PREFI	X "STEP (
+	step		DECIMAL	(12,0),
+	state		DECIMAL	(1,0),
+	t1		VARCHAR	(30),
+	t2		VARCHAR(30),
+	nbJob		DECIMAL(8,0),
+	nbTask		DECIMAL(8,0),
+	comments	VARCHAR(200),
+	idClub		VARCHAR(10)
+) ;
+"),
+
+%% JOB  = PROJECT + PROCESS(type job) ?
+%% TASK = PROJECT + PROCESS(type task) ?
+%% primary key = idProject, idJob(idProcessJob : process type job), idProcess(process type task)
+%% not need :
+%%	idJob	VARCHAR(60), replace by idProcessJob
+%%	idTypeProcess	VARCHAR(20),
+%% 2025.03.25
+%% checkTime = > extendedTime
+%% postTime = > endTime
+
+CreateTask=("
+CREATE TABLE " DB_PREFIX "TASK (
+	idClub			VARCHAR(10),
+	id			VARCHAR(100) NOT NULL,
+	idProject		VARCHAR(30) NOT NULL,
+	idProcess		VARCHAR(30) NOT NULL,
+	idJob			VARCHAR(60),
+	name			VARCHAR(200),
+	idxParent		DECIMAL(8,0),
+	idTypeProcess		VARCHAR(20),
+	quantity		DECIMAL(10,0),
+	unitQuantity		DECIMAL(10,0),
+	initTime		DECIMAL(16,2),
+	unitTime		DECIMAL(16,2),
+	endTime			DECIMAL(18,2),
+	extendedTime		DECIMAL(16,0),
+	t1			VARCHAR(20),
+	t2			VARCHAR(20),
+	continuous		VARCHAR(2),
+	divisible		VARCHAR(2),
+	maxGroupResource	DECIMAL(10,0),
+	maxGroupExternal	DECIMAL(10,0),
+	switch			DECIMAL(10,0),
+	minQtySwitch		DECIMAL(10,0),
+	maxQtySwitch		DECIMAL(10,0),
+	minQtyDivision		DECIMAL(10,0),
+	maxQtyDivision		DECIMAL(10,0),
+	minTimeDivision		DECIMAL(10,0),
+	maxTimeDivision		DECIMAL(10,0),
+	minBatch		DECIMAL(5,0),
+	maxBatch		DECIMAL(5,0),
+	minQtyBatch		DECIMAL(10,0),
+	maxQtyBatch		DECIMAL(10,0),
+	minTimeBatch		DECIMAL(10,0),
+	maxTimeBatch		DECIMAL(10,0),
+	state			DECIMAL(10,0),
+	preemptive		VARCHAR(2),
+	coupledTypeProject	VARCHAR(2),
+	exclusiveProject	VARCHAR(2),
+	exclusiveJob		VARCHAR(2),
+	CONSTRAINT PK_TASK PRIMARY KEY (id),
+	CONSTRAINT FK_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_TASK_Process FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id)
+) ;
+"),
+PrimaryKeyTask=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT PK_TASK PRIMARY KEY (idProject,idProcessJob,idProcess) ;"
+),
+ForeignKeyTask_Project=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT FK_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyTask_Task=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT FK_TASK_Process FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+
+%% 2025.02.22 change primary key (id) to (idProject,idProcessJob,idProcess)
+%% 2025.03.25
+%% checkTime = > extendedTime
+%% postTime = > endTime
+
+CreateTaskNew=("
+CREATE TABLE " DB_PREFIX "TASK (
+	idClub			VARCHAR(10),
+	id			VARCHAR(100) NOT NULL,
+	name			VARCHAR(200),
+	idProject		VARCHAR(30) NOT NULL,
+	idProcess		VARCHAR(30) NOT NULL,
+	idProcessJob		VARCHAR(30) NOT NULL,
+	idxParent		DECIMAL(8,0),
+	quantity		DECIMAL(10,0),
+	unitQuantity		DECIMAL(10,0),
+	initTime		DECIMAL(16,2),
+	unitTime		DECIMAL(16,2),
+	endTime			DECIMAL(18,2),
+	extendedTime		DECIMAL(16,0),
+	t1			VARCHAR(20),
+	t2			VARCHAR(20),
+	state			DECIMAL(10,0),
+	preemptive		VARCHAR(2),
+	coupledTypeProject	VARCHAR(2),
+	exclusiveProject	VARCHAR(2),
+	exclusiveJob		VARCHAR(2),
+	CONSTRAINT PK_TASK PRIMARY KEY (idProject,idProcessJob,idProcess),
+	CONSTRAINT FK_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE,
+	CONSTRAINT FK_TASK_ProcessJob FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id)
+) ;
+"),
+PrimaryKeyTaskNew=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT PK_TASK PRIMARY KEY (idProject,idProcessJob,idProcess) ;"
+),
+ForeignKeyTaskNew_Project=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT FK_TASK_Project FOREIGN KEY (idProject) references " DB_PREFIX "OPT_PROJECT (id) on UPDATE CASCADE ;"
+),
+ForeignKeyTaskNew_Task=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT FK_TASK_ProcessTask FOREIGN KEY (idProcess) references " DB_PREFIX "PROCESS (id) on UPDATE CASCADE ;"
+),
+ForeignKeyTaskNew_Job=(
+	"ALTER TABLE " DB_PREFIX "TASK ADD CONSTRAINT FK_TASK_ProcessJob FOREIGN KEY (idProcessJob) references " DB_PREFIX "PROCESS (id) ;"
+),
+
+
+CreateTypeAbsence=("
+CREATE TABLE " DB_PREFIX "TYPEABSENCE (
+	id			VARCHAR(20) NOT NULL,
+	name			VARCHAR(30),
+	idx			DECIMAL(2,0),
+	title			VARCHAR(100),
+	timeReduced		DECIMAL(8,0),
+	duration		DECIMAL(8,0),
+	comments		VARCHAR(200),
+	color			VARCHAR(15),
+	state			VARCHAR(2),
+	CONSTRAINT PK_TYPEABSENCE PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeAbsence=(
+	"ALTER TABLE " DB_PREFIX "TYPEABSENCE ADD CONSTRAINT PK_TYPEABSENCE PRIMARY KEY (id) ;"
+),
+
+
+CreateTypeProcess=("
+CREATE TABLE " DB_PREFIX "TYPEPROCESS (
+	id		VARCHAR(20) NOT NULL,
+	name		VARCHAR(100),
+	category	VARCHAR(20),
+	comments	VARCHAR(100),
+	state		VARCHAR(2),
+	idClub		VARCHAR(10),
+	color		VARCHAR(15),
+	CONSTRAINT PK_TYPEPROCESS PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeProcess=(
+	"ALTER TABLE " DB_PREFIX "TYPEPROCESS ADD CONSTRAINT PK_TYPEPROCESS PRIMARY KEY (id) ;"
+),
+
+CreateTypeResource=("
+CREATE TABLE " DB_PREFIX "TYPERESOURCE (
+	id			VARCHAR(20) NOT NULL,
+	name			VARCHAR(100),
+	idCategoryResource	VARCHAR(20),
+	minCapacityParallel	DECIMAL(10,0),
+	maxCapacityParallel	DECIMAL(10,0),
+	minCapacitySequence	DECIMAL(10,0),
+	maxCapacitySequence	DECIMAL(10,0),
+	initTimeSequence	DECIMAL(10,0),
+	comments		VARCHAR(200),
+	state			VARCHAR(2),
+	idClub			VARCHAR(10),
+	color			VARCHAR(15),
+	CONSTRAINT PK_TYPERESOURCE PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeResource=(
+	"ALTER TABLE " DB_PREFIX "TYPERESOURCE ADD CONSTRAINT PK_TYPERESOURCE PRIMARY KEY (id) ;"
+),
+
+%	asbestos (amiante sous-section 4 : SS4)
+CreateTypeRisk=("
+CREATE TABLE " DB_PREFIX "TYPERISK (
+	id		VARCHAR(20) NOT NULL,
+	name		VARCHAR(50),
+	cost		DECIMAL(8,2),
+	comments	VARCHAR(100),
+	color		VARCHAR(15),
+	state		VARCHAR(2),
+	CONSTRAINT PK_TYPERISK PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeRisk=(
+	"ALTER TABLE " DB_PREFIX "TYPERISK ADD CONSTRAINT PK_TYPERISK PRIMARY KEY (id) ;"
+),
+
+%% 2025.02.18 primary key to define : category, id ?
+CreateTypeSheet=("
+CREATE TABLE " DB_PREFIX "TYPESHEET (
+	category	VARCHAR(2) NOT NULL,
+	[column]	DECIMAL(3,0),
+	id		VARCHAR(100) NOT NULL,
+	name		VARCHAR(100),
+	color		VARCHAR(15),
+	alignment	VARCHAR(20),
+	type		VARCHAR(100),
+	comments	VARCHAR(200),
+	state		VARCHAR(2),
+	CONSTRAINT PK_TYPESHEET PRIMARY KEY (category,id)
+) ;
+"),
+PrimaryKeyTypeSheet=(
+	"ALTER TABLE " DB_PREFIX "TYPESHEET ADD CONSTRAINT PK_TYPESHEET PRIMARY KEY (category,id) ;"
+),
+
+CreateTypeSite=("
+CREATE TABLE " DB_PREFIX "TYPESITE (
+	id		VARCHAR(20) NOT NULL,
+	name		VARCHAR(50),
+	comments	VARCHAR(100),
+	idClub		VARCHAR(10),
+	CONSTRAINT PK_TYPESITE PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeSite=(
+	"ALTER TABLE " DB_PREFIX "TYPESITE ADD CONSTRAINT PK_TYPESITE PRIMARY KEY (id) ;"
+),
+
+CreateTypeTrip=("
+CREATE TABLE " DB_PREFIX "TYPETRIP (
+	id			VARCHAR(20) NOT NULL,
+	name			VARCHAR(50),
+	idx			DECIMAL(2,0),
+	title			VARCHAR(50),
+	nbLunch			DECIMAL(4,0),
+	costLunch		DECIMAL(8,2),
+	costNight		DECIMAL(8,2),
+	comments		VARCHAR(100),
+	color			VARCHAR(15),
+	state			VARCHAR(2),
+	CONSTRAINT PK_TYPETRIP PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyTypeTrip=(
+	"ALTER TABLE " DB_PREFIX "TYPETRIP ADD CONSTRAINT PK_TYPETRIP PRIMARY KEY (id) ;"
+),
+
+
+CreateUser=("
+CREATE TABLE " DB_PREFIX SQL_TABLE_USER " (
+	id		VARCHAR(10) NOT NULL,
+	name		VARCHAR(30),
+	idClub		VARCHAR(10),
+	idResource	VARCHAR(10),
+	permission	VARCHAR(2) ,
+	password	VARCHAR(20) ,
+	token		VARCHAR(30),
+	comments	VARCHAR(100),
+	CONSTRAINT PK_USER PRIMARY KEY (id)
+) ;
+"),
+PrimaryKeyUser=(
+	"ALTER TABLE " DB_PREFIX SQL_TABLE_USER " ADD CONSTRAINT PK_USER PRIMARY KEY (id) ;"
+),

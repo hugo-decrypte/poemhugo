@@ -1,0 +1,30 @@
+%==================================================%
+%                                                  %
+%           	Logistics               			 %
+%                                                  %
+%  		   DataPointDelivery.n  					  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+@ ("/// POINTDELIVERY /////////////// \n"),
+
+@ ("Data POINTDELIVERY 'PointDelivery' POINTDELIVERY "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[5;(string,IDCLIENT," TAG_CLIENT_ID ",,15.0.80,0);(string,NAMECLIENT," TAG_CLIENT_NAME " Client,,15.0.80,0);(string,IDPOINT,Point ID,,15.0.80,0);(string,CITY,Ville,,15.0.80,0);(string,LABELCLIENT,Identit  Client,,100.0.100,0);]\"\\\n"),
+
+@ VIEWSQL,
+@ ("SELECT \\\n"),
+@ ("\t\t cl.id AS IDCLIENT, \\\n"),
+@ ("\t\t cl.Name as NAMECLIENT,\\\n"),
+@ ("\t\t p.City as CITY,\\\n"),
+@ ("\t\t p.IdPoint as IDPOINT, \\\n"),
+@ ("\t\t "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELCLIENT \\\n"),
+@ ("\t FROM " DB_PREFIX "CLIENT cl, " DB_PREFIX "POINTDELIVERY p \\\n"),
+@ ("\t WHERE p.IdClient=cl.Id\"\n\n\n"),
+
+
+
+

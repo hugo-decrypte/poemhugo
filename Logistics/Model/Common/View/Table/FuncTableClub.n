@@ -1,0 +1,54 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableClub.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+<tableClub>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)	% JZ 1021
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableClub" postfix),
+
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+	      @("SELECT	c.id		AS ID, \
+				c.name		AS NAME,\
+				c.directory	AS DIRECTORY,\
+				c.ip		AS IP,\
+				c.port		AS PORT,\
+				c.comments	AS COMMENTS,\
+				"SQL_CASEWHEN"c.color IS NOT NULL"SQL_THEN" c.color "SQL_ELSE" '" RGB_WHITE "'"SQL_CASEEND" AS COLOR,\
+				"SQL_CASEWHEN"c.color IS NOT NULL"SQL_THEN" c.color "SQL_ELSE" '" RGB_WHITE "'"SQL_CASEEND" AS LINERGB\
+	 		FROM " DB_PREFIX "CLUB c \
+	 		ORDER BY c.id\"\n\n\n"),
+
+
+
+		
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableClub2EditClub.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+), 
+

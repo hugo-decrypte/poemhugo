@@ -1,0 +1,32 @@
+%==================================================%
+%                                                  %
+%           	Logistics               	   %
+%                                                  %
+%  		   DataDatePlan.n  		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+@ ("\n\n\n/// PLAN DATE/////////////// \n"),
+
+@ ("Data DATESTART2 'DateStart' DATESTART2 "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[1;(string,DateStart2,H départ,,15,,)]\"\\\n"),
+
+@ VIEWSQL,
+@ ("SELECT distinct Left(t1,10) as DateStart2 FROM OPT_TOUR WHERE idClub='(/*CLUBID*/)'\"\n\n\n"),
+
+%%%%%
+
+@ ("Data DATEEND2 'DateEnd' DATEEND2 "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[1;(string,DateEnd2,H retour,,15,,)]\"\\\n"),
+
+@ VIEWSQL,
+@ ("SELECT distinct Left(t2,10) as DateEnd2 FROM OPT_TOUR WHERE idClub='(/*CLUBID*/)'\"\n\n\n"),
+

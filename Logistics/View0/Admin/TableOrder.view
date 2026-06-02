@@ -1,0 +1,166 @@
+View ViewTableORDER 'Commande' 'Commande'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableORDER _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Commande;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Center,Center,Center,Right,Right,Left,Left,Left,Right,Left,Left}]"\
+"[DATAOBJ=ORDER;FILLCOLOR=LINERGB]"
+
+Data ORDER 'Commande' ORDER HTTPSQL 0 '[FIND={ID,NAMECLIENT,ADDRESSDELIVERY,CITYDELIVERY,DATEORDER,DATEDELIVERY,NBPRODUCT,NBPALLET,QUANTITY,INCOTERM,IDPROFORMA,REFERENCE,PRICE,COMMENTS,IDSTATE}]'   [DOUBLECLICK=TableOrderProduct] \
+"[15;(string,ID,Commande,,16,,);(string,NAMECLIENT,Client,,10,,);(string,ADDRESSDELIVERY,Adresse,,15,,);(string,CITYDELIVERY,Ville,,10,,);(date,DATEORDER,Date commande,,23,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEDELIVERY,Date livraison,,20,,YYYY-MM-DD|DD/MM/YYYY);(int,NBPRODUCT,#Produit,,13,,);(float,NBPALLET,#Palette,,13,,);(int,QUANTITY,Quantit�,,13,,);(string,INCOTERM,Incoterm,,13,,);(string,IDPROFORMA,Proforma,,13,,);(string,REFERENCE,R�f�rence,,15,,);(float,PRICE,Montant HT(�),,20,,);(string,COMMENTS,Commentaire,,19,,);(string,IDSTATE,Etat,,15,,);(string,IDAGENCY,ID agence,,15,0);(string,NAMEAGENCY,Nom agence,,50,0);\
+(string,IDCLIENT,ID client,,15.0.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT cm.id AS ID, cm.idClient AS IDCLIENT, cl.name as NAMECLIENT,\
+		 cm.idAgency AS IDAGENCY,\
+		 (select ay.Name from AGENCY ay where ay.id=cm.idAgency) as NAMEAGENCY,\
+		 (select (trim(Address)+IIF(AddressSup is not NULL and AddressSup>' ', ', '+trim(AddressSup) , ' ')) from (/*DBOWNER*/)POINTDELIVERY p where p.IdClient=cm.IdClient and p.IdPoint=cm.IdPointDelivery) as ADDRESSDELIVERY,\
+		 (select (trim(PostCode) + '-' + City ) from POINTDELIVERY p where p.IdClient=cm.IdClient and p.IdPoint=cm.IdPointDelivery) as CITYDELIVERY,\
+		 cm.dateOrder as DATEORDER,\
+		 cm.dateDelivery as DATEDELIVERY,\
+		 (select (trim(LABEL) + '(' + ID + ')') from STATE s where s.ID=cm.idState and s.CATEGORY='ORDER') as IDSTATE,\
+		 (select count(1) from ORDER_PRODUCT lc where lc.idOrder=cm.id) as NBPRODUCT,\
+		 format(cm.quantity,'0')      AS QUANTITY,\
+		 format(cm.quantityRest,'0')  AS QUANTITYREST,\
+		 format(cm.AmountHT,'0.00')      AS PRICE,\
+		 format(cm.NbPallet,'0.0')      AS NBPALLET,\
+		 (select format(sum(lc.QuantityRest*a.Weight),'0') from ORDER_PRODUCT lc inner join PRODUCT a on a.Id=lc.IdProduct where lc.idOrder=cm.id) as WEIGHTREST,\
+		 cm.Incoterm as INCOTERM,\
+		 cm.IdInvoice as IDINVOICE,\
+		 cm.IdProforma as IDPROFORMA,\
+		 cm.Reference as REFERENCE,\
+		 cm.Comments as COMMENTS,\
+		 IIF(cm.idState in (select s.Id from STATE s where s.CATEGORY='ORDER'),\
+		    (select Color from STATE s where s.Id=cm.idState and s.CATEGORY='ORDER'),\
+		 '(255 255 255)') AS LINERGB \
+	 FROM CLIENTORDER cm, CLIENT cl \
+	 WHERE cm.idClient=cl.id \
+	 AND (cm.idState is NULL or cm.idState<>'9')\
+	 ORDER BY cm.dateOrder desc, cm.id"
+
+
+Script TableOrderProduct 'D�tail commandes' _ 31 'Produits' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrderProduct_Order.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits pour commande {/*Selected(tableORDER;1;(string,ID))*/};IDPRODUCT='XXX';IDORDER={/*Selected(tableORDER;1;(string,ID))*/}]"
+
+Script TableProductForOrder  'Produits � ajouter pour commande' _ 22 'Produits � compl�menter' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductForOrder.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits pour commande {/*Selected(tableORDER;1;(string,ID))*/} du client {/*Selected(tableORDER;1;(string,NAMECLIENT))*/}; FAMILY='XXX';IDORDER={/*Selected(tableORDER;1;(string,ID))*/}]"
+
+Script TableDeliveryOrder  'Livraisons pour commande' _ 25 'Livraisons' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);NBDAY=7;OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=de la commande {/*Selected(tableORDER;1;(string,ID))*/};OWNERSUBOBJ=IdOrder;IDSUBOBJ={/*Selected(tableORDER;1;(string,ID))*/};IDTOUR='XXX']"
+
+Script PrintOrderConfirmation 'Imrpimer confirmation commande' _ 80 'Imrpimer confirmation commande' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  PrintOrderConfirmation.ini ConfirmOrder \
+ {/*selected(tableORDER;1;(string,ID))*/}' \
+ WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/ConfirmOrder{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintProforma  'Imrpimer proforma' _ 84 'Imrpimer proforma' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  PrintOrderProforma.ini Proforma_Order \
+ {/*selected(tableORDER;1;(string,ID))*/}' \
+ WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Proforma_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintInvoice  'Imrpimer facture' _ 81 'Imrpimer facture' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  PrintOrderInvoice.ini Invoice_Order \
+ {/*selected(tableORDER;1;(string,ID))*/}' \
+ WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintDelivery 'Imrpimer bon de livraison' _ 82 'Imrpimer bon de livraison' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  PrintOrderDelivery.ini Delivery_Order \
+ {/*selected(tableORDER;1;(string,ID))*/}' \
+ WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/Delivery_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script CreateOrder  'Cr�er commande' _ 61 'Cr�er' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\CreateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(Cr�er commande;4;\
+(string,IDORDER,ID commande,,50.0.580,0,0,);\
+(string,REFERENCE,R�f�rence,,50.0.580,0,0,);\
+(string,LABELCLIENT,Client,,50.0.580,0,,[/*CLIENT.LABELCLIENT*/]);\
+(date,DATEDELIVERY,Date livraison,,10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script DuplicateOrder  'Dupliquer commande' _ 62 'Dupliquer' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\DuplicateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \
+{/*Input(L;Dupliquer commande [/*ORDER.ID*/];3;\
+(string,IDORDER,ID commande,,50.0.580,0,0,);\
+(string,REFERENCE,R�f�rence,,50.0.580,0,0,);\
+(date,DATEDELIVERY,Date livraison,[/*ORDER.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script ModifyOrder  'Modifier commande' _ 63 'Modifier' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\UpdateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDER;1;(string,ID))*/} \
+{/*Input(MO;Modifier commande [/*ORDER.ID*/];7;\
+(date,DATEDELIVERY,Date livraison*,[/*ORDER.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+(string,INCOTERM,Incoterm,[/*ORDER.INCOTERM*/],50.0.580,1,,);\
+(string,REFERENCE,R�f�rence,[/*ORDER.REFERENCE*/],50.0.580,1,,);\
+(string,IDINVOICE,No facture,[/*ORDER.IDINVOICE*/],50.0.580,1,,);\
+(string,IDPROFORMA,No proforma,[/*ORDER.IDPROFORMA*/],50.0.580,1,,);\
+(string,COMMENTS,Commentaire,[/*ORDER.COMMENTS*/],50.0.580,1,,);\
+(string,STATE,Etat,[/*ORDER.STATEORDER*/],50.0.580,1,,[/*STATE.LABELSTATE*/]);\
+ )*/}\
+'\
+Reload _ _ _
+
+Script DeleteOrder 'Supprimer commande' _ 64'Supprimer' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\DeleteOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableORDER;1;(string,ID))*/}' \
+Reload _ _ _
+
+Script SetOrderState  'Modifier �tat commande' _ 66 'Modifier �tat' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SetOrderState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \
+{/*Input(MCS;Modifier �tat commande;1;\
+ (string,STATE,Etat,[/*ORDER.IDSTATE*/],50.0.580,0,,[/*STATE.LABELSTATE*/]);\
+ )*/}\
+'\
+Reload _ _ _
+
+Script SetToDelivery  'Mettre en livraison' _ 65 'Mettre en livraison' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SetToDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableORDER;1;(string,ID))*/} \
+{/*Input(ML;Mettre en livraison : Commande [/*ORDER.ID*/];1;\
+(date,DATEDELIVERY,Date livraison,[/*ORDER.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script TableOrderState 'Etat commande' _ 23 'Tableau �tat' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableState_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);CATEGORY='ORDER';TITLEOBJ=Commande]"
+
+Data CLIENT 'Client' CLIENT HTTPSQL 0 _ _ \
+"[2;(string,IDCLIENT,ID client,,15.0.80,0);(string,LABELCLIENT,Identit� Client,,100.0.100,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT cl.id AS IDCLIENT,\
+  (trim(cl.Name) + ' (' + trim(p.City) + ')') as LABELCLIENT \
+ FROM CLIENT cl, POINTDELIVERY p \
+ WHERE p.IdClient=cl.Id \
+ ORDER BY cl.Id"
+
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libell�,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='ORDER' \
+ORDER BY s.Id "
+

@@ -1,0 +1,55 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableAlias.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+<tableAlias>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableAlias" postfix),
+
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+
+
+		sqlColor = (SQL_CASEWHEN "a.color IS NOT NULL " SQL_THEN "a.color" SQL_ELSE "'" RGB_WHITE "'" SQL_CASEEND),
+
+
+		@ VIEWSQL,
+
+	    	@ ("SELECT a.id AS ID,\
+			a.name AS NAME,\
+			a.category AS CATEGORY,\
+			a.field AS FIELD,\
+			a.comments AS COMMENTS,\
+			" sqlColor " AS COLOR,\
+			" sqlColor " AS LINERGB\
+	 	FROM " DB_PREFIX "ALIAS a\
+	 	ORDER BY a.category,a.field,a.id\"\n\n\n"),
+
+
+
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableAlias2EditAlias.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

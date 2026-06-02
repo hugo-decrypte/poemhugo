@@ -1,0 +1,6 @@
+
+'()' => (
+	( "MapVehicle_Agent.view,2,IDVEHICLESELECTED   '30P01',IDTOURSELECTED   '30P01-1'" : '.'),
+	%( "TableTour.view" : '.'),
+),
+

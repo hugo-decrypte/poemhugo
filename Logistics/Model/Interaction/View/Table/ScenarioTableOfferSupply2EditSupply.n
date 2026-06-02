@@ -1,0 +1,73 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableOfferSupply2EditSupply.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "EditOfferSupply ",
+
+% Caption
+@ ("'" TAG_EDIT_SUPPLY_OFFER  "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT,
+
+% Label
+@ (" '" TAG_EDIT  "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableOFFERPRODUCT' ", 	% JZ 1018
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=1; NETNCL=HTTP; SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/); MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+	;
+	@ "'[COUNT=1;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+
+% Instruction... (When Count>0)
+@ ("\tWinExec \"[WAITTIME=0S;CONSOLE=1;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+%@ ("\t '(/*POEMDATAPATH*/)/(/*POEMDATAEXE*/)'\\\n"),
+@ ("\t '(/*POEMDATAEXE*/)'\\\n"),
+@ ("\t \"(/*POEMDATAPATH*/)/(/*POEMDATADEP*/) ?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=1)]? OPEN TABLE (/*DBOWNER*/)" DB_PREFIX "OFFERSUPPLIER&IdSupplier in ({/*selected(tableOFFERPRODUCT;1;(string,IDSUPPLIER))*/}) and IdProduct in ({/*selected(tableOFFER;1;(string,IDPRODUCT))*/})\" _ _ _ _ _ _ _ \n\n"),
+
+% JZ 1018 : tableOFFERPRODUCT
+
+
+
+%@ ("\t \"(/*POEMDATAPATH*/)/(/*POEMDATADEP*/) ?OPEN TABLE (/*DBOWNER*/)CLIENT&IdClient in ({/*selected(tableCLIENT;1;(string,ID))*/})" _ _ _ _ _ _ _ \n\n"),
+
+
+
+
+
+
+

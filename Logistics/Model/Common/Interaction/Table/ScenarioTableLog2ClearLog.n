@@ -1,0 +1,57 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%         ScenarioTableLog2ClearLog.n              %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "ClearLog ",
+
+% Caption
+@ ("'"TAG_CLEAR_LOG"' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_CLEAR_LOG,
+
+% Label
+@ (" '"TAG_CLEAR_LOG"' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableLOG' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("'" TAG_ASK_CLEAR_LOG "' "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\Backup\ClearLog.n'"),
+@ NCL_ARGUMENT_BEGIN,
+@ NCL_ARGUMENT_END_WITH,
+
+@ "Reload _ _ _ _\n\n",
+

@@ -1,0 +1,118 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableClient.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableClient>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		
+		viewFile = ("TableClient" postfix),
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(string,ADDRESSDELIVERY," TAG_DELIVERY_ADDRESS ",,100.0.100,0);\\\n"),
+		@ ("(string,ADDRESSSUPDELIVERY," TAG_DELIVERY_ADDRESS2 ",,100.0.100,0);\\\n"),
+		@ ("(string,POSTCODE," TAG_POSTCODE ",,10.0.50,0);\\\n"),
+		@ ("(string,ADDRESSINVOICE," TAG_INVOICE_ADDRESS ",,100.0.100,0);\\\n"),
+		@ ("(string,ADDRESSSUPINVOICE," TAG_INVOICE_ADDRESS2 ",,100.0.100,0);\\\n"),
+		@ ("(string,IDPOINTDELIVERY," TAG_DELIVERY_POINT_ID ",,30.0.100,0);\\\n"),
+		@ ("(string,POSTCODEDELIVERY," TAG_DELIVERY_PC ",,10.0.50,0);\\\n"),
+		@ ("(string,CITYDELIVERY," TAG_DELIVERY_CITY ",,50.0.100,0);\\\n"),
+		@ ("(string,COUNTRYDELIVERY," TAG_DELIVERY_COUNTRY ",,50.0.100,0);\\\n"),
+		@ ("(string,IDAGENCY," TAG_AGENCY_ID ",,10.0.50,0);\\\n"),
+		@ ("(string,NAMEAGENCY," TAG_AGENCY_NAME ",,100.0.100,0);\\\n"),
+		@ ("(string,NAMEBANK," TAG_BANK_NAME ",,100.0.100,0);\\\n"),
+		@ ("(string,VATCODE," TAG_TAX_CODE ",,30.0.100,0);\\\n"),
+		@ ("(string,SIRET," TAG_ESTABLISHMENT ",,30.0.100,0);\\\n"),
+		@ ("(string,COUNTRY," TAG_COUNTRY ",,50.0.100,0);\\\n"),
+		@ ("(int,TOMORROW," TAG_TOMORROW ",,8.0.100,1);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+		
+		tomarrow :: "",
+		? databaseType (
+			"ACCESS" :
+				tomarrow = ("DateAdd("SQL_DATEPART_DAY", 1, "SQL_CURRENTDATE")"),
+				;
+
+			"SQLSERVER" :
+				tomarrow = ("DateAdd("SQL_DATEPART_DAY", 1, "SQL_CURRENTDATE")"),
+				;
+
+			"MYSQL" :
+				tomarrow = ("AddDate("SQL_CURRENTDATE",1)"),
+				;
+
+			"ORACLE" :
+				tomarrow = (SQL_CURRENTDATE"+1"),
+		),
+
+		@ ("SELECT cl.id AS ID, cl.name AS NAME,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"trim(cl.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"cl.City"SQL_CONCATEND" AS CITY, cl.PostCode AS POSTCODE,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"trim(cl.Address)"SQL_CONCATWITH"(" SQL_CASEWHEN "cl.AddressSup is not NULL and cl.AddressSup>' '" SQL_THEN ""SQL_CONCAT"', '"SQL_CONCATWITH"cl.AddressSup"SQL_CONCATEND"" SQL_ELSE "' '" SQL_CASEEND ")"SQL_CONCATEND" AS ADDRESS,\\\n"),
+  		@ ("\t\t cl.Address AS ADDRESSINVOICE,\\\n"),
+  		@ ("\t\t cl.AddressSup AS ADDRESSSUPINVOICE,\\\n"),
+  		@ ("\t\t cl.Country as COUNTRY,\\\n"),
+  		@ ("\t\t cl.codeTax as VATCODE,\\\n"),
+  		@ ("\t\t cl.establishment as SIRET,\\\n"),
+  		@ ("\t\t cl.Comments as COMMENTS,\\\n"),
+  		@ ("\t\t pd.IdPoint as IDPOINTDELIVERY,\\\n"),
+  		@ ("\t\t pd.NameClient as NAMEDELIVERY,\\\n"),
+  		@ ("\t\t "SQL_CONCAT"trim(pd.Address)"SQL_CONCATWITH"(" SQL_CASEWHEN "pd.AddressSup is not NULL and pd.AddressSup>' '" SQL_THEN ""SQL_CONCAT"', '"SQL_CONCATWITH"pd.AddressSup"SQL_CONCATEND"" SQL_ELSE "' '" SQL_CASEEND ")"SQL_CONCATEND" AS ADDRESSDELIVERYCOMPL,\\\n"),
+ 		@ ("\t\t pd.Address AS ADDRESSDELIVERY,\\\n"),
+ 		@ ("\t\t pd.AddressSup AS ADDRESSSUPDELIVERY,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"trim(pd.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"pd.City"SQL_CONCATEND" AS POSTCITYDELIVERY,\\\n"),
+ 		@ ("\t\t pd.City AS CITYDELIVERY,\\\n"),
+ 		@ ("\t\t pd.Country AS COUNTRYDELIVERY,\\\n"),
+ 		@ ("\t\t	pd.PostCode AS POSTCODEDELIVERY,\\\n"),
+ 		@ ("\t\t	(select count(1) from " DB_PREFIX "CLIENTORDER O where O.IdClient=cl.Id and O.IdPointDelivery=pd.IdPoint and O.IdState not in ('9') ) as NBORDER,\\\n"),
+ 		@ ("\t\t	cl.IdAgency as IDAGENCY,\\\n"),
+ 		@ ("\t\t	(select ay.Name from " DB_PREFIX "AGENCY ay where ay.Id=cl.IdAgency ) as NAMEAGENCY,\\\n"),
+ 		@ ("\t\t	(select b.Name from " DB_PREFIX "BANKACCOUNT b where b.Id=cl.BankAccount ) as NAMEBANK,\\\n"),
+ 		@ ("\t\t	"SQL_FORMATDATE"("tomarrow", '"SQL_FORMATDATENUM"') as TOMORROW,\\\n"),
+ 		@ ("\t\t	'(255 255 255)' AS LINERGB \\\n"),
+ 		@ ("\t\t FROM " DB_PREFIX "CLIENT cl \\\n"),
+ 		@ ("\t\t  left join " DB_PREFIX "POINTDELIVERY pd on pd.IdClient=cl.Id \\\n"),
+ 		@ ("\t\t ORDER BY cl.Id, pd.IdPoint\"\n\n\n"),
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2TableOrderMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2TableDeliveryMenu.n"],
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2HistogramBalanceSheetRevenueMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2TableBalanceSheetRevenueMenu.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2CreateOrder.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2EditClient.n"],	
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableClient2EditOnView.n"],	% JZ 0911
+		
+
+
+
+		['Work Directory' "Model\View\Data\DataPointDelivery.n"],
+		['Work Directory' "Model\View\Data\DataAgency.n"],
+		['Work Directory' "Model\View\Data\DataBankAccount.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

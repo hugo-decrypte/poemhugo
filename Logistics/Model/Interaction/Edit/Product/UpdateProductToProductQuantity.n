@@ -1,0 +1,176 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductToProductQuantity.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idProductBuffer :: "",
+	
+	
+	idProductBuffer = (),
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjBuffer_{i} 		:: "",
+		idObjBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "',"),
+			;
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJBUFFER :: "",
+	IDOBJBUFFER = [\forall i \in [1, nbSelected] strIdObjBuffer_{i}],
+	
+	quantityBuffer 	:: "",
+	quantityBuffer	= (),
+
+
+	'()' <- database,
+	
+
+	UpdateProductToProductQuantity_SQL1 = (
+		"INSERT INTO " DB_PREFIX "PRODUCT_COMPONENT (IdProduct, IdSubProduct, Quantity, Comments) 
+		  select P.Id, "IDOBJBUFFER", "quantityBuffer", ' ' 
+		  from " DB_PREFIX "PRODUCT P 
+		  where P.Id in ("idProductBuffer")
+		   and not exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=P.Id and PC.IdSubProduct="IDOBJBUFFER") "
+	),
+	 
+	UpdateProductToProductQuantity_SQL2 = (
+		"Update " DB_PREFIX "PRODUCT_COMPONENT set Quantity="quantityBuffer" 
+		WHERE IdProduct in ("idProductBuffer")
+		and IdSubProduct="IDOBJBUFFER" "
+	),
+
+	databaseType = "ACCESS" => (
+
+		%% PRODUCT price, weight 
+		UpdateProductToProductQuantity_SQL3 = (
+			"Update " DB_PREFIX "PRODUCT SET PriceUnit=0, PurchasePrice=0, Weight=0 WHERE Id in ("idProductBuffer") "
+		),
+		UpdateProductToProductQuantity_SQL4 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct) on P.Id=PC.IdProduct SET 
+			P.PriceUnit = P.PriceUnit + PC.Quantity*sub.PriceUnit,
+			P.PurchasePrice = P.PurchasePrice + PC.Quantity*sub.PurchasePrice,
+			P.Weight = P.Weight + PC.Quantity*sub.Weight 
+			WHERE P.Id in ("idProductBuffer")"
+		),
+		
+
+		%% PRODUCT KIT  price, weight 
+		UpdateProductToProductQuantity_SQL5 = (
+			"Update " DB_PREFIX "PRODUCT SET PriceUnit=0, PurchasePrice=0, Weight=0 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=Id and PC.IdSubProduct in ("idProductBuffer") )"
+		),
+		UpdateProductToProductQuantity_SQL6 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct) on P.Id=PC.IdProduct SET 
+			P.PriceUnit = P.PriceUnit + PC.Quantity*sub.PriceUnit,
+			P.PurchasePrice = P.PurchasePrice + PC.Quantity*sub.PurchasePrice,
+			P.Weight = P.Weight + PC.Quantity*sub.Weight 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=P.Id and PC.IdSubProduct in ("idProductBuffer") )"
+		),
+		UpdateProductToProductQuantity_SQL7 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct) on P.Id=PC.IdProduct SET 
+			P.PriceUnit = P.PriceUnit + PC.Quantity*sub.PriceUnit,
+			P.PurchasePrice = P.PurchasePrice + PC.Quantity*sub.PurchasePrice,
+			P.Weight = P.Weight + PC.Quantity*sub.Weight 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=P.Id)"
+		),
+		UpdateProductToProductQuantity_SQL8 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct) on P.Id=PC.IdProduct SET 
+			P.PriceUnit = P.PriceUnit + PC.Quantity*sub.PriceUnit,
+			P.PurchasePrice = P.PurchasePrice + PC.Quantity*sub.PurchasePrice,
+			P.Weight = P.Weight + PC.Quantity*sub.Weight 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=P.Id)"
+		),
+
+		;
+
+		UpdateProductToProductQuantity_SQL2 = (
+			"Update " DB_PREFIX "PRODUCT SET 
+			PriceUnit=(select sum( PC.Quantity*sub.PriceUnit )         from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct 
+				where PRODUCT.Id=PC.IdProduct and PC.Quantity is not NULL and PC.Quantity>0 and sub.PriceUnit is not NULL and sub.PriceUnit>0),
+			PurchasePrice=(select sum( PC.Quantity*sub.PurchasePrice ) from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct 
+				where PRODUCT.Id=PC.IdProduct and PC.Quantity is not NULL and PC.Quantity>0 and sub.PurchasePrice is not NULL and sub.PurchasePrice>0),
+			Weight=(select sum( PC.Quantity*sub.Weight )               from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct 
+				where PRODUCT.Id=PC.IdProduct and PC.Quantity is not NULL and PC.Quantity>0 and sub.Weight is not NULL and sub.Weight>0)
+			WHERE Id in ("idProductBuffer")"
+		),
+		
+
+		UpdateProductToProductQuantity_SQL3 = (
+			"Update " DB_PREFIX "PRODUCT SET PriceUnit=0 		WHERE Id in ("idProductBuffer") and PriceUnit is NULL"
+		),
+		UpdateProductToProductQuantity_SQL4 = (
+			"Update " DB_PREFIX "PRODUCT SET PurchasePrice=0  WHERE Id in ("idProductBuffer") and PurchasePrice is NULL"
+		),
+		UpdateProductToProductQuantity_SQL5 = (
+			"Update " DB_PREFIX "PRODUCT SET Weight=0 		WHERE Id in ("idProductBuffer") and Weight is NULL"
+		),
+
+		UpdateProductToProductQuantity_SQL6 = (
+			"Update " DB_PREFIX "PRODUCT set 
+			PriceUnit=(select sum(sub.PriceUnit*PC.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct where PRODUCT.Id=PC.IdProduct), 
+			Weight=   (select sum(sub.Weight*PC.Quantity)    from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct where PRODUCT.Id=PC.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=PRODUCT.Id and PC.IdSubProduct in ("idProductBuffer") )"
+		),
+		UpdateProductToProductQuantity_SQL7 = (
+			"Update " DB_PREFIX "PRODUCT SET PriceUnit=0 		WHERE PriceUnit is NULL"
+		),
+		UpdateProductToProductQuantity_SQL8 = (
+			"Update " DB_PREFIX "PRODUCT SET PurchasePrice=0  WHERE PurchasePrice is NULL"
+		),
+		UpdateProductToProductQuantity_SQL9 = (
+			"Update " DB_PREFIX "PRODUCT SET Weight=0 		WHERE Weight is NULL"
+		),
+
+		UpdateProductToProductQuantity_SQL10 = (
+			"Update " DB_PREFIX "PRODUCT set 
+			PriceUnit=(select sum(sub.PriceUnit*PC.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct where PRODUCT.Id=PC.IdProduct) 
+			Weight=(select sum(sub.Weight*PC.Quantity) from " DB_PREFIX "PRODUCT_COMPONENT PC inner join " DB_PREFIX "PRODUCT sub on sub.Id=PC.IdSubProduct where PRODUCT.Id=PC.IdProduct) 
+			where exists (select 1 from " DB_PREFIX "PRODUCT_COMPONENT PC where PC.IdProduct=PRODUCT.Id)"
+		),
+		UpdateProductToProductQuantity_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT SET PriceUnit=0 		WHERE PriceUnit is NULL"
+		),
+		UpdateProductToProductQuantity_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT SET PurchasePrice=0  WHERE PurchasePrice is NULL"
+		),
+		UpdateProductToProductQuantity_SQL13 = (
+			"Update " DB_PREFIX "PRODUCT SET Weight=0 		WHERE Weight is NULL"
+		),
+	),
+
+	(SQL : UpdateProductToProductQuantity_SQL1), 
+	(SQL : UpdateProductToProductQuantity_SQL2), 
+	(SQL : UpdateProductToProductQuantity_SQL3), 
+	(SQL : UpdateProductToProductQuantity_SQL4), 
+	(SQL : UpdateProductToProductQuantity_SQL5), 
+	(SQL : UpdateProductToProductQuantity_SQL6), 
+	(SQL : UpdateProductToProductQuantity_SQL7), 
+	(SQL : UpdateProductToProductQuantity_SQL8), 
+	databaseType <> "ACCESS" => (
+		(SQL : UpdateProductToProductQuantity_SQL9), 
+		(SQL : UpdateProductToProductQuantity_SQL10), 
+		(SQL : UpdateProductToProductQuantity_SQL11), 
+		(SQL : UpdateProductToProductQuantity_SQL12), 
+		(SQL : UpdateProductToProductQuantity_SQL13),
+	),
+	
+	database <- '()',
+),

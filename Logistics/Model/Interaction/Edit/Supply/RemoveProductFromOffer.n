@@ -1,0 +1,49 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	           %
+%                                                  %
+% 		 RemoveProductFromOffer.n		   	       %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	idSupplierBuffer 	:: "",
+	idOfferBuffer 		:: "",
+	idSupplierBuffer	= (),
+	idOfferBuffer		= (),
+
+	'()' <- database,
+
+	RemoveProduct_SQL1 = (
+		"Delete from " DB_PREFIX "OFFER_PRODUCT 
+		WHERE IdSupplier in ("idSupplierBuffer") and IdOffer="idOfferBuffer"
+			and IdProduct in ("IDOBJSELECTEDBUFFER")"
+	),
+
+	(SQL : RemoveProduct_SQL1), 
+	
+	database <- '()',
+),

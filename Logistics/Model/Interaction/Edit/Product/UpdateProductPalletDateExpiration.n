@@ -1,0 +1,58 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductPalletDateExpiration.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idPackingBuffer :: "",
+	noPalletBuffer  :: 0,
+	
+	idPackingBuffer = (),
+	noPalletBuffer  = (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 		:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	
+	
+	dateExpirationBuffer 	= "",
+	dateExpirationBuffer	= (),
+
+	'()' <- database,
+	
+	
+	UpdateProductPalletDateExpiration_SQL1 = (
+		"Update " DB_PREFIX "PALLET_PRODUCT 
+			set DateExpiration="dateExpirationBuffer"
+			WHERE IdPacking in ("idPackingBuffer") and NoPallet in ("noPalletBuffer") and IdProduct in ("IDOBJSELECTEDBUFFER")"
+	),
+
+	(SQL : UpdateProductPalletDateExpiration_SQL1), 
+	
+	
+	database <- '()',
+),

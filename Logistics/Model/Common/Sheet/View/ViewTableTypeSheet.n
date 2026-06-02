@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+% 		ViewTableTypeSheet.n               %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Sheet\View\FuncTableTypeSheet.n"],
+
+'@' => (
+	tableTypeSheet("TYPESHEET",TAG_TABLE,"TYPESHEET",true,"EditTypeSheet",TAG_SHEET_TYPE,""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_TYPESHEET TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

@@ -1,0 +1,25 @@
+%==================================================%
+%                                                  %
+%           	Logistics               	   %
+%                                                  %
+%  		DataFamilyProduct.n 		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+@ ("Data FAMILYPRODUCT 'Famille Produit' FAMILYPRODUCT "),
+
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+@ ("\"[2;(string,IDFAMILY,Statut ID,,15.0.80,0);(string,LABELFAMILY," TAG_LABEL ",,50.0.300,0);]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT f.Id AS IDFAMILY,\
+	 "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" as LABELFAMILY \
+	 FROM " DB_PREFIX "FAMILYPRODUCT f \
+	 ORDER BY f.Designation,f.Id\"\n\n"),
+
+
+

@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%           	Depot Optimization                 %
+%                                                  %
+%  		   DataZone2.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: ZONE2
+@ "Data ",
+
+% ID
+@ ("ZONE2 "),
+
+% Caption
+@ ("Zone "),
+
+% Group
+@ " ZONE2 ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[1;(string,IDZONE,IDZONE,,10,0)]\"\\\n"), 
+	
+
+@ VIEWSQL,
+
+@ ("SELECT 	id			AS IDZONE \
+		FROM	" DB_PREFIX "ZONE  \
+		WHERE idIcon<>'' ORDER BY id\"\n\n"),
+

@@ -1,0 +1,80 @@
+%==================================================%
+%                                                  %
+%            	Vehicle Routing		           %
+%                                                  %
+% 		Snapshot.n                	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadColor.n"],
+
+'()' => (
+	'()' <- database,
+	
+	typeBackup = TAG_TYPE_SNAPSHOT,
+/*
+	databaseType = "SQLSERVER" =>(
+		(SQL : "SELECT COUNT(id) AS nbExist FROM [" DB_BACKUP "] WHERE name='" nameSnapshot "' AND type='" TAG_TYPE_SNAPSHOT "' AND idClub='" idClubLogin "'"),
+		;
+		(SQL : "SELECT COUNT(id) FROM " DB_BACKUP " WHERE name='" nameSnapshot "' AND type='" TAG_TYPE_SNAPSHOT "' AND idClub='" idClubLogin "'"),
+	),
+*/
+	(SQL : SQL_SelectBackupCountNameIs nameSnapshot "' "SQL_AndWhereBackupTypeIs TAG_TYPE_SNAPSHOT "' "SQL_AndWhereBackupClubIs idClubLogin "'"), % Chen 0822
+
+	_ =(), 
+
+	nbExistName :: 0,
+	nbExistName = (),
+
+	(TAG_EXISTS_SNAPSHOT:
+		nbExistName = 0,
+	),
+/*
+	? databaseType (
+		"ACCESS":
+		(SQL : "SELECT 	COUNT(id),
+				CINT(IIF(MIN(id)='' OR MIN(id) IS NULL,'0',MIN(id))),
+				CINT(IIF(MAX(id)='' OR MAX(id) IS NULL,'0',MAX(id)))
+			FROM 	" DB_BACKUP "
+			WHERE 	type='" typeBackup "' AND idClub='" idClubLogin "'"),
+		;
+		"ORACLE","MYSQL":
+		(SQL : "SELECT 	COUNT(id),
+				To_number(CASE WHEN MIN(id)='' OR MIN(id) IS NULL THEN '0' ELSE MIN(id) END),
+				To_number(CASE WHEN MAX(id)='' OR MAX(id) IS NULL THEN '0' ELSE MAX(id) END)
+			FROM 	" DB_BACKUP "
+			WHERE 	type='" typeBackup "' AND idClub='" idClubLogin "'"),
+		;
+		"SQLSERVER":
+		(SQL : "SELECT 	COUNT(id) AS nb,
+				CAST((CASE WHEN MIN(id)='' OR MIN(id) IS NULL THEN '0' ELSE MIN(id) END) AS int) AS minId,
+				CAST((CASE WHEN MAX(id)='' OR MAX(id) IS NULL THEN '0' ELSE MAX(id) END) AS int) AS maxId
+			FROM 	[" DB_BACKUP "]
+			WHERE 	type='" typeBackup "' AND idClub='" idClubLogin "'"),
+	),
+*/
+	(SQL : 	SQL_SelectBackupCountMinMaxIdTypeIs typeBackup "' " SQL_AndWhereBackupClubIs idClubLogin "'"), % Zhou 0831
+
+	_		= (),
+
+	nbIdx		:: 0,
+	minIdBackup	:: 0,
+	maxIdBackup	:: 0,
+
+	nbIdx		= (),
+	minIdBackup	= (),
+	maxIdBackup	= (),
+
+	database <- '()',
+
+
+	idBackup	= ((maxIdBackup = 0 ? 1000 : maxIdBackup+1) ""),
+	nameBackup	= (nameSnapshot = "" ? idBackup : nameSnapshot),
+
+	colorBackup	= colorIdx_{nbIdx \mod nbColor},
+),
+
+['Work Directory' "Model\\Interaction\\Backup\\Backup0.n"],

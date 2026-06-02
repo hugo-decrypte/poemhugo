@@ -1,0 +1,108 @@
+%====================================================%
+%						     %
+%		     Logistics		             %
+%						     %
+%  	ScenarioTableOrder2PrintInvoice.n    %
+%						     %
+%       (c)2000. Enginest. All rights reserved.	     %
+%====================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "PrintInvoice ",
+
+% Caption
+@ (" '" TAG_PRINT_INVOICE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_PRINT1,
+
+% Label
+@ (" '" TAG_PRINT_INVOICE "' "),	% JZ 0906
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+% Instruction... (When Count>0)
+
+% print 
+
+%typeExecute = "NCL",
+% typeExecute = "SQLVIEW",
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  PrintOrderInvoice.ini Invoice_Order \\\n"),
+		@ (" {/*selected(tableORDER;1;(string,ID))*/}' \\\n"),
+		
+		%@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		%@ ("\t '(/*POEMPRINTEXEPATH*/)" poemPrintExe "'\\\n"),
+		%@ ("\t '(/*POEMPRINTAPPPATH*/)PrintOrderInvoice.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTAPPPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf]'\\\n"),
+		%@ ("\t '{/*selected(tableORDER;1;(string,ID))*/}' '(/*CLUBID*/)'\\\n"),
+		%@ ("\t '(/*POEMPRINTAPPPATH*/)' _ _ _ _ \\\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+
+		@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t '(/*POEMPRINTEXEPATH*/)" poemPrintExe "'\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)PrintOrderInvoice.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTAPPPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf]'\\\n"),
+		@ ("\t '{/*selected(tableORDER;1;(string,ID))*/}' '(/*CLUBID*/)'\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)' _ _ _ _ \\\n"),
+
+	),
+
+
+
+? typeExecute (
+
+	"SQLVIEW" :
+		%  open pdf file by Edge
+		@ (" WinExec \"[WAITTIME=30S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+
+	"NCL" :
+		%  open pdf file by View Open Command
+		%@ (" Open '(/*OUTPUTPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' \n\n")
+	%%	@ (" Open 'http://(/*SERVERIP*/):(/*SERVERPORT*/)/(/*OUTPUTPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' \n\n")
+	
+		@ (" WinExec \"[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/Invoice_Order{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+	),
+
+

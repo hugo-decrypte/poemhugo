@@ -1,0 +1,187 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 SetToPacking.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	
+	idSupplySelectedBuffer	:: "",
+	idProductSelectedBuffer	:: "",
+	
+	idSupplySelectedBuffer	= (),
+	idProductSelectedBuffer	= (),
+
+
+	
+	idPackingBuffer			:: "",
+	noPalletBuffer			:: "",
+	quantityBuffer			:: "",
+
+	idPackingBuffer			= (),
+	noPalletBuffer			= (),
+	quantityBuffer			= (),
+		
+
+	'()' <- database,
+	
+	dateExpiration :: "",
+	? databaseType (
+		"ACCESS" : 
+			dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"SQLSERVER" :
+			dateExpiration = (SQL_FORMATDATE"(DateAdd("SQL_DATEPART_DAY", NbDaysExpiration, "SQL_CURRENTDATE"),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"MYSQL" :
+	%%		dateExpiration = (SQL_FORMATDATE"(Date_Add("SQL_CURRENTDATE", INTERVAL NbDaysExpiration DAY),'"SQL_FORMATDATESTR"')" ),
+			dateExpiration = (SQL_FORMATDATE"(AddDate("SQL_CURRENTDATE", NbDaysExpiration),'"SQL_FORMATDATESTR"')" ),
+		;
+
+		"ORACLE" :
+			dateExpiration = (SQL_FORMATDATE"("SQL_CURRENTDATE"+ NbDaysExpiration,'"SQL_FORMATDATESTR"')" ),
+	),
+
+	%% create packing if not exists
+	SetToPakcing_SQL1 = (
+		"INSERT INTO " DB_PREFIX "PACKING (Id, IdOrder, Comments, IdSender, DateCreate, DateDelivery, NbPallet, IdState, OriginPacking) 
+		select '"idPackingBuffer"', s.Id, "SQL_CONCAT"'Appro No '"SQL_CONCATWITH" s.Id"SQL_CONCATEND", s.IdSupplier,"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), s.DateDelivery, 1, '0','S'
+		from " DB_PREFIX "SUPPLY s
+		where s.Id='"idSupplySelectedBuffer"'
+		and not exists (select 1 from " DB_PREFIX "PACKING P where P.Id='"idPackingBuffer"') "
+	),
+
+%% create pallet if not exists
+SetToPakcing_SQL2 = (
+	"INSERT INTO " DB_PREFIX "PALLET (IdPacking, NoPallet, DatePreparation, DateDelivery, IdState,IdZone,IdRow,IdColumn) 
+	select P.Id, "noPalletBuffer", DateCreate, DateDelivery, IdState,' ',' ',' '
+	from " DB_PREFIX "PACKING P
+	WHERE P.Id='"idPackingBuffer"' 
+	and not exists (select 1 from " DB_PREFIX "PALLET p0 where p0.IdPacking='"idPackingBuffer"' and p0.NoPallet="noPalletBuffer") "
+),
+
+%% add product to pallet if not exists
+SetToPakcing_SQL3 = (
+	"INSERT INTO " DB_PREFIX "PALLET_PRODUCT (IdPacking, NoPallet, IdProduct, Quantity, QuantityReal, QuantityStock, QuantityDefective, WeightNet, Comments, DateCreate, DateExpiration,IdZone,IdRow,IdColumn) 
+	select PL.IdPacking, "noPalletBuffer", '"idProductSelectedBuffer"', 0, 0, 0, 0, 0, ' ',
+	"SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),
+	"SQL_CASEWHEN" prd.NbDaysExpiration is not NULL and prd.NbDaysExpiration>0 "SQL_THEN" "dateExpiration" "SQL_ELSE" NULL "SQL_CASEEND",
+	' ',' ',' '
+	from " DB_PREFIX "PALLET PL, " DB_PREFIX "PRODUCT prd
+	WHERE PL.IdPacking='"idPackingBuffer"' and PL.NoPallet ="noPalletBuffer" 
+	and prd.Id ='"idProductSelectedBuffer"' 
+	and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PL.IdPacking and PP.NoPallet="noPalletBuffer" and PP.IdProduct='"idProductSelectedBuffer"') "
+),
+%% add product qty to pallet
+SetToPakcing_SQL4 = (
+	"Update " DB_PREFIX "PALLET_PRODUCT set 
+		Quantity=Quantity+"quantityBuffer", 
+		QuantityReal=QuantityReal+"quantityBuffer", 
+		QuantityStock=QuantityStock+"quantityBuffer" 
+	WHERE IdPacking='"idPackingBuffer"' and NoPallet="noPalletBuffer" 
+		and IdProduct='"idProductSelectedBuffer"' "
+),
+
+databaseType = "ACCESS" => (
+
+%% set qty to realize
+	SetToPakcing_SQL5 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT SP inner join " DB_PREFIX "PRODUCT P on P.id=SP.IdProduct set
+			SP.QuantityReal=SP.QuantityReal+"quantityBuffer" 
+			SP.WeightNet=SP.Quantity*P.Weight
+		WHERE IdSupply='"idSupplySelectedBuffer"' and IdProduct='"idProductSelectedBuffer"' "
+	),	
+
+	SetToPakcing_SQL6 = (
+		"Update " DB_PREFIX "PALLET PL set PL.Quantity=0, PL.QuantityReal=0, PL.QuantityStock=0, PL.WeightNet=0 
+		WHERE PL.IdPacking='"idPackingBuffer"' and PL.NoPallet in ("noPalletBuffer")"
+	),
+	SetToPakcing_SQL7 = (
+		"Update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "PALLET_PRODUCT PP on PP.IdPacking=PL.IdPacking and PP.NoPallet=PL.NoPallet set 
+			PL.Quantity			= PL.Quantity+PP.Quantity,
+			PL.QuantityReal		= PL.QuantityReal+PP.QuantityReal,
+			PL.QuantityStock	= PL.QuantityStock+PP.QuantityStock,
+			PL.QuantityDefective= PL.QuantityDefective+PP.QuantityDefective,
+			PL.WeightNet		= PL.WeightNet+PP.WeightNet
+		WHERE PL.IdPacking='"idPackingBuffer"' and PL.NoPallet in ("noPalletBuffer") "
+	),
+
+	SetToPakcing_SQL8 = (
+		"Update " DB_PREFIX "PACKING 
+		set Quantity=0,QuantityReal=0,QuantityStock=0,QuantityDefective=0
+		WHERE Id = '"idPackingBuffer"' "
+	),
+	SetToPakcing_SQL9 = (
+		"Update " DB_PREFIX "PACKING PK inner join " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PK.Id set 
+			PK.Quantity = PK.Quantity+PP.Quantity,
+			PK.QuantityReal = PK.QuantityReal+PP.QuantityReal,
+			PK.QuantityStock = PK.QuantityStock+PP.QuantityStock,
+			PK.QuantityDefective = PK.QuantityDefective+PP.QuantityDefective,
+			PK.WeightNet = PK.WeightNet+PP.WeightNet
+		WHERE PK.Id = '"idPackingBuffer"' "
+	),
+	;
+
+	SetToPakcing_SQL5 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT set
+			QuantityReal=QuantityReal+"quantityBuffer" 
+			WeightNet=Quantity*(select P.Weight from " DB_PREFIX "PRODUCT where id=SIdProduct)
+		WHERE IdSupply='"idSupplySelectedBuffer"' and IdProduct='"idProductSelectedBuffer"' "
+	),	
+
+	SetToPakcing_SQL6 = (
+		"Update " DB_PREFIX "PALLET set 
+			Quantity=(select sum(PP.Quantity) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PALLET.IdPacking and PP.NoPallet=PALLET.NoPallet),
+			QuantityReal =(select sum(PP.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PALLET.IdPacking and PP.NoPallet=PALLET.NoPallet),
+			QuantityStock = (select sum(PP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PALLET.IdPacking and PP.NoPallet=PALLET.NoPallet),
+			QuantityDefective = (select sum(PP.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PALLET.IdPacking and PP.NoPallet=PALLET.NoPallet),
+			WeightNet=(select sum(PP.WeightNet) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PALLET.IdPacking and PP.NoPallet=PALLET.NoPallet)
+		WHERE IdPacking='"idPackingBuffer"' and NoPallet in ("noPalletBuffer") "
+	),
+	SetToPakcing_SQL7 = (
+		"Update " DB_PREFIX "PALLET set Quantity=0, QuantityReal=0, QuantityStock=0, WeightNet=0 
+		WHERE IdPacking='"idPackingBuffer"' and NoPallet in ("noPalletBuffer") and Quantity is NULL"
+	),
+
+	SetToPakcing_SQL8 = (
+		"Update " DB_PREFIX "PACKING set 
+			Quantity=(select sum(PP.Quantity) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PACKING.Id),
+			QuantityReal =(select sum(PP.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PACKING.Id),
+			QuantityStock = (select sum(PP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PACKING.Id),
+			QuantityDefective = (select sum(PP.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PACKING.Id),
+			WeightNet=(select sum(PP.WeightNet) from " DB_PREFIX "PALLET_PRODUCT PP where PP.IdPacking=PACKING.Id)
+		WHERE Id = '"idPackingBuffer"' "
+	),
+	SetToPakcing_SQL9 = (
+		"Update " DB_PREFIX "PACKING 
+		set Quantity=0,QuantityReal=0,QuantityStock=0,QuantityDefective=0
+		WHERE Id = '"idPackingBuffer"' and Quantity is NULL"
+	),
+),
+
+	
+	(SQL : SetToPakcing_SQL1), 
+	(SQL : SetToPakcing_SQL2), 
+	(SQL : SetToPakcing_SQL3), 
+	(SQL : SetToPakcing_SQL4), 
+	(SQL : SetToPakcing_SQL5), 
+	(SQL : SetToPakcing_SQL6), 
+	(SQL : SetToPakcing_SQL7), 
+	(SQL : SetToPakcing_SQL8), 
+	(SQL : SetToPakcing_SQL9), 
+
+	
+	database <- '()',
+),

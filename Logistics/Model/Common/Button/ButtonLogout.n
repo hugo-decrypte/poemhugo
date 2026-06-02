@@ -1,0 +1,111 @@
+%=============================================%
+%                                             %
+% 		ButtonLogout.n                %
+%                                             %
+% (c)2000. Enginest. All rights reserved.     %
+%=============================================%
+
+%['Work Directory' "Model\Common\Config\ReadConfig.n"],
+
+
+[viewDirectory "ButtonLogout.view"] <- '@',
+
+ % View Object	
+@ ("View "),
+
+% ID	
+@ ("'" TAG_LOGOUT "' "),
+
+% Caption	
+@ ("'" TAG_LOGOUT "' "),
+
+% Title	
+@ ("'" TAG_LOGOUT "' "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+@ "\n\n",
+
+
+
+
+
+% Global Parameters
+%@ ("'{/*(GLOBALPARAMETERS;2;\\\n"),
+%@ ("(string,XXX,,Read);\\\n"),
+%@ ("(string,YYY,,abcdef);\\\n"),
+%@ (")*/}'\n\n"),
+
+
+
+
+% Script Object	
+@ ("Script "),
+
+% ID
+@ "Logout ",	% ATTENTION ID
+
+% Caption	
+@ (" '" TAG_SHUTDOWN "' "),
+
+% Group	
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_LOGOUT,
+
+% Label	
+@ (" '" TAG_CLICK_TO_LOGOUT "' "),
+
+
+% Object Group Set "{G1, G2, ...}"	
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "_ ",
+%@ ("'" TAG_LOGOUT "' "),
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("'" TAG_ASK_LOGOUT "' "),
+
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_NCLSCRIPT "Model\Common\Interface\Logout.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ NCL_ARGUMENT_END,
+
+
+
+'@' <- [viewDirectory "ButtonLogout.view"],

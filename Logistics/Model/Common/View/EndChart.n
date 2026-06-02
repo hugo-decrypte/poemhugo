@@ -1,0 +1,122 @@
+%==================================================%
+%                                                  %
+%             EndChart.n	    	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+@ "Schedule ",		% Chart ??????	
+
+% ID
+@ id,
+
+% Caption
+@ (" '" title "' "),
+
+% Group
+@ "_ ",
+
+% X Y SX SY
+@ ("0 0 1000 0 \\\n"),
+
+
+
+% Drawing options
+@ ("\"[HORIZONTALLINEWIDTH=1;VERTICALLINEWIDTH=0;WORKCOLOR=" RGB_CHART_BACKGROUND ";NOWORKCOLOR=" RGB_CHART_INACTIVE ";DEADLINECOLOR=" RGB_CHART_DEADLINE ";SEPARATIONLINEWIDTH=1;SEPARATIONLINECOLOR=" RGB_CHART_SEPARATION ";]\" \\\n"),
+
+
+% Data convention item
+@ ("\"[DATEFORMAT="		dateFormatSql
+	";TIMEFORMAT="		timeFormatSql
+	";DURATIONFORMAT="	(timetable ? "HH" : "")
+	";DAYSTRINGS=" 		(timetable ? WEEK_SET : "")
+	";MONTHSTRINGS="	(timetable ? MONTH_SET : "") ";]\" \\\n"),
+
+
+% Title options
+@ ("\"[TITLE=" 			title ";LINESEPARATOR=\\n"
+	";FILLCOLOR=" 		RGB_CHART_BACKGROUND
+   	";FONTCOLOR=" 		RGB_CHART_FONT
+   	";FONTNAME="		chartTitleFont
+   	";FONTSIZE=" 		(timetable ? chartTitleFontSize : diagramTitleFontSize) ";]\" \\\n "),
+
+
+% Task axis options
+@ ("\"[CELLSIZE=" 		(timetable ? 0 : diagramTaskSize) ";DATEFIRST=;DATELAST=;\\\n"
+	"TIMEFIRST=" 		(timetable ? t1Day : defaultTime)
+	";TIMELAST="  		(timetable ? t2Day : defaultTime)
+	";TIMESLOTS=" 		(timetable ? Slot24Day : "")
+	";TIMEPRECISION="	(timetable ? "SLOT" : "")
+	";\\\n"),
+@ ("ROWCOUNT=2; BORDERWIDTH=0; LINEWIDTH=1"
+	";BORDERCOLOR="		RGB_CHART_BORDER
+	";LINECOLOR="		RGB_CHART_LINE
+	";FILLCOLOR="		RGB_CHART_BACKGROUND
+	";FONTCOLOR="		RGB_CHART_FONT
+	";FONTSIZE="		(timetable ? chartTaskFontSize : diagramTaskFontSize)
+	";FONTNAME="		chartTextFont
+	";ALIGNTEXT=LeftCenter;]\" \\\n"),
+
+
+% Item axis options
+@ ("\"[BORDERWIDTH=1;LINEWIDTH=0"
+	";BORDERCOLOR=" 	RGB_CHART_BORDER
+	";LINECOLOR=" 		RGB_CHART_LINE
+	";FILLCOLOR=" 		RGB_CHART_BACKGROUND
+	";FONTCOLOR=" 		RGB_CHART_FONT
+
+	";FONTSIZE="		(timetable ? chartItemFontSize : diagramItemFontSize)
+	";FONTNAME="		chartTextFont
+	";WIDTH="		chartItemWidth
+	";INTERLINE="		(timetable ? chartTaskInterline : diagramTaskInterline) ";]\" \\\n"),
+
+
+
+% Task drawing options
+timetable => (
+	@ ("\"[TIMETABLE=1; \\\n"),
+	;
+	@ ("\"[TIMETABLE=0; \\\n"),
+),
+
+viewtask => (
+	@ ("  VIEWTASK=1; \\\n"),
+	;
+	@ ("  VIEWTASK=0; \\\n"),
+),
+
+expanded => (
+	@ ("  EXPANDALL=1; \\\n"),
+	;
+	@ ("  EXPANDALL=0; \\\n"),
+),
+
+@ ("  EXPANSIBILITY=1; \\\n"),
+@ ("  DEFLATEHEIGHT=" 		(timetable ? chartTaskHeightRatio : diagramTaskHeightRatio) "; \\\n"),
+@ ("  DEFLATEWIDTH=" 		(timetable ? chartTaskWidthRatio : diagramTaskWidthRatio) "; \\\n"),
+
+
+
+@ ("  LINEWIDTH=0; \\\n"),
+@ ("  LINECOLOR=" 		RGB_CHART_LINE "; \\\n"),
+@ ("  FILLCOLOR=" 		RGB_CHART_BACKGROUND "; \\\n"),
+@ ("  FONTCOLOR=" 		RGB_CHART_FONT "; \\\n"),
+@ ("  LINKCOLOR=" 		RGB_CHART_LINK "; \\\n"),
+
+
+
+@ ("  FONTSIZE=" 		(timetable ? chartTaskFontSize : diagramTaskFontSize) "; \\\n"),
+@ ("  FONTNAME=" 		chartTextFont "; \\\n"),
+@ ("  ALIGNTEXT=LeftCenter;]\" \\\n"),
+
+
+
+% "[Group data-object]" or "(nGroups nCols)"
+@ "_ ",
+
+% "[Item data-object]" or "(nItems nCols)" 
+@ ("\"[DATAOBJ=" idItem ";]\" "),
+
+% "[Task data-object]" or "(nTasks nCols)"
+@ ("\"[DATAOBJ=" idTask ";DROPSCRIPT=" idDropScript ";SELECTED=" idSelected "]\"\n\n"),
+

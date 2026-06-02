@@ -1,0 +1,51 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 EditObjective.n	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0819
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+
+'()' => (
+	valueObjectiveBuffer		:: "",
+
+%	nbConfigSelected		= (),
+%	nbParameterSelected		= (),
+
+	valueObjectiveBuffer		= (),
+
+%	(TAG_ONLY_ONE_TO_EDIT : nbConfigSelected = 1),
+
+
+
+
+	'()' <- database,
+	(SQL : SQL_UpdateRuleSetSelectedToBe STATE_DESELECTED " " SQL_WhereRuleTypeIs TAG_OBJECTIVE "' "
+		SQL_AndWhereRuleSelectedIs STATE_SELECTED " " SQL_AndWhereRuleClubIs idClubLogin "'"), % Zhou 0822
+
+	(SQL : SQL_UpdateRuleSetSelectedToBe STATE_SELECTED " " SQL_WhereRuleTypeIs TAG_OBJECTIVE "' "
+		SQL_AndWhereRuleValueIs valueObjectiveBuffer "' " SQL_AndWhereRuleClubIs idClubLogin "'"),
+/*
+	(SQL : "UPDATE	" DB_PREFIX "RULE r
+		SET 	r.selected=" STATE_DESELECTED "
+		WHERE	r.type='"TAG_OBJECTIVE"' AND
+			r.selected=" STATE_SELECTED " AND
+			r.idClub='" idClubLogin "'"),
+
+	(SQL : "UPDATE	" DB_PREFIX "RULE
+		SET 	selected=" STATE_SELECTED "
+		WHERE	type='"TAG_OBJECTIVE"' AND
+			[value]='" valueObjectiveBuffer "' AND
+			idClub='" idClubLogin "'"),
+*/
+	sqlOperationLog := TAG_EDIT_OBJECTIVE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

@@ -1,0 +1,31 @@
+%==================================================%
+%                                                  %
+% 		ScriptFormatTable.n          	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Function\FuncFormatTable.n"],
+
+'()' => (
+	% PoemClient
+	fieldConfig = ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\Field.cfg"),
+	fieldTable = (DB_PREFIX "FIELD"),
+
+	formatTable(fieldConfig, fieldTable),
+
+
+	% PoemWeb
+	fieldMobileConfig = ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\FieldMobile.cfg"),
+	fieldMobileTable = (DB_PREFIX "FIELDMOBILE"),
+
+	formatTable(fieldMobileConfig, fieldMobileTable),
+
+
+
+
+
+	%[['Work Directory' "Model\Common\Script\GenerateMenu.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'], % Zhou 0518
+),

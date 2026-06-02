@@ -1,0 +1,60 @@
+%===============================================%
+%						%
+%	ScenarioChartVehicle2MoveOrder.n	%
+%						%
+% (c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "MoveOrder ",
+
+% Caption
+@ ("'" TAG_MOVE_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_MOVE,
+
+% Label
+@ (" '" TAG_MOVE_ORDER "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ " _ ",
+
+% Object Id. Set / Object Item
+@ "'[OBJECTIDS={VEHICLEORDER}; SUBOBJTYPE={VEHICLE,ORDER}]' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("'" TAG_MOVE_ORDER " ?'"),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=3;" NCLPREFIX "]'\\\n"),
+
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\Solver\Order\MoveOrderChart.n'\\\n"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*Selected(ORDER;3;(string,ID);(string,IDVEHICLE);(int,TOURVEHICLE))*/} \\\n"),
+@ ("{/*Drop(VEHICLE;3;(string,ITEMID);(datetime,DRAGTIME,,,,," dateTimeFormatView ");(datetime,DROPTIME,,,,," dateTimeFormatView "))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+@ ("Reload \"[VIEWID=ViewChartVEHICLE]\"\\\n"),
+@ ("Reload \"[VIEWID=ViewTableRESULT]\"\n\n"),
+

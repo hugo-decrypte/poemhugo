@@ -1,0 +1,89 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 AddProductToOfferSupplier.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	idSupplierBuffer 	:: "",
+	idOfferBuffer 		:: "",
+	idSupplierBuffer	= (),
+	idOfferBuffer		= (),
+
+	'()' <- database,
+
+	AddProductToOfferSupplier_SQL1 = (
+		"INSERT INTO " DB_PREFIX "OFFER_PRODUCT (IdSupplier, IdOffer, IdProduct, MinQuantity, Comments, DateOffer, DateValidity) 
+		select o.IdSupplier, o.IdOffer, prd.Id, 0, ' ', o.DateOffer, o.DateValidity
+		from " DB_PREFIX "SUPPLIEROFFER o, " DB_PREFIX "PRODUCT prd
+		WHERE o.IdSupplier in ("idSupplierBuffer") and o.IdOffer in ("idOfferBuffer") 
+		and prd.Id in ("IDOBJSELECTEDBUFFER")
+		and not exists (select 1 from " DB_PREFIX "OFFER_PRODUCT op where op.IdSupplier=o.IdSupplier and op.IdOffer=o.IdOffer and op.IdProduct=prd.Id) "
+	),
+
+	databaseType = "ACCESS" => (
+
+		AddProductToOfferSupplier_SQL2 = (
+			"Update " DB_PREFIX "OFFER_PRODUCT op inner join " DB_PREFIX "PRODUCT prd on prd.Id=op.IdProduct
+				set op.MinQuantity=op.MinQuantity+prd.QuantityPackaging 
+			WHERE op.IdSupplier in ("idSupplierBuffer") and op.IdOffer="idOfferBuffer"
+				and prd.Id in ("IDOBJSELECTEDBUFFER")"
+		),
+		AddProductToOfferSupplier_SQL3 = (
+			"Update " DB_PREFIX "OFFER_PRODUCT op inner join " DB_PREFIX "PRODUCT prd on prd.Id=op.IdProduct
+				set op.PriceUnit=prd.PurchasePrice 
+			WHERE op.IdSupplier in ("idSupplierBuffer") and op.IdOffer="idOfferBuffer"
+				and prd.Id in ("IDOBJSELECTEDBUFFER")
+				and (op.PriceUnit is NULL or op.PriceUnit<=0)
+				and (prd.PurchasePrice is not NULL and prd.PurchasePrice>0) "
+		),
+
+		;
+
+		AddProductToOfferSupplier_SQL2 = (
+			"Update " DB_PREFIX "OFFER_PRODUCT set
+				MinQuantity=MinQuantity+(select prd.QuantityPackaging from  " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)
+			WHERE IdSupplier in ("idSupplierBuffer") and IdOffer="idOfferBuffer"
+				and IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+		AddProductToOfferSupplier_SQL3 = (
+			"Update " DB_PREFIX "OFFER_PRODUCT set
+				PriceUnit=(select prd.PurchasePrice from  " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct and (prd.PurchasePrice is not NULL and prd.PurchasePrice>0) )
+			WHERE IdSupplier in ("idSupplierBuffer") and IdOffer="idOfferBuffer"
+				and IdProduct in ("IDOBJSELECTEDBUFFER") 
+				and (PriceUnit is NULL or PriceUnit<=0) "
+		),
+	),
+
+
+	(SQL : AddProductToOfferSupplier_SQL1), 
+	(SQL : AddProductToOfferSupplier_SQL2), 
+	(SQL : AddProductToOfferSupplier_SQL3), 
+	
+	database <- '()',
+),

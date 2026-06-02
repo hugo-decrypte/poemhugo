@@ -1,0 +1,54 @@
+%==================================================%
+%                                                  %
+% 		UpdateResourceState.n		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+%['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+%['Work Directory' "Model\Common\Config\CheckLog.n"],
+%['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+%'()' => (
+%	aliasTable	= "SITE",
+%),
+%['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	nbSelected = (),
+	nbParam    = (),
+	
+	\forall i \in [1, nbSelected] (
+		idSelectedBuffer_{i} :: "",
+		idSelectedBuffer_{i} = (),
+		
+		i < nbSelected =>(
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "',"),
+			;
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDSELECTED :: "",
+	IDSELECTED = [\forall i \in [1, nbSelected] strIdSelectedBuffer_{i}],
+	
+	strState :: "",
+	strState = (),
+	
+
+	
+	UpdateResourceState_SQL1 = (
+		"UPDATE " DB_PREFIX "RESOURCE r, " DB_PREFIX "STATE s
+		 SET r.state=s.id
+		 WHERE r.id IN (" IDSELECTED ")
+		 AND "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"strState"' and s.CATEGORY='RESOURCE'"
+	),
+
+
+	'()' <- database,
+
+	(SQL : UpdateResourceState_SQL1),
+
+	database <- '()',
+),

@@ -1,0 +1,81 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		UpdateResourceCalendar.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+('hh:mm:ss' TAG_TAB_0 identity ": " TAG_UPDATE_RESOURCE_INFORMATION "\n" : ),
+
+
+
+(SQL : "SELECT MIN(t1Plan) AS t1Fr,MAX(t2Plan) AS t2Fr FROM " DB_PREFIX "PROJECT WHERE idClub='" idClubActive "'"),
+
+_		= (),
+
+t1FrPlan	:: defaultDateTime,
+t2FrPlan	:: defaultDateTime,	
+
+t1FrPlan	= (),
+t2FrPlan	= (),
+
+
+DateFrPlan	= [t1FrPlan,t2FrPlan][dateFormat],
+
+
+
+% RESOURCE Calendar
+nbUnitString = 2000,
+
+\forall r \in RESOURCE (
+	str0CalendarResource_{r} = (
+		""
+		((DateResource_{r} \cap DateFrPlan \cup AdditionalDateResource_{r}) \setminus DateForbiddenResource_{r})
+	),
+		
+	strCalendarResource_{r} :: "",
+	#str0CalendarResource_{r} > nbUnitString*2 =>(
+		strCalendarResource_{r} = ("" DateFrPlan),
+		;
+		strCalendarResource_{r} = str0CalendarResource_{r},	
+	),
+
+	nbSqlCalendarResource_{r}	\in [1, #RESOURCE],
+	nbSqlCalendarResource_{r} 	= \lceil #strCalendarResource_{r} / nbUnitString \rceil,
+	nbLastStrCalendarResource_{r} 	= #strCalendarResource_{r} \mod nbUnitString,
+
+	\forall i \in [1, nbSqlCalendarResource_{r}]
+		strCalendarResourceSql_{r,i} :: "",
+
+	strCalendarResourceSql_{r,1} = strCalendarResource_{r}[1..nbUnitString],
+	\forall i \in [2, nbSqlCalendarResource_{r}-1]
+		strCalendarResourceSql_{r,i} = strCalendarResource_{r}[nbUnitString*(i-1)+1..nbUnitString*i],
+	strCalendarResourceSql_{r,nbSqlCalendarResource_{r}} =  strCalendarResource_{r}[nbUnitString*(nbSqlCalendarResource_{r}-1)+1..nbUnitString*(nbSqlCalendarResource_{r}-1)+1+nbLastStrCalendarResource_{r}],
+),
+
+
+\forall r \in RESOURCE (
+	(SQL : "UPDATE " DB_PREFIX "RESOURCE SET Calendar=NULL WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"),
+
+	\forall i \in [1, nbSqlCalendarResource_{r}] 
+		? databaseType (
+		"ACCESS","SQLSERVER":
+			(SQL : "UPDATE " DB_PREFIX "RESOURCE SET Calendar=Calendar+'" strCalendarResourceSql_{r,i} "' WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"),
+			;
+
+		"MYSQL" :
+			(SQL : "UPDATE " DB_PREFIX "RESOURCE SET Calendar=CONCAT_WS('',Calendar,'" strCalendarResourceSql_{r,i} "') WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"),			
+			;
+
+		"ORACLE" :
+			(SQL : "UPDATE " DB_PREFIX "RESOURCE SET Calendar=Calendar||'" strCalendarResourceSql_{r,i} "' WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"),					
+		),
+
+
+	(SQL : "UPDATE " DB_PREFIX "RESOURCE SET Slot='"SlotShiftResource_{r}	"' WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"), 
+	(SQL : "UPDATE " DB_PREFIX "RESOURCE SET NameShift='"NameShiftResource_{r} "' WHERE id='" idResource_{r} "' AND idClub='" idClubActive "'"),
+),
+

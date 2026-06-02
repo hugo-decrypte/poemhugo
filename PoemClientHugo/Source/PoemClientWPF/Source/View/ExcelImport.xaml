@@ -1,0 +1,49 @@
+﻿<Window x:Class="PoemClient.Source.View.ExcelImport"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding windowTitle}" Height="180" Width="450" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="8*"/>
+            <RowDefinition Height="17*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="15*"/>
+            <ColumnDefinition Width="300*"/>
+            <ColumnDefinition Width="15*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center" Height="26">
+            <Label Content="{Binding windowInputLabel}" Width="110"/>
+            <Button x:Name="Input" Click="BrowseFile" BorderThickness="0,0,0,1" Width="280" Background="Transparent" BorderBrush="#FFC6BDBD"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Height="26">
+            <Label Content="{Binding windowOutputLabel}" Width="110"/>
+            <Button x:Name="Output" Click="BrowseFile" BorderThickness="0,0,0,1" Width="280" Background="Transparent" BorderBrush="#FFC6BDBD"/>
+        </StackPanel>
+
+        <Grid Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Height="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Content="Ok" Click="StartImportButton_Click" Grid.Column="1" Padding="5" Background="White" Width="100" Height="30" FontWeight="DemiBold" HorizontalAlignment="Right">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="Transparent" BorderBrush="Gray" BorderThickness="1" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="LightBlue" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

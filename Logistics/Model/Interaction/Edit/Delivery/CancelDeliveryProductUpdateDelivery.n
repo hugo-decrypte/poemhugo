@@ -1,0 +1,169 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   		%
+%                                                  %
+% 		 CancelDeliveryProductUpdateDelivery.n		   	 		  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	
+	idProductBuffer		:: "",
+	idPackingBuffer		:: "",
+	idOrderProductLine	:: "",
+	
+	idProductBuffer			= (),
+	idPackingBuffer			= (),
+	idOrderProductLine		= (),
+	
+	noPalletBuffer		:: 0,
+	
+	noPalletBuffer		= (),
+	
+	
+	idOrderProductLineCondition = ( 
+		SQL_CONCAT"trim(IdOrder)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH"trim(IdProduct)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH""SQL_FORMATNUM"(NoLine,"SQL_FORMATSCALE0")"
+		SQL_CONCATEND" in ('"idOrderProductLine"') "
+	),
+	
+	
+	'()' <- database,
+	
+	CancelDeliveryProductUpdateDelivery_SQL1=(
+		"Update " DB_PREFIX "DELIVERY_PRODUCT 
+		set IdPacking='STOCK', NoPallet=0
+		WHERE  "idOrderProductLineCondition" "
+	),
+
+
+	databaseType = "ACCESS" => (
+		%% PALLET_PRODUCT qty
+		CancelDeliveryProductUpdateDelivery_SQL2=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityOut=0
+			WHERE PLP.IdPacking='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL3=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on DP.IdPacking=PLP.IdPacking and DP.NoPallet=PLP.NoPallet and DP.IdProduct=PLP.IdProduct set
+				PLP.QuantityOut=PLP.QuantityOut+DP.QuantityReal 
+			WHERE PLP.IdPacking='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL4=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityStock=PLP.quantityReal-PLP.QuantityOut
+			WHERE PLP.IdPacking='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL5=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityStock=0
+			WHERE PLP.IdPacking='"idPackingBuffer"' and PLP.QuantityStock=-0"
+		),
+
+		%% PALLET qty
+		CancelDeliveryProductUpdateDelivery_SQL6=(
+			"Update " DB_PREFIX "PALLET PL set PL.QuantityStock=0
+			WHERE PL.IdPacking='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL7=(
+			"Update " DB_PREFIX "PALLET PL inner join " DB_PREFIX "PALLET_PRODUCT PLP on PL.IdPacking=PLP.IdPacking and PL.NoPallet=PLP.NoPallet set
+				PL.QuantityStock=PL.QuantityStock+PLP.QuantityStock 
+			WHERE PL.IdPacking='"idPackingBuffer"'"
+		),
+
+		%% PACKING qty
+		CancelDeliveryProductUpdateDelivery_SQL8=(
+			"Update " DB_PREFIX "PACKING PK set PK.QuantityStock=0
+			WHERE PK.Id='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL9=(
+			"Update " DB_PREFIX "PACKING PK inner join " DB_PREFIX "PALLET PL on PK.Id=PL.IdPacking set
+				PK.QuantityStock=PK.QuantityStock+PL.QuantityStock 
+			WHERE PK.Id='"idPackingBuffer"'"
+		),
+
+		
+		%% PRODUCT Qty
+		CancelDeliveryProductUpdateDelivery_SQL10=(
+			"Update " DB_PREFIX "PRODUCT prd set prd.QuantityStock=0 WHERE prd.Id in ('"idProductBuffer"')"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL11=(
+			"Update " DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "PALLET_PRODUCT PLP on prd.Id=PLP.IdProduct set 
+				prd.QuantityStock=prd.QuantityStock+PLP.QuantityStock
+			WHERE prd.Id in ('"idProductBuffer"') "
+		),
+		
+		;
+
+		%% PALLET_PRODUCT qty
+		CancelDeliveryProductUpdateDelivery_SQL2=(
+			"Update " DB_PREFIX "PALLET_PRODUCT set
+				PLP.QuantityOut=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdPacking=PLP.IdPacking and DP.NoPallet=PLP.NoPallet and DP.IdProduct=PLP.IdProduct)
+			WHERE PLP.IdPacking='"idPackingBuffer"' and PLP.NoPallet="noPalletBuffer" and PLP.IdProduct='"idProductBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL3=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityOut=0
+			WHERE PLP.IdPacking='"idPackingBuffer"' and PLP.NoPallet="noPalletBuffer" and PLP.IdProduct='"idProductBuffer"' and PLP.QuantityOut is NULL"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL4=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityStock=PLP.quantityReal-PLP.QuantityOut
+			WHERE PLP.IdPacking='"idPackingBuffer"' and PLP.NoPallet="noPalletBuffer" and PLP.IdProduct='"idProductBuffer"'"
+		),
+		
+
+		%% PALLET qty
+		CancelDeliveryProductUpdateDelivery_SQL5=(
+			"Update " DB_PREFIX "PALLET set
+				PL.QuantityStock=(select sum(PLP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PLP where PALLET.IdPacking=PLP.IdPacking and PALLET.NoPallet=PLP.NoPallet) 
+			WHERE PL.IdPacking='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL6=(
+			"Update " DB_PREFIX "PALLET set QuantityStock=0
+			WHERE IdPacking='"idPackingBuffer"' and QuantityStock is NULL "
+		),
+
+		%% PACKING qty
+		CancelDeliveryProductUpdateDelivery_SQL7=(
+			"Update " DB_PREFIX "PACKING set
+				QuantityStock=(select sum(PL.QuantityStock) from " DB_PREFIX "PALLET PL where Id=PL.IdPacking)
+			WHERE PK.Id='"idPackingBuffer"'"
+		),
+		CancelDeliveryProductUpdateDelivery_SQL8=(
+			"Update " DB_PREFIX "PACKING set QuantityStock=0
+			WHERE Id='"idPackingBuffer"' and QuantityStock is NULL "
+		),
+
+		%% PRODUCT qty
+		CancelDeliveryProductUpdateDelivery_SQL9=(
+			"Update " DB_PREFIX "PRODUCT set 
+				QuantityStock=(select sum(PLP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PLP where Id=PLP.IdProduct)
+			WHERE Id in ('"idProductBuffer"') "
+		),
+		CancelDeliveryProductUpdateDelivery_SQL10=(
+			"Update " DB_PREFIX "PRODUCT set QuantityStock=0   WHERE Id in ('"idProductBuffer"') and QuantityStock is NULL"
+		),
+	),
+
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL1), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL2), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL3), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL4), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL5), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL6), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL7), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL8), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL9), 
+	(SQL : CancelDeliveryProductUpdateDelivery_SQL10), 
+	databaseType = "ACCESS" => (
+		(SQL : CancelDeliveryProductUpdateDelivery_SQL11), 
+	),
+	
+	database <- '()',
+),

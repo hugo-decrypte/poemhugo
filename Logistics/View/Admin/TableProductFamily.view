@@ -1,0 +1,83 @@
+View ViewTableFAMILYPRODUCT 'Famille produit' 'Famille produit'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableFAMILYPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Famille produit;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Left,Left,Left,Left}]"\
+"[DATAOBJ=FAMILYPRODUCT;FILLCOLOR=LINERGB]"
+
+Data FAMILYPRODUCT 'Famille produit' FAMILYPRODUCT HTTPSQL 0 '[FIND={ID,DESIGNATION,SUPPLIER,MINSTORAGEUNIT,MAXSTORAGEUNIT,QUANTITYSTOCK,QUANTITYORDERED,QUANTITYSUPPLIED,STATE,IDZONE,IDROW,IDCOLUMN}]'   [DOUBLECLICK=TableDefaultRateProduct] \
+"[12;(string,ID,ID,,15,,);(string,DESIGNATION,Désignation,,25,,);(string,SUPPLIER,Fournisseur,,20,,);(int,MINSTORAGEUNIT,Min capacité stock,,30,,);(int,MAXSTORAGEUNIT,Max capacité stock,,30,,);(int,QUANTITYSTOCK,Qté stock,,20,,);(int,QUANTITYORDERED,Qté commande,,25,,);(int,QUANTITYSUPPLIED,Qté provision,,20,,);(string,STATE,Etat,,20,,);(string,IDZONE,Zone,,20,,);(string,IDROW,Rang,,20,,);(string,IDCOLUMN,Colonne,,20,,);(color,LINERGB,(255 255 255),,13.0.0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT f.id AS ID, \
+	 f.Designation AS DESIGNATION,\
+	 (select Name from SUPPLIER s where s.Id=f.Idsupplier) as SUPPLIER,\
+	 f.QuantityStock AS QUANTITYSTOCK,\
+	 f.QuantityOrdered AS QUANTITYORDERED,\
+	 f.QuantitySupplied AS QUANTITYSUPPLIED,\
+	 f.MinStorageUnit AS MINSTORAGEUNIT,\
+	 f.MaxStorageUnit AS MAXSTORAGEUNIT,\
+	 f.IdStockState as STATE,\
+	 f.IDZONE as IDZONE,\
+	 f.IDROW as IDROW,\
+	 f.IDCOLUMN as IDCOLUMN,\
+	 '(220 220 255)' as LINERGB \
+ FROM FAMILYPRODUCT f \
+ ORDER BY f.ID"
+
+
+
+Script TableDefaultRateProduct  'Taux de défaut' _ 26 'Taux de défaut' _ 'tableFAMILYPRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDefaultRate_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);FAMILY={/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/};OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=pour famille produit {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/}]"
+
+// Script 1. Create Family
+
+Script CreateFamily  'Créer famille' _ 61 'Créer' _ 'tableFAMILYPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\product\CreateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(CPRD;Créer famille;2;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+(string,DESIGNATION,Désignation,,50.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 2. Duplicate Family
+
+Script DuplicateFamilyProduct 'Dupliquer famille' _ 62 'Dupliquer' _ 'tableFAMILYPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DuplicateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \
+{/*Input(DPRD;Dupliquer famille;1;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 3. Modify Family
+
+Script ModifyFamily 'Modifier famille' _ 63'Modifier' _ 'tableFAMILYPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \
+{/*Input(MPRD;Modifier famille;6;\
+(string,DESIGNATION,Désignation,[/*FAMILYPRODUCT.DESIGNATION*/],50.0.580,0);\
+(int,MINSTORAGEUNIT, Min Capacité Stock,,10.0.580,1);\
+(int,MAXSTORAGEUNIT, Max Capacité Stock,,10.0.580,1);\
+(string,IDZONE,Secteur,[/*FAMILYPRODUCT.IDZONE*/],20.0.580,1);\
+(string,IDROW,Rang,[/*FAMILYPRODUCT.IDROW*/],20.0.580,1);\
+(string,IDCOLUMN,Colonne,[/*FAMILYPRODUCT.IDCOLUMN*/],20.0.580,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 4. Delete Family
+
+Script DeleteFamily 'Supprimer famille' _ 64'Supprimer' _ 'tableFAMILYPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ 'Supprimer famille ?'  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DeleteProductFamily.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableFAMILYPRODUCT;1;(string,ID))*/} \
+'\
+Reload _ _ _
+

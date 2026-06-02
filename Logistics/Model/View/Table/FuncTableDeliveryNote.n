@@ -1,0 +1,71 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	       	   %
+%                                                  %
+%  		 FuncTableDeliveryNote.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableDeliveryNote>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),	
+		viewFile = ("TableDeliveryNote" postfix),
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);(datetime,T1WINDOW,T1WINDOW,,,,YYYY-MM-DD HH:MM|MM/DD/YYYY HH:MM);\\\n"),
+		@ ("(datetime,T2WINDOW,T2WINDOW,,,,YYYY-MM-DD HH:MM|MM/DD/YYYY HH:MM);(int,QUANTITY,QUANTITY,,20,0);\\\n"),
+		@ ("(string,IDVEHICLE,,,20,0);(string,IDVEHICLE0,,,20,0);]\"\\\n"),
+			
+
+		
+		@ VIEWSQL,
+		
+		
+		@ ("SELECT o.id AS ID, o.idClient AS CLIENT, \\\n"),
+ 		@ (SQL_CASEWHEN"o.priority IS NULL"SQL_THEN"0"SQL_ELSE"o.priority"SQL_CASEEND" AS PRIORITY, \\\n"),
+		@ (SQL_CONCAT"trim(s.id) "SQL_CONCATWITH" ' ' "SQL_CONCATWITH" s.name "SQL_CONCATEND" AS SITE,\\\n"),
+		@ ("o.idProduct AS IDPRODUCT,\\\n"),
+		@ (SQL_CASEWHEN"o.quantity IS NULL "SQL_THEN" 0 "SQL_ELSE" o.quantity"SQL_CASEEND" AS QUANTITY,\\\n"),
+		@ (SQL_CASEWHEN"o.weight IS NULL,0,o.weight"SQL_CASEEND" AS WEIGHT, \\\n"),
+		@ (SQL_CASEWHEN"o.volume IS NULL,0,o.volume"SQL_CASEEND" AS VOLUME, \\\n"),
+		@ (SQL_CASEWHEN"o.state='1' "SQL_THEN" 'candidate' "SQL_ELSE" "SQL_CASEWHEN"o.state='2' "SQL_THEN" 'planned'"SQL_ELSE""SQL_CASEWHEN"o.state='3'"SQL_THEN"'launched' "SQL_ELSE" 'unavailable'"SQL_CASEEND SQL_CASEEND SQL_CASEEND" AS STATE, \\\n"),
+		@ (SQL_CASEWHEN"o.state='1' "SQL_THEN" '(0 224 224)' "SQL_ELSE" "SQL_CASEWHEN"o.state='0' "SQL_THEN" '(248 248 248)' "SQL_ELSE" '(255 255 255)'"SQL_CASEEND""SQL_CASEEND" AS LINERGB, \\\n"),
+		@ ("'(/*USERID*/)' AS IDUSER, \\\n"),
+		@ ("o.t1Service0 AS T1WINDOW, o.t2Service0 AS T2WINDOW, o.idResource AS IDVEHICLE, o.tourResource AS TOURVEHICLE, \\\n"),
+		@ ("o.t1 AS T1PLAN, o.t2 AS T2PLAN, o.receipts AS RECEIPTS, o.cost AS COST, o.timeService  AS TIMESERVICE, \\\n"),
+		@ ("o.timeFixed AS TIMEFIXED, o.IdResource0 AS IDRESOURCE0, o.t2Service0 AS T2SERVICE0 \\\n"),
+		@ ("FROM " DB_PREFIX "OPT_ORDER o, " DB_PREFIX "SITE s \\\n"),
+		@ ("WHERE o.idSite2=s.id AND o.idClub='(/*CLUBID*/)' \\\n"),
+		@ ("ORDER BY o.state DESC, o.selected DESC \"\n\n\n"),
+
+		['Work Directory' "Model\View\Data\DataState.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryNote2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryNote2EditOrder.n"],
+		
+	
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

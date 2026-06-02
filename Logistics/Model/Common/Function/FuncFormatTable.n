@@ -1,0 +1,143 @@
+%==================================================%
+%                                                  %
+%            	  ERP		    	           %
+%                                                  %
+% 		FuncFormatTable.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<formatTable>(fieldConfig, fieldTable)
+(
+	'()' => (
+		'()' <- [fieldConfig],
+
+
+		nbTable =< maxTable,
+		nbTable = (),
+
+
+		% Read from config file Field.cfg
+		\forall t \in [1,nbTable] (
+			idxTable_{t} 	:: 0,
+			idTable_{t} 	:: "",
+			aliasTable_{t} :: "",
+			nameTable_{t} 	:: "",
+			colorTable_{t} :: "",
+
+			idxTable_{t}	= (),
+			idTable_{t} 	= (),
+			aliasTable_{t}	= (),
+			nameTable_{t} 	= (),
+			colorTable_{t}	= (),
+
+
+			nbFieldTable_{t} =< maxFieldTable,
+			nbFieldTable_{t} = (),
+
+
+			\forall i \in [1,nbFieldTable_{t}] (
+				selectedFieldTable_{t,i} :: "",
+				selectedFieldTable_{t,i} = () ,
+			),
+	
+
+			\forall i \in [1,nbFieldTable_{t}] (
+				typeFieldTable_{t,i} :: "",
+				typeFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (
+				idFieldTable_{t,i} :: "",
+				idFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (
+				aliasFieldTable_{t,i} :: "",
+				aliasFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (	
+				nameFieldTable_{t,i} :: "",
+				nameFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (
+				alignmentFieldTable_{t,i} :: "",
+				alignmentFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (
+				colorFieldTable_{t,i} :: "",
+				colorFieldTable_{t,i} = () ,
+			),
+			\forall i \in [1,nbFieldTable_{t}] (
+				formatFieldTable_{t,i} :: "",
+				formatFieldTable_{t,i} = () ,
+			),
+		),
+
+	
+		[fieldConfig] <- '()',
+
+
+
+		% Write to field table
+		\forall t \in [1,nbTable] (
+			FieldTable_{t} \subset [1, maxFieldTable],
+			IdxFieldTable_{t} \subset [1, maxFieldTable],
+
+			FieldTable_{t} = \{
+				\forall i \in [1,nbFieldTable_{t}]
+				(selectedFieldTable_{t,i} = "T" ? i : 0)
+			\} \setminus 0,
+
+			IdxFieldTable_{t} \subset [1,maxFieldTable],
+			IdxFieldTable_{t} = [1,#FieldTable_{t}],
+
+			\forall i \in IdxFieldTable_{t} (
+				idxFieldTable_{t,i} = FieldTable_{t}[i],
+			),
+		),
+
+
+
+		'()' <- database,
+	
+		(SQL : "DELETE FROM " fieldTable),
+
+		\forall t \in [1,nbTable] (
+			\forall i \in IdxFieldTable_{t} (
+				nameTrueFieldTable_{t,i} = nameFieldTable_{t,idxFieldTable_{t,i}},
+
+				sqlInsertIntoFieldTable_{t,i} = (
+					"INSERT INTO " fieldTable
+					"(idTable,aliasTable,nameTable,idxTable, idField,aliasField,nameField,typeField,alignmentField,colorField,formatField,idxField)VALUES('"
+
+					idTable_{t} 					"','" 
+					aliasTable_{t} 					"','"
+					&{nameTable_{t}} 				"',"
+
+					idxTable_{t}					",'"
+
+					idFieldTable_{t,idxFieldTable_{t,i}} 		"','"
+					aliasFieldTable_{t,idxFieldTable_{t,i}} 	"','"
+
+					&{nameTrueFieldTable_{t,i}} 			"','"
+					%&{nameFieldTable_{t,idxFieldTable_{t,i}}} 	"','"
+
+					typeFieldTable_{t,idxFieldTable_{t,i}} 		"','"
+					alignmentFieldTable_{t,idxFieldTable_{t,i}} 	"','"
+					colorFieldTable_{t,idxFieldTable_{t,i}} 	"','"
+					formatFieldTable_{t,idxFieldTable_{t,i}} 	"',"
+
+					i 						")"
+				),
+
+				(SQL : sqlInsertIntoFieldTable_{t,i}),
+			),
+		),
+
+
+
+		database <- '()',
+
+
+	),
+),
+

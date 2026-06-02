@@ -1,0 +1,125 @@
+View ViewTableDELIVERYPREPARATION 'Préparation livraison (/*IDDELIVERY*/)' 'Préparation livraison (/*IDDELIVERY*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableDELIVERYPREPARATION _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Préparation livraison (/*IDDELIVERY*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Left,Left,Left,Left}]"\
+"[DATAOBJ=DELIVERYPREPARATION;FILLCOLOR=LINERGB]"
+
+Data DELIVERYPREPARATION 'Préparation livraison (/*IDDELIVERY*/)' DELIVERYPREPARATION HTTPSQL 0 '[FIND={IDPRODUCT,DESIGNATION,IDORDER,NOLINE,QUANTITY,QUANTITYDEFECTIVE,WEIGHTUNIT,WEIGHT,WEIGHTPALLET,IDPACKING,NOPALLET,NOPALLETDELIVERY,STATE}]'   [DOUBLECLICK=] \
+"[13;(string,IDPRODUCT,Produit,,10,,);(string,DESIGNATION,Désignation,,20,,);(string,IDORDER,Commande,,12,,);(int,NOLINE,No ligne,,10,,);(int,QUANTITY,Quantité,,10,,);(int,QUANTITYDEFECTIVE,Qté défectueuse,,15,,);(float,WEIGHTUNIT,Poids unité,,12,,);(float,WEIGHT,Poids,,10,,);(float,WEIGHTPALLET,Poids palette,,12,,);(string,IDPACKING,ID entrée,,11,,);(int,NOPALLET,No. palette,,11,,);(int,NOPALLETDELIVERY,Palette livraison,,19,,);(string,STATE,Etat,,20,,);(string,DATEEXPIRY,Date expiration,,8.0.80,1);\
+(float,PRICE,Prix unitaire,,8.2.80,0);\
+(float,DISCOUNT,Remise(%),,3.1.80,0);\
+(string,LABELDISCOUNT,Libellé remise,,3.0.80,1);\
+(string,FAMILY,Famille,,50.0.100,0);\
+(string,IDCLIENT,ID client,,20.0.50,0);\
+(string,POINTDELIVERY,Point livraison,,15.0.70,1);\
+(string,ID,No livraison,,20.0.80,0);\
+(string,DATEDELIVERY,Date livraison,,15.0.80,0);\
+(string,IDORDERPRODUCTLINE,ID ligne,,20.0.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT \
+		 d.id AS ID,\
+		 d.idClient AS IDCLIENT,\
+		 d.IdPointDelivery as POINTDELIVERY,\
+		 P.Id as IDPRODUCT,\
+		 P.Family as FAMILY,\
+		 P.Designation as DESIGNATION,\
+		 format(P.Weight,'0.0') as WEIGHTUNIT,\
+		 DP.IdOrder AS IDORDER,format(DP.NoLine,'0') AS NOLINE,\
+		 format(DP.PriceUnit,'0.000') as PRICE,\
+		 format(DP.Discount,'0.0') as DISCOUNT,\
+		 DP.LabelDiscount as LABELDISCOUNT,\
+		 DP.DateDelivery as DATEDELIVERY,\
+		 DP.Quantity AS QUANTITY,\
+		 P.Weight*DP.QuantityReal as WEIGHT,\
+		 DP.IdPacking as IDPACKING,\
+		 IIF(DP.NoPallet is NULL,0,DP.NoPallet) as NOPALLET,\
+		 IIF(DP.NoPalletDelivery is NULL,0,DP.NoPalletDelivery) as NOPALLETDELIVERY,\
+		 (trim(DP.IdOrder)+'-'+trim(DP.IdProduct)+'-'+format(DP.NoLine,'0')) as IDORDERPRODUCTLINE,\
+		 (select DateExpiration from PALLET_PRODUCT LP where  LP.IdPacking=DP.IdPacking and LP.NoPallet=DP.NoPallet and LP.IdProduct=DP.IdProduct) as DATEEXPIRY,\
+		 (select format(sum(DP0.QuantityReal*P0.Weight),'0.0') from DELIVERY_PRODUCT DP0 inner join PRODUCT P0 on P0.Id=DP0.IdProduct where DP0.IdDelivery=d.Id and DP0.NoPalletDelivery=DP.NoPalletDelivery) as WEIGHTPALLET,\
+		  0 as INDELIVERY,\
+		 IIF(DP.IdPacking='STOCK','Attent Retrait du Stock','OK') AS STATE, \
+		 IIF(DP.IdPacking='STOCK','(250 220 20)','(120 255 120)') AS LINERGB \
+		 FROM DELIVERY d, DELIVERY_PRODUCT DP, PRODUCT P \
+		 WHERE d.Id=DP.IdDelivery\
+		 and P.Id=DP.IdProduct\
+		 and d.Id in ((/*IDDELIVERY*/)) \
+		 \
+		 UNION ALL SELECT\
+		 d.id AS ID,\
+		 d.idClient AS IDCLIENT,\
+		 d.IdPointDelivery as POINTDELIVERY,\
+		 P.Id as IDPRODUCT,\
+		 P.Family as FAMILY,\
+		 P.Designation as DESIGNATION,\
+		 format(P.Weight,'0.0') as WEIGHTUNIT,\
+		 ' ' as IDORDER, 0 AS NOLINE,\
+		 '0.000' as PRICE,\
+		 '0.0' as DISCOUNT,\
+		 ' ' as LABELDISCOUNT,\
+		 ' ' as DATEDELIVERY,\
+		 PaPr.QuantityStock AS QUANTITY,\
+		 P.Weight*PaPr.QuantityStock as WEIGHT,\
+		 PaPr.IdPacking as IDPACKING,\
+		 PaPr.NoPallet as NOPALLET,\
+		 ' ' as NOPALLETDELIVERY,\
+		 ' ' as IDORDERPRODUCTLINE,\
+		 PaPr.DateExpiration as DATEEXPIRY,\
+		 (select format(sum(PaPr0.QuantityStock*P0.Weight),'0.0') from PALLET_PRODUCT PaPr0 inner join PRODUCT P0 on P0.Id=PaPr0.IdProduct where PaPr0.IdPacking=PaPr.IdPacking and PaPr0.NoPallet=PaPr.NoPallet) as WEIGHTPALLET,\
+		 1 as INDELIVERY,\
+		 'A Retirer' AS STATE, \
+		 '(255 255 255)' AS LINERGB \
+		 FROM DELIVERY d, PALLET_PRODUCT PaPr, PRODUCT P \
+		 WHERE PaPr.IdProduct in (select DP.IdProduct from DELIVERY_PRODUCT DP where d.Id=DP.IdDelivery and DP.IdPacking='STOCK')\
+		 and P.Id=PaPr.IdProduct\
+		 and PaPr.QuantityStock>0 and d.Id in ((/*IDDELIVERY*/)) \
+		 Order BY FAMILY, DESIGNATION, INDELIVERY,IDORDER, NOLINE, DATEEXPIRY"
+
+
+Script ModifyPallet  'Modifier palette livraison' _ 61 'Modifier palette livraison' _ 'tableDELIVERYPREPARATION' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(DELIVERYPREPARATION;2;(string,ID);(string,IDORDERPRODUCTLINE);)*/} \
+{/*Input(Modifier Palette;1;\
+(int,PALLET,Numéro palette,1,10.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// 2. Remove article from delivery
+
+Script RemoveProduct  'Enlever produit' _ 62 'Enlever produit' _ 'tableDELIVERYPREPARATION' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(DELIVERYPREPARATION;4;(string,IDPRODUCT);(string,IDORDER);(string,IDPACKING);(string,IDORDERPRODUCTLINE);)*/} \
+ (/*IDDELIVERY*/) '\
+Reload _ _ _
+
+// 3. picking
+
+Script PickForDelivery  'Prélever pour livrer' _ 63 'Prélever pour livrer' _ 'tableDELIVERYPREPARATION' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductSingleDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(DELIVERYPREPARATION;5;(string,ID);(string,IDPRODUCT);(string,IDPACKING);(int,QUANTITY);(int,NOPALLET);)*/} \
+'\
+Reload _ _ _
+
+// 4. cancel picking
+
+Script CancelPickForDelivery 'Annuler Prélevement' _ 64 'Annuler Prélevement' _ 'tableDELIVERYPREPARATION' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\CancelDeliveryProductUpdateDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(DELIVERYPREPARATION;4;(string,IDPRODUCT);(string,IDPACKING);(string,IDORDERPRODUCTLINE);(int,NOPALLET);)*/} \
+'\
+Reload _ _ _
+
+// 8 . picking all possible
+
+Script PickAllForDelivery 'Prélever tous possibles pour livrer' _ 68 'Prélever tous possibles pour livrer' _ 'tableDELIVERYPREPARATION' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Delivery\UpdateDeliveryProductAllDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(DELIVERYPREPARATION;1;(string,ID);)*/} \
+'\
+Reload _ _ _
+

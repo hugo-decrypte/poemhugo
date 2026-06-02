@@ -1,0 +1,15 @@
+%==================================================%
+%                                                  %
+% 		ViewTableTypeRisk.n                %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableTypeRisk.n"],
+
+'@' => (
+	tableTypeRisk("TYPERISK",TAG_TABLE,"TYPERISK",true,"EditTypeRisk",TAG_TABLE_TYPERISK,""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_TYPERISK TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

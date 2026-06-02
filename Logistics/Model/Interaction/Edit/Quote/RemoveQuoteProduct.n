@@ -1,0 +1,83 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 RemoveQuoteProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+
+	\forall i \in [1, nbSelected] (
+		idQuoteSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i} 		:: "",
+		
+		idQuoteSelectedBuffer_{i}			= (),
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdQuoteSelectedBuffer_{i}   = ("'" idQuoteSelectedBuffer_{i} "',"),
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdQuoteSelectedBuffer_{i}   = ("'" idQuoteSelectedBuffer_{i} "'"),
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDQUOTESELECTEDBUFFER :: "",
+	IDQUOTESELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdQuoteSelectedBuffer_{i}],
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+	
+
+	'()' <- database,
+
+	DeleteQuoteProduct_SQL1=(
+		"Delete from " DB_PREFIX "QUOTE_PRODUCT 
+		 WHERE IdQuote in ("IDQUOTESELECTEDBUFFER")
+		 AND IdProduct in ("IDPRODUCTSELECTEDBUFFER")"
+	),
+
+	databaseType = "ACCESS" => (
+		DeleteQuoteProduct_SQL2=(
+			"Update " DB_PREFIX "QUOTE set Quantity=0, AmountHT=0 
+			WHERE Id in ("IDQUOTESELECTEDBUFFER")"
+		),
+
+		DeleteQuoteProduct_SQL3=(
+			"Update " DB_PREFIX "QUOTE q inner join " DB_PREFIX "QUOTE_PRODUCT QP on q.Id=QP.IdQuote set
+				q.Quantity=q.Quantity+QP.Quantity,
+				q.AmountHT=q.AmountHT+QP.AmountHT 
+			WHERE q.Id in ("IDQUOTESELECTEDBUFFER")"
+		),
+
+		;
+	
+		DeleteQuoteProduct_SQL2=(
+			"Update " DB_PREFIX "QUOTE set
+				Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where QUOTE.Id=QP.IdQuote),
+				AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where QUOTE.Id=QP.IdQuote) 
+			WHERE Id in ("IDQUOTESELECTEDBUFFER")"
+		),
+		DeleteQuoteProduct_SQL3=(
+			"Update " DB_PREFIX "QUOTE set
+				Quantity=0,
+				AmountHT=0 
+			WHERE Id in ("IDQUOTESELECTEDBUFFER") and Quantity is NULL"
+		),
+	),
+
+	(SQL : DeleteQuoteProduct_SQL1), 
+	(SQL : DeleteQuoteProduct_SQL2), 
+	(SQL : DeleteQuoteProduct_SQL3), 
+	
+	database <- '()',
+),

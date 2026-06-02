@@ -1,0 +1,12 @@
+%==================================================%
+%                                                  
+%      						   %
+%              	WriteDebug.n			   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+['Work Directory' "Model\Debug\DebugSolution.n"] <- '@',
+
+
+'@' <- ['Work Directory' "Model\Debug\DebugSolution.n"],

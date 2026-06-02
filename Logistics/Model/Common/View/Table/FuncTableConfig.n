@@ -1,0 +1,68 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  	    FuncTableConfig.n                       %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableConfig>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableConfig" postfix),
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		@ ("(color,LINERGB,,,13.0.0);(string,ID,,,);(string,IDCLUB,,,);]\" \\\n"),
+
+
+		sqlPriority = (
+			SQL_CASEWHEN "c.idx>500 AND c.idx<600"
+			SQL_THEN "(508-c.idx)" SQL_ELSE "NULL"
+			SQL_CASEEND),
+
+		%sqlColorSelected = "c.color",
+
+		sqlColorSelected = (
+			SQL_CASEWHEN "c.selected='" STATE_TRUE "'"
+			SQL_THEN "'" RGB_CRITICAL"'" SQL_ELSE "'" RGB_SHALLOWBLUE "'"
+			SQL_CASEEND),
+
+		sqlDataConfig = (
+			"SELECT	c.idClub						AS IDCLUB, \
+				"SQL_ClubNameIdIs"c.idClub)				AS NAMECLUB, \
+				c.idx        	 					AS IDX, \
+				"sqlPriority " 						AS PRIORITY, \
+				c.id        	 					AS ID, \
+				c.name		  					AS NAME, \
+				c.type							AS TYPECONFIG, \
+				c.comments	  					AS COMMENT, \
+				c.parameter  						AS PARAMETER, \
+				c.selected						AS SELECTED,\
+				"SQL_AliasCategoryIs "'BOOL' AND al.id=c.selected) 	AS NAMESELECTED,\
+				"sqlColorSelected "					AS LINERGB \
+			FROM    " DB_PREFIX "CONFIG c \
+			WHERE	" SQL_ViewClubIs "c.idClub AND c.editable='" STATE_TRUE "' \
+			ORDER BY c.idClub,c.idx,c.name"),
+
+		@ (VIEWSQL sqlDataConfig "\"\n\n\n"),
+
+
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableConfig2EditConfig.n"],
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableConfig2EditOnView.n"],
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),
+

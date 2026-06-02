@@ -1,0 +1,53 @@
+View ViewTableSITE 'Adresse livraison' 'Adresse livraison'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableSITE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Adresse livraison;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Left,Left,Left,Left,right,right,Left,Center}]"\
+"[DATAOBJ=SITE;FILLCOLOR=LINERGB]"
+
+Data SITE 'Adresse livraison' SITE HTTPSQL 0 '[FIND={NAMECLUB,ID,NAME,SECONDNAME,STREET,CITY,COUNTRY,POSTCODE,LATITUDE,LONGITUDE,COMMENTS,NAMESELECTED}]'   [DOUBLECLICK=EditSite] \
+"[12;(string,NAMECLUB,Division,,15,,);(string,ID,ID,,10,,);(string,NAME,Nom du site,,15,,);(string,SECONDNAME,Lieu dit,,15,,);(string,STREET,Adresse rue,,20,,);(string,CITY,Ville,,10,,);(string,COUNTRY,Pays,,10,,);(string,POSTCODE,Code postal,,10,,);(string,LATITUDE,Latitude,,10,,);(string,LONGITUDE,Longitude,,10,,);(string,COMMENTS,Commentaire,,10,,);(string,NAMESELECTED,Sélectionné,,10,,);(color,LINERGB,,,13.0.0);(string,IDSITE,,,);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT	s.idClub 				AS IDCLUB, \
+				(SELECT clb.name FROM CLUB clb WHERE clb.id=s.idClub)		AS NAMECLUB,\
+    				s.id					AS ID, \
+				s.name					AS NAME,\
+				s.name2					AS SECONDNAME,\
+				s.idTypeSite				AS NAMETYPESITE,\
+				s.idTypeTrip				AS NAMETYPETRIP,\
+				s.idTypeRisk				AS NAMETYPERISK,\
+				s.street				AS STREET,\
+				s.city					AS CITY,\
+				s.country				AS COUNTRY,\
+				s.postcode				AS POSTCODE,\
+				s.latitude				AS LATITUDE,\
+				s.longitude				AS LONGITUDE,\
+				s.comments				AS COMMENTS,\
+				s.selected				AS SELECTED,\
+				(SELECT al.name FROM ALIAS al WHERE al.category='BOOL' AND al.id=s.selected) 	AS NAMESELECTED,\
+				IIF(s.selected='1', '(255 140 0)', '(255 255 255)' )	AS LINERGB \
+			FROM SITE s\
+			WHERE  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=s.idClub)\
+			ORDER BY s.idClub,s.id
+
+Script SelectDeselect  'Sélectionnéer/Désélectionnéer' _ 61 'Sélectionnéer/Désélectionnéer' _ 'tableSITE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Site\SelectDeselectSite.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSITE;1;(string,ID))*/}  \
+'\
+Reload _ _ _
+
+
+//The reload does not run, bug comview 
+//Script SetSelected  'Selectionner' _ 1 'Selectionner' _ 'tableSITE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+//"UPDATE SITE s set s.selected='1' WHERE s.id='[/*SITE.ID*/]'" \
+Reload _ _ _ 
+
+
+Script EditSite 'Editer Site' _ 1 'Editer' _ 'tableSITE' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE SITE&id in ({/*selected(tableSITE;1;(string,ID))*/})"\
+Reload _ _ _ _ 
+
+

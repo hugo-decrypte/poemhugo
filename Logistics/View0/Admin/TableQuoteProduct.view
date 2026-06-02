@@ -1,0 +1,59 @@
+View ViewTableQUOTEPRODUCT 'Produits pour devis (/*TITLEOBJ*/)' 'Produits pour devis (/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableQUOTEPRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Produits pour devis (/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Center,Right,Right,Left,Left}]"\
+"[DATAOBJ=QUOTEPRODUCT;FILLCOLOR=LINERGB]"
+
+Data QUOTEPRODUCT 'Produits pour devis (/*TITLEOBJ*/)' QUOTEPRODUCT HTTPSQL 0 '[FIND={IDQUOTE,IDPRODUCT,DESIGNATION,PRICEREFERENCE,QUANTITY,PRICEQUOTE,DISCOUNT,AMOUNTHT,TOOLCOST,COMMENTS,COMMENTS1}]'   [DOUBLECLICK=] \
+"[11;(string,IDQUOTE,ID devis,,15,,);(string,IDPRODUCT,Produit,,15,,);(string,DESIGNATION,Désignation,,15,,);(float,PRICEREFERENCE,Prix référence,,15,,);(int,QUANTITY,Quantité,,15,,);(float,PRICEQUOTE,Prix devis,,15,,);(float,DISCOUNT,Remise(%),,15,,);(float,AMOUNTHT,Montant HT(€),,15,,);(float,TOOLCOST,Coût cutillage,,16,,);(string,COMMENTS,Commentaire,,20,,);(string,COMMENTS1,Commentaire sup,,20,,);(string,IDCLIENT,ID client,,15.0.80,0);\
+(string,NAMECLIENT,Nom client,,50.0.150,0);\
+(string,PTDELIVERY,Point livraison,,50.0.150,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT Q.id AS IDQUOTE, Q.idClient AS IDCLIENT, CL.Name as NAMECLIENT,\
+		 (select City from POINTDELIVERY PT where PT.IdClient=Q.IdClient and PT.IdPoint=Q.IdPointDelivery) as PTDELIVERY,\
+		 QP.idProduct AS IDPRODUCT, P.Designation as DESIGNATION, QP.PriceUnitReference as PRICEREFERENCE,\
+		 QP.Quantity AS QUANTITY, QP.PriceUnit AS PRICEQUOTE, QP.Discount as DISCOUNT,\
+		 QP.AmountHT AS AMOUNTHT, QP.ToolCost AS TOOLCOST, QP.Comments AS COMMENTS,\
+		 QP.Comments_1 AS COMMENTS2, QP.IdVAT as TVA,\
+		 IIF(Q.idState in (select ID from STATE where Category='QUOTE'),(select COLOR from STATE where ID=Q.idState and Category='QUOTE'),'(255 220 220)') AS LINERGB \
+	 FROM QUOTE Q, QUOTE_PRODUCT QP, CLIENT CL, PRODUCT P \
+	 WHERE Q.id=QP.IdQuote and Q.IdClient=CL.id and QP.IdProduct=P.Id\
+	 AND(QP.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)))\
+	 ORDER BY QP.IdQuote, QP.IdProduct"
+
+
+Script EditQuoteProduct  'Editer détail devis' _ 1 'Editer détail devis' _ 'tableQUOTEPRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE QUOTE_PRODUCT&IdQuote in ({/*selected(tableQUOTEPRODUCT;1;(string,IDQUOTE))*/}) and IdProduct in ({/*selected(tableQUOTE;1;(string,IDPRODUCT))*/})" \
+Reload _ _ _ _ 
+
+
+Script RemoveProduct  'Enlever produit' _ 61 'Enlever produit' _ 'tableQUOTEPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\RemoveProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDQUOTE*/) {/*Selected(tableQUOTEPRODUCT;1;(string,IDPRODUCT))*/}'\
+Reload _ _ _
+
+Script ModifyQuote 'Modifier devis' _ 62 'Modifier' _ 'tableQUOTEPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuoteProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTEPRODUCT;2;(string,IDQUOTE);(string,IDPRODUCT))*/} \
+{/*Input(Modifier devis : [/*QUOTE.IDPRODUCT*/];4;\
+(float,QUANTITY,Quantité,[/*QUOTE.QUANTITY*/],10.0.580,0,,);\
+(float,PRICEQUOTE,Prix,[/*QUOTE.PRICEQUOTE*/],10.4.580,0,,);\
+(float,TOOLCOST,Outillage,[/*QUOTE.TOOLCOST*/],15.2.580,1);\
+(float,DISCOUNT,Remise,[/*QUOTE.DISCOUNT*/],10.0.580,0,,);\
+)*/}'\
+Reload _ _ _
+
+Script ModifyComments  'Modifier commentaire' _ 63 'Modifier commentaire' _ 'tableQUOTEPRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuoteProductComment.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTEPRODUCT;2;(string,IDQUOTE);(string,IDPRODUCT))*/} \
+{/*Input(Modifier commentaire : [/*QUOTE.IDPRODUCT*/];2;\
+(string,COMMENTS,Commentaire,[/*QUOTE.COMMENTS*/],100.0.580,1);\
+(string,COMMENTS2,Commentaire Sup,[/*QUOTE.COMMENTS2*/],100.0.580,1);\
+)*/}'\
+Reload _ _ _
+

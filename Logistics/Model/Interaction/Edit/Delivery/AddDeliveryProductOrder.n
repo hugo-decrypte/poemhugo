@@ -1,0 +1,166 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	    		%
+%                                                  %
+% 		 AddDeliveryProductOrder.n		  		  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idProductBuffer_{i} 				:: "",
+		idOrderBuffer_{i} 					:: "",
+		idDeliveryProductLineBuffer_{i}		:: "",
+		
+		idObjSelectedBuffer_{i}				= (),
+		idProductBuffer_{i}					= (),
+		idOrderBuffer_{i}					= (),
+		idDeliveryProductLineBuffer_{i}		= (),
+		
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} 				= ("'" idObjSelectedBuffer_{i} "',"),
+			strIdProductBuffer_{i}					= ("'" idProductBuffer_{i} "',"),
+			strIdOrderBuffer_{i}					= ("'" idOrderBuffer_{i} "',"),
+			strIdDeliveryProductLineBuffer_{i} 		= ("'" idDeliveryProductLineBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} 				= ("'" idObjSelectedBuffer_{i} "'"),
+			strIdProductBuffer_{i}	 				= ("'" idProductBuffer_{i} "'"),
+			strIdOrderBuffer_{i}	 				= ("'" idOrderBuffer_{i} "'"),
+			strIdDeliveryProductLineBuffer_{i}	 	= ("'" idDeliveryProductLineBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER 	:: "",
+	IDPRODUCTBUFFER			:: "",
+	IDORDERBUFFER			:: "",
+	IDORDERPRODUCTLINE 	:: "",
+	
+	IDOBJSELECTEDBUFFER 	= [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+	IDPRODUCTBUFFER			= [\forall i \in [1, nbSelected] strIdProductBuffer_{i}],
+	IDORDERBUFFER			= [\forall i \in [1, nbSelected] strIdOrderBuffer_{i}],
+	IDORDERPRODUCTLINE		= [\forall i \in [1, nbSelected] strIdDeliveryProductLineBuffer_{i}],
+
+	
+	idOrderProductAddCondition = ( 
+		SQL_CONCAT"trim(IdOrder)"SQL_CONCATWITH"'-'"
+		SQL_CONCATWITH"trim(IdProduct)"SQL_CONCATWITH"'-0'"
+		SQL_CONCATEND" in ("IDORDERPRODUCTLINE") "),
+	
+	
+	'()' <- database,
+	
+	AddDeliveryProductOrder_SQL1 = (
+		"insert into " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery, IdOrder, IdProduct, NoLine, IdPacking, NoPallet, DateDelivery,
+		   Quantity, QuantityReal, QuantityDefective,QuantityOrderRest, PriceUnit, IdVAT,Discount,LabelDiscount,NoPalletDelivery)
+		 select d.ID, OP.IdOrder, OP.IdProduct, tabNum.NoLine+1, 'STOCK', 1, d.DateDelivery,
+		  OP.QuantityRest, OP.QuantityRest, 0, 0, OP.PriceUnit, OP.IdVAT,OP.Discount,OP.LabelDiscount,OP.NoPalletDelivery 
+		  from " DB_PREFIX "DELIVERY d, " DB_PREFIX "ORDER_PRODUCT OP,
+		  (select max(N) as NoLine from
+		   (select DP.NoLine as N from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and "idOrderProductAddCondition"
+			UNION ALL
+			select 0 as N from " DB_PREFIX "ORDER_PRODUCT OP0 where not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdDelivery in ("IDOBJSELECTEDBUFFER") and "idOrderProductAddCondition" )
+		   ) t
+		  ) tabNum
+		 WHERE d.ID in ("IDOBJSELECTEDBUFFER") AND "idOrderProductAddCondition" "
+	),
+
+
+	databaseType = "ACCESS" => (
+		%% ORDER_PRODUCT Qty
+		AddDeliveryProductOrder_SQL2 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP
+			set OP.QuantityDelivered=0
+			where OP.IdOrder in ("IDORDERBUFFER") "
+		),
+		AddDeliveryProductOrder_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on DP.IdOrder=OP.IdOrder and DP.IdProduct=OP.IdProduct set
+			OP.QuantityDelivered=OP.QuantityDelivered + DP.QuantityReal 
+			WHERE OP.IdOrder in ("IDORDERBUFFER") "
+		),
+
+		AddDeliveryProductOrder_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP
+			set OP.QuantityRest=OP.Quantity-OP.QuantityDelivered
+			where OP.IdOrder in ("IDORDERBUFFER") "
+		),
+		
+
+		%% ORDER Qty
+		AddDeliveryProductOrder_SQL5 = (
+			"Update " DB_PREFIX "CLIENTORDER O set O.QuantityRest=0
+			where O.Id in ("IDORDERBUFFER") "
+		),
+		AddDeliveryProductOrder_SQL6 = (
+			"Update " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on O.Id=OP.IdOrder set
+			O.QuantityRest=O.QuantityRest + OP.QuantityRest 
+			WHERE O.Id in ("IDORDERBUFFER") "
+		),
+		
+
+		%% PRODUCT quantityOrdered
+		AddDeliveryProductOrder_SQL7 = (
+			"Update " DB_PREFIX "PRODUCT P set P.QuantityOrdered=0
+			WHERE P.Id in ("IDPRODUCTBUFFER")"
+		),
+		AddDeliveryProductOrder_SQL8 = (
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "ORDER_PRODUCT OP on P.Id=OP.IdProduct
+			set P.QuantityOrdered=P.QuantityOrdered+OP.QuantityRest
+			WHERE P.Id in ("IDPRODUCTBUFFER")"
+		),
+		;
+
+		AddDeliveryProductOrder_SQL2 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set
+				QuantityDelivered=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdOrder=ORDER_PRODUCT.IdOrder and DP.IdProduct=ORDER_PRODUCT.IdProduct)
+			WHERE IdOrder in ("IDORDERBUFFER") "
+		),
+		AddDeliveryProductOrder_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set OQuantityDelivered=0
+			where IdOrder in ("IDORDERBUFFER") and QuantityDelivered is NULL"
+		),
+		AddDeliveryProductOrder_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT set QuantityRest=Quantity-QuantityDelivered
+			where IdOrder in ("IDORDERBUFFER") "
+		),
+		
+
+		%% ORDER Qty
+		AddDeliveryProductOrder_SQL5 = (
+			"Update " DB_PREFIX "CLIENTORDER set 
+				QuantityRest=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where Id=OP.IdOrder)
+			WHERE Id in ("IDORDERBUFFER")"
+		),
+
+		%% PRODUCT quantityOrdered
+		AddDeliveryProductOrder_SQL6 = (
+			"Update " DB_PREFIX "PRODUCT set 
+				QuantityOrdered=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where Id=OP.IdProduct)
+			WHERE Id in ("IDPRODUCTBUFFER")"
+		),
+	),
+
+	(SQL : AddDeliveryProductOrder_SQL1), 
+	(SQL : AddDeliveryProductOrder_SQL2), 
+	(SQL : AddDeliveryProductOrder_SQL3), 
+	(SQL : AddDeliveryProductOrder_SQL4), 
+	(SQL : AddDeliveryProductOrder_SQL5), 
+	(SQL : AddDeliveryProductOrder_SQL6), 
+	databaseType = "ACCESS" => (
+		(SQL : AddDeliveryProductOrder_SQL7), 
+		(SQL : AddDeliveryProductOrder_SQL8), 
+	),
+	
+	database <- '()',
+),
+.

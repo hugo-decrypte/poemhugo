@@ -1,0 +1,40 @@
+%==================================================%
+%                                                  %
+%           	  Depot Optimization               %
+%                                                  %
+%  		  DataTypeVehicle.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: SITE2
+@ "Data ",
+
+% ID
+@ ("TYPEVEHICLE '"),%li 0603
+
+% Caption
+@ TAG_DATA_TYPEVEHICLE,
+
+% Group
+@ "' TYPEVEHICLE ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,IDTYPEVEHICLE,IDTYPEVEHICLE,,255,0)]\"\\\n"),%li 0411	
+
+@ VIEWSQL,
+
+@ (SQL_SelectTypeVehicleId "\"\n\n"), % Zhou 0910
+

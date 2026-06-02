@@ -1,0 +1,61 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateQuoteProductComment.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+
+	\forall i \in [1, nbSelected] (
+		idQuoteSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i} 		:: "",
+		
+		idQuoteSelectedBuffer_{i}			= (),
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdQuoteSelectedBuffer_{i}   = ("'" idQuoteSelectedBuffer_{i} "',"),
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdQuoteSelectedBuffer_{i}   = ("'" idQuoteSelectedBuffer_{i} "'"),
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDQUOTESELECTEDBUFFER :: "",
+	IDQUOTESELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdQuoteSelectedBuffer_{i}],
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+	
+	commentBuffer	:: "",
+	commentBuffer1	:: "",
+	
+	commentBuffer	= (),
+	commentBuffer1	= (),
+	
+
+	'()' <- database,
+
+	UpdateQuoteProductComment_SQL1 = (
+		"Update " DB_PREFIX "QUOTE_PRODUCT set Comments='"commentBuffer"', Comments_1='"commentBuffer1"'
+		WHERE IdQuote in ("IDQUOTESELECTEDBUFFER")
+		and IdProduct in ("IDPRODUCTSELECTEDBUFFER")"
+	),
+
+	(SQL : UpdateQuoteProductComment_SQL1), 
+	 
+	
+	database <- '()',
+),

@@ -1,0 +1,64 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%      						   %
+%              	ReadField.n			   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	FIELD = [1,maxFieldTable],
+
+
+	sqlReadField = (
+		"SELECT	idField,aliasField,nameField, typeField,alignmentField,colorField,formatField
+		FROM	" DB_PREFIX "FIELD
+		WHERE	aliasTable='" aliasTable "' ORDER BY idxField"),
+
+
+
+	(SQL : sqlReadField),
+
+
+	nbColumn = (),
+
+	FieldSelected \subset FIELD,
+	FieldSelected = [1,nbColumn],
+
+	\forall i \in FieldSelected (
+		idField_{i}		:: "",
+		aliasField_{i}		:: "",
+		nameField_{i}		:: "",
+
+		typeField0_{i}		:: "",
+		alignmentField0_{i}	:: "",
+		rgbField0_{i}		:: "",
+		lenField_{i}		:: "",
+
+		idField_{i}		= (),
+		aliasField_{i}		= (),
+		nameField_{i}		= (),
+
+		typeField0_{i}		= (),
+		alignmentField0_{i}	= (),
+		rgbField0_{i}		= (),
+		lenField_{i}		= (),
+
+		typeField_{i}		\in TypeView,
+
+		typeField_{i}		= (typeField0_{i} = "" || typeField0_{i} = " " ? "string" : typeField0_{i}),
+		alignmentField_{i}	= (alignmentField0_{i} = "" || alignmentField0_{i} = " " ? "Center" : alignmentField0_{i}),
+		rgbField_{i}		= (rgbField0_{i} = "" || rgbField0_{i} = " " ? RGB_WHITE : rgbField0_{i}),
+		formatField_{i}		= ("," lenField_{i} ",," formatViewType_{typeField_{i}}),
+	),
+
+	IdFieldSelected = \{ \forall i \in FieldSelected idField_{i} \},
+	AliasFieldSelected = \{ \forall i \in FieldSelected aliasField_{i} \},
+	NameFieldSelected = \{ \forall i \in FieldSelected nameField_{i} \},
+
+	database <- '()',
+),
+

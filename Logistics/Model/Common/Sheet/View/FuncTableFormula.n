@@ -1,0 +1,52 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		FuncTableFormula.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableFormula>(id,type,aliasTable,bestfit, doubleclick,title)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		viewFile = (viewDirectory "TableFormula.view"), 
+
+
+		[viewFile] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		@ ("(color,LINERGB,,,13.0.0)]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+
+		@("SELECT	"SQL_ClubNameIdIs"f.idClub)	AS NAMECLUB,\
+				" SQL_AliasCategoryIs "'SHEET' AND al.field='formula' AND al.id=f.category)	AS CATEGORY,\
+				f.id									AS ID,\
+				f.name									AS NAME,\
+				f.program								AS PROGRAM,\
+				f.comments								AS COMMENTS,\
+				f.color									AS LINERGB\
+			FROM " DB_PREFIX "FORMULA f\
+			ORDER BY f.idClub,f.category,f.id \"\n\n"),
+
+
+			%" SQL_ColorCategoryIs "'SHEET' AND al.field='formula' AND al.id=f.category)	AS LINERGB\
+
+
+
+		['Work Directory' "Model\Common\Sheet\Interaction\ScenarioTableFormula2EditFormula.n"],
+
+
+
+		'@' <- [viewFile],
+	),
+),

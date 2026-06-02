@@ -1,0 +1,108 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		FuncTableResult.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableResult>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableResult" postfix),
+		
+
+
+
+		salObjective = [ \forall i \in IdConfigObj ("'" i "',") ] [-\infty..-2],
+
+		sqlValueObjective = (
+			"(SELECT TOP 1 parameter FROM	" DB_PREFIX "CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ("
+				salObjective ") AND selected='" STATE_TRUE
+			"' ORDER BY idx)"
+		),
+
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);(string,IDCLUB,,,20,0)]\" \\\n"),
+
+
+
+	     	sqlDataResult = (
+			"SELECT	'" RGB_TITLE "'			AS LINERGB, \
+				'" TAG_ORDER_NB "'		AS ID,\
+				COUNT(id)			AS RESULT,\
+				1				AS IDX \
+			FROM	(SELECT DISTINCT o.id FROM " DB_PREFIX "OPT_ORDER o WHERE o.idClub='(/*CLUBID*/)' AND o.state>='" STATE_PLANNED "') \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_RESOURCE_NB "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_RESOURCE_NB "'		AS ID,\
+				v1.count1+' / '+v2.count2	AS RESULT,\
+				2				AS IDX \
+			FROM	(SELECT CSTR(COUNT(id)) AS count1 FROM " DB_PREFIX "RESOURCE WHERE idClub='(/*CLUBID*/)' AND state>='" STATE_PLANNED "') v1, \
+				(SELECT CSTR(COUNT(id)) AS count2 FROM " DB_PREFIX "RESOURCE WHERE idClub='(/*CLUBID*/)') v2 \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_TOUR_NB "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_TOUR_NB "'		AS ID,\
+				t1.count1+' / '+t2.count2	AS RESULT,\
+				3				AS IDX \
+			FROM	(SELECT CSTR(COUNT(id)) AS count1 FROM " DB_PREFIX "OPT_TOUR WHERE idClub='(/*CLUBID*/)') t1, \
+				(SELECT IIF(parameter='0' OR parameter='" TAG_EMPTY_STRING "' OR parameter IS NULL,'_',parameter) AS count2 FROM " DB_PREFIX "CONFIG WHERE id='maxTour' AND idClub='(/*CLUBID*/)') t2 \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_PROFIT "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_PROFIT "'		AS ID,\
+				sum(receipts)-sum(cost)		AS RESULT,\
+				4				AS IDX \
+			FROM	" DB_PREFIX "RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='" STATE_PLANNED "' \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_COST "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_COST "'			AS ID,\
+				sum(cost)			AS RESULT,\
+				5				AS IDX \
+			FROM	" DB_PREFIX "RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='" STATE_PLANNED "' \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_MILEAGE "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_MILEAGE "'		AS ID,\
+				SUM(mileage)			AS RESULT,\
+				6				AS IDX \
+			FROM	" DB_PREFIX "RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='" STATE_PLANNED "' \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_WORKTIME "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_WORKTIME_SUM "'		AS ID,\
+				SUM(timeService)+SUM(timeRoute)	AS RESULT,\
+				7				AS IDX \
+			FROM	" DB_PREFIX "OPT_PLAN \
+			WHERE	idClub='(/*CLUBID*/)' \
+		UNION	SELECT	IIF(" sqlValueObjective "='" TAG_MAKESPAN "','" RGB_CRITICAL "','" RGB_HIGHLIGHT "')	AS LINERGB, \
+				'" TAG_MAKESPAN_SUM "'		AS ID,\
+				SUM(makespan)			AS RESULT,\
+				8				AS IDX \
+			FROM	" DB_PREFIX "RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='" STATE_PLANNED "' \
+		ORDER BY IDX"),
+
+		%UNION	SELECT	'" RGB_TITLE "'			AS LINERGB, \
+		%		'" TAG_SOLUTION_STATE "'	AS ID,\
+		%		parameter			AS RESULT,\
+		%		9				AS IDX \
+		%	FROM	" DB_PREFIX "CONFIG \
+		%	WHERE	id='state' AND type='string' AND idClub='(/*CLUBID*/)' \
+		%ORDER BY IDX"),
+
+
+
+
+		@ (VIEWSQL sqlDataResult "\"\n\n\n"),
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

@@ -1,0 +1,162 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductQuantity.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+
+	'()' <- database,
+
+
+%%% DELIVERY_PRODUCT
+	UpdateProductQty_SQL1 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set QuantityReal=Quantity where QuantityReal is NULL"
+	),
+	UpdateProductQty_SQL2 = (
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set QuantityDefective=0 where QuantityDefective is NULL"
+	),
+
+%%% ORDER_PRODUCT
+	databaseType = "ACCESS" => (
+		UpdateProductQty_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityPicked=0
+			where OP.QuantityPicked is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+		UpdateProductQty_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityDelivered=0 
+			where OP.QuantityDelivered is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+		UpdateProductQty_SQL5 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "DELIVERY_PRODUCT DP on OP.IdOrder=DP.IdOrder and OP.IdProduct=DP.IdProduct set 
+			OP.QuantityDelivered= OP.QuantityDelivered + DP.QuantityReal-DP.QuantityDefective,
+			OP.QuantityPicked	= OP.QuantityPicked + iif(DP.IdPacking<>'STOCK', DP.QuantityReal, 0)
+			where not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+		;
+		
+		UpdateProductQty_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set 
+			OP.QuantityDelivered=(select sum(DP.QuantityReal-DP.QuantityDefective) from " DB_PREFIX "DELIVERY_PRODUCT DP where OP.IdOrder=DP.IdOrder and OP.IdProduct=DP.IdProduct),
+			OP.QuantityPicked=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where OP.IdOrder=DP.IdOrder and OP.IdProduct=DP.IdProduct and DP.IdPacking<>'STOCK')
+			where not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+		UpdateProductQty_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityPicked=0
+			where OP.QuantityPicked is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+		UpdateProductQty_SQL5 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityDelivered=0 
+			where OP.QuantityDelivered is NULL and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+		),
+	),
+
+	UpdateProductQty_SQL6 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT OP set OP.QuantityRest=OP.Quantity-OP.QuantityDelivered 
+		where not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=OP.IdOrder and O.IdState='9')"
+	),
+
+	UpdateProductQty_SQL7 = (
+		"Update " DB_PREFIX "PRODUCT set QuantityIn=0 where QuantityIn is NULL"
+	),
+
+%%% CLIENTORDER
+	databaseType = "ACCESS" => (
+		UpdateProductQty_SQL8 = (
+			"Update " DB_PREFIX "CLIENTORDER set Quantity=0"
+		),
+		UpdateProductQty_SQL9 = (
+			"Update " DB_PREFIX "CLIENTORDER set QuantityRest=0"
+		),
+		UpdateProductQty_SQL10 = (
+			"Update " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on OP.IdOrder=O.Id set 
+				O.Quantity=O.Quantity + OP.Quantity,
+				O.QuantityRest=O.QuantityRest + OP.QuantityRest
+			where O.IdState<>'9'"
+		),
+		;
+
+		UpdateProductQty_SQL8 = (
+			"Update " DB_PREFIX "CLIENTORDER O set 
+				O.Quantity=(select sum(OP.Quantity) from " DB_PREFIX "ORDER_PRODUCT OP where OP.IdOrder=O.Id),
+				O.QuantityRest=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where OP.IdOrder=O.Id)
+			where O.IdState<>'9'"
+		),
+		UpdateProductQty_SQL9 = (
+			"Update " DB_PREFIX "CLIENTORDER set Quantity=0 where Quantity is NULL"
+		),
+		UpdateProductQty_SQL10 = (
+			"Update " DB_PREFIX "CLIENTORDER set QuantityRest=0 where QuantityRest is NULL"
+		),
+	),
+
+%%% PRODUCT
+	databaseType = "ACCESS" => (
+		UpdateProductQty_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT SET
+				QuantityOrdered=0,
+				QuantityStock=0,
+				QuantitySupplied=0"
+		),
+
+		UpdateProductQty_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.Id=OP.IdOrder) on P.Id=OP.IdProduct set 
+			P.QuantityOrdered=P.QuantityOrdered+OP.QuantityRest 
+			where O.IdState<>'9' "
+		),
+		UpdateProductQty_SQL13 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "PALLET_PRODUCT PP inner join " DB_PREFIX "PACKING PK on PK.Id=PP.IdPacking) on P.Id=PP.IdProduct set 
+				P.QuantityStock=P.QuantityStock+PP.QuantityStock 
+			where PK.IdState<>'9' "
+		),
+		UpdateProductQty_SQL14 = (
+			"Update " DB_PREFIX "PRODUCT P inner join (" DB_PREFIX "SUPPLY_PRODUCT SP inner join " DB_PREFIX "SUPPLY S on S.Id=SP.IdSupply) on P.Id=SP.IdProduct set 
+				P.QuantitySupplied=P.QuantitySupplied+SP.Quantity 
+			where S.IdState<>'9' "
+		),
+		;
+
+		UpdateProductQty_SQL11 = (
+			"Update " DB_PREFIX "PRODUCT P set 
+				P.QuantityOrdered=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.Id=OP.IdOrder where P.Id=OP.IdProduct and O.IdState<>'9' ),
+				P.QuantityStock=(select sum(PP.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT PP inner join " DB_PREFIX "PACKING PK on PK.Id=PP.IdPacking where P.Id=PP.IdProduct and PK.IdState<>'9' ),
+				P.QuantitySupplied=(select sum(SP.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT SP inner join " DB_PREFIX "SUPPLY S on S.Id=SP.IdSupply where P.Id=SP.IdProduct and S.IdState<>'9' ) "
+		),
+		UpdateProductQty_SQL12 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0 where QuantityOrdered is NULL"
+		),
+		UpdateProductQty_SQL13 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityStock=0 where QuantityStock is NULL"
+		),
+		UpdateProductQty_SQL14 = (
+			"Update " DB_PREFIX "PRODUCT set QuantitySupplied=0 where QuantitySupplied is NULL"
+		),
+	),
+	
+
+	(SQL : UpdateProductQty_SQL1), 
+	(SQL : UpdateProductQty_SQL2), 
+	(SQL : UpdateProductQty_SQL3), 
+	(SQL : UpdateProductQty_SQL4), 
+	(SQL : UpdateProductQty_SQL5), 
+	(SQL : UpdateProductQty_SQL6), 
+	(SQL : UpdateProductQty_SQL7), 
+	(SQL : UpdateProductQty_SQL8), 
+	(SQL : UpdateProductQty_SQL9), 
+	(SQL : UpdateProductQty_SQL10), 
+	(SQL : UpdateProductQty_SQL11), 
+	(SQL : UpdateProductQty_SQL12), 
+	(SQL : UpdateProductQty_SQL13), 
+	(SQL : UpdateProductQty_SQL14), 
+
+	
+	database <- '()',
+),

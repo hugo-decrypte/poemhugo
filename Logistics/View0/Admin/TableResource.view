@@ -1,0 +1,61 @@
+View ViewTableRESOURCE 'Tableau camion' 'Tableau camion'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableRESOURCE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Tableau camion;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Left,Right,Right,Right,Right,Right,Right,Center,Center,Center,Center}]"\
+"[DATAOBJ=RESOURCE;FILLCOLOR=LINERGB]"
+
+Data RESOURCE 'Tableau camion' RESOURCE HTTPSQL 0 '[FIND={NAMECLUB,IDRESOURCE,NAMERESOURCE,NAMEGROUPRESOURCE,NAMETYPERESOURCE,MAXQUANTITY,MAXWEIGHT,MAXVOLUME,MAXTOUR,MAXMAKESPAN,MAXWORKTIME,NAMESHIFT,T1,T2,NAMESTATE}]'   [DOUBLECLICK=EditResource] \
+"[15;(string,NAMECLUB,Division,,10,,);(string,IDRESOURCE,ID,,15,,);(string,NAMERESOURCE,Nom,,15,,);(string,NAMEGROUPRESOURCE,Dépôt,,15,,);(string,NAMETYPERESOURCE,Type,,15,,);(int,MAXQUANTITY,Max quantité,,15,,);(float,MAXWEIGHT,Max poids,,15,,);(float,MAXVOLUME,Max volume,,15,,);(int,MAXTOUR,Max #tournée,,15,,);(int,MAXMAKESPAN,Max durée travail,,20,,);(int,MAXWORKTIME,Max temps travail,,20,,);(string,NAMESHIFT,Tranche horaire,,20,,);(datetime,T1,Le plus tôt,,20,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(datetime,T2,Le plus tard,,20,,YYYY-MM-DD HH:MM|DD/MM/YYYY HH:MM);(string,NAMESTATE,Etat,,15,,);(color,LINERGB,,,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT (SELECT clb.name FROM CLUB clb WHERE clb.id=r.idClub) 							AS NAMECLUB, \
+			r.id											AS IDRESOURCE, \
+			r.name											AS NAMERESOURCE, \
+			r.idGroupResource									AS IDGROUPRESOURCE, \
+			(SELECT g.name FROM GROUPRESOURCE g WHERE r.idGroupResource=g.id)		AS NAMEGROUPRESOURCE, \
+			r.idCategoryResource 									AS IDCATEGORYRESOURCE, \
+			(SELECT c.name FROM CATEGORYRESOURCE c WHERE r.idCategoryResource=c.id)	AS NAMECATEGORYRESOURCE, \
+			r.idTypeResource 									AS IDTYPERESOURCE, \
+			(SELECT t.name FROM TYPERESOURCE t WHERE r.idTypeResource=t.id)		AS NAMETYPERESOURCE, \
+			IIF(r.maxTour IS NULL,0,r.maxTour) 		AS MAXTOUR, \
+			IIF(r.maxMakespan IS NULL,0,r.maxMakespan) 		AS MAXMAKESPAN, \
+			IIF(r.maxWorktime IS NULL,0,r.maxWorktime) 		AS MAXWORKTIME, \
+			IIF(r.maxQuantity IS NULL,0,r.maxQuantity) 		AS MAXQUANTITY, \
+			IIF(r.maxWeight IS NULL,0,r.maxWeight) 		AS MAXWEIGHT, \
+			IIF(r.maxVolume IS NULL,0,r.maxVolume) 		AS MAXVOLUME, \
+			r.idShift										AS IDSHIFT, \
+			r.t1											AS T1, \
+			r.t2											AS T2, \
+			(SELECT distinct s.name FROM SHIFT s WHERE r.idShift=s.id)			AS NAMESHIFT, \
+			r.receipts 										AS RECEIPTS, \
+			r.state 										AS STATE,\
+			(SELECT al.name FROM ALIAS al WHERE al.category='TASK' AND al.field='state' AND al.id=r.state)			AS NAMESTATE,\
+			(SELECT al.color FROM ALIAS al WHERE al.category='TASK' AND al.field='state' AND al.id=r.state)			AS LINERGB \
+			FROM RESOURCE r \
+ WHERE EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE '(/*USERID*/)'=usr.id AND cc.idClub=usr.idClub AND cc.idClubRelated=r.idClub AND ( usr.permission>='1' OR usr.idResource=r.id))  ORDER BY r.idClub,r.id "
+
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='RESOURCE' \
+ORDER BY s.Id "
+
+Script ModifyResourceState 'Modifier état' _ 61 'Modifier état' _ 'tableRESOURCE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\RESOURCE\UpdateResourceState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableRESOURCE;1;(string,IDRESOURCE))*/} \
+{/*Input(MCM;Modifier état;1;\
+(string,STATEHERE,Etat,[/*RESOURCE.NAMESTATE*/],50.0.580,0,,[/*STATE.LABELSTATE*/]);\
+)*/}'\
+Reload _ _ _
+
+Script EditResource 'Editer' _ 1 'Editer' _ 'tableRESOURCE' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE RESOURCE&id in ({/*selected(tableRESOURCE;1;(string,IDRESOURCE))*/})"\
+Reload _ _ _ _ 
+
+

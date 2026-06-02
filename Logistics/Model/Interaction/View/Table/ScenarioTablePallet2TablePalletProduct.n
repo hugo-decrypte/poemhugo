@@ -1,0 +1,53 @@
+%=======================================================%
+%														%
+%			Logistics									%
+%														%
+%	    ScenarioTablePallet2TablePlatteProduct.n				%  
+%													%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TablePalletProduct ",
+
+% Caption
+@ (" '" TAG_PRODUCT_IN_PALLET "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_PALLET_PRODUCT,
+
+% Label
+@ (" '" TAG_PRODUCTS "' "),	% JZ 0924
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePALLET' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+@ (PREFIX_OPENTABLE_BEGIN "TablePalletProduct.view" OPENTABLE_END),
+
+% JZ 0924 : TITLEOBJ 
+@ (TABLE_ARGUMENTS "TITLEOBJ=" TAG_PRODUCT_IN_PALLET " {/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPACKING={/*Selected(tablePALLET;1;(string,IDPACKING))*/};NOPALLET={/*selected(tablePALLET;1;(int,NOPALLET))*/};IDPRODUCT='XXX']\"\n\n"), 
+
+

@@ -1,0 +1,136 @@
+%==================================================%
+%                                                  %
+%          	Production Scheduling              %
+%                                                  %
+% 		  Restore.n               	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'@' => (
+	sqlFile <- '@',
+
+% Zhou 1024 : ??? (1) bug delete not backup; (2) Danger: if restore name not ok, also delete ???
+
+	@ (SQL_DeleteProjectBackupWhereTrue		sql_AND_CLUB_ORDER "\n"),
+	@ (SQL_DeleteVehicleBackupWhereTrue		sql_AND_CLUB_VEHICLE "\n"),
+	@ (SQL_DeletePlanBackupWhereTrue		sql_AND_CLUB_PLAN "\n"),
+	@ (SQL_DeleteResourceShiftBackupWhereTrue	sql_AND_CLUB_RESOURCE_SHIFT "\n"),
+	@ (SQL_DeleteResourceTimeBackupWhereTrue	sql_AND_CLUB_RESOURCE_TIME "\n"),
+	@ (SQL_DeleteRuleBackupWhereTrue		sql_AND_CLUB_RULE "\n"),
+	@ (SQL_DeleteTypeVehicleProductBackupWhereTrue	sql_AND_CLUB_TYPEVEHICLE_PRODUCT "\n"),
+	@ (SQL_DeleteTourBackupWhereTrue		sql_AND_CLUB_TOUR "\n"),
+	@ (SQL_DeleteClientBackupWhereTrue		sql_AND_CLUB_CLIENT "\n"), 
+	@ (SQL_DeleteDepotBackupWhereTrue		sql_AND_CLUB_DEPOT "\n"), 
+	@ (SQL_DeleteDepotProductBackupWhereTrue	sql_AND_CLUB_DEPOT_PRODUCT "\n"), 
+	@ (SQL_DeleteProductBackupWhereTrue		sql_AND_CLUB_PRODUCT "\n"), 
+	@ (SQL_DeleteShiftBackupWhereTrue		sql_AND_CLUB_SHIFT "\n"), 
+	@ (SQL_DeleteSiteBackupWhereTrue		sql_AND_CLUB_SITE "\n"), 
+	@ (SQL_DeleteSiteSiteBackupWhereTrue		sql_AND_CLUB_SITE_SITE "\n"), 
+	@ (SQL_DeleteTypeVehicleBackupWhereTrue		sql_AND_CLUB_TYPEVEHICLE "\n"), 
+	@ (SQL_DeleteVehicleProductBackupWhereTrue	sql_AND_CLUB_VEHICLE_PRODUCT "\n"), 
+	@ (SQL_DeleteUserBackupWhereTrue		sql_AND_CLUB_USER "\n"), 
+
+/*
+	@ ( "DELETE FROM " DB_PREFIX "COMMAND WHERE 1=1			"sql_AND_CLUB_ORDER"\n"), 
+	@ ( "DELETE FROM " DB_PREFIX "RESOURCE WHERE 1=1			"sql_AND_CLUB_VEHICLE"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "PLAN WHERE 1=1			"sql_AND_CLUB_PLAN"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "RESOURCE_SHIFT WHERE 1=1		"sql_AND_CLUB_RESOURCE_SHIFT"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "RESOURCE_TIME WHERE 1=1		"sql_AND_CLUB_RESOURCE_TIME"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "RULE WHERE 1=1			"sql_AND_CLUB_RULE"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "TYPEVEHICLE_PRODUCT WHERE 1=1	"sql_AND_CLUB_TYPEVEHICLE_PRODUCT"\n"),
+	@ ( "DELETE FROM " DB_PREFIX "TOUR WHERE 1=1			"sql_AND_CLUB_TOUR"\n"),
+
+
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "CLIENT WHERE 1=1		"sql_AND_CLUB_CLIENT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "DEPOT WHERE 1=1		"sql_AND_CLUB_DEPOT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "DEPOT_PRODUCT WHERE 1=1	"sql_AND_CLUB_DEPOT_PRODUCT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "PRODUCT WHERE 1=1		"sql_AND_CLUB_PRODUCT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "SHIFT WHERE 1=1		"sql_AND_CLUB_SHIFT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "SITE WHERE 1=1		"sql_AND_CLUB_SITE"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "SITE_SITE WHERE 1=1		"sql_AND_CLUB_SITE_SITE"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "TYPEVEHICLE WHERE 1=1	"sql_AND_CLUB_TYPEVEHICLE"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "VEHICLE_PRODUCT WHERE 1=1 	"sql_AND_CLUB_VEHICLE_PRODUCT"\n"), 
+	@ ( "DELETE FROM " DB_BACKUP_PREFIX "USER WHERE 1=1	 	"sql_AND_CLUB_USER"\n"), 
+*/
+
+% Zhou 0813 : _InsertInto
+
+
+	% ORDER
+	@ (SQL_InsertIntoProjectFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_ORDER "\n"), % Chen 0731
+
+
+	% VEHICLE 
+	@ (SQL_InsertIntoVehicleFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_VEHICLE "\n"), 
+
+	% PLAN
+	@ (SQL_InsertIntoPlanFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_PLAN "\n"), 
+
+	% RESOURCE_SHIFT
+	@ (SQL_InsertIntoResourceShiftFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_RESOURCE_SHIFT "\n"), % Zhou 0726 : DateShift
+
+
+	% RESOURCE_TIME
+	@ (SQL_InsertIntoResourceTimeFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_RESOURCE_TIME "\n"), 
+
+	% RULE
+	@ (SQL_InsertIntoRuleFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_RULE "\n"), 
+
+
+	% TYPEVEHICLE_PRODUCT
+	@ (SQL_InsertIntoTypeVehicleProductFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_TYPEVEHICLE_PRODUCT "\n"), 
+
+	% TOUR
+	@ (SQL_InsertIntoTourFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_TOUR "\n"), 
+
+
+	% CLIENT
+	%@ ("    INSERT INTO  " DB_PREFIX "CLIENT(idClub,id,name,idSite,DateForbidden)"),
+	%@ ("	SELECT 	idClub,id,name,idSite,DateForbidden"),
+	%@ ("	FROM 	" DB_BACKUP_PREFIX "CLIENT cl"),
+	%@ ("	WHERE 	idBackup = '" idBackup "' " sql_AND_CLUB_BACKUP_CLIENT "\n"), 
+
+	% DEPOT 
+	@ (SQL_InsertIntoDepotFromBackupIs sql_AND_CLUB_BACKUP_DEPOT "'\n"), 	%li 0822
+
+	% DEPOT_PRODUCT 
+	@ (SQL_InsertIntoDepotProductFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_DEPOT_PRODUCT "\n"),
+
+	% PRODUCT 
+	@ (SQL_InsertIntoProductFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_PRODUCT "\n"),
+
+	% SHIFT 
+	@ (SQL_InsertIntoShiftFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_SHIFT "\n"),
+
+	% SITE 
+	@ (SQL_InsertIntoSiteFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_SITE "\n"),
+
+	% SITE_SITE 
+	@ (SQL_InsertIntoSiteSiteFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_SITE_SITE "\n"),
+
+	% TYPEVEHICLE 
+	@ (SQL_InsertIntoTypeVehicleFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_TYPEVEHICLE "\n"),
+
+	% VEHICLE_PRODUCT
+	@ (SQL_InsertIntoVehicleProductFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_VEHICLE_PRODUCT "\n"),
+
+	% USER 
+	@ (SQL_InsertIntoUserFromBackupIs idBackup "' " sql_AND_CLUB_BACKUP_USER "\n"),
+
+	'@' <- sqlFile,
+
+
+	% ExecuteSql
+	[['Work Directory' "Model\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+),
+
+'()' => ( 
+
+	'()' <- database,
+
+	sqlOperationLog := TAG_RESTORE_SNAPSHOT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

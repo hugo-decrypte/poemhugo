@@ -1,0 +1,98 @@
+%=======================================================%
+%							%
+%			Scheduling			%
+%							%
+% 	  ScenarioTableSiteSite2EditSiteSite.n	        %
+%							%
+% 	  (c)2000 Enginest. All rights reserved.	%
+%=======================================================%
+
+% Script: MODIFY
+@ "Script ",
+
+% ID
+@ "EditSiteSite ",
+
+% Caption
+@ ("'" TAG_EDIT_SITE_SITE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT,
+
+% Label
+@ (" '" TAG_EDIT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSITE_SITE' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+% Instruction... (When Count>0)
+@ (PREFIX_POEMDATA_OPEN "SITE_SITE&idSite1 in ({/*selected(table"aliasTable";1;(string,IDSITE1))*/}) and idSite2 in ({/*selected(table"aliasTable";1;(string,IDSITE2))*/}) and idClub in ({/*selected(table"aliasTable";1;(string,IDCLUB))*/})\"\\\n"),
+
+@ POEMDATA_RELOAD,
+
+
+
+.
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=1; NETNCL=HTTP; SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/); MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=1;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+
+@ (" WinExec \"[WAITTIME=0S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+@ ("   '(/*POEMDATAEXE*/)'\\\n"),
+@ ("   \"(/*POEMDATAPATH*/)/(/*POEMDATADEP*/) ?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=1)]?\\\n"),
+@ ("   OPEN TABLE " DB_PREFIX "SITE_SITE&idClub='(/*CLUBID*/)' AND idSite1 in ({/*selected(tableSITE_SITE;1;(string,IDSS1))*/}) AND idSite2 in ({/*selected(tableSITE_SITE;1;(string,IDSS2))*/})\" _ _ _ _ _ _ _ \n\n"),
+
+
+
+.
+
+
+%===version ncl wp 26/07/2024
+
+% Instruction... (When Count>0)
+@ ("\tNcl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\SiteSite\EditSiteSite.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+
+@ ("\t'(/*SERVERPORT*/) (/*USERID*/) "),
+@ ("\t{/*selected(tableSITESITE;2;(string,IDSITE1);(string,IDSITE2))*/} \\\n"),
+
+@ ("\t{/*Input(" TAG_EDIT_SITE_SITE ";" nbColumn ";"),
+
+"IDSITE1" \in IdFieldSelected => 
+@ ("(string,IDSITE1," TAG_SITE1 ",[/*SITESITE.IDSITE1*/],40,,);\\\n"),%li 0711
+
+"IDSITE2" \in IdFieldSelected => 
+@ ("(string,IDSITE2," TAG_SITE2 ",[/*SITESITE.IDSITE2*/],,,);\\\n"),
+
+"MILEAGE" \in IdFieldSelected =>
+@ ("(int,MILEAGE," TAG_MILEAGE ",[/*SITESITE.MILEAGE*/],,,);\\\n"),	
+
+"TIME" \in IdFieldSelected =>
+@ ("(int,TIME," TAG_TIME ",[/*SITESITE.TIME*/],,,);\\\n"),
+
+@ (")*/}'\\\n"),
+
+@ ("\tReload _ _ _ _\n\n"),

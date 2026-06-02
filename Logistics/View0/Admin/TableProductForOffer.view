@@ -1,0 +1,81 @@
+View ViewTablePRODUCTFOROFFER 'Produits pour offre (/*IDSUPPLIER*/)' 'Produits pour offre (/*IDSUPPLIER*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCTFOROFFER _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Produits pour offre (/*IDSUPPLIER*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Right,Center,Center,Center,Left}]"\
+"[DATAOBJ=PRODUCTFOROFFER;FILLCOLOR=LINERGB]"
+
+Data PRODUCTFOROFFER 'Produits pour offre (/*IDSUPPLIER*/)' PRODUCTFOROFFER HTTPSQL 0 '[FIND={IDPRODUCT,FAMILY,DESIGNATION,QUANTITYPACKAGE,QUANTITYSTOCK,quantityORDERED,quantitySUPPLIED,MINQUANTITY,PRICE,TRANSPORTCOST,TRANSPORTTIME,DATEOFFER,DATEVALIDITY,COMMENTS}]'   [DOUBLECLICK=] \
+"[14;(string,IDPRODUCT,Produit,,10,,);(string,FAMILY,Famille,,10,,);(string,DESIGNATION,Désignation,,15,,);(float,QUANTITYPACKAGE,Qté paquet,,13,,);(float,QUANTITYSTOCK,Qté stock,,12,,);(float,quantityORDERED,Qté commande,,18,,);(float,quantitySUPPLIED,Qté provision,,18,,);(int,MINQUANTITY,Min quantité,,15,,);(float,PRICE,Prix unitaire,,15,,);(float,TRANSPORTCOST,Frais transport,,18,,);(string,TRANSPORTTIME,Temps transport,,19,,);(date,DATEOFFER,Date offre,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEVALIDITY,Date validation,,18,,YYYY-MM-DD|DD/MM/YYYY);(string,COMMENTS,Commentaire,,18,,);(float,MYPRICE,Prix Catalogue,,10.4.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT a.Id as IDPRODUCT,\
+		 a.Designation as DESIGNATION,\
+		 a.Family as FAMILY,\
+		 a.QuantityPackaging as QUANTITYPACKAGE,\
+		 a.QuantityStock as QUANTITYSTOCK,\
+		 IIF(a.QuantitySupplied is NULL, 0, a.QuantitySupplied) as QUANTITYSUPPLIED,\
+		 a.QuantityOrdered as QUANTITYORDERED,\
+		 a.PriceUnit as MYPRICE,\
+		 a.Weight as WEIGHTUNIT,\
+		 format(a.Weight*a.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		 ' ' as MINQUANTITY,\
+		 ' ' as PRICE,\
+		 ' ' AS TRANSPORTCOST,\
+		 ' ' AS TRANSPORTTIME,\
+		 ' ' as DATEOFFER,\
+		 ' ' as DATEVALIDITY,\
+		 ' ' as COMMENTS,\
+		 0 as INORDER,\
+		 '(255 255 255)' AS LINERGB \
+		 FROM PRODUCT a \
+		 WHERE ( a.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/))) \
+		 and a.TypeProduct<>'F'\
+		 and a.Id not in (select os.IdProduct from OFFER_PRODUCT os where os.IdSupplier in ((/*IDSUPPLIER*/)) ) \
+		 UNION ALL \
+		 SELECT \
+		  a.Id as IDPRODUCT,\
+		  a.Designation as DESIGNATION,\
+		  a.Family as FAMILY,\
+		  a.QuantityPackaging as QUANTITYPACKAGE,\
+		  a.QuantityStock as QUANTITYSTOCK,\
+		 IIF(a.QuantitySupplied is NULL , 0 , a.QuantitySupplied) as QUANTITYSUPPLIED,\
+		 a.QuantityOrdered as QUANTITYORDERED,\
+		  a.PriceUnit as MYPRICE,\
+		  a.Weight as WEIGHTUNIT,\
+		  format(a.Weight*a.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		 format(os.MinQuantity,'0') as MINQUANTITY,\
+		 os.PriceUnit as PRICE,\
+		  format(os.TransportCost,'0.00') AS TRANSPORTCOST,\
+		  format(os.TransportTime,'0') AS TRANSPORTTIME,\
+		  os.DateOffer as DATEOFFER,\
+		  os.DateValidity as DATEVALIDITY,\
+		  os.Comments as COMMENTS,\
+		  1 as INORDER,\
+		 '(150 150 255)' AS LINERGB \
+		 FROM PRODUCT a \
+		  inner join OFFER_PRODUCT os on os.IdProduct=a.Id \
+		 WHERE ( a.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+		  and (os.IdSupplier in ((/*IDSUPPLIER*/)) ) \
+		 Order BY INORDER desc, IDPRODUCT, Family, DESIGNATION "
+
+
+Script AddProductToOffer  'Quantité + un paquet' _ 61 'Quantité + un paquet' _ 'tablePRODUCTFOROFFER' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\AddProductToOfferSupplier.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTFOROFFER;1;(string,IDPRODUCT);)*/} \
+ (/*IDSUPPLIER*/) (/*IDOFFER*/) \
+'\
+Reload _ _ _
+
+// 2. Remove Product from offer
+Script RemoveProduct  'Enlever produit' _ 62 'Enlever produit' _ 'tablePRODUCTFOROFFER' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\RemoveProductFromOffer.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCTFOROFFER;1;(string,IDPRODUCT);)*/} \
+ (/*IDSUPPLIER*/) (/*IDOFFER*/) \
+'\
+Reload _ _ _
+

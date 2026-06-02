@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableClient.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableClient.n"],
+
+'@' => (
+	tableClient("CLIENT",TAG_TABLE,"CLIENT",true,"EditClient",TAG_CLIENT,""),	% JZ 1020
+),

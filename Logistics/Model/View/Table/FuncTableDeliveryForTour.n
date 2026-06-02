@@ -1,0 +1,88 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableDeliveryForTour.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableDeliveryForTour>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableDeliveryForTour" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+%% //date,DATESTART,Date début,,13,,YYYY-MM-DD|DD/MM/YYYY
+
+		@ VIEWSQL,
+
+		@ ("SELECT d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t (select "SQL_CONCAT"trim(PtD.Address)"SQL_CONCATWITH"', '"SQL_CONCATWITH"trim(PtD.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"PtD.City"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY PtD where PtD.IdClient=d.IdClient and PtD.IdPoint=d.IdPointDelivery) as ADDRESSDELIVERY,\\\n"),
+		@ ("\t\t d.AmountHT as AMOUNTHT,\\\n"),
+		@ ("\t\t d.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t d.DateInvoice as DATEINVOICE,\\\n"),
+		@ ("\t\t d.DatePayment as DATEPAYMENT,\\\n"),
+		@ ("\t\t (select sum(p.Weight*DP.Quantity) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT p on p.Id=DP.IdProduct where DP.IdDelivery=d.Id) as WEIGHT,\\\n"),
+		@ ("\t\t (select LABEL from " DB_PREFIX "STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY') as STATE,\\\n"),
+		@ ("\t\t 1 as ORD,\\\n"),
+		@ ("\t\t IIF(d.idState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='DELIVERY'),(select Color from " DB_PREFIX "STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY'),\\\n"),
+		@ ("\t\t   '(255 230 230)') AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id \\\n"),
+		@ ("\t AND (d.Id in (select DP.IdDelivery from " DB_PREFIX "DELIVERY_PRODUCT DP where (DP.(/*OWNERSUBOBJ*/) in ((/*IDSUBOBJ*/)) ) or 'XXX' in ((/*IDSUBOBJ*/)) ) )\\\n"),
+		@ ("\t AND (d.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)) ) \\\n"),
+		@ ("\t UNION ALL SELECT\\\n"),
+		@ ("\t\t d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t (select "SQL_CONCAT"trim(PtD.Address)"SQL_CONCATWITH"', '"SQL_CONCATWITH"trim(PtD.PostCode)"SQL_CONCATWITH"' '"SQL_CONCATWITH"PtD.City"SQL_CONCATEND" from " DB_PREFIX "POINTDELIVERY PtD where PtD.IdClient=d.IdClient and PtD.IdPoint=d.IdPointDelivery) as ADDRESSDELIVERY,\\\n"),
+		@ ("\t\t d.AmountHT as AMOUNTHT,\\\n"),
+		@ ("\t\t d.DateDelivery as DATEDELIVERY,\\\n"),
+		@ ("\t\t d.DateInvoice as DATEINVOICE,\\\n"),
+		@ ("\t\t d.DatePayment as DATEPAYMENT,\\\n"),
+		@ ("\t\t (select sum(p.Weight*DP.Quantity) from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PRODUCT p on p.Id=DP.IdProduct where DP.IdDelivery=d.Id) as WEIGHT,\\\n"),
+		@ ("\t\t (select LABEL from " DB_PREFIX "STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY') as STATE,\\\n"),
+		@ ("\t\t 2 as ORD,\\\n"),
+		@ ("\t\t  '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "DELIVERY d, " DB_PREFIX "CLIENT cl \\\n"),
+		@ ("\t WHERE d.IdClient=cl.Id \\\n"),
+		@ ("\t AND d.idState<>'9'\\\n"),
+		@ ("\t AND ('XXX' not in ((/*IDTOUR*/)) and (d.IdTour is NULL or d.IdTour<=' ') ) \\\n"),
+		@ ("\t ORDER BY ORD, ID \"\n\n\n"),
+ 		
+
+
+
+		@ "//////Table///////////////////////////////////////////\n\n",
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableDeliveryProduct.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDelivery2TableDeliveryPreparation.n"],
+		
+
+		%===================================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableDeliveryForTour2EditOnView.n"],
+		%===================================
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

@@ -1,0 +1,70 @@
+%===============================================%
+%						%
+%		CheckLog.n			%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+'()' => (
+	'()' <- database,
+
+	%now = '2025-08-01 08:12:59',
+
+	sqlInsertLog = ("INSERT	INTO " DB_PREFIX
+		"LOG(idClub,idUser,ip," SQL_FIELD_PERMISSION ",t1)VALUES('"
+		idClubLogin "','"
+		idUserLogin "','"
+		ipClub_{clubId_{idClubLogin}} "','"
+		permissionLogin "','"
+		 'yyyy-mm-dd hh:mm:ss'
+	"')"),
+
+	(SQL : sqlInsertLog),
+
+	database <- '()',
+),
+
+.
+
+
+'()' => (
+	'()' <- database,
+
+
+/*
+	(SQL : "SELECT ip," SQL_FIELD_PERMISSION " FROM "
+			DB_PREFIX "LOG WHERE t2 IS NULL AND ip IS NOT NULL AND idUser='"
+			idUserLogin "' AND operation='" TAG_LOGIN "'"),
+
+	() > 0 => (
+		ipLogin		:: "",
+		permissionLogin	:: "",
+
+		ipLogin		= (),
+		permissionLogin	= (),	
+
+		timeLog := 'yyyy-mm-dd hh:mm:ss',
+
+		(SQL : "INSERT	INTO " DB_PREFIX
+			"LOG(idClub,idUser,ip," SQL_FIELD_PERMISSION ",t1)VALUES('"
+			idClubLogin "','"
+			idUserLogin "','"
+			ipLogin "','"
+			permissionLogin "','"
+			timeLog "')"),
+	),
+*/
+
+	now = '2025-08-01 08:12:59',
+	%now = 'yyyy-mm-dd hh:mm:ss',
+
+	(SQL : "INSERT	INTO " DB_PREFIX
+		"LOG(idClub,idUser,ip," SQL_FIELD_PERMISSION ",t1)VALUES('"
+		idClubLogin "','"
+		idUserLogin "','"
+		ipClub_{clubId_{idClubLogin}} "','"
+		permissionLogin "','"
+		now "')"),
+
+	database <- '()',
+),

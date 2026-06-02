@@ -1,0 +1,36 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		DataClub.n 	 		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Data: CLUB
+@ "Data ",
+
+% ID
+@ "CLUB '",
+
+% Caption
+@ TAG_DATA_CLUB,
+
+% Group
+@ "' CLUB ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Script item "[Scripts when delete, insert or update]"
+%@ ("\"[DSN=" databaseName ";USR=" databaseUser";PWD=" databasePassword";]\" \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ "\"[1;(string,IDCLUB,IDCLUB,,,,);]\"\\\n",
+
+@ VIEWSQL,
+
+@ ("SELECT id AS IDCLUB FROM " DB_PREFIX "CLUB " SQL_WHERE_CLUB "\"\n\n"),
+

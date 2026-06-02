@@ -1,0 +1,91 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  	FuncTableProductForOffer.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductForOffer>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],  
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableArticleForOfferSupplier" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableProductForOffer" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		
+		@ ("(float,MYPRICE,Prix Catalogue,,10.4.80,0);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+		@ VIEWSQL,
+		
+
+		@ ("SELECT a.Id as IDPRODUCT,\\\n"),
+ 		@ ("\t\t a.Designation as DESIGNATION,\\\n"),
+ 		@ ("\t\t a.Family as FAMILY,\\\n"),
+ 		@ ("\t\t a.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+ 		@ ("\t\t a.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"a.QuantitySupplied is NULL"SQL_THEN" 0"SQL_ELSE" a.QuantitySupplied"SQL_CASEEND" as QUANTITYSUPPLIED,\\\n"),
+ 		@ ("\t\t a.QuantityOrdered as QUANTITYORDERED,\\\n"),
+ 		@ ("\t\t a.PriceUnit as MYPRICE,\\\n"),
+ 		@ ("\t\t a.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(a.Weight*a.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t ' ' as MINQUANTITY,\\\n"),
+ 		@ ("\t\t ' ' as PRICE,\\\n"),
+ 		@ ("\t\t ' ' AS TRANSPORTCOST,\\\n"),
+ 		@ ("\t\t ' ' AS TRANSPORTTIME,\\\n"),
+ 		@ ("\t\t ' ' as DATEOFFER,\\\n"),
+ 		@ ("\t\t ' ' as DATEVALIDITY,\\\n"),
+ 		@ ("\t\t ' ' as COMMENTS,\\\n"),
+ 		@ ("\t\t 0 as INORDER,\\\n"),
+ 		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "PRODUCT a \\\n"),
+		@ ("\t\t WHERE ( a.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/))) \\\n"),
+ 		@ ("\t\t and a.TypeProduct<>'F'\\\n"),
+ 		@ ("\t\t and a.Id not in (select os.IdProduct from " DB_PREFIX "OFFER_PRODUCT os where os.IdSupplier in ((/*IDSUPPLIER*/)) ) \\\n"),
+		@ ("\t\t UNION ALL \\\n"),
+		@ ("\t\t SELECT \\\n"),
+		@ ("\t\t  a.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t  a.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t  a.Family as FAMILY,\\\n"),
+		@ ("\t\t  a.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+		@ ("\t\t  a.QuantityStock as QUANTITYSTOCK,\\\n"),
+		@ ("\t\t "SQL_CASEWHEN"a.QuantitySupplied is NULL "SQL_THEN" 0 "SQL_ELSE" a.QuantitySupplied"SQL_CASEEND" as QUANTITYSUPPLIED,\\\n"),
+		@ ("\t\t a.QuantityOrdered as QUANTITYORDERED,\\\n"),
+		@ ("\t\t  a.PriceUnit as MYPRICE,\\\n"),
+		@ ("\t\t  a.Weight as WEIGHTUNIT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(a.Weight*a.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(os.MinQuantity,"SQL_FORMATSCALE0") as MINQUANTITY,\\\n"),
+ 		@ ("\t\t os.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(os.TransportCost,"SQL_FORMATSCALE2") AS TRANSPORTCOST,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(os.TransportTime,"SQL_FORMATSCALE0") AS TRANSPORTTIME,\\\n"),
+		@ ("\t\t  os.DateOffer as DATEOFFER,\\\n"),
+		@ ("\t\t  os.DateValidity as DATEVALIDITY,\\\n"),
+		@ ("\t\t  os.Comments as COMMENTS,\\\n"),
+		@ ("\t\t  1 as INORDER,\\\n"),
+ 		@ ("\t\t '(150 150 255)' AS LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "PRODUCT a \\\n"),
+		@ ("\t\t  inner join " DB_PREFIX "OFFER_PRODUCT os on os.IdProduct=a.Id \\\n"),
+		@ ("\t\t WHERE ( a.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+		@ ("\t\t  and (os.IdSupplier in ((/*IDSUPPLIER*/)) ) \\\n"),
+		@ ("\t\t Order BY INORDER desc, IDPRODUCT, Family, DESIGNATION \"\n\n\n"), 
+
+		%=====================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForOffer2EditOnView.n"],
+		%=====================
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

@@ -1,0 +1,129 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdatePacking.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idObjSelectedBuffer				:: "",
+	idObjSelectedBuffer				= (),
+	
+	dateInputBuffer					:: "",
+	idSenderBuffer					:: "",
+	commentBuffer					:: "",
+	stateBuffer						:: "",
+
+	
+	dateInputBuffer					= (),
+	idSenderBuffer					= (),
+	commentBuffer					= (),
+	stateBuffer						= (),
+	
+
+	'()' <- database,
+	
+
+	UpdatePacking_SQL1 = (
+		"Update " DB_PREFIX "PACKING set
+		DateDelivery='"dateInputBuffer"',
+		IdSender='"idSenderBuffer"',
+		Comments='"commentBuffer"'
+		where Id = '"idObjSelectedBuffer"'"
+	),
+	
+
+databaseType = "ACCESS" => (
+
+	UpdatePacking_SQL2 = (
+		"Update " DB_PREFIX "PACKING p, " DB_PREFIX "STATE s
+		set p.IdState=s.Id
+		where p.Id = '"idObjSelectedBuffer"'
+		and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='SUPPLY'"
+	),
+
+	UpdatePacking_SQL3 = (
+		"Update " DB_PREFIX "PRODUCT A 
+		set A.QuantityStock=0
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0
+			where lp0.IdPacking = '"idObjSelectedBuffer"' )"
+	),
+
+	UpdatePacking_SQL4 = (
+		"Update " DB_PREFIX "PALLET_PRODUCT lp inner join " DB_PREFIX "PRODUCT A on A.Id=lp.IdProduct 
+		set A.QuantityStock=A.QuantityStock + lp.QuantityStock
+		WHERE A.Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0
+			where lp0.IdPacking = '"idObjSelectedBuffer"' )
+			and exists (select 1 from " DB_PREFIX "PACKING pk where pk.Id=lp.IdPacking and pk.IdState not in ('0','9') )"
+	),
+
+	UpdatePacking_SQL5 = (
+		"Update " DB_PREFIX "PACKING P set
+		Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0 
+		WHERE P.Id = '"idObjSelectedBuffer"' "
+	),
+
+	UpdatePacking_SQL6 = (
+		"Update " DB_PREFIX "PACKING P inner join " DB_PREFIX "PALLET_PRODUCT lp on P.Id=lp.IdPacking set
+		P.Quantity=P.Quantity+lp.Quantity,
+		P.QuantityReal=P.QuantityReal+lp.QuantityReal,
+		P.QuantityStock=P.QuantityStock+lp.QuantityStock,
+		P.QuantityDefective=P.QuantityDefective+lp.QuantityDefective 
+		WHERE P.Id = '"idObjSelectedBuffer"' "
+	),
+
+	;
+
+	UpdatePacking_SQL2 = (
+		"Update " DB_PREFIX "PACKING 
+		set IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='SUPPLY')
+		where p.Id = '"idObjSelectedBuffer"'	"
+	),
+
+	UpdatePacking_SQL3 = (
+		"Update " DB_PREFIX "PRODUCT 
+			set QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdProduct)
+		WHERE Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0
+			where lp0.IdPacking = '"idObjSelectedBuffer"' )
+			and exists (select 1 from " DB_PREFIX "PACKING pk where pk.Id=lp.IdPacking and pk.IdState not in ('0','9') )"
+	),
+
+	UpdatePacking_SQL4 = (
+		"Update " DB_PREFIX "PRODUCT 
+		set QuantityStock=0
+		WHERE QuantityStock is NULL and Id in (select lp0.IdProduct from " DB_PREFIX "PALLET_PRODUCT lp0 where lp0.IdPacking = '"idObjSelectedBuffer"' )"
+	),
+
+	UpdatePacking_SQL5 = (
+		"Update " DB_PREFIX "PACKING set
+			Quantity=(select sum(lp.Quantity) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),
+			QuantityReal=(select sum(lp.QuantityReal) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),
+			QuantityStock=(select sum(lp.QuantityStock) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking),
+			QuantityDefective=(select sum(lp.QuantityDefective) from " DB_PREFIX "PALLET_PRODUCT lp where Id=lp.IdPacking)
+		WHERE Id = '"idObjSelectedBuffer"' "
+	),
+	UpdatePacking_SQL6 = (
+		"Update " DB_PREFIX "PACKING set
+		Quantity=0, QuantityReal=0, QuantityStock=0, QuantityDefective=0 
+		WHERE Quantity is NULL and Id = '"idObjSelectedBuffer"'"
+	),
+),
+	
+	(SQL : UpdatePacking_SQL1),
+	(SQL : UpdatePacking_SQL2),
+	(SQL : UpdatePacking_SQL3),
+	(SQL : UpdatePacking_SQL4),
+	(SQL : UpdatePacking_SQL5),
+	(SQL : UpdatePacking_SQL6),
+	
+	database <- '()',
+),

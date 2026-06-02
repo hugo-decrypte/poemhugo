@@ -1,0 +1,6 @@
+View 'Optimiser les tournées' _ 'Optimiser les tournées' 255 255 255 _ 0 0 40 40 5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;DEBUGLEVEL=0;SCROLLBAR=0;NATURESCALE=0;BESTFIT=1]'
+
+Script GenerateSolution 'Optimiser les tournées' _ 7 'Cliquer à Optimiser les tournées' _ _ '0 0 40 40' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;;AUTOCLOSE=0]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptGenerateSolution.n' '(/*SERVERDIRECTORY*/)parallel.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*Input(Optimiser les tournées;1;(string,ORDER,Sélectionner,Optimiser planifiées + nouvelles commandes,50.0.580,,,{Optimiser nouvelles commandes,Optimiser planifiées + nouvelles commandes,Relaxation})*/}' \
+Reload "[VIEWID=ViewTableRESULT]"
+

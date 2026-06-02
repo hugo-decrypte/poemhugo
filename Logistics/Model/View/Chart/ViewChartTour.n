@@ -1,0 +1,31 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ViewChartTour.n	               	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Chart\FuncChartTour.n"],
+
+'@' => (	
+	chartTour(
+		TAG_CHART,
+		true,true, true,true,
+		"TOURORDER", "ORDER","TOUR", "MoveTask", "Selected", 200,
+		TAG_TOUR,
+		{},
+		""),	% JZ 1023
+	
+	chartTour(
+		TAG_CHART,
+		true,true, true,true,
+		"TOURORDER", "ORDER","TOUR", "MoveTask", "Selected", 200,
+		TAG_TOUR,
+		{},
+		"Menu"),	% JZ 1023
+
+	%chartTour({},TAG_CHART_TOUR,date1Plan,date2Plan,""),
+	%chartTour({},TAG_CHART_TOUR,date1Plan,date2Plan,"Menu"),
+),

@@ -1,0 +1,58 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%  ScenarioTableProductKit2TableProductForProduct.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+@ "\n///////////////////// table component\n",
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableProductComponent ",
+
+% Caption
+@ ("'" TAG_PRODUCT_KIT "' "),  % JZ 1018
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_PRODUCT_PRODUCT,
+
+% Label
+@ (" '" TAG_COMPONENTS "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePRODUCTKIT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableProductProduct.view" OPENTABLE_END),	% JZ 1018
+
+@ (TABLE_ARGUMENTS "FAMILY='XXX';IDPRODUCT={/*Selected(tablePRODUCTKIT;1;(string,ID))*/};TITLEOBJ={/*Selected(tablePRODUCTKIT;1;(string,DESIGNATION))*/}]\"\n\n"),
+
+

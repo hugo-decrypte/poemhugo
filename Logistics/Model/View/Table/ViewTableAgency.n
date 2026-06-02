@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+% 		ViewTableAgency.n                  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableAgency.n"],
+
+'@' => (
+	tableAgency("AGENCY",TAG_TABLE,"AGENCY",true,"EditAgency",TAG_TABLE_EMPLOYER,""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_AGENCY TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

@@ -1,0 +1,61 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% ScenarioTableResource2HistogramWorktimeDate.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0710
+% Script
+@ "Script ",
+
+% ID
+@ "HistogramWorktimeDate ",
+
+% Caption
+@ ("'" TAG_HISTOGRAM_WORKTIME_DATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_HISTOGRAM_WORKTIME_DATE,
+
+% Label
+@ (" '" TAG_HISTOGRAM_WORKTIME_DATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableVEHICLE' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+@ ("\tNcl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\\Interaction\\View\\Histogram\\GenerateHistogramWorktimeDate.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+
+@ ("\t'(/*SERVERPORT*/) (/*USERID*/) "),
+@ ("\t{/*selected(tableVEHICLE;1;(string,ID))*/}\\\n"),
+
+@ ("\t{/*Input(" TAG_HISTOGRAM_WORKTIME_DATE ";2;"),
+@ ("(date,1," TAG_DATE1 "," date1Plan ",20." inputWidth ",0," dateFormatView ",);"),
+@ ("(date,2," TAG_DATE2 "," date2Plan ",20." inputWidth ",0," dateFormatView ",))*/}'\\\n"),
+
+@ ("\tOpen '" httpDirectory "HistogramWorktimeDate(/*USERID*/).view' _ _ _  \n\n"),

@@ -1,0 +1,60 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductFamily.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idProductSelectedBuffer	::"",
+	idProductBuffer			:: "",
+	
+	idProductSelectedBuffer	= (),
+	idProductBuffer			= (),
+	
+	designationBuffer	:: "",
+	minstockUnitBuffer	:: 0,
+	maxStockUnitBuffer	:: 0,
+	idZoneBuffer		:: "",
+	idRowBuffer			:: "",
+	idColumBuffer		:: "",
+	
+	designationBuffer	= (),
+	minstockUnitBuffer	= (),
+	maxStockUnitBuffer	= (),
+	idZoneBuffer		= (),
+	idRowBuffer			= (),
+	idColumBuffer		= (),
+	
+
+	'()' <- database,
+	
+
+	UpdateProductFamily_SQL1 = (
+		"UPDATE " DB_PREFIX "FAMILYPRODUCT SET 
+		 Designation='"designationBuffer"',
+		 MinStorageUnit="minstockUnitBuffer",
+		 MaxStorageUnit="maxStockUnitBuffer",
+		 IdZone='"idZoneBuffer"',
+		 IdRow='[/*IDROW*/]',
+		 IdColumn='"idRowBuffer"'
+		 where Id ='"idColumBuffer"'"
+	),
+
+	(SQL : UpdateProductFamily_SQL1), 
+	
+	
+
+	database <- '()',
+),

@@ -1,0 +1,73 @@
+%==================================================%
+%                                                  %
+%                Vehicle Routing                   %
+%                                                  %
+%                ComputeSolution.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+
+<routing>(
+	loop, solutionBuf, nameObjectiveTop,
+	mileage, TourActive,
+	maxBacktrack, maxTime,
+	stepCost,stepTime,stepDistance)
+(
+
+	% Declaration of principal variables
+	['Work Directory' "Model\Solver\DeclareSolving.n"],
+
+
+	% Relaxation
+	%'()' => (
+	%	['Work Directory' "Model\Relaxation\RelaxPrevious.n"],		
+	%),
+
+
+	% Optimization
+	['Work Directory' "Model\Solver\Routing.n"],
+
+
+	% Output
+	'@' => (
+		['Work Directory' "Model\Output\WriteSolutionBuffer.n"],
+	),
+
+
+	% Prediction
+	['Work Directory' "Model\Solver\PredictRouting.n"],
+
+	% Termination
+	['Work Directory' "Model\Solver\TerminateSolving.n"],
+),
+
+
+resultLoop_{0} = routing(
+	0, solutionBuf, nameObjectiveTop,
+	mileage0, TourActive0,
+	maxBacktrack, maxTime, stepCost,stepTime,stepDistance
+),
+
+%!!,
+
+resultLoop_{0} \in ResultWithSolution => (
+	(TAG_SEPARATION_LINE : '@' ),
+	('hh:mm:ss' TAG_TAB_0 TAG_OPTIMIZATION : '@'),
+
+	reoptimize(
+		0, solutionBuf, TAG_MILEAGE,
+		maxBacktrack, maxTime, stepCost,stepTime,stepDistance,
+
+		TourActive0, {},{}, 0,0,
+		mileage0, 0, mileageLoop_{0}
+	),
+	;
+
+
+	('hh:mm:ss' "  " TAG_NO_SOLUTION : '@'),
+
+	>> postSolving,
+),
+

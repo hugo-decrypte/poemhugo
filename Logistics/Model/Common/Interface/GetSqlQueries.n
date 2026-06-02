@@ -1,0 +1,52 @@
+/********************************************************/
+/*	             Routing				*/
+/*							*/
+/*		   GetSqlQueries.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	% Database config files
+	sqlConfig = ('Work Directory' "Boot/" directoryClub_{clubId_{idClubLogin}} "/Database/SqlQuery.cfg"),
+
+
+	sqlQueryFile = [sqlConfig],
+
+
+	'()' <- sqlQueryFile,
+
+	nbSqlQuery = #(sqlQueryFile, "\n\n"),
+
+	\forall i \in [1, nbSqlQuery] (
+		idSqlQuery_{i}		:: "",
+		valueSqlQuery_{i}	:: "",
+
+		idSqlQuery_{i} = ()	: "=",
+		valueSqlQuery_{i} = ()	: "\n\n",
+	),
+
+	sqlQueryFile <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ (nbSqlQuery	"\n"),
+
+	\forall i \in [1, nbSqlQuery] (
+		@ (valueSqlQuery_{i}  "\n"),
+	),
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+),
+

@@ -1,0 +1,134 @@
+%===============================================%
+%		Vehicle Routing			%
+%						%
+%		AddToTour.n			%
+%						%
+%	This is a part of the NCL Models.	%
+%	Copyright (C) 2000 ENGINEST SOFTWARE	%
+%		All rights reserved.		%
+%===============================================%
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	
+	
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	\forall i \in [1,nbSelected] (
+		idSelected_{i} :: "",
+
+		idSelected_{i} = (),
+	),
+	
+	IdSelected = \{ \forall i \in [1,nbSelected] idSelected_{i} \},
+	
+
+	idTourBuffer	:: "",
+	idVehicleBuffer :: "",
+	tourVehicleBuffer :: 0,
+
+	idVehicleBuffer	= (),
+	tourVehicleBuffer = (),
+	
+	idTourBuffer = (idVehicleBuffer "-" tourVehicleBuffer),
+
+	'()' <- database,
+	
+	
+
+	\forall o \in IdSelected  (
+		% update tble Order
+		(SQL : "UPDATE " DB_PREFIX "OPT_ORDER SET idResource='" idVehicleBuffer "',tourResource=" tourVehicleBuffer " WHERE id='" o "'\n"),
+		
+		% update table TOUR
+		(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idResource='" idVehicleBuffer "' AND tourResource=" tourVehicleBuffer " AND id='" idTourBuffer "'\n"),
+		(SQL : "INSERT INTO " DB_PREFIX "OPT_TOUR (idClub, id, idResource, tourResource) VALUES ('" idClubLogin "','" idTourBuffer "','" idVehicleBuffer "'," tourVehicleBuffer ")\n"),
+	),
+
+
+	database <- '()',
+	
+)
+.
+
+
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+
+['Work Directory' "Model\Input\Vehicle\ReadVehicle.n"],
+
+
+'()' => (
+	
+	
+	nbSelected		= (),
+	nbParameterSelected	= (),
+
+	\forall i \in [1,nbSelected] (
+		idSelected_{i} :: "",
+
+		idSelected_{i} = (),
+	),
+
+	idTourBuffer	:: "",
+	idVehicleBuffer :: "",
+	tourVehicleBuffer :: 0,
+
+	idVehicleBuffer	= (),
+	tourVehicleBuffer = (),
+	
+
+
+	vehicle		= resourceId_{idVehicleBuffer},
+	typeVehicle	= typeVehicleVehicle_{vehicle},
+
+	maxTourTour = (
+		maxTour0Vehicle_{vehicle} > 0 ?
+		maxTour0Vehicle_{vehicle} : (
+			maxTourTypeVehicle_{typeVehicle} > 0 ?
+			maxTourTypeVehicle_{typeVehicle} : maxTourVehicle
+		)
+	),
+
+	( TAG_RESOURCE " " idVehicleBuffer " " TAG_MAX_TOUR " = " maxTourTour :
+		tourVehicleBuffer \in [1, maxTourTour],
+	),
+
+
+
+	% make the tour id, but how about tour daily ?
+	idTourBuffer = (idVehicleBuffer "-" tourVehicleBuffer),
+
+	IdSelected = \{ \forall i \in [1,nbSelected] idSelected_{i} \},
+	IdOrderSelected = IdSelected,
+
+	IdVehicleInteraction = \{ idVehicleBuffer \},
+
+
+	'()' <- database,
+	\forall o \in IdOrderSelected  (
+		(SQL : "SELECT idSite2 FROM " DB_PREFIX "OPT_ORDER WHERE id='" o "'\n"),
+
+		nbOrderSelected_{o} 		= (),
+
+		idSite2OrderSelected_{o}	:: "",
+		idSite2OrderSelected_{o}	= (),
+	),
+
+	\forall o \in IdOrderSelected  (
+		% update tble Order
+		(SQL : "UPDATE " DB_PREFIX "OPT_ORDER SET idResource='" idVehicleBuffer "',tourResource=" tourVehicleBuffer " WHERE id='" o "'\n"),
+		
+		% update table TOUR
+		(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idResource='" idVehicleBuffer "' AND tourResource=" tourVehicleBuffer " AND id='" idTourBuffer "'\n"),
+		(SQL : "INSERT INTO " DB_PREFIX "OPT_TOUR (idClub, id, idResource, tourResource) VALUES ('" idClubLogin "','" idTourBuffer "','" idVehicleBuffer "'," tourVehicleBuffer ")\n"),
+	),
+
+
+	database <- '()',
+),

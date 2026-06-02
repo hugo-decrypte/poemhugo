@@ -1,0 +1,166 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableDeliveryNote2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "SelectDeselect ",
+
+% Caption
+@ (" '" TAG_SELECT_DESELECT "' "),	
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+
+% Label
+@ (" '" TAG_SELECT_DESELECT "' "),
+
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERYNOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+sqlDeliveryNoteSelected = (
+	"UPDATE " DB_PREFIX "OPT_ORDER o SET s.selected="
+		SQL_CASEWHEN "o.selected IS NULL OR o.selected='" STATE_FALSE "'"
+			SQL_THEN "'" STATE_TRUE "'"
+			SQL_ELSE "'" STATE_FALSE "'"
+		SQL_CASEEND
+),
+
+SetSelected_SQL1=(
+	"\"" sqlDeliveryNoteSelected " WHERE o.id in ([/*DELIVERYNOTE.ID*/]) \"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SelectDeselectDeliveryNote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableDELIVERYNOTE;1;(string,ID))*/}  \\\n"),
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ SetSelected_SQL1,
+		@ ("Reload _ _ _ \n\n\n"),
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyDeliveryNote ",
+
+
+% Caption
+@ ("'" TAG_UPDATE_STATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE_STATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERYNOTE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+%"{/*Input(MCM;" TAG_UPDATE " [/*DELIVERYNOTE.ID*/];1;\\\n"
+
+% Instruction... (When Count>0)
+UpdateDeliveryNote_Input = (
+	"{/*Input(MCM;" TAG_UPDATE_STATE ";1;\\\n"
+	"(string,STATEHERE," TAG_STATE ",[/*DELIVERYNOTE.STATE*/],50." inputWidth ",0,,[/*STATE.LABELSTATE*/]);\\\n"
+	")*/}"
+),
+
+UpdateDeliveryNote_SQL1 = (
+		"\"Update " DB_PREFIX "OPT_ORDER o, " DB_PREFIX "STATE s\
+		set o.state=s.Id\
+		where o.Id in (trim( [/*DELIVERYNOTE.ID*/] )) \
+		 and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATEHERE*/]' and s.CATEGORY='DELIVERYNOTE'\"\n\n"
+),
+	
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\ORDER\UpdateDeliveryNoteState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableDELIVERYNOTE;1;(string,ID))*/} \\\n"),
+		@ UpdateDeliveryNote_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateDeliveryNote_Input),
+		@ ("'\\\n"),
+		@ UpdateDeliveryNote_SQL1,
+		@ ("Reload _ _ _ \n\n\n"),
+),
+
+.
+
+

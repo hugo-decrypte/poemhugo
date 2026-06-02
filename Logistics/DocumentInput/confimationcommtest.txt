@@ -1,0 +1,9 @@
+﻿SHEET_NUMBER=1;
+SHEET_NAME=Commande;10;6;
+ID Commande;ID Produit;désignation;ID Client;date Commande;date livraison;ID adresse (livraison);quantité;prix unité;remis;
+idOrder;idProduct;designation;idClient;date1;date2;idSite2;quantity;priceUnit;discount;
+string key;string;string;string key;dd/mm/yyyy hh:mm;dd/mm/yyyy hh:mm;string;int;float;float;
+K23-G0998_00;53057600;NICKELE;;26/09/2025;09/12/2025;;1000;0,5600;;
+K23-G0998_00;56163300;FE/ZN;;26/09/2025;09/12/2025;;200;0,2100;;
+K23-G0998_00;57816900;AXE ZBC;;26/09/2025;09/12/2025;;400;0,6800;;
+K23-G0998_00;58558510;AXE FE/ZN;;26/09/2025;09/12/2025;;322;1,0800;;

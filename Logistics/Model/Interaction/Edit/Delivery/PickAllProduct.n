@@ -1,0 +1,141 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   		%
+%                                                  %
+% 		 PickAllProduct.n		   	 		  %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+%% 2025.09.13 rename UpdateDeliveryProductAllDelivery = > PickAllProduct
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idObjBuffer		:: "",
+	idObjBuffer		= (),
+	
+	
+	
+	'()' <- database,
+	
+	PickAllProduct_SQL1=(
+		"insert into " DB_PREFIX "DELIVERY_PRODUCT (IdDelivery, IdOrder, IdProduct, NoLine, IdPacking, NoPallet, DateDelivery,
+			Quantity, QuantityReal, QuantityDefective,QuantityOrderRest, PriceUnit, IdVAT,Discount,LabelDiscount,NoPalletDelivery)
+		select DP.IdDelivery, DP.IdOrder, DP.IdProduct, DP.NoLine+1, DP.IdPacking, DP.NoPallet, DP.DateDelivery,
+		DP.QuantityReal-PLP.QuantityStock, DP.QuantityReal-PLP.QuantityStock, 0, DP.QuantityOrderRest, DP.PriceUnit, DP.IdVAT,DP.Discount,DP.LabelDiscount,DP.NoPalletDelivery 
+		from " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PALLET_PRODUCT PLP on DP.IdProduct=PLP.IdProduct
+		WHERE not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.IdProduct=DP.IdProduct and DP0.IdPacking=DP.IdPacking
+				and (DP0.IdOrder<DP.IdOrder or (DP0.IdOrder=DP.IdOrder and DP0.NoLine<DP.NoLine)))
+		and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0
+			and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+	   and DP.IdDelivery='"idObjBuffer"' and DP.IdPacking='STOCK' 
+	   and PLP.QuantityStock>0 and PLP.QuantityStock<DP.QuantityReal"
+	),
+
+
+	databaseType = "ACCESS" => (
+		%% pick
+		PickAllProduct_SQL2=(
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PALLET_PRODUCT PLP on DP.IdProduct=PLP.IdProduct
+				set DP.Quantity=PLP.QuantityStock, DP.QuantityReal=PLP.QuantityStock
+				WHERE not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.IdProduct=DP.IdProduct and DP0.IdPacking=DP.IdPacking and (DP0.IdOrder<DP.IdOrder or (DP0.IdOrder=DP.IdOrder and DP0.NoLine<DP.NoLine)))
+				and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+				and DP.IdDelivery ='"idObjBuffer"' and DP.IdPacking='STOCK' 
+				and PLP.QuantityStock>0 and PLP.QuantityStock<DP.QuantityReal"
+		),
+		PickAllProduct_SQL3=(
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PALLET_PRODUCT PLP on DP.IdProduct=PLP.IdProduct
+				set DP.IdPacking=PLP.IdPacking, DP.NoPallet=PLP.NoPallet, PLP.QuantityStock=PLP.QuantityStock-DP.QuantityReal
+				WHERE not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.IdProduct=DP.IdProduct and DP0.IdPacking=DP.IdPacking and (DP0.IdOrder<DP.IdOrder or (DP0.IdOrder=DP.IdOrder and DP0.NoLine<DP.NoLine)))
+				and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+				and PLP.QuantityStock>=DP.QuantityReal
+				and DP.IdDelivery ='"idObjBuffer"' and DP.IdPacking='STOCK' "
+		),
+		PickAllProduct_SQL4=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityOut=0
+				WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PLP.IdPacking=DP.IdPacking and PLP.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL5=(
+			"Update " DB_PREFIX "DELIVERY_PRODUCT DP inner join " DB_PREFIX "PALLET_PRODUCT PLP on DP.IdPacking=PLP.IdPacking and DP.NoPallet=PLP.NoPallet and DP.IdProduct=PLP.IdProduct
+				set PLP.QuantityOut=PLP.QuantityOut+DP.QuantityReal
+				WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where PLP.IdPacking=DP0.IdPacking and PLP.NoPallet=DP0.NoPallet and DP0.IdDelivery='"idObjBuffer"'"
+		),
+		PickAllProduct_SQL6=(
+			"Update " DB_PREFIX "PALLET_PRODUCT PLP set PLP.QuantityStock=-PLP.QuantityOut+PLP.quantityReal
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PLP.IdPacking=DP.IdPacking and PLP.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL7=(
+			"Update " DB_PREFIX "PRODUCT P set P.QuantityStock=0
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where P.Id=DP.IdProduct and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL8=(
+			"Update " DB_PREFIX "PRODUCT P inner join " DB_PREFIX "PALLET_PRODUCT PLP on P.Id=PLP.IdProduct
+			set P.QuantityStock=P.QuantityStock+PLP.QuantityStock
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PLP.IdPacking=DP.IdPacking and PLP.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')"
+		),
+
+		;
+
+		PickAllProduct_SQL2=(
+		"Update " DB_PREFIX "DELIVERY_PRODUCT set 
+				Quantity=(select PLP.QuantityStock from " DB_PREFIX "PALLET_PRODUCT PLP where DELIVERY_PRODUCT.IdProduct=PLP.IdProduct and PLP.QuantityStock>0 and PLP.QuantityStock<DELIVERY_PRODUCT.QuantityReal 
+							and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+						),
+				QuantityReal=(select PLP.QuantityStock from " DB_PREFIX "PALLET_PRODUCT PLP where DELIVERY_PRODUCT.IdProduct=PLP.IdProduct and PLP.QuantityStock>0 and PLP.QuantityStock<DELIVERY_PRODUCT.QuantityReal 
+							and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+						)
+			WHERE not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.IdProduct=DP.IdProduct and DP0.IdPacking=DP.IdPacking and (DP0.IdOrder<DP.IdOrder or (DP0.IdOrder=DP.IdOrder and DP0.NoLine<DP.NoLine)))
+			and DP.IdDelivery ='"idObjBuffer"' and DP.IdPacking='STOCK' "
+		),
+		PickAllProduct_SQL3=(
+			"Update " DB_PREFIX "DELIVERY_PRODUCT set 
+				IdPacking=(select PLP.IdPacking from " DB_PREFIX "PALLET_PRODUCT PLP where DELIVERY_PRODUCT.IdProduct=PLP.IdProduct and PLP.QuantityStock>=DELIVERY_PRODUCT.QuantityReal
+							and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+						), 
+				NoPallet=(select PLP.NoPallet from " DB_PREFIX "PALLET_PRODUCT PLP where DELIVERY_PRODUCT.IdProduct=PLP.IdProduct and PLP.QuantityStock>=DELIVERY_PRODUCT.QuantityReal
+							and not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT PLP0 where PLP0.IdProduct=PLP.IdProduct and PLP0.QuantityStock>0 and (PLP0.DateExpiration<PLP.DateExpiration or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking<PLP.IdPacking) or (PLP0.DateExpiration=PLP.DateExpiration and PLP0.IdPacking=PLP.IdPacking and PLP0.NoPallet<PLP.NoPallet) ))
+						) 
+			WHERE not exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP0 where DP0.IdDelivery=DP.IdDelivery and DP0.IdProduct=DP.IdProduct and DP0.IdPacking=DP.IdPacking and (DP0.IdOrder<DP.IdOrder or (DP0.IdOrder=DP.IdOrder and DP0.NoLine<DP.NoLine)))
+				and DP.IdDelivery ='"idObjBuffer"' and DP.IdPacking='STOCK' "
+		),
+		PickAllProduct_SQL4=(
+			"Update " DB_PREFIX "PALLET_PRODUCT set 
+				QuantityOut=(select sum(DP.QuantityReal) from " DB_PREFIX "DELIVERY_PRODUCT DP where DP.IdPacking=PALLET_PRODUCT.IdPacking and DP.NoPallet=PALLET_PRODUCT.NoPallet and DP.IdProduct=PALLET_PRODUCT.IdProduct)
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET_PRODUCT.IdPacking=DP.IdPacking and PALLET_PRODUCT.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL5=(
+			"Update " DB_PREFIX "PALLET_PRODUCT set QuantityOut=0
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET_PRODUCT.IdPacking=DP.IdPacking and PALLET_PRODUCT.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')
+				and QuantityOut is NULL "
+		),
+		PickAllProduct_SQL6=(
+			"Update " DB_PREFIX "PALLET_PRODUCT set QuantityStock=-QuantityOut+quantityReal
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where PALLET_PRODUCT.IdPacking=DP.IdPacking and PALLET_PRODUCT.NoPallet=DP.NoPallet and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL7=(
+			"Update " DB_PREFIX "PRODUCT set
+				QuantityStock=(select sum(PLP.QuantityStock) from " DB_PREFIX "PACKING PK inner join " DB_PREFIX "PALLET_PRODUCT PLP on PC.id=PLP.idPacking where PRODUCT.Id=PLP.IdProduct)
+			WHERE exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where id=DP.IdProduct and DP.IdDelivery='"idObjBuffer"')"
+		),
+		PickAllProduct_SQL8=(
+			"Update " DB_PREFIX "PRODUCT set QuantityStock=0
+			WHERE QuantityStock is NULL 
+				and exists (select 1 from " DB_PREFIX "DELIVERY_PRODUCT DP where Id=DP.IdProduct and DP.IdDelivery='"idObjBuffer"')"
+		),
+	),
+
+	(SQL : PickAllProduct_SQL1), 
+	(SQL : PickAllProduct_SQL2), 
+	(SQL : PickAllProduct_SQL3), 
+	(SQL : PickAllProduct_SQL4), 
+	(SQL : PickAllProduct_SQL5), 
+	(SQL : PickAllProduct_SQL6), 
+	(SQL : PickAllProduct_SQL7), 
+	(SQL : PickAllProduct_SQL8), 
+	
+	database <- '()',
+),

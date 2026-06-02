@@ -1,0 +1,42 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		ClearBackup0.n                     %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'@' => (  % bai 0411
+	sqlFile <- '@',
+
+	%databaseType = "SQLSERVER" =>(
+	%	@ ( "DELETE FROM " DB_BACKUP_PREFIX "PLAN WHERE idBackup NOT IN (SELECT id FROM [" DB_BACKUP "] )\n"),
+
+	%	@ ( "DELETE FROM " DB_BACKUP_PREFIX "PLAN WHERE idBackup IN (SELECT id FROM [" DB_BACKUP "] b WHERE type='" TAG_TYPE_BACKUP "'  "sql_AND_CLUB_BACKUP" )\n"), % Chen 0823
+
+	%	@ ( "DELETE FROM [" DB_BACKUP "] WHERE type='" TAG_TYPE_BACKUP "'  "sql_AND_CLUB_BACKUP), % Chen 0823
+
+
+	@ (SQL_DeletePlanBackupNotInBackup "\n"), % Zhou 0831
+
+	@ (SQL_DeletePlanBackupInBackupTypeIs TAG_TYPE_BACKUP "'  " sql_AND_CLUB_BACKUP" )\n"),
+
+	@ (SQL_DeleteBackupTypeIs TAG_TYPE_BACKUP "'  " sql_AND_CLUB_BACKUP "\n"),
+
+
+	'@' <- sqlFile,
+
+	% ExecuteSql
+	[['Work Directory' "Model\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+),
+
+'()' => (
+	'()' <- database,
+
+	sqlOperationLog := TAG_CLEAR_BACKUP,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),
+

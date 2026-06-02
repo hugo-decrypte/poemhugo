@@ -1,0 +1,73 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		FuncTableShift.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableShift>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)	% JZ 1021
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableShift" postfix),
+
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+	    	@ ("SELECT DISTINCT s.id as IDSHIFT, \\\n"),
+		@ (" s.name AS NAMESHIFT,\\\n"),
+		@ (SQL_AliasCategoryIs "'SHIFT' AND al.id=s.type) AS TYPESHIFT,\\\n"),
+		@ (" s.timeStart	AS TIMESTART,\\\n"),
+		@ (" s.timeEnd		AS TIMEEND,\\\n"),
+
+		@ (" s.night1Start	AS NIGHT1START,\\\n"),
+		@ (" s.night1End	AS NIGHT1END,\\\n"),
+		@ (" s.night2Start	AS NIGHT2START,\\\n"),
+		@ (" s.night2End	AS NIGHT2END,\\\n"),
+
+		@ (" s.break1Start	AS BREAK1START,\\\n"),
+		@ (" s.break1End	AS BREAK1END,\\\n"),
+		@ (" s.break2Start	AS BREAK2START,\\\n"),
+		@ (" s.break2End	AS BREAK2END,\\\n"),
+		@ (" s.break3Start	AS BREAK3START,\\\n"),
+		@ (" s.break3End	AS BREAK3END,\\\n"),
+
+		@ (" s.timeStart+' - '+s.timeEnd	AS HORIZON,\\\n"),
+
+		@ (" s.night1Start+' - '+s.night1End	AS NIGHT1,\\\n"),
+		@ (" s.night2Start+' - '+s.night2End	AS NIGHT2,\\\n"),
+
+		@ (" s.break1Start+' - '+s.break1End	AS BREAK1,\\\n"),
+		@ (" s.break2Start+' - '+s.break2End	AS BREAK2,\\\n"),
+		@ (" s.break3Start+' - '+s.break3End	AS BREAK3,\\\n"),
+
+		@ (" '" RGB_WHITE "' 	AS LINERGB\\\n"),
+
+		@ ("\t FROM " DB_PREFIX "SHIFT s \"\n\n\n"),
+
+
+
+		['Work Directory' "Model\Common\Interaction\Table\ScenarioTableShift2EditShift.n"],
+
+				
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+), 
+

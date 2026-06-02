@@ -1,0 +1,263 @@
+%==================================================%
+%                                                  %
+%            Vehicle Routing		           %
+%                                                  %
+% 		 Backup0.n                	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'@' => ( 
+	sqlFile <- '@',
+
+	nbIdx >= maxBackup => (
+		@ (SQL_DeleteBackupIdIs minIdBackup "'\n"),
+/*
+		databaseType="SQLSERVER" =>( % bai 0625
+			@ ( "DELETE FROM BACKUP WHERE id='" minIdBackup "' AND type='" typeBackup "'\n"),
+			;
+			@ ( "DELETE FROM BACKUP WHERE id='" minIdBackup "' AND type='" typeBackup "'\n"),
+*/
+		@ ( SQL_DeleteProjectBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_ORDER "\n"), 
+		@ ( SQL_DeleteVehicleBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_VEHICLE "\n"),
+		@ ( SQL_DeletePlanBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_PLAN "\n"),
+		@ ( SQL_DeleteResourceShiftBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_RESOURCE_SHIFT "\n"),
+		@ ( SQL_DeleteResourceTimeBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_RESOURCE_TIME "\n"),
+		@ ( SQL_DeleteRuleBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_RULE "\n"),
+		@ ( SQL_DeleteTypeVehicleProductBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_TYPEVEHICLE_PRODUCT "\n"),
+		@ ( SQL_DeleteTourBackupIs minIdBackup "' " sql_AND_CLUB_BACKUP_TOUR "\n"), % Chen 0823
+
+		@ ( SQL_DeleteClientBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_CLIENT "\n"),
+		@ ( SQL_DeleteDepotBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_DEPOT "\n"),
+		@ ( SQL_DeleteDepotProductBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_DEPOT_PRODUCT "\n"),
+		@ ( SQL_DeleteProductBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_PRODUCT "\n"),
+		@ ( SQL_DeleteShiftBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_SHIFT "\n"),
+		@ ( SQL_DeleteSiteBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_SITE "\n"),
+		@ ( SQL_DeleteSiteSiteBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_SITE_SITE "\n"),
+		@ ( SQL_DeleteTypeVehicleBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_TYPEVEHICLE "\n"),
+		@ ( SQL_DeleteVehicleProductBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_VEHICLE_PRODUCT "\n"),
+		@ ( SQL_DeleteUserBackupIs minIdBackup"' "sql_AND_CLUB_BACKUP_USER "\n"),
+/*
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "ORDER 			WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"), 
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "VEHICLE 			WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "PLAN 			WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "RESOURCE_SHIFT 		WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "RESOURCE_TIME 		WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "RULE 			WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "TYPEVEHICLE_PRODUCT 	WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "TOUR 			WHERE idBackup='" minIdBackup "' " SQL_AND_CLUB "\n"),
+
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "CLIENT			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "DEPOT			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "DEPOT_PRODUCT		WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "PRODUCT			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "SHIFT			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "SITE			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "SITE_SITE			WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "TYPEVEHICLE		WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "VEHICLE_PRODUCT 		WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+		@ ( "DELETE FROM " DB_BACKUP_PREFIX "USER	 		WHERE idBackup='"minIdBackup"' "SQL_AND_CLUB"\n"),
+*/
+	),
+
+	'@' <- sqlFile,
+
+	% ExecuteSql
+	[['Work Directory' "Model\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+),
+
+'()' => (
+	idxBackup0	:: 0,
+	idBackup	:: "",
+
+	'()' <- database,
+
+
+	% BACKUP
+%	databaseType = "SQLSERVER" =>( % bai 1029
+%		(SQL : "INSERT INTO [BACKUP] (id,type,name,idClub,t0,color)VALUES('"
+%			idBackup "','" typeBackup "','" nameBackup "','" idClubLogin "','" 'yyyy-mm-dd hh:mm:ss' "','(" colorBackup ")')"),
+%		(SQL : "UPDATE	[BACKUP] b
+%			SET 	name=id
+%			WHERE	(name='' OR name IS NULL) AND
+%				type='" typeBackup "' "sql_AND_CLUB_BACKUP),
+%		;
+
+
+	(SQL : SQL_InsertIntoBackupValues idBackup "','" typeBackup "','" nameBackup "','"
+		idClubLogin "','" 'yyyy-mm-dd hh:mm:ss' "','(" colorBackup ")')"),
+
+	(SQL : SQL_UpdateBackupSetNameToBeIdNameNullTypeIs typeBackup "' " sql_AND_CLUB_BACKUP), % Zhou 0831
+
+
+	% BACKUP_ORDER
+	(SQL : SQL_InsertIntoBackupProjectSelect idBackup "' AS idBackup " SQL_FromProjectWhereTrue sql_AND_CLUB_ORDER),
+
+	% BACKUP_VEHICLE
+	(SQL : SQL_InsertIntoBackupVehicleSelect idBackup "' AS idBackup " SQL_FromVehicleWhereTrue sql_AND_CLUB_VEHICLE),
+
+	% BACKUP_PLAN
+	(SQL : SQL_InsertIntoBackupPlanSelect idBackup "' AS idBackup " SQL_FromPlanWhereTrue sql_AND_CLUB_PLAN),
+
+	% BACKUP_RESOURCE_SHIFT
+	(SQL : SQL_InsertIntoBackupResourceShiftSelect idBackup "' AS idBackup " SQL_FromResourceShiftWhereTrue sql_AND_CLUB_RESOURCE_SHIFT),
+
+	% BACKUP_RESOURCE_TIME
+	(SQL : SQL_InsertIntoBackupResourceTimeSelect idBackup "' AS idBackup " SQL_FromResourceTimeWhereTrue sql_AND_CLUB_RESOURCE_TIME),
+
+	% BACKUP_RULE
+	(SQL : SQL_InsertIntoBackupRuleSelect idBackup "' AS idBackup " SQL_FromRuleWhereTrue sql_AND_CLUB_RULE),
+
+	% BACKUP_VEHICLE_TYPE_PRODUCT
+	(SQL : SQL_InsertIntoBackupTypeVehicleProductSelect idBackup "' AS idBackup " SQL_FromTypeVehicleProductWhereTrue sql_AND_CLUB_TYPEVEHICLE_PRODUCT),
+
+	% BACKUP_PATH
+	(SQL : SQL_InsertIntoBackupTourSelect idBackup "' AS idBackup " SQL_FromTourWhereTrue sql_AND_CLUB_TOUR),
+
+	% BACKUP_CLIENT
+	(SQL : SQL_InsertIntoBackupClientSelect idBackup "' AS idBackup " SQL_FromClientWhereTrue sql_AND_CLUB_CLIENT),
+
+	% BACKUP_DEPOT
+	(SQL : SQL_InsertIntoBackupDepotSelect idBackup "' AS idBackup " SQL_FromDepotWhereTrue sql_AND_CLUB_DEPOT),
+
+	% BACKUP_DEPOT_PRODUCT
+	(SQL : SQL_InsertIntoBackupDepotProductSelect idBackup "' AS idBackup " SQL_FromDepotProductWhereTrue sql_AND_CLUB_DEPOT_PRODUCT),
+
+	% BACKUP_PRODUCT
+	(SQL : SQL_InsertIntoBackupProductSelect idBackup "' AS idBackup " SQL_FromProductWhereTrue sql_AND_CLUB_PRODUCT),
+
+	% BACKUP_SHIFT
+	(SQL :SQL_InsertIntoBackupShiftSelect idBackup "' AS idBackup " SQL_FromShiftWhereTrue sql_AND_CLUB_SHIFT),
+
+	% BACKUP_SITE
+	(SQL : SQL_InsertIntoBackupSiteSelect idBackup "' AS idBackup " SQL_FromSiteWhereTrue sql_AND_CLUB_SITE),
+
+	% BACKUP_SITE_SITE
+	(SQL : SQL_InsertIntoBackupSiteSiteSelect idBackup "' AS idBackup " SQL_FromSiteSiteWhereTrue sql_AND_CLUB_SITE_SITE),
+
+	% BACKUP_TYPEVEHICLE
+	(SQL : SQL_InsertIntoBackupTypeVehicleSelect idBackup "' AS idBackup " SQL_FromTypeVehicleWhereTrue sql_AND_CLUB_TYPEVEHICLE),
+
+	% BACKUP_VEHICLE_PRODUCT
+	(SQL : SQL_InsertIntoBackupVehicleProductSelect idBackup "' AS idBackup " SQL_FromVehicleProductWhereTrue sql_AND_CLUB_VEHICLE_PRODUCT),
+
+	% BACKUP_USER
+	(SQL :SQL_InsertIntoBackupUserSelect idBackup "' AS idBackup " SQL_FromUserWhereTrue sql_AND_CLUB_USER),
+
+/*
+	databaseType = "SQLSERVER" =>( % bai 1029
+		(SQL : "INSERT INTO [BACKUP] (id,type,name,idClub,t0,color)VALUES('"
+			idBackup "','" typeBackup "','" nameBackup "','" idClubLogin "','" 'yyyy-mm-dd hh:mm:ss' "','(" colorBackup ")')"),
+		(SQL : "UPDATE	[BACKUP] b
+			SET 	name=id
+			WHERE	(name='' OR name IS NULL) AND
+				type='" typeBackup "' "sql_AND_CLUB_BACKUP),
+		;
+		(SQL : "INSERT INTO BACKUP (id,type,name,idClub,t0,color)VALUES('"
+			idBackup "','" typeBackup "','" nameBackup "','" idClubLogin "','" 'yyyy-mm-dd hh:mm:ss' "','(" colorBackup ")')"),
+		(SQL : "UPDATE	BACKUP b
+			SET 	name=id
+			WHERE	(name='' OR name IS NULL) AND
+				type='" typeBackup "' " sql_AND_CLUB_BACKUP),
+	),
+
+	% BACKUP_ORDER % bai 0416
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "ORDER
+		SELECT	o.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "COMMAND o" sql_WHERE_CLUB),
+
+	% BACKUP_VEHICLE % bai 0416
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "VEHICLE
+		SELECT	t.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "RESOURCE t" sql_WHERE_CLUB),
+	% BACKUP_PLAN
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "PLAN
+		SELECT	p.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "PLAN p" sql_WHERE_CLUB),
+
+	% BACKUP_RESOURCE_SHIFT % bai 0429
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "RESOURCE_SHIFT
+		SELECT	ds.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "RESOURCE_SHIFT ds" sql_WHERE_CLUB),
+
+	% BACKUP_RESOURCE_TIME
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "RESOURCE_TIME
+		SELECT	ft.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "RESOURCE_TIME ft" sql_WHERE_CLUB),
+
+	% BACKUP_RULE
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "RULE
+		SELECT	r.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "RULE r" sql_WHERE_CLUB),
+
+	% BACKUP_VEHICLE_TYPE_PRODUCT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "TYPEVEHICLE_PRODUCT
+		SELECT	tp.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "TYPEVEHICLE_PRODUCT tp" sql_WHERE_CLUB),
+
+	% BACKUP_PATH % bai 0620
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "TOUR
+		SELECT	p.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "TOUR p" sql_WHERE_CLUB),
+
+	% BACKUP_CLIENT  % bai 0625
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "CLIENT
+		SELECT	c.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "CLIENT c" sql_WHERE_CLUB),
+
+	% BACKUP_DEPOT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "DEPOT
+		SELECT	d.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "DEPOT d" sql_WHERE_CLUB),
+
+	% BACKUP_DEPOT_PRODUCT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "DEPOT_PRODUCT
+		SELECT	dp.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "DEPOT_PRODUCT dp" sql_WHERE_CLUB),
+
+	% BACKUP_PRODUCT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "PRODUCT
+		SELECT	p.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "PRODUCT p" sql_WHERE_CLUB),
+
+	% BACKUP_SHIFT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "SHIFT
+		SELECT	s.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "SHIFT s" sql_WHERE_CLUB),
+
+	% BACKUP_SITE
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "SITE
+		SELECT	s.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "SITE s" sql_WHERE_CLUB),
+
+	% BACKUP_SITE_SITE
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "SITE_SITE
+		SELECT	ss.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "SITE_SITE ss" sql_WHERE_CLUB),
+
+	% BACKUP_TYPEVEHICLE
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "TYPEVEHICLE
+		SELECT	t.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "TYPEVEHICLE t" sql_WHERE_CLUB),
+
+	% BACKUP_VEHICLE_PRODUCT
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "VEHICLE_PRODUCT
+		SELECT	vp.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "RESOURCE_PRODUCT vp" sql_WHERE_CLUB),
+
+	% BACKUP_USER
+	(SQL : "INSERT	INTO " DB_BACKUP_PREFIX "USER
+		SELECT	u.*,'" idBackup "' AS idBackup
+		FROM	" DB_PREFIX "USER u" sql_WHERE_CLUB),
+*/
+	%!autoSnapshot => (
+	sqlOperationLog := TAG_TAKE_SNAPSHOT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+	%),
+
+
+	database <- '()',
+),

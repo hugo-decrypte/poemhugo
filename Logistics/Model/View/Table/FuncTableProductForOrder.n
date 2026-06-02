@@ -1,0 +1,156 @@
+%==================================================%
+%                                                  %
+%            	  Gestion Stock    	           %
+%                                                  %
+%  	FuncTableProductForOrder.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductForOrder>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductForOrder" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY,\\\n"),
+		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t P.PriceUnit as PRICEPRODUCT, P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t ' ' as NBPACKAGE, ' ' as QUANTITY, ' ' as QUANTITYDELIVERY, ' ' as QUANTITYREST,\\\n"),
+ 		@ ("\t\t (" SQL_CASEWHEN "exists (select 1 from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "CLIENTORDER O0 on O0.Id=OP0.IdOrder where OP0.IdProduct=P.ID and O0.IdState<>'9' )" SQL_THEN "(select sum(OP0.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "CLIENTORDER O0 on O0.Id=OP0.IdOrder where OP0.IdProduct=P.ID and O0.IdState<>'9' )" SQL_ELSE "0" SQL_CASEEND ") as QUANTITYORDERED,\\\n"),
+ 		@ ("\t\t ' ' as WEIGHT, ' ' AS IDORDER, ' ' AS IDCLIENT, ' ' as NAMECLIENT,\\\n"),
+ 		@ ("\t\t ' ' as COMMENTS, ' ' as NOPALLET, ' ' as WEIGHTPALLET,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t 0.0 as PRICE, '0.0' as DISCOUNT,\\\n"),
+ 		@ ("\t\t ' ' as LABELDISCOUNT, ' ' as AMOUNTHT, P.IdVAT as TVA,\\\n"),
+ 		@ ("\t\t "SQL_CONCAT"'XXX-'"SQL_CONCATWITH"P.Id"SQL_CONCATEND" as IDORDERPRODUCT,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t ' ' as IDPARENT,\\\n"),
+		@ ("\t\t 0 as BEPARENT,\\\n"),
+ 		@ ("\t\t 0 as INORDER, ' ' AS STATE,\\\n"),
+ 		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+ 		@ ("\t AND P.TypeProduct<>'F'\\\n"),
+ 		@ ("\t AND P.Id not in (select OP.IdProduct from " DB_PREFIX "ORDER_PRODUCT OP where OP.IdOrder in ((/*IDORDER*/)) ) \\\n"),
+
+		@ ("\t UNION ALL \\\n"),
+		@ ("\t SELECT  P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY,\\\n"),
+ 		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+ 		@ ("\t\t P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t P.PriceUnit as PRICEPRODUCT,\\\n"),
+ 		@ ("\t\t P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+		
+		@ ("\t\t "SQL_FORMATNUM"(OP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE1") as NBPACKAGE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.Quantity,"SQL_FORMATSCALE0") as QUANTITY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.QuantityDelivered,"SQL_FORMATSCALE0") as QUANTITYDELIVERY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.QuantityRest,"SQL_FORMATSCALE0") as QUANTITYREST,\\\n"),
+		@ ("\t\t (select sum(OP0.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "CLIENTORDER O0 on O0.ID=OP0.IdOrder where OP0.IdProduct=P.ID ) as QUANTITYORDERED,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.Weight*OP.Quantity,"SQL_FORMATSCALE1") as WEIGHT,\\\n"),
+		@ ("\t\t O.Id AS IDORDER, O.idClient AS IDCLIENT, CL.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t "SQL_CONCAT"(" SQL_CASEWHEN "OP.Comments is not NULL" SQL_THEN "trim(OP.Comments)" SQL_ELSE "' '" SQL_CASEEND ")\\\n"),
+		@ ("\t\t  "SQL_CONCATWITH"(" SQL_CASEWHEN " "SQL_FORMATNUM"(OP.Quantity*100/P.QuantityPackaging,"SQL_FORMATSCALE0")<>"SQL_FORMATNUM"(OP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")*100\\\n"),
+		@ ("\t\t   " SQL_THEN " "SQL_CONCAT"(" SQL_CASEWHEN "OP.Comments is not NULL and trim(OP.Comments)>' '" SQL_THEN "'; '" SQL_ELSE "' '" SQL_CASEEND ") "SQL_CONCATWITH"'Paquet incomplet'"SQL_CONCATEND"" SQL_ELSE "' '" SQL_CASEEND ")"SQL_CONCATEND" as COMMENTS,\\\n"),
+		@ ("\t\t (" SQL_CASEWHEN " OP.NoPalletDelivery is NULL" SQL_THEN "0" SQL_ELSE "OP.NoPalletDelivery" SQL_CASEEND ") as NOPALLET,\\\n"),
+		@ ("\t\t (select "SQL_FORMATNUM"(sum(OP0.Quantity*a0.Weight),"SQL_FORMATSCALE1") from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "PRODUCT a0 on a0.Id=OP0.IdProduct where OP0.IdOrder=O.ID and OP0.NoPalletDelivery=OP.NoPalletDelivery) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.PriceUnit,"SQL_FORMATSCALE4") as PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.Discount,"SQL_FORMATSCALE1") as DISCOUNT,\\\n"),
+		@ ("\t\t OP.LabelDiscount as LABELDISCOUNT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.PriceUnit*OP.Quantity*(100.0-(" SQL_CASEWHEN "OP.Discount is NULL" SQL_THEN "0.0" SQL_ELSE "OP.Discount" SQL_CASEEND "))/100.0, "SQL_FORMATSCALE2") as AMOUNTHT,\\\n"),
+		@ ("\t\t OP.IdVAT as TVA,\\\n"),
+		@ ("\t\t "SQL_CONCAT"trim(OP.IdOrder)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"OP.IdProduct"SQL_CONCATEND" as IDORDERPRODUCT,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t OP.IdProduct as IDPARENT,\\\n"),
+		@ ("\t\t 1 as BEPARENT,\\\n"),
+		@ ("\t\t 1 as INORDER,\\\n"),
+		@ ("\t\t (" SQL_CASEWHEN "OP.QuantityRest>P.QuantityStock and OP.QuantityRest>0" SQL_THEN "'Stock insuffisant'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "OP.QuantityRest<OP.Quantity and OP.QuantityRest>0" SQL_THEN "'Livrée partielle'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "OP.QuantityRest=0 and OP.QuantityDelivered>0" SQL_THEN "'Livrée'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "OP.QuantityRest>0" SQL_THEN "'A livrer'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "OP.Quantity=0" SQL_THEN "'Sans Quantité'" SQL_ELSE "\\\n"),
+		@ ("\t\t   ''" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") AS STATE,\\\n"),
+		@ ("\t\t (" SQL_CASEWHEN ""SQL_FORMATNUM"(OP.Quantity*100/P.QuantityPackaging,"SQL_FORMATSCALE0")<>"SQL_FORMATNUM"(OP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")*100" SQL_THEN "'(255 255 160)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "OP.Quantity=0" SQL_THEN "'(200 200 200)'" SQL_ELSE "\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "OP.QuantityDelivered>0" SQL_THEN "'(200 250 200)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   '(150 150 255)'" SQL_CASEEND "" SQL_CASEEND "" SQL_CASEEND ") AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t\t inner join ((" DB_PREFIX "CLIENTORDER O \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "CLIENT CL on CL.ID=O.IdClient) \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder ) on OP.IdProduct=P.Id \\\n"),
+		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+		@ ("\t\t AND (O.ID in ((/*IDORDER*/)) )\\\n"),
+
+		@ ("\t UNION ALL \\\n"),
+		@ ("\t SELECT\\\n"),
+		@ ("\t\t P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY,\\\n"),
+		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+		@ ("\t\t P.QuantityStock as QUANTITYSTOCK,\\\n"),
+		@ ("\t\t P.PriceUnit as PRICEPRODUCT,\\\n"),
+		@ ("\t\t P.Weight as WEIGHTUNIT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE1") as NBPACKAGE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.Quantity,"SQL_FORMATSCALE0") as QUANTITY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.QuantityDelivered,"SQL_FORMATSCALE0") as QUANTITYDELIVERY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.QuantityRest,"SQL_FORMATSCALE0") as QUANTITYREST,\\\n"),
+		@ ("\t\t (select sum(OP0.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "CLIENTORDER O0 on O0.ID=OP0.IdOrder where OP0.IdProduct=P.ID ) as QUANTITYORDERED,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.Weight*OP.Quantity,"SQL_FORMATSCALE1") as WEIGHT,\\\n"),
+		@ ("\t\t O.Id AS IDORDER, O.idClient AS IDCLIENT, CL.Name as NAMECLIENT,\\\n"),
+		@ ("\t\t "SQL_CONCAT"(" SQL_CASEWHEN "OP.Comments is not NULL" SQL_THEN "trim(OP.Comments)" SQL_ELSE "' '" SQL_CASEEND ") "SQL_CONCATWITH"\\\n"),
+		@ ("\t\t		(" SQL_CASEWHEN ""SQL_FORMATNUM"(OP.Quantity*100/P.QuantityPackaging,"SQL_FORMATSCALE0")<>"SQL_FORMATNUM"(OP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")*100\\\n"),
+		@ ("\t\t	  " SQL_THEN "(" SQL_CASEWHEN "OP.Comments is not NULL and trim(OP.Comments)>' '" SQL_THEN "' ; Paquet incomplet'" SQL_ELSE "'Paquet incomplet'" SQL_CASEEND ")" SQL_ELSE "' '" SQL_CASEEND ""SQL_CONCATEND")  as COMMENTS,\\\n"),
+		@ ("\t\t (" SQL_CASEWHEN "OP.NoPalletDelivery is NULL" SQL_THEN "0" SQL_ELSE "OP.NoPalletDelivery" SQL_CASEEND ") as NOPALLET,\\\n"),
+		@ ("\t\t (select "SQL_FORMATNUM"(sum(OP0.Quantity*a0.Weight),"SQL_FORMATSCALE1") from " DB_PREFIX "ORDER_PRODUCT OP0 inner join " DB_PREFIX "PRODUCT a0 on a0.Id=OP0.IdProduct where OP0.IdOrder=O.ID and OP0.NoPalletDelivery=OP.NoPalletDelivery) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.PriceUnit,"SQL_FORMATSCALE4") as PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(OP.Discount,"SQL_FORMATSCALE1") as DISCOUNT,\\\n"),
+		@ ("\t\t OP.LabelDiscount as LABELDISCOUNT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(P.PriceUnit*OP.Quantity*(100.0-(" SQL_CASEWHEN "OP.Discount is NULL" SQL_THEN "0.0" SQL_ELSE "OP.Discount" SQL_CASEEND "))/100.0, "SQL_FORMATSCALE2") as AMOUNTHT,\\\n"),
+		@ ("\t\t OP.IdVAT as TVA,\\\n"),
+		@ ("\t\t "SQL_CONCAT"trim(OP.IdOrder)"SQL_CONCATWITH"'-'"SQL_CONCATWITH"OP.IdProduct"SQL_CONCATEND" as IDORDERPRODUCT,\\\n"),
+		@ ("\t\t \\\n"),
+		@ ("\t\t OP.IdProduct as IDPARENT,\\\n"),
+		@ ("\t\t 2 as BEPARENT,\\\n"),
+		@ ("\t\t 1 as INORDER,\\\n"),
+		@ ("\t\t  '' AS STATE,\\\n"),
+		@ ("\t\t '(150 150 150)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t\t inner join ((( " DB_PREFIX "CLIENTORDER O \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "CLIENT CL on CL.ID=O.IdClient) \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder ) \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "PRODUCT_COMPONENT PC on PC.IdProduct=OP.IdProduct )\\\n"),
+		@ ("\t\t on PC.IdSubProduct=P.Id \\\n"),
+		@ ("\t WHERE (O.ID in ((/*IDORDER*/)) )\\\n"),
+		@ ("\t \\\n"),
+		@ ("\t ORDER BY INORDER desc, IDPARENT,BEPARENT, IDPRODUCT \"\\\n\n"),
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForOrder2EditOnView.n"],
+
+
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

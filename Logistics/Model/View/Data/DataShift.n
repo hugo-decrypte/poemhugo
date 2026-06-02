@@ -1,0 +1,44 @@
+%==================================================%
+%                                                  %
+%           	Depot Optimization                 %
+%                                                  %
+%  		   DataShift.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+	% bai 0418
+% Data: SHIFT
+@ "Data ",
+
+% ID
+@ ("SHIFT '"),
+
+% Caption
+@ TAG_SHIFT,
+
+% Group
+@ "' SHIFT ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,IDSHIFT,IDSHIFT,,255,0);"), 
+@ ("(string,NAMESHIFT,NAMESHIFT,,255,0)]\"\\\n"),%li 0411b	
+
+@ VIEWSQL,
+
+@ ("SELECT 	id			AS IDSHIFT, \
+			name 			AS NAMESHIFT \
+		FROM	" DB_PREFIX "SHIFT  \
+		ORDER BY id\"\n\n"),
+

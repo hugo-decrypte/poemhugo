@@ -1,0 +1,131 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductForSupplyQuantity.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idSupplyBuffer 	:: "",
+	
+	idSupplyBuffer	= (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	quantityBuffer	:: 0,
+	
+	quantityBuffer	= (),
+
+	'()' <- database,
+	
+
+	UpdateProductQuantity_SQL1 = (
+		"INSERT INTO " DB_PREFIX "SUPPLY_PRODUCT (IdSupply, IdProduct, Quantity, Comments, DateSupply, DateDelivery) 
+		select s.Id, prd.Id, 0, ' ', s.DateSupply, s.DateDelivery
+		from " DB_PREFIX "SUPPLY s, " DB_PREFIX "PRODUCT prd
+		WHERE s.Id in ("idSupplyBuffer") 
+		and prd.Id in ("IDOBJSELECTEDBUFFER") 
+		and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=s.Id and ls.IdProduct=prd.Id) "
+	),
+	UpdateProductQuantity_SQL2 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT set
+			Quantity="quantityBuffer"
+		WHERE IdSupply in ('"idSupplyBuffer"') 
+			and IdProduct in ("IDOBJSELECTEDBUFFER")"
+	),
+
+
+databaseType = "ACCESS" => (
+
+	UpdateProductQuantity_SQL3 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT ls inner join " DB_PREFIX "PRODUCT prd on prd.Id=ls.IdProduct
+		set ls.PriceUnit=prd.PurchasePrice 
+		WHERE ls.IdSupply in ("idSupplyBuffer") 
+			and ls.PriceUnit is NULL
+		and prd.Id in ("IDOBJSELECTEDBUFFER")"
+	),
+	UpdateProductQuantity_SQL4 = (
+		"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 
+		WHERE Id in ("idSupplyBuffer") "
+	),
+	UpdateProductQuantity_SQL5 = (
+		"Update " DB_PREFIX "SUPPLY s inner join " DB_PREFIX "SUPPLY_PRODUCT ls on ls.IdSupply=s.Id set
+		s.Quantity=s.Quantity+ls.Quantity,
+		s.AmountHT=s.AmountHT+ls.Quantity*ls.PriceUnit
+		WHERE s.Id in ("idSupplyBuffer")"
+	),
+
+	UpdateProductQuantity_SQL6 = (
+		"Update " DB_PREFIX "PRODUCT 
+		set QuantitySupplied=0
+		WHERE Id in ("IDOBJSELECTEDBUFFER")"
+	),
+	UpdateProductQuantity_SQL7 = (
+		"Update " DB_PREFIX "PRODUCT prd inner join " DB_PREFIX "SUPPLY_PRODUCT ls on prd.Id=ls.IdProduct
+			set prd.QuantitySupplied=prd.QuantitySupplied+ls.Quantity
+		WHERE prd.Id in ("IDOBJSELECTEDBUFFER") "
+	),
+	;
+
+	UpdateProductQuantity_SQL3 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT set 
+			PriceUnit=(select prd.PurchasePrice from " DB_PREFIX "PRODUCT prd where prd.Id=IdProduct)
+		WHERE IdSupply in ("idSupplyBuffer") 
+			and PriceUnit is NULL
+			and IdProduct in ("IDOBJSELECTEDBUFFER") "
+	),
+	UpdateProductQuantity_SQL4 = (
+		"Update " DB_PREFIX "SUPPLY set
+			Quantity=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id),
+			AmountHT=(select sum(ls.Quantity*ls.PriceUnit) from " DB_PREFIX "SUPPLY_PRODUCT ls where ls.IdSupply=Id)
+		WHERE Id in ("idSupplyBuffer")"
+	),
+	UpdateProductQuantity_SQL5 = (
+		"Update " DB_PREFIX "SUPPLY set Quantity=0, AmountHT=0 
+		WHERE Id in ("idSupplyBuffer") and Quantity is NULL"
+	),
+	UpdateProductQuantity_SQL6 = (
+		"Update " DB_PREFIX "PRODUCT 
+		set QuantitySupplied=(select sum(ls.Quantity) from " DB_PREFIX "SUPPLY_PRODUCT ls where Id=ls.IdProduct)
+		WHERE Id in ("IDOBJSELECTEDBUFFER") "
+	),
+	UpdateProductQuantity_SQL7 = (
+		"Update " DB_PREFIX "PRODUCT 
+		set QuantitySupplied=0
+		WHERE Id in ("IDOBJSELECTEDBUFFER") and QuantitySupplied is NULL"
+	),
+),
+
+	
+	(SQL : UpdateProductQuantity_SQL1), 
+	(SQL : UpdateProductQuantity_SQL2), 
+	(SQL : UpdateProductQuantity_SQL3), 
+	(SQL : UpdateProductQuantity_SQL4), 
+	(SQL : UpdateProductQuantity_SQL5), 
+	(SQL : UpdateProductQuantity_SQL6), 
+	(SQL : UpdateProductQuantity_SQL7), 
+	
+	database <- '()',
+),

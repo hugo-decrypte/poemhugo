@@ -1,0 +1,6 @@
+
+'()' => (
+	( "MapVehicle.view,0" : '.'),
+	%( "TableTour.view" : '.'),
+),
+

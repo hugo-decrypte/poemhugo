@@ -1,0 +1,172 @@
+%==================================================%
+%                                                  %
+%            	Routing 	          	   %
+%                                                  %
+%		WriteRelaxation.n              	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+solutionBuf <- '@',
+
+@ "Relaxation\n",
+@ (TourToRelax "  " Swap_o "  " Swap_i  "  " tour_o "  " tour_i "\n"),
+%@ ((Swap_oRelaxed \cup Swap_o)  "  " TourToRelax "  " Swap_o "  " Swap_i  "  " tour_o "  " tour_i "\n"),
+
+
+@ "Objectives\n",
+@ (\overline{profitBuffer} "  "),
+@ (\underline{costBuffer} "  "),
+@ (nbVehicleBuffer "  "),
+@ (nbTourBuffer "  "),
+@ (mileageBuffer "  "),
+
+
+@ (worktimeBuffer "  "),
+@ (makespanBuffer "\n\n"),
+
+
+
+
+@ "Vehicle\n",
+@ (VehicleActiveBuffer "  " SourceActiveBuffer "  " SourceActiveOrderBuffer "  " SourceOrderSinkActiveBuffer "\n\n"),
+
+
+
+@ "TourActive\n",
+@ (TourActiveBuffer "\n"),
+
+\forall t \in TourActiveBuffer (
+	tour_o = t && \underline{improvement_i} > 0 => (
+		@ ((Swap_oRelaxedTourBuffer_{t} \cup Swap_i) "\n"),
+		;
+
+		tour_i = t => (
+			@ ((Swap_oRelaxedTourBuffer_{t} \cup Swap_o) "\n"),
+			;
+
+			@ (Swap_oRelaxedTourBuffer_{t} "\n"),
+		),
+	),
+
+
+	@ (idSite1TourBuffer_{t} "  "),
+	@ (idSite2TourBuffer_{t} "  "),
+
+	@ (OrderTourBuffer_{t} "  "),
+
+	@ (quantityTourBuffer_{t} "  "),
+	@ (\underline{weightTourBuffer_{t}} "  "),
+	@ (\underline{volumeTourBuffer_{t}} "  "),
+
+	@ (\underline{receiptsTourBuffer_{t}} "  "),
+	@ (\underline{costTourBuffer_{t}} "  "),
+
+	@ (mileageTourBuffer_{t} "  "),
+
+	@ (t1TourBuffer_{t} "  "),
+	@ (t2TourBuffer_{t} "  "),
+
+	@ (timeServiceTourBuffer_{t} "  "),
+	@ (timeRouteTourBuffer_{t} "\n"),
+
+),
+@ "\n\n",
+
+
+
+\forall t \in TourActiveBuffer (
+	\forall o \in SourceOrderTourBuffer_{t} (
+		timeServiceOrderBuffer_{o}	:: defaultTime,
+		timeToNextOrderBuffer_{o}	:: defaultTime,
+
+		@ (idOrderBuffer_{o} "  "),
+		@ (nextOrderBuffer_{o} "  "),
+
+		@ (\underline{t1OrderBuffer_{o}} "  "),
+		@ (\underline{t2OrderBuffer_{o}} "  "),
+
+		@ (timeServiceOrderBuffer_{o} "  "),
+		@ (timeToNextOrderBuffer_{o} "  "),
+
+		@ (mileageOrderBuffer_{o} "  "),
+
+		@ (receiptsOrderBuffer_{o} "  "),
+	),
+	@ "\n",
+
+),
+@ "\n",
+
+
+
+@ "ORDER\n",
+@ (ORDER "\n"),
+\forall o \in ORDER (
+	strictTimeOrderBuffer_{o}	:: true,
+
+	idShiftOrderBuffer_{o}		:: "",
+	t1Service0OrderBuffer_{o}	:: defaultDateTime,
+	t2Service0OrderBuffer_{o}	:: defaultDateTime,
+	timeFixed0OrderBuffer_{o}	:: 0,
+
+	quantityOrderBuffer_{o}		:: 0,
+	weightOrderBuffer_{o}		:: 0.0,
+	volumeOrderBuffer_{o}		:: 0.0,
+
+	priorityOrderBuffer_{o}		:: 0,
+
+
+
+	@ (strictTimeOrderBuffer_{o} "  "),
+
+	@ ("\"" idShiftOrderBuffer_{o} "\"  "),
+	@ (t1Service0OrderBuffer_{o} "  "),
+	@ (t2Service0OrderBuffer_{o} "  "),
+	@ (timeFixed0OrderBuffer_{o} "  "),
+
+	@ (quantityOrderBuffer_{o} "  "),
+	@ (weightOrderBuffer_{o} "  "),
+	@ (volumeOrderBuffer_{o} "  "),
+
+	@ (priorityOrderBuffer_{o} "\n"),
+),
+@ "\n\n",
+
+
+@ "tour/site\n",
+\forall o \in SourceOrderSinkActiveBuffer (
+	@ (o "  "),
+	@ (tourOrderBuffer_{o} "  "),
+	@ (idSiteOrderBuffer_{o} "  "),
+),
+@ "\n\n",
+
+
+@ "VehicleActive\n",
+\forall v \in VehicleActiveBuffer (
+	@ (tour2ActiveVehicleBuffer_{v} "  "),
+
+	@ (nbDayVehicleBuffer_{v} "  "),
+	@ (nbNightVehicleBuffer_{v} "  "),
+
+	@ makespanVehicleBuffer_{v} : "",
+	@ "  ",
+
+	\forall d \in DateVehicle_{v} (
+		@ timeActiveDateVehicleBuffer_{v,d} : "",
+		@ "  ",
+
+		@ makespanDateVehicleBuffer_{v,d} : "",
+		@ "  ",
+	),
+	@ "\n",
+),
+@ "\n\n",
+
+
+
+
+'@' <- solutionBuf,
+

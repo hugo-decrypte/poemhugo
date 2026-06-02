@@ -1,0 +1,73 @@
+/******************************************************/
+/*	        Vehicle Routing 	              */
+/*	                                              */
+/* 		FuncTableTourOrder.n    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<tableTourOrder>(id,type,aliasTable,bestfit, IdTour, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		%postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : (related)),
+		viewFile = ("TableTourOrder" postfix),
+
+
+		IdTour = {} => (
+			sqlTourSelected = (SQL_ViewUserVisibleClubIs "p.idClub)"),
+			;
+			sqlTourSelected = (SQL_ViewUserVisibleClubIs "p.idClub) AND p.idTour IN (" concatSetQuoted(IdTour) ")"), 
+		),
+
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+		@ ("(color,LINERGB,,,13.0.0)]\" \\\n"),
+
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT p.idTour 										AS IDTOUR,	\
+			p.idResource										AS IDVEHICLE,	\
+			p.tourResource										AS TOURVEHICLE,	\
+			p.idx-1											AS IDX,		\
+			p.idOrder										AS IDORDER,	\
+			p.idSite1		 								AS IDSITE,	\
+			(SELECT " SQL_CASEWHEN "s.name=NULL"
+				SQL_THEN "s.city" SQL_ELSE "s.name"
+			  SQL_CASEEND 		" FROM " DB_PREFIX "SITE s WHERE s.id=p.idSite1) 		AS NAMESITE,	\
+			p.t1Service  											AS T1PLAN,	\
+			p.timeService 										AS TIMESERVICE,	\
+			p.timeRoute 										AS TIMEROUTE,	\
+			(SELECT o.t1Service0+' - '+o.t2Service0 FROM " DB_PREFIX "OPT_ORDER o WHERE p.idOrder=o.id)	AS TIMEWINDOW,	\
+			(SELECT o.quantity FROM " DB_PREFIX "OPT_ORDER o WHERE p.idOrder=o.id)			AS QUANTITY,	\
+			(SELECT o.weight FROM " DB_PREFIX "OPT_ORDER o WHERE p.idOrder=o.id) 			AS WEIGHT,	\
+			(SELECT o.volume FROM " DB_PREFIX "OPT_ORDER o WHERE p.idOrder=o.id)			AS VOLUME,	\
+			p.mileage 										AS MILEAGE,	\
+			p.receipts 										AS RECEIPTS,	\
+			p.cost  										AS COST,	\
+			" SQL_CASEWHEN "p.idx=1"
+				SQL_THEN "'" RGB_CRITICAL "'" SQL_ELSE "'" RGB_WHITE "'"
+			  SQL_CASEEND 										" AS LINERGB	\
+		FROM 	" DB_PREFIX "OPT_PLAN p \
+		WHERE 	" sqlTourSelected " ORDER BY p.idTour,p.t1Service\"\n\n\n"),
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableTourOrder2EditTourOrder.n"],
+
+		
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

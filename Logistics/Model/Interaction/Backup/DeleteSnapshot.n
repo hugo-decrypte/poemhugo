@@ -1,0 +1,64 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	       DeleteSnapshot.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0620
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	nbSnapshot	:: 0,
+	nbParameter	:: 0,
+
+	nbSnapshot	= (),
+	nbParameter	= (),
+
+	\forall i \in[1,nbSnapshot](
+		idSnapshot_{i}		:: "",
+		typeSnapshot_{i}	:: "",
+
+		idSnapshot_{i} 		= (),
+		typeSnapshot_{i} 	= (),
+	),
+),
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'@' => (
+	sqlFile <- '@',
+
+	\forall i \in[1,nbSnapshot](
+		databaseType="SQLSERVER" =>( 
+			@ ("DELETE FROM [" DB_BACKUP "] WHERE id='"idSnapshot_{i}"' AND type='"typeSnapshot_{i}"'\n"),
+			;
+			@ ("DELETE FROM " DB_BACKUP " WHERE id='"idSnapshot_{i}"' AND type='"typeSnapshot_{i}"'\n"),
+		),
+
+		@ (SQL_DeleteProjectBackupIs idSnapshot_{i} "'\n"),
+		@ (SQL_DeleteVehicleBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeletePlanBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeleteResourceShiftBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeleteResourceTimeBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeleteRuleBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeleteTypeVehicleProductBackupIs idSnapshot_{i}"'\n"),
+		@ (SQL_DeleteTourBackupIs idSnapshot_{i}"'\n"),
+	),
+	
+	'@' <- sqlFile,
+
+	% ExecuteSql
+	[['Work Directory' "Model\Interface\ExecuteSql.n"], ['Work Directory' "ncl.cfg"], _],
+),
+
+'()' => (
+	'()' <- database,
+
+	sqlOperationLog := TAG_DELETE_SNAPSHOT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

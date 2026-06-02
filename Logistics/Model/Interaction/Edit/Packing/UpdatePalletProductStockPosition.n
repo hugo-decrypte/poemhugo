@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		UpdatePalletProductStockPosition.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 		:: "",
+		
+		idObjSelectedBuffer_{i}			= (),
+	
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	idPackingSelectedBuffer :: "",
+	noPalletSelectedBuffer	:: 0,
+	
+	idPackingSelectedBuffer	= (),
+	noPalletSelectedBuffer	= (),
+		
+	idZoneBuffer	:: "",
+	idRowBuffer		:: "",
+	idColumnBuffer	:: "",
+	commentsBuffer	:: "",
+
+	idZoneBuffer	= (),
+	idRowBuffer		= (),
+	idColumnBuffer	= (),
+	commentsBuffer	= (),
+
+	'()' <- database,
+	
+	UpdatePallet_SQL1=(
+		"update " DB_PREFIX "PALLET_PRODUCT set
+			IdZone='"idZoneBuffer"', IdRow='"idRowBuffer"', IdColumn='"idColumnBuffer"',
+			comments='"commentsBuffer"'
+		where IdPacking ="idPackingSelectedBuffer" and NoPallet="noPalletSelectedBuffer" and IdProduct in ("IDOBJSELECTEDBUFFER")"
+	),
+	
+	(SQL : UpdatePallet_SQL1), 
+	
+	
+	database <- '()',
+),

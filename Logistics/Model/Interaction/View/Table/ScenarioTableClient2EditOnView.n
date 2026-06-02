@@ -1,0 +1,529 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableClient2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreateClient ",
+
+% Caption
+@ (" '" TAG_INSERT_CLIENT "' "),	% JZ 0906
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+
+% Label
+@ (" '" TAG_INSERT "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% JZ 0917 TAG_DELIVERY_POINT_ID
+
+% Instruction... (When Count>0)
+CreateClient_Input=(
+	"{/*Input(CCLI;" TAG_INSERT_CLIENT ";18;\\\n"
+	"(string,CLIENTID," TAG_ID "*,[/*CLIENT.ID*/],50." inputWidth ",0,);\\\n"
+	"(string,CLIENTNAME," TAG_NAME "*,,50." inputWidth ",0,);\\\n"
+	"(string,ADDRESSINVOICE," TAG_INVOICE_ADDRESS "*,,50." inputWidth ",0);\\\n"
+	"(string,ADDRESSSUPINVOICE," TAG_INVOICE_ADDRESS2 ",,50." inputWidth ",1);\\\n"
+	"(string,POSTCODE," TAG_POSTCODE ",,50." inputWidth ",0);\\\n"
+	"(string,CITY," TAG_CITY "*,,50." inputWidth ",0);\\\n"
+	"(string,COUNTRY," TAG_COUNTRY "*,,50." inputWidth ",0);\\\n"
+	"(string,VATCODE," TAG_TAX_CODE "*,,30." inputWidth ",0);\\\n"
+	"(string,SIRET," TAG_ESTABLISHMENT ",,30." inputWidth ",1);\\\n"
+	"(string,IDPOINTDELIVERY," TAG_DELIVERY_POINT_ID "*,,20." inputWidth ",0);\\\n"
+	"(string,NAMEDELIVERY," TAG_DELIVERY_NAME "*,,50." inputWidth ",0);\\\n"
+	"(string,ADDRESSDELIVERY," TAG_DELIVERY_ADDRESS "*,,50." inputWidth ",0);\\\n"
+	"(string,ADDRESSSUPDELIVERY," TAG_DELIVERY_ADDRESS2 ",,50." inputWidth ",1);\\\n"
+	"(string,POSTCODEDELIVERY," TAG_DELIVERY_PC ",,10." inputWidth ",1);\\\n"
+	"(string,CITYDELIVERY," TAG_DELIVERY_CITY "*,,50." inputWidth ",0);\\\n"
+	"(string,COUNTRYDELIVERY," TAG_DELIVERY_COUNTRY ",,50." inputWidth ",1);\\\n"
+	"(string,AGENCYNAME," TAG_AGENCY ",[/*CLIENT.NAMEAGENCY*/],50." inputWidth ",0,0,[/*AGENCY.NAMEAGENCY*/]);\\\n"
+	"(string,BANKACCOUNT," TAG_BANK_ACCOUNT ",[/*CLIENT.NAMEBANK*/],50." inputWidth ",0,0,[/*BANKACCOUNT.NAMEBANK*/]);\\\n"
+	")*/}\\\n"
+),
+CreateClient_SQL1=(
+	" \"INSERT INTO " DB_PREFIX "CLIENT (IdClub, Id, Name, Address, AddressSup, City, PostCode, Country, codeTax, establishment, IdAgency, BankAccount) \
+	select '(/*CLUBID*/)', '[/*CLIENTID*/]', '[/*CLIENTNAME*/]', '[/*ADDRESSINVOICE*/]', '[/*ADDRESSSUPINVOICE*/]','[/*CITY*/]','[/*POSTCODE*/]','[/*COUNTRY*/]', '[/*VATCODE*/]','[/*SIRET*/]',ay.Id, b.Id\
+	from " DB_PREFIX "AGENCY ay, " DB_PREFIX "BANKACCOUNT b \
+	where ay.Name='[/*AGENCYNAME*/]' and b.Name='[/*BANKACCOUNT*/]'\"\\\n"
+),
+CreateClient_SQL2=(
+	" \"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) \
+	select '[/*CLIENTID*/]','[/*IDPOINTDELIVERY*/]', '[/*NAMEDELIVERY*/]', '[/*ADDRESSDELIVERY*/]', '[/*ADDRESSSUPDELIVERY*/]','[/*CITYDELIVERY*/]','[/*POSTCODEDELIVERY*/]','[/*COUNTRYDELIVERY*/]'\
+	from " DB_PREFIX "CLIENT cl \
+	where cl.ID='[/*CLIENTID*/]' and '[/*IDPOINTDELIVERY*/]'>' '\"\n\n"
+),
+
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Client\CreateClient.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ CreateClient_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" CreateClient_Input),
+		@ ("'\\\n"),
+		@ CreateClient_SQL1,
+		@ CreateClient_SQL2,
+),
+
+
+
+%================================================================================================
+%
+% Script
+
+@ "Script ",
+
+% ID
+@ "ModifyClient ",
+
+
+
+% Caption
+@ ("'" TAG_UPDATE_CLIENT "' "),		% JZ 0906
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateClient_Input = (
+	"{/*Input(MCLI;" TAG_UPDATE_CLIENT ";19;\\\n"
+	"(string,CLIENTID," TAG_ID "*,[/*CLIENT.ID*/],20." inputWidth ",0,);\\\n"
+	"(string,CLIENTNAME," TAG_NAME "*,[/*CLIENT.NAME*/],50." inputWidth ",0,);\\\n"
+	"(string,ADDRESSINVOICE," TAG_INVOICE_ADDRESS "*,[/*CLIENT.ADDRESSINVOICE*/],100." inputWidth ",0);\\\n"
+	"(string,ADDRESSSUPINVOICE," TAG_INVOICE_ADDRESS2 ",[/*CLIENT.ADDRESSSUPINVOICE*/],100." inputWidth ",1);\\\n"
+	"(string,POSTCODE," TAG_POSTCODE ",[/*CLIENT.POSTCODE*/],10." inputWidth ",0);\\\n"
+	"(string,CITY," TAG_CITY "*,[/*CLIENT.CITY*/],50." inputWidth ",0);\\\n"
+	"(string,COUNTRY," TAG_COUNTRY "*,[/*CLIENT.COUNTRY*/],50." inputWidth ",0);\\\n"
+	"(string,VATCODE," TAG_TAX_CODE "*,[/*CLIENT.VATCODE*/],30." inputWidth ",0);\\\n"
+	"(string,SIRET," TAG_ESTABLISHMENT "*,[/*CLIENT.SIRET*/],30." inputWidth ",0);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*CLIENT.COMMENTS*/],30." inputWidth ",1);\\\n"
+	"(string,IDPOINTDELIVERY," TAG_DELIVERY_POINT_ID "*,[/*CLIENT.IDPOINTDELIVERY*/],20." inputWidth ",0);\\\n"
+	"(string,NAMEDELIVERY," TAG_DELIVERY_NAME "*,[/*CLIENT.NAMEDELIVERY*/],50." inputWidth ",0);\\\n"
+	"(string,ADDRESSDELIVERY," TAG_DELIVERY_ADDRESS "*,[/*CLIENT.ADDRESSDELIVERY*/],100." inputWidth ",0);\\\n"
+	"(string,ADDRESSSUPDELIVERY," TAG_DELIVERY_ADDRESS2 ",[/*CLIENT.ADDRESSSUPDELIVERY*/],100." inputWidth ",1);\\\n"
+	"(string,POSTCODEDELIVERY," TAG_DELIVERY_PC ",[/*CLIENT.POSTCODEDELIVERY*/],10." inputWidth ",0);\\\n"
+	"(string,CITYDELIVERY," TAG_DELIVERY_CITY "*,[/*CLIENT.CITYDELIVERY*/],60." inputWidth ",0);\\\n"
+	"(string,COUNTRYDELIVERY," TAG_DELIVERY_COUNTRY ",[/*CLIENT.COUNTRYDELIVERY*/],50." inputWidth ",0);\\\n"
+	"(string,AGENCYNAME," TAG_AGENCY ",[/*CLIENT.NAMEAGENCY*/],100." inputWidth ",0,0,[/*AGENCY.NAMEAGENCY*/]);\\\n"
+	"(string,BANKACCOUNT," TAG_BANK_ACCOUNT ",[/*CLIENT.NAMEBANK*/],100." inputWidth ",0,0,[/*BANKACCOUNT.NAMEBANK*/]);\\\n"
+	")*/}\\\n"
+),
+UpdateClient_SQL1=(
+	" \"INSERT INTO " DB_PREFIX "CLIENT (idClub, id, name, address, AddressSup, City, PostCode, Country, codeTax, establishment, IdAgency, BankAccount) \
+	select '(/*CLUBID*/)', '[/*CLIENTID*/]', '[/*CLIENTNAME*/]', '[/*ADDRESSINVOICE*/]', '[/*ADDRESSSUPINVOICE*/]','[/*CITY*/]','[/*POSTCODE*/]','[/*COUNTRY*/]', '[/*VATCODE*/]','[/*SIRET*/]',ay.Id, b.Id\
+	from " DB_PREFIX "AGENCY ay, " DB_PREFIX "BANKACCOUNT b \
+	where ay.Name='[/*AGENCYNAME*/]' and b.Name='[/*BANKACCOUNT*/]'\
+	and not exists (select 1 from " DB_PREFIX "CLIENT where ID='[/*CLIENTID*/]')\"\\\n"
+),
+
+UpdateClient_SQL2=(
+	" \"UPDATE " DB_PREFIX "CLIENT SET\
+	Name='[/*CLIENTNAME*/]',\
+	Address='[/*ADDRESSINVOICE*/]', AddressSup='[/*ADDRESSSUPINVOICE*/]',\
+	City='[/*CITY*/]', PostCode='[/*POSTCODE*/]', Country='[/*COUNTRY*/]',\
+	codeTax='[/*VATCODE*/]', establishment='[/*SIRET*/]',\
+	Comments='[/*COMMENTS*/]'\
+	where ID='[/*CLIENTID*/]'\"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	UpdateClient_SQL3=(
+		" \"UPDATE " DB_PREFIX "CLIENT cl, " DB_PREFIX "AGENCY ay, " DB_PREFIX "BANKACCOUNT b \
+		set cl.IdAgency=ay.Id, cl.BankAccount=b.Id\
+		where ay.Name='[/*AGENCYNAME*/]' and b.Name='[/*BANKACCOUNT*/]'\
+		and cl.ID='[/*CLIENTID*/]'\"\\\n"
+	),
+	;
+
+	UpdateClient_SQL3=(
+		" \"UPDATE " DB_PREFIX "CLIENT set \
+			IdAgency=(select ay.Id from " DB_PREFIX "AGENCY ay where ay.Name='[/*AGENCYNAME*/]'),\
+			BankAccount=(select b.Id from " DB_PREFIX "BANKACCOUNT b where b.Name='[/*BANKACCOUNT*/]')\
+		where ID='[/*CLIENTID*/]'\"\\\n"
+	),
+),
+
+UpdateClient_SQL4=(
+	" \"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) \
+	select '[/*CLIENTID*/]','[/*IDPOINTDELIVERY*/]', '[/*NAMEDELIVERY*/]', '[/*ADDRESSDELIVERY*/]', '[/*ADDRESSSUPDELIVERY*/]','[/*CITYDELIVERY*/]','[/*POSTCODEDELIVERY*/]','[/*COUNTRYDELIVERY*/]'\
+	from " DB_PREFIX "CLIENT cl \	
+	where cl.ID='[/*CLIENTID*/]' and '[/*IDPOINTDELIVERY*/]'>' '\
+	and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where IdClient='[/*CLIENTID*/]' and IdPoint='[/*IDPOINTDELIVERY*/]')\"\\\n"
+),
+
+UpdateClient_SQL5=(
+	" \"UPDATE " DB_PREFIX "POINTDELIVERY SET \
+	NameClient='[/*NAMEDELIVERY*/]',\
+	Address='[/*ADDRESSDELIVERY*/]', AddressSup='[/*ADDRESSSUPDELIVERY*/]',\
+	City='[/*CITYDELIVERY*/]', PostCode='[/*POSTCODEDELIVERY*/]',Country='[/*COUNTRYDELIVERY*/]'\
+	where IdClient='[/*CLIENTID*/]' and IdPoint='[/*IDPOINTDELIVERY*/]'\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Client\UpdateClient.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ UpdateClient_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateClient_Input),
+		@ ("'\\\n"),
+		@ UpdateClient_SQL1,
+		@ UpdateClient_SQL2,
+		@ UpdateClient_SQL3,
+		@ UpdateClient_SQL4,
+		@ UpdateClient_SQL5,
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "AddPtDelivery ",
+
+% Caption
+@ (" '" TAG_INSERT_DELIVERY_POINT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_INSERT_DELIVERY_POINT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+
+
+% Instruction... (When Count>0)
+AddPointDelivery_Input = (
+	"{/*Input(MCLI;" TAG_INSERT_DELIVERY_POINT ";8;\\\n"
+	"(string,CLIENTID" TAG_ID "*,[/*CLIENT.ID*/],20." inputWidth ",0,,,0);\\\n"
+	"(string,IDPOINTDELIVERY," TAG_DELIVERY_POINT_ID "*,[/*CLIENT.IDPOINTDELIVERY*/],20." inputWidth ",0);\\\n"
+	"(string,NAMEDELIVERY," TAG_DELIVERY_NAME "*,[/*CLIENT.NAMEDELIVERY*/],50." inputWidth ",0);\\\n"
+	"(string,ADDRESSDELIVERY," TAG_DELIVERY_ADDRESS "*,[/*CLIENT.ADDRESSDELIVERY*/],100." inputWidth ",0);\\\n"
+	"(string,ADDRESSSUPDELIVERY," TAG_DELIVERY_ADDRESS2 ",[/*CLIENT.ADDRESSSUPDELIVERY*/],100." inputWidth ",1);\\\n"
+	"(string,POSTCODEDELIVERY," TAG_DELIVERY_PC ",[/*CLIENT.POSTCODEDELIVERY*/],10." inputWidth ",0);\\\n"
+	"(string,CITYDELIVERY," TAG_DELIVERY_CITY "*,[/*CLIENT.CITYDELIVERY*/],60." inputWidth ",0);\\\n"
+	"(string,COUNTRYDELIVERY," TAG_DELIVERY_COUNTRY ",[/*CLIENT.COUNTRYDELIVERY*/],50." inputWidth ",0);\\\n"
+	"*/}\\\n"
+),
+AddPointDelivery_SQL1 = (
+	" \"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) \
+	select '[/*CLIENTID*/]','[/*IDPOINTDELIVERY*/]', '[/*NAMEDELIVERY*/]', '[/*ADDRESSDELIVERY*/]', '[/*ADDRESSSUPDELIVERY*/]','[/*CITYDELIVERY*/]','[/*POSTCODEDELIVERY*/]','[/*COUNTRYDELIVERY*/]'\
+	from " DB_PREFIX "CLIENT cl \
+	where cl.ID='[/*CLIENTID*/]' and '[/*IDPOINTDELIVERY*/]'>' '\
+	and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where IdClient='[/*CLIENTID*/]' and IdPoint='[/*IDPOINTDELIVERY*/]')\"\\\n"
+),
+AddPointDelivery_SQL2 = (
+	" \"UPDATE " DB_PREFIX "POINTDELIVERY SET \
+	NameClient='[/*NAMEDELIVERY*/]',\
+	Address='[/*ADDRESSDELIVERY*/]', AddressSup='[/*ADDRESSSUPDELIVERY*/]',\
+	City='[/*CITYDELIVERY*/]', PostCode='[/*POSTCODEDELIVERY*/]',Country='[/*COUNTRYDELIVERY*/]'\
+	where IdClient='[/*CLIENTID*/]' and IdPoint='[/*IDPOINTDELIVERY*/]'\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Client\AddPointDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ AddPointDelivery_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" AddPointDelivery_Input),
+		@ ("'\\\n"),
+		@ AddPointDelivery_SQL1,
+		@ AddPointDelivery_SQL2,
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeletePtDelivery ",
+
+% Caption
+@ ("'" TAG_DELETE_DELIVERY_POINT "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" '" TAG_DELETE_DELIVERY_POINT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("'Attention,Vous ne pouvez supprimer que des points de livraison qui n ont pas de commande' "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+
+DeletePointDelivery_Input = (
+	"{/*Input(DCLI;" TAG_DELETE_DELIVERY_POINT ";2;\\\n"
+	"(string,CLIENTID,Code*,[/*CLIENT.ID*/],20." inputWidth ",0,,,0);\\\n"
+	"(string,IDPOINTDELIVERY," TAG_DELIVERY_POINT_ID "*,[/*CLIENT.IDPOINTDELIVERY*/],20." inputWidth ",0,,,0);\\\n"
+	")*/}\\\n"
+),
+DeletePointDelivery_SQL1 = (
+	" \"Delete from " DB_PREFIX "POINTDELIVERY pd \
+	where IdClient='[/*CLIENTID*/]' and IdPoint='[/*IDPOINTDELIVERY*/]'\
+	and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=pd.IdClient and o.IdPointDelivery=pd.IdPoint)\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Client\DeletePointDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ DeletePointDelivery_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" DeletePointDelivery_Input),
+		@ ("'\\\n"),
+		@ DeletePointDelivery_SQL1,
+),
+
+%================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeleteClient ",
+
+% Caption
+@ ("'" TAG_DELETE_CLIENT "' "),		% JZ 0906
+
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW5,
+
+% Label
+@ (" '" TAG_DELETE "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("'Attention,Vous ne pouvez supprimer que des clients qui ne ont pas de commande' "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeleteClient_Input = (
+	"{/*Input(DCLI;" TAG_DELETE_CLIENT ";2;\\\n"
+	"(string,CLIENTID" TAG_ID "*,[/*CLIENT.ID*/],20." inputWidth ",0,,,0);\\\n"
+	"(int,NBORDER,Nb Commandes,[/*CLIENT.NBORDER*/],20." inputWidth ",0,,,0);\\\n"
+	")*/}\\\n"
+),
+DeleteClient_SQL1 = (
+	" \"Delete from " DB_PREFIX "POINTDELIVERY \
+	where IdClient='[/*CLIENTID*/]'\
+	and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=POINTDELIVERY.IdClient )\"\\\n"
+),
+DeleteClient_SQL2 = (
+	" \"delete from " DB_PREFIX "CLIENT \
+	where Id = '[/*CLIENTID*/]' \
+	and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where CLIENT.Id=IdClient)\
+	and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=CLIENT.Id )\"\\\n"
+),
+DeleteClient_SQL3 = (
+	" \"Update " DB_PREFIX "CLIENT\
+	set Comments='NON Supprimée'\
+	where Id='[/*CLIENTID*/]' \"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Client\DeleteClient.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  \\\n"),
+		@ DeleteClient_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=7; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" DeleteClient_Input),
+		@ ("'\\\n"),
+		@ DeleteClient_SQL1,
+		@ DeleteClient_SQL2,
+		@ DeleteClient_SQL3,
+),
+.
+
+
+
+
+
+

@@ -1,0 +1,61 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 DeleteOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdOrderSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdOrderSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdOrderSelectedBuffer_{i}],
+
+
+	'()' <- database,
+
+	DeleteOrder_SQL1 = (
+		"DELETE FROM " DB_PREFIX "ORDER_PRODUCT 
+		 WHERE IdOrder in (" IDOBJSELECTEDBUFFER ")
+		 AND not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO0 where LO0.QuantityDelivered>0 and ORDER_PRODUCT.IdOrder=LO0.IdOrder)
+		 AND exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id=ORDER_PRODUCT.IdOrder and (O.IdState is NULL or O.IdState='0') )"
+	),
+	DeleteOrder_SQL2 = (
+		"DELETE FROM " DB_PREFIX "CLIENTORDER 
+		 WHERE Id in (" IDOBJSELECTEDBUFFER ")
+		 AND not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO0 where CLIENTORDER.Id=LO0.IdOrder)
+		 AND (IdState is NULL or IdState='0')"
+	),
+	DeleteOrder_SQL3 = (
+		"UPDATE " DB_PREFIX "CLIENTORDER 
+		 SET Comments='NON Supprimée'
+		 WHERE Id in (" IDOBJSELECTEDBUFFER ")"
+	),
+
+	(SQL : DeleteOrder_SQL1), 
+	(SQL : DeleteOrder_SQL2),
+	(SQL : DeleteOrder_SQL3),
+	
+
+	database <- '()',
+),

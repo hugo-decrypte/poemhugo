@@ -1,0 +1,55 @@
+/********************************************************/
+/*							*/
+/*			ScriptTSP.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+['Work Directory' "Model\Common\Config\ReadConfigDate.n"],
+['Work Directory' "Model\Common\Config\ReadDateTime.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+
+
+['Work Directory' "Model\Input\Vehicle\ReadVehicle.n"],
+['Work Directory' "Model\Input\Vehicle\ReadResource.n"],
+
+['Work Directory' "Model\Input\Depot\ReadDepot.n"],
+['Work Directory' "Model\Input\Product\ReadProduct.n"],
+
+
+'()' => (
+	% Input buffer
+	TSP = [1, ()],
+	nbParameter = (),
+
+
+	\forall tsp \in TSP (
+		idTourTsp_{tsp} :: "",
+
+		( TAG_INPUT_ERROR :
+			idTourTsp_{tsp} <> "",
+			idTourTsp_{tsp} = (),
+		),
+
+		sqlReadTSP := (
+			"SELECT id,idSite1,idSite2,t1,mileage,timeService,timeRoute,makespan FROM "DB_PREFIX "OPT_TOUR
+			WHERE id='" idTourTsp_{tsp} "'"),
+ 
+		resultTsp_{tsp} := [['Work Directory' "Model\Solver\SolveTSP.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+	),
+
+
+
+	#TSP > 1 =>
+	(TAG_COMPUTATION_TIME 'Global Time'[1..8] : '()'),
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+),

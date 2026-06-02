@@ -1,0 +1,189 @@
+%===============================================%
+%						%
+%		GenerateView.n			%
+%						%
+%	Copyright (C) 2000 ENGINEST SOFTWARE	%
+%	All rights reserved.			%
+%===============================================%
+
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Config\ReadConfigDate.n"],
+['Work Directory' "Model\Common\Config\ReadDateTime.n"],
+['Work Directory' "Model\Common\Input\Calendar\ReadShift.n"],
+
+['Work Directory'  "Model\Input\Site\ReadTypeSite.n"],
+['Work Directory'  "Model\Input\Site\ReadSite.n"],
+
+['Work Directory' "Model\Input\Product\ReadProduct.n"],
+
+['Work Directory'  "Model\Input\Vehicle\ReadVehicle.n"],
+
+['Work Directory' "Model\Input\Vehicle\ReadResource.n"],
+
+['Work Directory'  "Model\Input\Plan\ReadPlanDate.n"],
+
+['Work Directory'  "Model\Common\Function\FuncConcatSet.n"],
+
+
+
+'@' => (
+
+	[['Work Directory' "Model\Common\View\Table\ViewTableClub.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableUser.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableAlias.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableLog.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableConfig.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\Common\View\Table\ViewTableCalendar.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableShift.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\Common\View\Table\ViewTableTypeAbsence.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableTypeTrip.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\Table\ViewTableTypeRisk.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\Common\Sheet\View\ViewTableFormula.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Sheet\View\ViewTableTypeSheet.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\Sheet\View\ViewTableSheet.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+
+	% Histogram
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleWeight.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleQuantity.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleVolume.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'], 
+
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleCost.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleReceipts.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramVehicleProfit.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'], 
+
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramTourWeight.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramTourQuantity.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Histogram\ViewHistogramTourVolume.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'], 
+
+
+	[['Work Directory' "Model\View\Histogram\ViewHistogramPrevisionProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+
+	[['Work Directory' "Model\View\Histogram\ViewHistogramBalanceSheetRevenue.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Histogram\ViewHistogramBalanceSheetQuantity.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Histogram\ViewHistogramBalanceSheetWeight.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+
+% JZ 1023
+	% Chart
+	[['Work Directory'  "Model\View\Chart\ViewChartVehicle.n"],			['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Chart\ViewChartTour.n"],			['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	[['Work Directory'  "Model\View\Chart\ViewChartProduct.n"],			['Work Directory' "ncl.cfg"], 'Trace Level'], 
+
+
+
+	% Map
+	[['Work Directory'  "Model\View\Map\ViewMapVehicle.n"], 			['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory'  "Model\View\Map\ViewMapSite.n"], 				['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	[['Work Directory'  "Model\View\Map\ViewMapOrder.n"], 				['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	[['Work Directory'  "Model\View\Map\ViewMapFeedback.n"], 			['Work Directory' "ncl.cfg"], 'Trace Level'], 
+
+	%[['Work Directory'  "Model\View\Map\ViewMapClient.n"], 				['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	%[['Work Directory'  "Model\View\Map\ViewMapZone.n"], 				['Work Directory' "ncl.cfg"], 'Trace Level'], 
+	
+
+	% Table
+	[['Work Directory' "Model\View\Table\ViewTableFeedback.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableTourOrder.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableClient.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableDefaultRate.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableSupply.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOfferSupply.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	
+	[['Work Directory' "Model\View\Table\ViewTableSupplier.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOfferSupplier.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableInventory.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableStockReport.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableDelivery.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableDeliveryProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOrderForDelivery.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableDeliveryPreparation.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],	
+	
+	[['Work Directory' "Model\View\Table\ViewTableDeliveryNote.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	
+	[['Work Directory' "Model\View\Table\ViewTableInvoiceDelivery.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableInvoiceProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableOrder.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOrderProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOrderProductDate.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTablePacking.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTablePallet.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTablePalletProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableProduct.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductKit.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductFamily.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductType.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	[['Work Directory' "Model\View\Table\ViewTableProductForOffer.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductForOrder.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductForPackingPallet.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductForQuote.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableProductForSupply.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableQuote.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableQuoteProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	
+	[['Work Directory' "Model\View\Table\ViewTableState.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableSupplier.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableSupply.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableSupplyProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	[['Work Directory' "Model\View\Table\ViewTableOptTour.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableTour.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableDeliveryForTour.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableOrderForTour.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheet.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheetRevenueProduct.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheetRevenueClient.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheetRevenueFamily.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheetQuantity.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableBalanceSheetWeight.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTablePrevisionProduct.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTablePrevisionProductPrice.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTablePrevisionProductDemand.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+
+	[['Work Directory' "Model\View\Table\ViewTableAlert.n"], 			['Work Directory' "ncl.cfg"], 'Trace Level'],	% JZ 0906
+	[['Work Directory' "Model\View\Table\ViewTableResult.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	[['Work Directory' "Model\View\Table\ViewTableSite.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableSiteSite.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+
+	[['Work Directory' "Model\View\Table\ViewTableResource.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableResourceShift.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\View\Table\ViewTableResourceAbsence.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	[['Work Directory' "Model\View\Table\ViewTableTypeResource.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+).
+

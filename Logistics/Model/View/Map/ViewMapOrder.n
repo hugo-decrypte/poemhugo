@@ -1,0 +1,14 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ViewMapOrder.n			%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\View\Map\FuncMapOrder.n"],
+
+'@' => (
+	mapOrder({}, "",TAG_MAP_SITE,"",""),
+),

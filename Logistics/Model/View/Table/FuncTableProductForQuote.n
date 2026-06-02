@@ -1,0 +1,86 @@
+%==================================================%
+%                                                  %
+%            	 Logistics	   	           %
+%                                                  %
+%  		 FuncTableProductForQuote.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductForQuote>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductForQuote" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+		@ ("(string,IDQUOTE,No Devis,,20.0.50,0);\\\n"),
+		@ ("(string,NAMECLIENT," TAG_CLIENT_NAME ",,50.0.150,0);\\\n"),
+		@ ("(float,WEIGHT,Poids,,8.2.50,0);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY, P.TypeProduct as TYPEPRODUCT,\\\n"),
+ 		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t P.PriceUnit as PRICE, ' ' as PRICEQUOTE, ' ' as DISCOUNT,\\\n"),
+ 		@ ("\t\t ' ' as AMOUNT, P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t ' ' as NBPACKAGE, ' ' as QUANTITY, ' ' as WEIGHT, ' ' AS IDQUOTE, ' ' AS IDCLIENT, ' ' as NAMECLIENT,\\\n"),
+ 		@ ("\t\t ' ' as COMMENTS, ' ' as COMMENTS2, 0 as INQUOTE, ' ' AS STATE,\\\n"),
+ 		@ ("\t\t '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) ) \\\n"),
+ 		@ ("\t and P.Id not in (select QP.IdProduct from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote in ((/*IDQUOTE*/))) \\\n"),			
+		
+		@ ("\t UNION ALL \\\n"),
+		@ ("\t SELECT P.Id as IDPRODUCT, P.Designation as DESIGNATION, P.Family as FAMILY,\\\n"),
+ 		@ ("\t\t P.TypeProduct as TYPEPRODUCT,\\\n"),
+ 		@ ("\t\t P.QuantityPackaging as QUANTITYPACKAGE,P.QuantityStock as QUANTITYSTOCK,\\\n"),
+ 		@ ("\t\t P.PriceUnit as PRICE,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(QP.PriceUnit,"SQL_FORMATSCALE4") as PRICEQUOTE,\\\n"),
+ 		@ ("\t\t QP.Discount as DISCOUNT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(QP.AmountHT,"SQL_FORMATSCALE2") as AMOUNT,\\\n"),
+ 		@ ("\t\t P.Weight as WEIGHTUNIT,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(P.Weight*P.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t " SQL_CASEWHEN " "SQL_FORMATNUM"(QP.Quantity*100/P.QuantityPackaging,"SQL_FORMATSCALE0")="SQL_FORMATNUM"(QP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")*100" SQL_THEN " "SQL_FORMATNUM"(QP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE0")" SQL_ELSE "\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(QP.Quantity/P.QuantityPackaging,"SQL_FORMATSCALE1")" SQL_CASEEND " as NBPACKAGE,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(QP.Quantity,"SQL_FORMATSCALE0") as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(P.Weight*QP.Quantity,"SQL_FORMATSCALE1") as WEIGHT,\\\n"),
+ 		@ ("\t\t q.Id AS IDQUOTE, q.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\\\n"),
+ 		@ ("\t\t QP.Comments as COMMENTS,\\\n"),
+ 		@ ("\t\t QP.Comments_1 as COMMENTS2,\\\n"),
+ 		@ ("\t\t 1 as INQUOTE,\\\n"),
+ 		@ ("\t\t " SQL_CASEWHEN "P.TypeProduct='F'" SQL_THEN "' '" SQL_ELSE " " SQL_CASEWHEN "QP.Quantity>P.QuantityStock and QP.Quantity>0" SQL_THEN "'Stock insuffisant'" SQL_ELSE "'' " SQL_CASEEND " " SQL_CASEEND " AS STATE,\\\n"),
+ 		@ ("\t\t " SQL_CASEWHEN "P.TypeProduct='F'" SQL_THEN "'(200 220 200)'" SQL_ELSE "\\\n"),
+ 		@ ("\t\t  " SQL_CASEWHEN "QP.Quantity=0" SQL_THEN "'(200 200 200)'" SQL_ELSE "\\\n"),
+    		@ ("\t\t '(150 150 255)'" SQL_CASEEND " " SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P \\\n"),
+ 		@ ("\t inner join ((" DB_PREFIX "QUOTE q inner join " DB_PREFIX "CLIENT cl on cl.Id=q.IdClient) \\\n"),
+		@ ("\t\t inner join " DB_PREFIX "QUOTE_PRODUCT QP on q.Id=QP.IdQuote ) on QP.IdProduct=P.Id \\\n"),
+		@ ("\t WHERE ( P.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+ 		@ ("\t AND (q.Id in ((/*IDQUOTE*/)) )\\\n"),
+		@ ("\t ORDER BY INQUOTE desc, TYPEPRODUCT desc, Family, DESIGNATION, IDPRODUCT \"\n\n"), 
+
+
+
+		%=====================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForQuote2EditOnView.n"],
+		%=====================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

@@ -1,0 +1,79 @@
+%==================================================%
+%                                                  %
+% 		ScriptDeploySystem.n               %
+%                                                  %
+% (c)2020. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+
+'()' => (
+
+	% Format tables
+	[['Work Directory' "Model\Common\Script\ScriptFormatTable.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	( TAG_VIEW_FORMATTED : '()' ),
+
+
+
+	[['Work Directory'  "Model\Print\GeneratePrint.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	( TAG_PRINT_FORMATTED : '()' ),
+
+
+
+	% Menu Login
+	[['Work Directory' "Model\Common\Button\ButtonLogin.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Common\View\ConsoleLogin.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	( TAG_MENU_LOGIN_GENERATED : '()' ),
+
+
+
+	DirectoryRelatedClubLogin = \{
+		\forall i \in IdRelatedClubLogin
+		directoryClub_{clubId_{i}}
+	\},
+
+	\forall d \in DirectoryRelatedClubLogin (
+		IdRelatedClubDirectory_{d} = \{
+			\forall i \in IdRelatedClubLogin (
+				directoryClub_{clubId_{i}} = d ? i : ""
+			)
+		\} \setminus "",
+	),
+
+	IdClubRelatedDirectory = \{ \forall d \in DirectoryRelatedClubLogin \inf IdRelatedClubDirectory_{d} \},
+
+
+
+	% Menu button
+	\forall idClubActive \in IdClubRelatedDirectory (
+		[['Work Directory' "Model\View\GenerateButton.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	),
+
+	( TAG_MENU_GENERATED : '()' ),
+
+
+
+	% View files
+	\forall i \in IdRelatedClubLogin
+		IdUserClubId_{i} = \{
+			\forall u \in USER (idClubUser_{u} = i ? idUser_{u} : "")
+		\} \setminus "",
+
+	\forall idClubActive \in IdClubRelatedDirectory (
+		[['Work Directory'  "Model\View\GenerateView.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	),
+
+	( TAG_VIEW_GENERATED : '()' ),
+
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+),
+

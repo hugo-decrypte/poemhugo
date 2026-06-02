@@ -1,0 +1,37 @@
+%==================================================%
+%                                                  %
+%          	Vehicle Routing             	   %
+%                                                  %
+% 		 DeleteLog.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	nbLogBuffer	:: 0,
+	nbParameter	:: 0,
+
+	nbLogBuffer	= (),
+	nbParameter	= (),
+
+	\forall i \in [1,nbLogBuffer](
+		idLogBuffer_{i}	 :: 0,
+		idLogBuffer_{i}	 = (),
+	),
+),
+
+['Work Directory' "Model\Common\Config\ReadDatabase.n"],
+
+
+'()' => (
+	'()' <- database,
+
+	\forall i \in [1,nbLogBuffer]
+		(SQL : SQL_DeleteLogIdIs idLogBuffer_{i} " "),
+
+
+	database <- '()',
+),
+

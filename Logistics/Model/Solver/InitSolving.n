@@ -1,0 +1,54 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*                                                    */
+/*		InitSolving.n			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+% Basics
+OrderToPlan	= ORDER,
+TourToPlan	= TOUR,
+
+OrderPlan	= {},
+TourPlan	= {},
+
+%OrderSelected	= {},
+
+
+
+ResultWithSolution = \{
+	'all solutions found',
+	'optimal solution proved',
+	'approximate solution found',
+	'stopped with solution'
+\},
+
+
+LoopRelaxation = [1, nbOrder*2],	% ????????
+
+
+Loop = \{0\} \cup LoopRelaxation,
+
+
+\forall loop \in Loop (
+	resultLoop_{loop}		:: "",
+
+	mileageNotRelaxedLoop_{loop}	:: 0,
+	mileageLoop_{loop}		:: 0,
+
+
+	Swap_oLoop_{loop}		:: {},
+	Swap_iLoop_{loop}		:: {},
+
+	tour_oLoop_{loop}		:: 0, 
+	tour_iLoop_{loop}		:: 0,
+),
+
+ruleRelaxation => (
+	resultLoop_{0} = 'all solutions found',
+),
+
+

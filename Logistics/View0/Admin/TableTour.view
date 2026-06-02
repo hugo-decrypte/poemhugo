@@ -1,0 +1,138 @@
+View ViewTableTOUR 'Tournée' 'Tournée'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableTOUR _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Tournée;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,center,Right,Right,Right,Right,Right,Right,Right,Right,Right,Left}]"\
+"[DATAOBJ=TOUR;FILLCOLOR=LINERGB]"
+
+Data TOUR 'Tournée' TOUR HTTPSQL 0 '[FIND={ID,NAMEDRIVER,IDVEHICLE,DATETOUR,T1,T2,NBCLIENT,NBPALLET,WEIGHT,VOLUME,KM,ROUTETIME,WORKTIME,STATE}]'   [DOUBLECLICK=TableDelivery] \
+"[14;(string,ID,ID,,15,,);(string,NAMEDRIVER,Chauffeur,,25,,);(string,IDVEHICLE,Véhicule,,20,,);(date,DATETOUR,Date tournée,,20,,YYYY-MM-DD|DD/MM/YYYY);(time,T1,H départ,,20,,HH:MM);(time,T2,H retour,,20,,HH:MM);(int,NBCLIENT,#Client,,20,,);(int,NBPALLET,#Palette,,20,,);(float,WEIGHT,Poids,,20,,);(float,VOLUME,Volume,,20,,);(int,KM,KM,,20,,);(duration,ROUTETIME,Temps de route,,20,,);(duration,WORKTIME,Temps travail,,20,,);(string,STATE,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT t.Id AS ID,\
+		 (select dr.LastName from DRIVER dr where dr.ID=t.idDriver) as NAMEDRIVER,\
+		 t.idVehicle AS IDVEHICLE,\
+		  format(t.T1,'YYYY-MM-DD')  as DATETOUR,\
+		  mid(t.T1, 12,5) as T1,\
+		  mid(t.T2, 12,6) as T2,\
+		  (select count(1) from DELIVERY d where d.IdTour=t.Id) as NBCLIENT,\
+		  format(t.Weight,'0.0') as WEIGHT,\
+		  format(t.Volume,'0.0') as VOLUME,\
+		 (select sum(NbPallet) from DELIVERY d where d.IdTour=t.Id) as NBPALLET,\
+		 format(t.KM/1000.0,'0.0') as KM,\
+		 t.worktime as WORKTIME,\
+		 t.routeTime as ROUTETIME,\
+		  IIF(t.IdState in (select s.Id from STATE s where s.CATEGORY='TOUR'),\
+		    (select Label from STATE s where s.Id=t.IdState and s.CATEGORY='TOUR'),\
+		    t.IdState) as STATE,\
+		  IIF(t.IdState in (select s.Id from STATE s where s.CATEGORY='TOUR'),\
+		    (select Color from STATE s where s.Id=t.IdState and s.CATEGORY='TOUR'),\
+		   '(255 255 255)') AS LINERGB \
+	 FROM TOUR t\
+	 WHERE (t.IdState is NULL or t.IdState<>'9')\
+	 ORDER BY t.Id desc"
+
+
+Script TableDelivery  'Livraisons provision' _ 25 'Livraisons' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);NBDAY=0;OWNEROBJ=IdTour;IDOBJ={/*Selected(tableTOUR;1;(string,ID))*/};TITLEOBJ=de la tournée {/*Selected(tableTOUR;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR='XXX']"
+
+Script TableDeliveryForTour  'Livraisons à ajouter pour tournée' _ 14 'Livraisons à complémenter' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDeliveryForTour.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);OWNEROBJ=IdTour;IDOBJ={/*Selected(tableTOUR;1;(string,ID))*/};TITLEOBJ=pour tournée {/*Selected(tableTOUR;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR={/*Selected(tableTOUR;1;(string,ID))*/}]"
+
+Script TableOrderForTour  'Commandes à ajouter pour tournée' _ 15 'Commandes à complémenter' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrderForTour.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);OWNEROBJ=IdTour;IDOBJ='XXX';TITLEOBJ=Commandes à ajouter pour tournée {/*Selected(tableTOUR;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR={/*Selected(tableTOUR;1;(string,ID))*/};DATETOUR={/*Selected(tableTOUR;1;(int,DATETOUR))*/}]"
+
+Script OptimizeTour 'Optimiser par tournée' _ 8 'Optimiser par tournée' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;;AUTOCLOSE=1]'\
+  Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptTSP.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableTOUR;1;(string,ID))*/}' 
+
+Script PrintDeliveryPreparation  'Imrpimer fiche de préparation' _ 80 'Imrpimer fiche de préparation' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintTourDeliveryPreparation.ini  PreparationDeliveryTour \
+	 {/*selected(tableTOUR;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)PreparationDeliveryTour{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintPalletNote  'Imrpimer étiquette palette' _ 81 'Imrpimer étiquette palette' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintTourPalletSheet.ini  PalletDeliveryTour \
+	 {/*selected(tableTOUR;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)PalletDeliveryTour{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintRouteSheet  'Imprimer feuille de route' _ 82 'Imprimer feuille de route' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintTour.ini  Tour \
+	 {/*selected(tableTOUR;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Tour{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintDelivery 'Imrpimer bon de livraison' _ 83 'Imrpimer bon de livraison' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintTourDelivery.ini  Delivery_TOUR \
+	 {/*selected(tableTOUR;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Delivery_TOUR{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script PrintTourInvoice  'Imrpimer facture' _ 84 'Imrpimer facture' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintTourDeliveryInvoice.ini  Invoice_TOUR \
+	 {/*selected(tableTOUR;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Invoice_TOUR{/*selected(tableTOUR;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+// 0	Cré 	
+// 1	Validée	
+// 2	Livrée	
+// 3	Facturée
+// 4	Quantité erronée	quantité  prévue et quantité  réelle sont difé rentes ou quantité défecteuse positive
+// 6	Refacturée	Factueré la partie trop livrée ou faire un avoir
+// 9	Terminée
+Script CreateTour  'Créer tournée' _ 61 'Créer' _ 'tableTOUR' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\CreateTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  \
+{/*Input(Créer tournée;3;\
+(string,NAMEDRIVER,Chauffeur,,50.0.580,0,,[/*DRIVER.NAMEDRIVER*/]);\
+(string,IMMATRIC,Véhicule,,50.0.580,0,,[/*VEHICLE.IMMATRIC*/]);\
+(date,DATETOUR,Date tournée,[/*DRIVER.TOMORROW*/],10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script ModifyTour  'Modifier tournée' _ 62 'Modifier' _ 'tableTOUR' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\UpdateTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableTOUR;1;(string,ID))*/}  \
+{/*Input(Modifier tournée;2;\
+(date,DATETOUR,Date tournée,[/*TOUR.DATETOUR*/],10.0.580,1,YYYY-MM-DD);\
+(time,TIMESTART,Le plus tôt,[/*TOUR.T1*/],8.0.580,1,HHMM);\
+)*/}\
+'\
+Reload _ _ _
+
+Script TableState  'Etat tournée' _ 23 'Tableau état' _ 'tableTOUR' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableState_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);CATEGORY='TOUR';TITLEOBJ=Tournée]"
+
+Data DRIVER 'Driver' DRIVER HTTPSQL 0 _ _ \
+"[3;(string,IDDRIVER,ID chauffeur,,15.0.80,0);(string,NAMEDRIVER,Nom chauffeur,,50.0.300,0);\
+(date,TOMORROW,Demain,,8.0.100,1,YYYYMMDD);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT dr.id AS IDDRIVER,\
+ (trim(dr.LastName) + ', ' + dr.FirstName) as NAMEDRIVER,\
+ format(Date()+1, 'YYYYMMDD') as TOMORROW \
+ FROM DRIVER dr \
+ ORDER BY dr.Id"
+
+
+Data VEHICLE 'Vehicle' VEHICLE HTTPSQL 0 _ _ \
+"[2;(string,IDVEHICLE,Camion ID,,15.0.80,0);(string,IMMATRIC,Immatriculation,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT v.id AS IDVEHICLE, \
+	      v.Immatric as IMMATRIC \
+	FROM VEHICLE v \
+	ORDER BY v.Id"
+
+

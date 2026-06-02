@@ -1,0 +1,100 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 AddSiteSite.n		   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+'()' => (
+	aliasTable	= "SITE_SITE",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	(TAG_ONLY_ONE_TO_ADD : nbSelected = 1),
+
+
+	site1Buffer				:: "",
+	site2Buffer				:: "",
+	mileageBuffer				:: 0,
+	timeBuffer				:: 0,
+
+	"IDSITE1" \in IdFieldSelected => ( % li 0605
+		site1Buffer			= (),
+		;
+		site1Buffer			= TAG_EMPTY_STRING, 
+	),
+	"IDSITE2" \in IdFieldSelected => ( 
+		site2Buffer			= (),
+		;
+		site2Buffer			= TAG_EMPTY_STRING, 
+	),
+	"MILEAGE" \in IdFieldSelected => (
+		mileageBuffer			= (),
+		;
+		mileageBuffer			= 0, 
+	),
+	"TIME" \in IdFieldSelected => (
+		timeBuffer			= (),
+		;
+		timeBuffer			= 0, 
+	),
+	
+
+	'()' <- database,
+
+	(SQL :	SQL_SelectSiteSiteSite1Site1IsRtrim site1Buffer "'," SQL_FuncInstr "('" site1Buffer "','" stringLinkSymbol "')))"
+		SQL_AndWhereSiteSiteSite2IsRtrim site2Buffer "'," SQL_FuncInstr "('" site2Buffer "','" stringLinkSymbol "')))"), % Chen 0822
+/*
+	(SQL : "SELECT idSite1 
+		FROM " DB_PREFIX "SITE_SITE 
+		WHERE idSite1=RTRIM(LEFT('" site1Buffer "',INSTR('" site1Buffer "','" stringLinkSymbol "'))) AND idSite2=RTRIM(LEFT('" site2Buffer "',INSTR('" site2Buffer "','" stringLinkSymbol "')))"), 
+*/
+		nbRecord = (),
+
+	(TAG_EXISTS_ID site1Buffer stringLinkSymbol site2Buffer: nbRecord=0), 
+
+		(SQL : SQL_InsertIntoSiteSiteValues site1Buffer "'," SQL_FuncInstr "('" site1Buffer "','" stringLinkSymbol "')),
+				" SQL_FuncLeftStr "('" site2Buffer "'," SQL_FuncInstr "('" site2Buffer "','" stringLinkSymbol "')),
+				" mileageBuffer ",
+				" timeBuffer ")"),
+		(SQL : SQL_InsertIntoSiteIdNameValues site1Buffer "'," SQL_FuncInstr "('" site1Buffer "','" stringLinkSymbol "')),
+				" SQL_FuncRightStr "('" site1Buffer "'," SQL_FuncLengthStr "('" site1Buffer "')-" SQL_FuncInstr "('" site1Buffer "','" stringLinkSymbol "')))"),
+		(SQL : SQL_InsertIntoSiteIdNameValues site2Buffer "'," SQL_FuncInstr "('" site2Buffer "','" stringLinkSymbol "')),
+				" SQL_FuncRightStr "('" site2Buffer "'," SQL_FuncLengthStr "('" site2Buffer "')-" SQL_FuncInstr "('" site2Buffer "','" stringLinkSymbol "')))"),
+
+/*
+	databaseType = "ACCESS" =>(	%li 0702
+		(SQL : "INSERT 	INTO " DB_PREFIX "SITE_SITE (idSite1,idSite2,mileage,[time])
+			VALUES( LEFT('" site1Buffer "',INSTR('" site1Buffer "','" stringLinkSymbol "')),
+				LEFT('" site2Buffer "',INSTR('" site2Buffer "','" stringLinkSymbol "')),
+				" mileageBuffer ",
+				" timeBuffer ")"),
+		(SQL : "INSERT 	INTO " DB_PREFIX "SITE (id,name)
+			VALUES( LEFT('" site1Buffer "',INSTR('" site1Buffer "','" stringLinkSymbol "')),
+				RIGHT('" site1Buffer "',LEN('" site1Buffer "')-INSTR('" site1Buffer "','" stringLinkSymbol "')))"),
+		(SQL : "INSERT 	INTO " DB_PREFIX "SITE (id,name)
+			VALUES( LEFT('" site2Buffer "',INSTR('" site2Buffer "','" stringLinkSymbol "')),
+				RIGHT('" site2Buffer "',LEN('" site2Buffer "')-INSTR('" site2Buffer "','" stringLinkSymbol "')))"),
+		;
+		(SQL : "INSERT 	INTO " DB_PREFIX "SITE_SITE (idSite1,idSite2,mileage,time)
+			VALUES( SUBSTR('" site1Buffer "',0,3),
+				SUBSTR('" site2Buffer "',0,3),
+				" mileageBuffer ",
+				" timeBuffer ")"),
+	),
+*/
+	sqlOperationLog := TAG_ADD_SITE_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

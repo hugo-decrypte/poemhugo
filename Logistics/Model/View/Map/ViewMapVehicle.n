@@ -1,0 +1,20 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ViewMapVehicle.n		%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\View\Map\FuncMapVehicle.n"],
+
+%['Work Directory' "Model\Input\Vehicle\ReadVehicle.n"],
+
+'@' => (
+	mapVehicle({},{}, date1Plan,date2Plan, "",TAG_MAP_RESOURCE, "",""),
+	mapVehicle({},{}, date1Plan,date2Plan, "",TAG_MAP_RESOURCE, "Simulation",""),
+
+	mapVehicle({},{}, date1Plan,date2Plan, "",TAG_MAP_RESOURCE, "Agent",""),
+
+),

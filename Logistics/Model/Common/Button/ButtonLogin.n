@@ -1,0 +1,134 @@
+%******************************************%
+%	        ButtonLogin.n	           %
+%	                                   % 
+% Copyright (C) 2000 ENGINEST SOFTWARE     %
+% All rights reserved.                     %
+%******************************************%
+
+%['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+%['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+% JZ 0204
+viewConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\View.cfg"),
+[viewConfig],
+
+
+['Work Directory' serverViewRoot "ButtonLogin.view"] <- '@',
+
+
+ % View Object	
+@ ("View "),
+
+% ID	
+@ ("LoginView "),
+
+% Caption	
+@ ("_ "),
+
+% Title	
+@ ("LoginView "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("GLOBALVARIABLE=1;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+
+
+
+
+% User Login format
+@ ("\\\n'{/*Input(" TAG_START_SYSTEM ";2;"),
+
+@ ("(string,USERID," TAG_USER ",,30." inputWidth ",,);"),
+@ ("(password,PASSWORD," TAG_PASSWORD ",,30." inputWidth ",,)*/}\\\n"),
+
+
+% Global Parameters
+@ ( "{/*(GLOBALPARAMETERS;3;\\\n"),
+
+@ ("(string,PERMISSION,,"	"XXXXXXXX"	");\\\n"),
+
+@ ("(string,SERVERIP,,"		"127.0.0.1"	");\\\n"),	% JZ 0711
+@ ("(string,SERVERPORT,,"	"89"		");\\\n"),
+
+%@ ("(string,SERVERIP,,"	defaultIP	");\\\n"),
+%@ ("(string,SERVERPORT,,"	defaultPort	");\\\n"),
+%@ ("(string,SERVERDIRECTORY,,"	serverDirectory ");\\\n"),
+
+@ (")*/}'"),
+
+
+
+
+% Script Object	 
+@ ("\n\nScript "),
+
+% ID
+@ "Login",
+
+
+% Caption
+@ (" '" TAG_LOGIN "' "),
+
+
+% Group	
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_LOGIN,
+
+
+% Label
+@ (" '" TAG_LOGIN "' "),
+
+
+% Object Group Set "{G1, G2, ...}"	
+@ "_ ",
+
+
+% Object Id. Set / Object Item
+@ "_ ",
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("_ "),
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (NCLSCRIPT_LOGIN "Model\Common\Interface\LoginClient.n'"),
+
+
+@ NCL_ARGUMENT_BEGIN_LOGIN,
+@ ("\"(/*PASSWORD*/)\""),
+@ NCL_ARGUMENT_END,
+
+
+'@' <- ['Work Directory' serverViewRoot "ButtonLogin.view"],
+

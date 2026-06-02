@@ -1,0 +1,32 @@
+%==================================================%
+%                                                  %
+%            	  Routing	    	           %
+%                                                  %
+%		ExecuteSql.n                       %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory'  "Model\Common\Config\ReadConfig.n"],
+
+'()' => (
+	'()' <- sqlFile,
+
+	nbQuery = #(sqlFile, "\n"),
+
+	\forall i \in [1, nbQuery]
+		strQuery_{i} = () : "\n",
+
+	sqlFile <- '()',
+),
+
+
+'@' => (
+	database <- '@',
+
+	\forall i \in [1, nbQuery] 
+		(SQL : strQuery_{i}),
+
+	'@' <- database,
+),
+

@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics  	           %
+%                                                  %
+%  		ViewTableOrderProduct.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOrderProduct.n"],
+
+'@' => (
+	tableOrderProduct("ORDERPRODUCT",TAG_TABLE,"ORDERPRODUCT",true,"", "(/*TITLEOBJ*/)", "Order",   ""), % JZ 1003
+	tableOrderProduct("PRODUCTORDER",TAG_TABLE,"PRODUCTORDER",true,"", "(/*TITLEOBJ*/)", "Product", ""),
+	% Check "TableOrderProduct" for open view file
+),

@@ -1,0 +1,128 @@
+%******************************************%
+%	        Declaration.n 	   	   %
+%	                                   % 
+% Copyright (C) 2000 ENGINEST SOFTWARE     %
+% All rights reserved.                     %
+%******************************************%
+
+
+% Declaration of 18 view variables after LOGIN (USERID, PASSWORD, PERMISSION)
+
+'@' => (
+	clientPoemDataConfig = ("(/*POEMDATAAPPPATH*/)" directoryClub_{clubId_{idClubActive}} "/" poemDataConfig),
+% JZ 1208
+
+	poemDataExePath		= ("(/*POEMCLIENTDIRECTORY*/)(/*POEMDATADIRECTORY*/)"),
+	poemPrintExePath	= ("(/*POEMCLIENTDIRECTORY*/)(/*POEMPRINTDIRECTORY*/)"),
+
+	poemDataAppPath		= ("(/*CLIENTDIRECTORY*/)(/*POEMDATADIRECTORY*/)"),
+	poemPrintAppPath	= ("(/*CLIENTDIRECTORY*/)(/*POEMPRINTDIRECTORY*/)"),
+
+
+	httpView = ("http://(/*SERVERIP*/):(/*SERVERPORT*/)/" serverViewRoot "(/*CLUBDIRECTORY*/)/"), 	% IMPORTANT: / not \\
+
+	%httpView = ("http://(/*SERVERIP*/):(/*SERVERPORT*/)/" serverViewRoot),		% IMPORTANT: / not \\
+	
+
+
+	[viewDirectory "Declaration.view"] <- '@',
+
+
+	% View Object	
+	@ ("View "),
+
+	% ID	
+	@ ("Declaration "),
+
+	% Caption	
+	@ ("_ "),
+
+	% Title	
+	@ ("Declaration "),
+
+	% Color(R G B)	
+	@ ("255 255 255 "),
+
+	% Icon	
+	@ ("_ "),
+
+	% Rect(X Y SX SY )	
+	@ ("0 0 40 40 "),
+
+	% Margin	
+	@ ("5 5 5 5 "),
+
+	% [Option items]
+	@ ("'[TRACELEVEL=0;"),
+	@ ("TRACEFILE=;"),
+	@ ("GLOBALVARIABLE=1;"),
+	@ ("DEBUGLEVEL=0;"),
+	@ ("SCROLLBAR=0;"),
+	@ ("NATURESCALE=0;"),
+	@ ("BESTFIT=1]'\\\n"),
+
+
+
+	% Global Parameters
+	@ ("'{/*(GLOBALPARAMETERS;20;\\\n"),
+
+
+
+	% Server config
+	@ ("(string,CLUBID,,"			idClubActive 		");\\\n"),
+	%@ ("(string,CLUBID,,"			"(/*CLUBID*/)" 		");\\\n"),
+
+
+	@ ("(string,SERVERDIRECTORY,,"		serverDirectory 	");\\\n"),
+
+	@ ("(string,CLUBDIRECTORY,,"		directoryClub_{clubId_{idClubActive}} 	");\\\n"),
+
+
+	% Database config
+	@ ("(string,DBNAME,,"			databaseName 		");\\\n"),
+	@ ("(string,DBOWNER,,"			databaseOwner 		");\\\n"),
+	@ ("(string,DBUSER,,"			databaseUser 		");\\\n"),
+	@ ("(Password,DBPWD,,"			"XXXXXXXX"	 	");\\\n"),
+
+
+
+	% Client config
+	@ ("(string,CLIENTDIRECTORY,," 		"XXXXXXXX"	 	");\\\n"),
+	@ ("(string,POEMCLIENTDIRECTORY,," 	"XXXXXXXX"	 	");\\\n"),
+
+	@ ("(string,POEMDATADIRECTORY,,"	poemDataDirectory 	");\\\n"),
+	@ ("(string,POEMPRINTDIRECTORY,,"	poemPrintDirectory 	");\\\n"),
+
+	@ ("(string,POEMPRINTDEVICE,,"		poemPrintDevice 	");\\\n"),
+
+
+
+	% Application config
+	@ ("(string,POEMDATAAPPPATH,,"		poemDataAppPath 	");\\\n"),
+	@ ("(string,POEMDATAEXEPATH,,"		poemDataExePath 	");\\\n"),
+	@ ("(string,POEMDATACONFIG,,"		clientPoemDataConfig 	");\\\n"),
+
+	@ ("(string,POEMPRINTAPPPATH,,"		poemPrintAppPath 	");\\\n"),
+	@ ("(string,POEMPRINTEXEPATH,,"		poemPrintExePath 	");\\\n"),
+
+
+
+	% HTTP View
+	@ ("(string,HTTPVIEW,,"			httpView 		");\\\n"),
+
+
+
+	% Trace Level
+	@ ("(string,TRACELEVEL,,"		poemTraceLevel 		");\\\n"),
+
+
+	% Reply to refresh
+	@ ("(string,REPLY,,"			"XXXXXXX" 		");\\\n"),
+
+
+
+	@ (")*/}'\n\n"),
+
+
+	'@' <- [viewDirectory "Declaration.view"],
+),

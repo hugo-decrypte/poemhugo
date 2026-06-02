@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreateState.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+	
+'()' => (
+	
+	categoryBuffer	:: "",
+	
+	idBuffer		:: "",
+	labelBuffer		:: "",
+	commentsBuffer	:: "",
+	colorBuffer		:: "",
+
+	
+	categoryBuffer	= (),
+	idBuffer		= (),
+	labelBuffer		= (),
+	commentsBuffer	= (),
+	colorBuffer		= (),
+
+	'()' <- database,
+	
+	CreateState_SQL1=(
+		"INSERT INTO " DB_PREFIX "STATE (Id, Category, Label, Comments, Color)"
+		"select distinct '"idBuffer"', "categoryBuffer", '"labelBuffer"', '"commentsBuffer"', '"colorBuffer"'"
+		"from " DB_PREFIX "STATE s0\\\n"
+		"where not exists (select 1 from " DB_PREFIX "STATE s where s.ID='"idBuffer"'  and s.Category="categoryBuffer" )'"
+	),
+	
+	(SQL : CreateState_SQL1), 
+	
+	
+	database <- '()',
+),

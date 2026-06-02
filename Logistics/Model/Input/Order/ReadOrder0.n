@@ -1,0 +1,180 @@
+/******************************************************/
+/*	         	Routing	              	      */
+/*	                                              */
+/*			ReadOrder0.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+['Work Directory' "Model\Input\Client\ReadClient.n"],
+
+
+
+'()' <- database,
+
+
+( SQL: sqlReadOrder),
+
+
+nbOrder	= (),
+ORDER	= [1, nbOrder],
+
+SOURCEORDER  	  = SOURCE \cup ORDER,
+ORDERSINK 	  = ORDER  \cup SINK,
+SOURCEORDERSINK   = SOURCE \cup ORDER \cup SINK,
+SOURCESINK	  = SOURCE \cup SINK,
+
+
+\forall o \in SOURCEORDERSINK (
+	idOrder_{o} :: "",
+	strictTimeOrder_{o} :: true,
+
+	priorityOrder_{o} :: 0,
+
+	quantityOrder_{o} >= 0,
+	weightOrder_{o} >= 0.0,
+	volumeOrder_{o} >= 0.0,
+
+	receiptsOrder_{o} :: 0.0,
+),
+
+
+\forall o \in SOURCESINK (
+	priorityOrder_{o} = 0,
+
+	quantityOrder_{o} = 0,
+	weightOrder_{o} = 0.0,
+	volumeOrder_{o} = 0.0,
+
+	receiptsOrder_{o} = 0.0,
+	!strictTimeOrder_{o},
+),
+
+\forall o \in ORDER (
+	idSite2Order_{o} 	:: "",
+
+	idClientOrder_{o} 	:: "",
+	idProductOrder_{o} 	:: "",
+
+	quantity0Order_{o} 	:: 0,
+	weight0Order_{o} 	:: 0.0,
+	volume0Order_{o} 	:: 0.0,
+
+	timeFixed0Order_{o}	:: 0,
+
+	IdTypeVehicle0Order_{o} :: {""},
+	IdVehicle0Order_{o}	:: IDVEHICLE,
+	t1Service00Order_{o}	:: defaultDateTime,
+	t2Service00Order_{o}	:: defaultDateTime,
+
+	idShift0Order_{o} 	:: "",
+
+	stateOrder_{o}		:: "",
+
+
+
+	idOrder_{o} 		= (),
+	idSite2Order_{o} 	= (),
+	priorityOrder_{o} 	= (),
+
+	idClientOrder_{o} 	= (),
+	idProductOrder_{o} 	= (),
+
+	quantity0Order_{o} 	= (),
+	weight0Order_{o} 	= (),
+	volume0Order_{o} 	= (),
+
+	timeFixed0Order_{o}	= (),
+
+	receiptsOrder_{o}	= (),
+
+
+	strictTimeOrder_{o} 	== (() = STATE_TRUE),
+
+	t1Service00Order_{o}	= (),
+	t2Service00Order_{o}	= (),
+	idShift0Order_{o} 	= (),
+
+	IdTypeVehicle0Order_{o} = (),
+	IdVehicle0Order_{o}	= (),
+
+	stateOrder_{o}		= (),
+
+
+
+	(IdVehicle0Order_{o} TAG_INVALID_VEHICLE_FOR_LOCKING_ORDER idOrder_{o} :
+		IdVehicle0Order_{o} \subset IDVEHICLE,
+	),
+% ?????? TAG_INVALID_VEHICLE_FOR_LOCKING_ORDER
+
+
+	%(idOrder_{o} TAG_ORDER_TIME_WIN_NOT_IN_HORIZON idOrder_{o} " : " TimeWin00Order_{o} :
+	%	TimeWin00Order_{o} \subset HORIZON,
+	%),
+
+
+
+	t1Service0Order_{o} = (
+		t1Service00Order_{o} < t1 || t1Service00Order_{o} = defaultDateTime ?
+		t1 : t1Service00Order_{o}
+	),
+
+	t2Service0Order_{o} = (
+		t2Service00Order_{o} > t2 || t2Service00Order_{o} = defaultDateTime ?
+		t2 : t2Service00Order_{o}
+	),
+
+
+	(idOrder_{o} TAG_ORDER_TIME_WIN_NOT_IN_HORIZON idOrder_{o} " : " t1Service0Order_{o} " " t2Service0Order_{o} :
+		t1Service0Order_{o} =< t2Service0Order_{o},
+	),
+),
+
+database <- '()',
+
+
+CLIENTORDER = \{ \forall o \in ORDER clientId_{idClientOrder_{o}} \},
+
+
+
+%\forall c \in CLIENTORDER
+%	idZoneClient_{c} = (
+%		idZone0Client_{c} <> "" ?
+%		idZone0Client_{c} :
+%		idZoneSite_{siteId_{idSiteClient_{c}}}
+%	),
+
+
+
+\forall o \in ORDER (
+	quantityOrder_{o} >= 0,
+	weightOrder_{o} >= 0.0,
+	volumeOrder_{o} >= 0.0,
+
+	idProductOrder_{o} \in IDPRODUCT \cup \{""\},
+
+	weightQtyOrder_{o} = quantity0Order_{o} * unitWeightProduct_{productId_{idProductOrder_{o}}},
+	volumeQtyOrder_{o} = quantity0Order_{o} * unitVolumeProduct_{productId_{idProductOrder_{o}}},
+
+	quantityOrder_{o} = \underline{quantity0Order_{o}},
+	weightOrder_{o} = \underline{(weight0Order_{o} > weightQtyOrder_{o} ? weight0Order_{o} : weightQtyOrder_{o})}, % Zhou 0724
+	volumeOrder_{o} = \underline{(volume0Order_{o} > volumeQtyOrder_{o} ? volume0Order_{o} : volumeQtyOrder_{o})}, % Zhou 0724
+
+
+	idShiftOrder_{o} = (
+		idShift0Order_{o} <> "" ?
+		idShift0Order_{o} :
+		idShiftClient_{clientId_{idClientOrder_{o}}}
+	),
+
+
+	idZoneOrder_{o} = idZoneClient_{clientId_{idClientOrder_{o}}},
+),
+
+
+IDORDER = \{ \forall o \in ORDER idOrder_{o} \},
+
+
+

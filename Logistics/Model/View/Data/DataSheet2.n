@@ -1,0 +1,47 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataSheet2.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: SHEET2
+@ "Data ",
+
+% ID
+@ ("SHEET2 '"),	
+
+% Caption
+@ "SHEET",
+%@ TAG_SHEET,
+
+% Group
+@ "' SHEET ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,CATEGORY,CATEGORY,,255,0);(string,ID,ID,,255,0);]\"\\\n"),	
+
+@ VIEWSQL,
+
+@("SELECT DISTINCT a.category 	AS CATEGORY,\
+			a.id 		AS ID\
+	FROM " DB_PREFIX "SHEET a\
+	ORDER BY a.category,a.id\"\n\n"),
+
+

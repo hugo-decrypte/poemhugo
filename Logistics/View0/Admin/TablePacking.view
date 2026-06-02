@@ -1,0 +1,87 @@
+View ViewTablePACKING 'Entrée en stock' 'Entrée en stock'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePACKING _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Entrée en stock;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Center,Center,Right,Right,Right,Right,Right,Right,Left,Left}]"\
+"[DATAOBJ=PACKING;FILLCOLOR=LINERGB]"
+
+Data PACKING 'Entrée en stock' PACKING HTTPSQL 0 '[FIND={ID,NAMESENDER,DATEPACKING,DATEINPUT,NBPALLET,QUANTITYSTOCK,QUANTITYREAL,QUANTITYDEFECTIVE,WEIGHTNET,WEIGHTGLOBAL,COMMENTS,STATE}]'   [DOUBLECLICK=TablePallet] \
+"[12;(string,ID,ID,,15,,);(string,NAMESENDER,Expéditeur,,15,,);(date,DATEPACKING,Date entrée,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEINPUT,Date entrée,,15,,YYYY-MM-DD|DD/MM/YYYY);(int,NBPALLET,#Palette,,15,,);(int,QUANTITYSTOCK,Qté stock,,15,,);(int,QUANTITYREAL,Qté livrée,,15,,);(int,QUANTITYDEFECTIVE,Qté défectueuse,,15,,);(float,WEIGHTNET,Poids net,,15,,);(float,WEIGHTGLOBAL,Poids total,,15,,);(string,COMMENTS,Commentaire,,15,,);(string,STATE,Etat,,15,,);(int,QUANTITY,Quantité déclarée,,8.0.80,1);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT p.id AS ID, \
+		 IIF(exists (select Name from COMPANY where Id=p.IdSender), (select Name from COMPANY where Id=p.IdSender), p.IdSender) as NAMESENDER,\
+		 p.DateCreate as DATEPACKING,\
+		 p.DateDelivery as DATEINPUT,\
+		 p.NbPallet AS NBPALLET,\
+		 p.Quantity AS QUANTITY,\
+		 p.QuantityReal AS QUANTITYREAL,\
+		 p.QuantityStock AS QUANTITYSTOCK,\
+		 p.QuantityDefective AS QUANTITYDEFECTIVE,\
+		 p.WeightNet AS WEIGHTNET,\
+		 p.WeightGlobal AS WEIGHTGLOBAL,\
+		 IIF(p.comments is NULL or p.comments<=' ', ' ', p.comments) as COMMENTS,\
+		 IIF(exists (select 1 from STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY'), (select (trim(LABEL) + '(' + trim(ID) + ')') from STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY'), p.idState) as STATE,\
+		 IIF(exists (select 1 from STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY'), (select Color from STATE s where s.Id=p.idState and s.CATEGORY='SUPPLY'),\
+		 '(200 200 160)' ) AS LINERGB \
+	 FROM PACKING p \
+	 WHERE (format(p.DateDelivery,'0')>format(DateAdd('d', 10, Date()), 'YYYY-MM-DD') or p.DateDelivery<='0' or p.DateDelivery is NULL or p.idState<>'9')\
+	 AND OriginPacking='S'\
+	 ORDER BY p.id"
+
+
+Script TablePallet  'Palettes' _ 24 'Palettes' _ 'tablePACKING' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TablePallet_Packing.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Palettes en stock {/*Selected(tablePACKING;1;(string,ID))*/}; IDPACKING={/*Selected(tablePACKING;1;(string,ID))*/}; IDPRODUCT='XXX']"
+
+Script PrintPalletNote  'Imrpimer étiquette palette' _ 81 'Imrpimer étiquette palette' _ 'tablePACKING' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintPackingPalletSheet.ini  PalletPacking \
+	 {/*selected(tablePACKING;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/PalletPacking{/*selected(tablePACKING;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script CreatePacking  'Créer entrée en stock' _ 61 'Créer' _ 'tablePACKING' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\CreatePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(Créer entrée en stock;1;\
+(date,DATEDELIV,Date entrée,[/*PACKING.DATEINPUT*/],10.0.580,1,YYYY-MM-DD);\
+ )*/}'\
+Reload _ _ _
+
+
+
+Script ModifyPacking  'Modifier entrée en stock' _ 62 'Modifier' _ 'tablePACKING' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePACKING;1;(string,ID))*/} \
+{/*Input(MCM;Modifier entrée en stock [/*PACKING.ID*/];4;\
+(date,DATEINPUT,Date entrée,[/*PACKING.DATEINPUT*/],10.0.580,1,YYYY-MM-DD);\
+(string,IDSENDER,Expéditeur,[/*PACKING.NAMESENDER*/],50.0.580,0,1,);\
+(string,COMMENTS,Commentaire,[/*PACKING.COMMENTS*/],50.0.580,0,0,);\
+(string,STATE,Etat,[/*PACKING.STATE*/],50.0.580,0,0,[/*STATE.LABELSTATE*/]);\
+ )*/}'\
+Reload _ _ _
+
+
+
+Script DeletePacking  'Supprimer entrée en stock' _ 63 'Supprimer' _ 'tablePACKING' '( 0 0 0 0 )' _ _ 'Attention! Vider et supprimer en premier temps les palettes.'  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\DeletePacking.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePACKING;1;(string,ID))*/}' \
+Reload _ _ _
+
+Script TableState  'Etat entrée en stock' _ 23 'Tableau état' _ 'tablePACKING' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableState_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);CATEGORY='SUPPLY';TITLEOBJ=Entrée en stock]"
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='SUPPLY' \
+ORDER BY s.Id "
+

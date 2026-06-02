@@ -1,0 +1,36 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		ReadTypeSheet.n		           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	(SQL : "SELECT category,column,id,name,type,table,field FROM " DB_PREFIX "TYPESHEET"),
+
+	TYPESHEET = [1,()],
+
+	\forall t \in TYPESHEET (
+		categoryTypeSheet_{c}		:: "",
+		columnSheet_{c}			:: 0,
+		idTypeSheet_{c}			:: "",
+		nameTypeSheet_{c}		:: "",
+		typeTypeSheet_{c}		:: "",
+		tableTypeSheet_{c}		:: "",
+		fieldTypeSheet_{c}		:: "",
+
+		categoryTypeSheet_{c}		= (),
+		columnSheet_{c}			= (),
+		idTypeSheet_{c}			= (),
+		nameTypeSheet_{c}		= (),
+		typeTypeSheet_{c}		= (),
+		tableTypeSheet_{c}		= (),
+		fieldTypeSheet_{c}		= (),
+	),
+
+	database <- '()',
+),

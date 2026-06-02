@@ -1,0 +1,38 @@
+%===============================================%
+%						%
+%		Tour Routing			%
+%						%
+%	  FuncHistogramTourQuantity.n	        %
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+<histogramTourQuantity>(aliasHistogram,bestfit, labelX,labelY, labelLegend,colorLegend, IdTourSelected, title, postfix0)	
+(
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("HistogramTourQuantity" postfix ".view"),
+
+
+		sqlRate = (SQL_CASEWHEN "ISNULL(t.rateQuantity)" SQL_THEN "0" SQL_ELSE "t.rateQuantity" SQL_CASEEND),
+		sqlDataXY = ("SELECT DISTINCT t.id AS X, " sqlRate " AS Y, "),
+
+
+		IdTourSelected <> {} => (
+			sqlFrom = (
+				" FROM " DB_PREFIX "OPT_TOUR t  WHERE "
+				SQL_ViewUserVisibleClubIs "t.idClub) AND t.id IN (" concatSetQuoted(IdTourSelected) ")"
+			),
+			;
+
+			sqlFrom = (
+				" FROM " DB_PREFIX "OPT_TOUR t  WHERE "
+				SQL_ViewUserVisibleClubIs "t.idClub)"
+			),
+		),
+	
+		['Work Directory' "Model\Common\View\HistogramBar1.n"],
+	),
+),
+.

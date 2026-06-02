@@ -1,0 +1,37 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	GenerateMapVehicleTourByDate.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\View\Map\FuncMapVehicle.n"],
+
+'()' => (
+	idClubBuffer :: "",
+
+	date1Buffer :: defaultDate,
+	date2Buffer :: defaultDate,
+
+	idClubBuffer = (),
+	
+	date1Buffer = (),
+	date2Buffer = (),
+
+),
+
+
+'@' => (
+	mapVehicle({},{}, date1Buffer,date2Buffer, "",TAG_MAP_RESOURCE, "","User"),
+),
+
+
+.
+

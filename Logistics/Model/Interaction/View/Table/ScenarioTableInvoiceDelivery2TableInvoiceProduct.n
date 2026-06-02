@@ -1,0 +1,54 @@
+%=======================================================%
+%							%
+%			GestionStock			%
+%							%
+%	    ScenarioTableInvoiceDelivery2TableInvoiceProduct.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableInvoiceProduct ",
+
+% Caption
+@ (" '" TAG_DETAIL_INVOICE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_INVOICE,
+
+% Label
+@ (" '" TAG_DETAIL_INVOICE "' "),	% JZ 0906
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableINVOICE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableInvoiceProduct.view" OPENTABLE_END),	% JZ 0919
+
+@ (TABLE_ARGUMENTS "IDINVOICE={/*Selected(tableINVOICE;1;(string,IDINVOICE))*/};IDDELIVERY={/*Selected(tableINVOICE;1;(string,IDDELIVERY))*/}]\"\n\n"),
+

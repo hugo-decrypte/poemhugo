@@ -1,0 +1,368 @@
+/****************************************************/
+/*              	Routing	       	       	    */
+/*                                                  */
+/*		InitRelaxation.n		    */
+/*                                                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE             */
+/* All rights reserved                              */
+/****************************************************/
+
+
+'()' <- database,
+
+% Objectives
+profitBuffer		:: 0.0,
+costBuffer		:: 0.0,
+nbVehicleBuffer		:: 0,
+nbTourBuffer		:: 0,
+mileageBuffer		:: 0,
+worktime0Buffer		:: 0,
+makespan0Buffer		:: 0,
+
+worktimeBuffer		:: defaultTime,
+makespanBuffer		:: defaultTime,
+
+(SQL : "SELECT SUM(v.receipts-v.cost),SUM(v.cost),SUM(v.mileage),SUM(v.timeService+v.timeRoute),SUM(v.makespan) FROM "
+	DB_PREFIX "RESOURCE v WHERE " SQL_UserVisibleClubIs "v.idClub) AND v.state='" STATE_PLANNED "'"),
+
+_		= (),
+
+profitBuffer	= (),
+costBuffer	= (),
+mileageBuffer	= (),
+worktime0Buffer	= (),
+makespan0Buffer	= (),
+
+worktimeBuffer	= worktime0Buffer,
+makespanBuffer	= makespan0Buffer,
+
+
+
+
+(SQL : "SELECT id,strict,idShift,t1Service0,t2Service0,timeFixed,quantity,weight,volume,priority FROM " DB_PREFIX "OPT_ORDER WHERE state='"
+	STATE_PLANNED "' AND idClub='" idClubLogin "' ORDER BY id"),
+
+
+ORDER	= [1, ()],
+
+SOURCEORDER = SOURCE \cup ORDER,
+SOURCEORDERSINK = SOURCEORDER \cup SINK,
+
+\forall o \in SOURCEORDERSINK
+	idOrderBuffer_{o} :: "",
+
+
+\forall o \in ORDER (
+	idShiftOrderBuffer_{o}		:: "",
+	t1Service00OrderBuffer_{o}	:: defaultDateTime,
+	t2Service00OrderBuffer_{o}	:: defaultDateTime,
+	timeFixed0OrderBuffer_{o}	:: 0,
+
+	quantityOrderBuffer_{o}		:: 0,
+	weightOrderBuffer_{o}		:: 0.0,
+	volumeOrderBuffer_{o}		:: 0.0,
+
+	priorityOrderBuffer_{o}		:: 0,
+
+
+	idOrderBuffer_{o} 		= (),
+
+
+	strictTimeOrderBuffer_{o} 	== (() = STATE_TRUE),
+
+	idShiftOrderBuffer_{o}		= (),
+	t1Service00OrderBuffer_{o}	= (),
+	t2Service00OrderBuffer_{o}	= (),
+
+	timeFixed0OrderBuffer_{o}	= (),
+
+	quantityOrderBuffer_{o}		= (),
+	weightOrderBuffer_{o}		= (),
+	volumeOrderBuffer_{o}		= (),
+
+	priorityOrderBuffer_{o}		= (),
+
+
+	t1Service0OrderBuffer_{o} = (
+		t1Service00OrderBuffer_{o} < t1 || t1Service00OrderBuffer_{o} = defaultDateTime ?
+		t1 : t1Service00OrderBuffer_{o}
+	),
+
+	t2Service0OrderBuffer_{o} = (
+		t2Service00OrderBuffer_{o} > t2 || t2Service00OrderBuffer_{o} = defaultDateTime ?
+		t2 : t2Service00OrderBuffer_{o}
+	),
+),
+
+
+
+IDORDER = \{ \forall o \in ORDER idOrderBuffer_{o} \},
+
+
+\forall i \in IDORDER (
+	orderIdBuffer_{i} \in ORDER,
+	idOrderBuffer_{orderIdBuffer_{i}} = i,
+),
+
+
+\forall t \in TOUR (
+	idOrderBuffer_{sourceTour_{t}}	= TAG_SOURCE,
+	idOrderBuffer_{sinkTour_{t}}	= TAG_SINK,
+),
+
+
+% VehicleActiveBuffer, nbVehicleBuffer
+(SQL : "SELECT DISTINCT v.id FROM " DB_PREFIX "RESOURCE v WHERE "
+	SQL_UserVisibleClubIs "v.idClub) AND v.state='" STATE_PLANNED "'"),
+
+nbVehicleBuffer =< nbVehicle,
+nbVehicleBuffer = (),
+
+VehicleActiveBuffer	\subset RESOURCE,
+VehicleActiveBuffer = \{ \forall i \in [1,nbVehicleBuffer] resourceId_{()} \},
+
+
+% TourActiveBuffer, nbTourBuffer
+\forall v \in VehicleActiveBuffer (
+	(SQL : "SELECT MAX(t.tourResource) FROM " DB_PREFIX "OPT_TOUR t WHERE "
+		SQL_UserVisibleClubIs "t.idClub) AND t.idResource='" idResource_{v} "'"), 
+
+	_ = (),
+
+	TourVehicleBuffer_{v} = [tour0Vehicle_{v}+1, tour0Vehicle_{v}+()],
+
+	nbTourVehicleBuffer_{v} = #TourVehicleBuffer_{v},
+),
+
+TourActiveBuffer	\subset TOUR,
+TourActiveBuffer	= \bigcup_{v \in VehicleActiveBuffer}{TourVehicleBuffer_{v}},
+
+nbTourBuffer		= #{TourActiveBuffer},
+
+SourceActiveBuffer		\subset SOURCE,
+SourceActiveBuffer		= \{ \forall t \in TourActiveBuffer sourceTour_{t} \},
+
+SinkActiveBuffer		\subset SINK,
+SinkActiveBuffer		= \{ \forall t \in TourActiveBuffer sinkTour_{t} \},
+
+SourceActiveOrderBuffer		= SourceActiveBuffer \cup ORDER,
+OrderSinkActiveBuffer		= SinkActiveBuffer \cup ORDER,
+SourceOrderSinkActiveBuffer	= SourceActiveOrderBuffer \cup SinkActiveBuffer,
+
+
+\forall t \in TOUR
+	nbOrderTourBuffer_{t} =< #ORDER+2,
+
+
+% site2TourBuffer
+\forall t \in TourActiveBuffer (
+	idSite1TourBuffer_{t}		:: "",
+	idSite2TourBuffer_{t}		:: "",
+
+	t1TourBuffer_{t}		:: defaultDateTime,
+	t2TourBuffer_{t}		:: defaultDateTime,
+
+	timeRouteTourBuffer_{t}		:: 0,
+	timeServiceTourBuffer_{t}	:: 0,
+
+	receiptsTourBuffer_{t}		:: 0.0,
+
+	quantityTourBuffer_{t}		:: 0,
+	weightTourBuffer_{t}		:: 0.0,
+	volumeTourBuffer_{t}		:: 0.0,
+
+	costTourBuffer_{t}		:: 0.0,
+
+
+	sqlSelectTour_{t} = (
+		"SELECT	t.idSite1,t.idSite2,t.t1,t.t2,
+			t.mileage,t.timeRoute,t.timeService,t.receipts,t.quantity,t.weight,t.volume,t.cost
+		FROM	" DB_PREFIX "OPT_TOUR t
+		WHERE	" SQL_UserVisibleClubIs "t.idClub) AND t.idResource='"
+			idResource_{vehicleTour_{t}} "' AND t.tourResource=" idxTourVehicleTour_{t}),
+
+	(SQL : sqlSelectTour_{t}),
+
+	(TAG_NOT_PLANNED_FOR_TOUR " " t :
+		() > 0,
+	),
+
+	idSite1TourBuffer_{t}		= (),
+	idSite2TourBuffer_{t}		= (),
+
+	t1TourBuffer_{t}		= (),
+	t2TourBuffer_{t}		= (),
+
+	mileageTourBuffer_{t} 		= (),
+	timeRouteTourBuffer_{t} 	= (),
+	timeServiceTourBuffer_{t} 	= (),
+
+
+	receiptsTourBuffer_{t} 		= (),
+
+	quantityTourBuffer_{t} 		= (),
+	weightTourBuffer_{t} 		= (),
+	volumeTourBuffer_{t} 		= (),
+
+	costTourBuffer_{t} 		= (),
+
+
+	sqlSelectOrderTour_{t} = (
+		"SELECT p.idOrder
+		FROM	" DB_PREFIX "OPT_PLAN p
+		WHERE	" SQL_UserVisibleClubIs "p.idClub) AND p.idResource='" idResource_{vehicleTour_{t}} "' AND
+			p.tourResource=" idxTourVehicleTour_{t} " ORDER BY p.idx"),
+
+	(SQL : sqlSelectOrderTour_{t}),
+
+	nbOrderTourBuffer_{t} =< #ORDER+2,
+	nbOrderTourBuffer_{t} = (),
+
+	\forall i \in [1,nbOrderTourBuffer_{t}] (
+		idOrderIdxTour_{t,i} :: "",
+		idOrderIdxTour_{t,i} = (),
+	),
+),
+
+
+% OrderTourBuffer
+
+\forall o \in SourceOrderSinkActiveBuffer
+	idOrderBuffer_{o} :: "",
+
+\forall t \in TourActiveBuffer (
+	\forall i \in [1,nbOrderTourBuffer_{t}]
+		orderIdxTour_{t,i} :: 0,
+
+	orderIdxTour_{t,1} = sourceTour_{t},
+	\forall i \in [2,nbOrderTourBuffer_{t}-1]
+		orderIdxTour_{t,i} = orderIdBuffer_{idOrderIdxTour_{t,i}},
+	orderIdxTour_{t,nbOrderTourBuffer_{t}} = sinkTour_{t},
+
+
+	\forall i \in [1,nbOrderTourBuffer_{t}]
+		idOrderBuffer_{orderIdxTour_{t,i}} = idOrderIdxTour_{t,i},
+
+
+	OrderTourBuffer_{t} \subset ORDER,
+	SourceOrderTourBuffer_{t} \subset SourceActiveOrderBuffer,
+	SourceOrderSinkTourBuffer_{t} \subset SourceOrderSinkActiveBuffer,
+
+	OrderTourBuffer_{t} = \{ \forall i \in [2,nbOrderTourBuffer_{t}-1] orderIdxTour_{t,i} \},
+	SourceOrderTourBuffer_{t} = \{ sourceTour_{t} \} \cup OrderTourBuffer_{t},
+	SourceOrderSinkTourBuffer_{t} = \{ sinkTour_{t} \} \cup SourceOrderTourBuffer_{t},
+),
+
+ORDER = \bigcup_{t \in TourActiveBuffer}{OrderTourBuffer_{t}},
+
+
+
+\forall o \in SourceOrderSinkActiveBuffer
+	tourOrderBuffer_{o} \in TourActiveBuffer,
+
+
+\forall t \in TourActiveBuffer
+\forall o \in SourceOrderSinkActiveBuffer
+	o \in SourceOrderSinkTourBuffer_{t} == tourOrderBuffer_{o} = t,
+
+
+
+\forall o \in SourceOrderSinkActiveBuffer (
+	idSiteOrderBuffer_{o}		:: "",
+
+	t1OrderBuffer_{o} 		:: defaultDateTime,
+	t2OrderBuffer_{o} 		:: defaultDateTime,
+
+	timeServiceOrderBuffer_{o}	:: defaultTime,
+	timeToNextOrderBuffer_{o}	:: defaultTime,
+	timeService0OrderBuffer_{o}	:: 0,
+	timeToNext0OrderBuffer_{o}	:: 0,
+
+	mileageOrderBuffer_{o}		:: 0,
+
+	receiptsOrderBuffer_{o}		:: 0.0,
+
+
+
+
+	sqlOrderBuffer_{o} = (
+		"SELECT p.idSite1,p.t1Service,p.t2,p.timeService,p.timeRoute,p.mileage,p.receipts FROM " DB_PREFIX
+		"OPT_PLAN p WHERE " SQL_UserVisibleClubIs "p.idClub) AND p.idTour='"
+		idTour_{tourOrderBuffer_{o}} "'  AND p.idOrder='" idOrderBuffer_{o} "'"),
+
+	(SQL : sqlOrderBuffer_{o}),
+
+
+	1 = (),
+
+	idSiteOrderBuffer_{o}		= (),
+
+	t1OrderBuffer_{o}		= (),
+	t2OrderBuffer_{o}		= (),
+
+	timeService0OrderBuffer_{o}	= (),
+	timeToNext0OrderBuffer_{o}	= (),
+
+	mileageOrderBuffer_{o}		= (),
+
+	receiptsOrderBuffer_{o}		= (),
+
+	timeServiceOrderBuffer_{o}	= timeService0OrderBuffer_{o},	% ????????
+	timeToNextOrderBuffer_{o}	= timeToNext0OrderBuffer_{o},
+),
+
+database <- '()',
+
+
+
+
+\forall o \in SourceOrderSinkActiveBuffer (
+	nextOrderBuffer_{o} \in OrderSinkActiveBuffer,
+),
+
+\forall t \in TourActiveBuffer (
+	% special: next of sink is sink
+	\forall i \in [1,nbOrderTourBuffer_{t}-1]
+		nextOrderBuffer_{orderIdxTour_{t,i}} = orderIdxTour_{t,i+1},
+
+	nextOrderBuffer_{orderIdxTour_{t,nbOrderTourBuffer_{t}}} = sinkTour_{t},
+),
+
+
+
+
+
+% Result argument for mileageLoop_{0}
+mileage0 = mileageBuffer,
+
+
+
+% Relaxation
+TourToRelax = {},
+
+Swap_o = {},
+Swap_i = {},
+
+tour_o = 0,
+tour_i = 0,
+
+\forall t \in TourActiveBuffer (
+	Swap_oRelaxedTourBuffer_{t} = {},
+),
+
+\forall v \in VehicleActiveBuffer (
+	tour2ActiveVehicleBuffer_{v} = \sup TourVehicleBuffer_{v},
+
+	nbDayVehicleBuffer_{v} = 0,
+	nbNightVehicleBuffer_{v} = 0,
+
+	makespanVehicleBuffer_{v} = 0,
+
+	DateVehicle_{v} = DateResource_{v} \cap DATE,
+	%DateVehicle_{v} = DateResource_{v} \cap Date,
+
+	\forall d \in DateVehicle_{v} (
+		timeActiveDateVehicleBuffer_{v,d} = 0,
+		makespanDateVehicleBuffer_{v,d} = 0,
+	),
+),

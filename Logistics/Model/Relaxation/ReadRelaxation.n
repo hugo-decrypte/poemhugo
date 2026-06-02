@@ -1,0 +1,261 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ReadRelaxation.n		   %
+%                                                  %
+%	(c)2000. Enginest. All rights reserved.	   %
+%==================================================%
+
+'()' <- solutionBuf,
+
+
+Swap_oRelaxed		:: {},
+
+TourToRelaxBuffer	:: {},
+
+Swap_oBuffer		:: {},
+Swap_iBuffer		:: {},
+
+
+
+
+
+"Relaxation"		= (),
+%Swap_oRelaxed		= (),
+
+TourToRelaxBuffer	= (),
+
+Swap_oBuffer		= (),
+Swap_iBuffer		= (),
+
+tour_oBuffer		= (),
+tour_iBuffer		= (),
+
+
+
+
+profitBuffer 	:: 0.0,
+costBuffer 	:: 0.0,
+nbVehicleBuffer :: 0,
+nbTourBuffer 	:: 0,
+mileageBuffer 	:: 0,
+worktimeBuffer 	:: defaultTime,
+makespanBuffer 	:: defaultTime,
+
+"Objectives"		= (),
+profitBuffer		= (),
+costBuffer		= (),
+nbVehicleBuffer		= (),
+nbTourBuffer		= (),
+mileageBuffer		= (),
+worktimeBuffer		= (),
+makespanBuffer		= (),
+
+
+
+VehicleActiveBuffer	\subset RESOURCE,
+
+
+"Vehicle"			= (),
+VehicleActiveBuffer		= (),
+%TourActiveBuffer		= (),
+
+SourceActiveBuffer		= (),
+SourceActiveOrderBuffer		= (),
+SourceOrderSinkActiveBuffer	= (),
+
+
+
+SourceActiveBuffer \subset SOURCE,
+SourceActiveOrderBuffer \subset SOURCEORDER,
+SourceOrderSinkActiveBuffer \subset SOURCEORDERSINK,
+
+SourceActiveOrderBuffer = SourceOrderSinkActiveBuffer \setminus SINK,
+OrderSinkActiveBuffer = SourceOrderSinkActiveBuffer \setminus SOURCE,
+
+
+
+
+TourActiveBuffer	\subset TOUR,
+
+"TourActive"		= (),
+TourActiveBuffer	= (),
+
+\forall t \in TourActiveBuffer (
+	SourceTourBuffer_{t}		:: {},
+	SourceOrderTourBuffer_{t}	:: {},
+	SourceOrderSinkTourBuffer_{t}	:: {},
+	OrderTourBuffer_{t}		:: {},
+	SinkTourBuffer_{t}		:: {},
+
+	Swap_oRelaxedTourBuffer_{t}	:: {},
+
+	idSite1TourBuffer_{t}		:: "",
+	idSite2TourBuffer_{t}		:: "",
+
+	quantityTourBuffer_{t}		:: 0,
+	weightTourBuffer_{t}		:: 0.0,
+	volumeTourBuffer_{t}		:: 0.0,
+
+	receiptsTourBuffer_{t}		:: 0.0,
+
+	costTourBuffer_{t}		:: 0.0,
+
+	mileageTourBuffer_{t}		:: 0,
+
+	t1TourBuffer_{t}		:: defaultDateTime,
+	t2TourBuffer_{t}		:: defaultDateTime,
+
+	timeServiceTourBuffer_{t}	:: 0,
+	timeRouteTourBuffer_{t}		:: 0,
+
+
+	Swap_oRelaxedTourBuffer_{t}	= (),
+
+	idSite1TourBuffer_{t}		= (),
+	idSite2TourBuffer_{t}		= (),
+
+	OrderTourBuffer_{t} 		= (),
+
+	quantityTourBuffer_{t}		= (),
+	weightTourBuffer_{t}		= (),
+	volumeTourBuffer_{t}		= (),
+
+	receiptsTourBuffer_{t}		= (),
+
+	costTourBuffer_{t}		= (),
+
+	mileageTourBuffer_{t}		= (),
+
+	t1TourBuffer_{t}		= (),
+	t2TourBuffer_{t}		= (),
+
+	timeServiceTourBuffer_{t}	= (),
+	timeRouteTourBuffer_{t}		= (),
+
+
+	SourceOrderSinkTourBuffer_{t} \subset SourceOrderSinkActiveBuffer,
+	SourceOrderTourBuffer_{t} \subset SourceOrderSinkTourBuffer_{t},
+
+	SourceOrderTourBuffer_{t} \subset SOURCEORDER,
+	SourceOrderSinkTourBuffer_{t} \subset SOURCEORDERSINK,
+
+	SourceOrderTourBuffer_{t} = SourceTour_{t} \cup OrderTourBuffer_{t},
+	SourceOrderSinkTourBuffer_{t} = SourceOrderTourBuffer_{t} \cup SinkTour_{t},
+),
+
+
+\forall t \in TourActiveBuffer (
+	\forall o \in SourceOrderTourBuffer_{t} (
+		idOrderBuffer_{o}		:: "",
+		nextOrderBuffer_{o}		:: 0,
+
+		t1OrderBuffer_{o}		:: defaultDateTime,
+		t2OrderBuffer_{o}		:: defaultDateTime,
+		t2ServiceOrderBuffer_{o}	:: defaultDateTime,
+
+		timeServiceOrderBuffer_{o}	:: defaultTime,
+		timeToNextOrderBuffer_{o}	:: defaultTime,
+
+		mileageOrderBuffer_{o}		:: 0,
+
+		receiptsOrderBuffer_{o}		:: 0.0,
+
+
+		idOrderBuffer_{o}		= (),
+		nextOrderBuffer_{o}		= (),
+
+		t1OrderBuffer_{o}		= (),
+		t2OrderBuffer_{o}		= (),
+
+		timeServiceOrderBuffer_{o}	= (),
+		timeToNextOrderBuffer_{o}	= (),
+
+		mileageOrderBuffer_{o}		= (),
+
+		receiptsOrderBuffer_{o}		= (),
+	),
+),
+
+
+"ORDER"		= (),
+ORDER		= (),
+\forall o \in ORDER (
+	strictTimeOrderBuffer_{o}	:: true,
+
+	idShiftOrderBuffer_{o}		:: "",
+	t1Service0OrderBuffer_{o}	:: defaultDateTime,
+	t2Service0OrderBuffer_{o}	:: defaultDateTime,
+	timeFixed0OrderBuffer_{o}	:: 0,
+
+	quantityOrderBuffer_{o}		:: 0,
+	weightOrderBuffer_{o}		:: 0.0,
+	volumeOrderBuffer_{o}		:: 0.0,
+
+	priorityOrderBuffer_{o}		:: 0,
+
+
+
+	strictTimeOrderBuffer_{o}	= (),
+
+	idShiftOrderBuffer_{o}		= (),
+	t1Service0OrderBuffer_{o}	= (),
+	t2Service0OrderBuffer_{o}	= (),
+	timeFixed0OrderBuffer_{o}	= (),
+
+	quantityOrderBuffer_{o}		= (),
+	weightOrderBuffer_{o}		= (),
+	volumeOrderBuffer_{o}		= (),
+
+	priorityOrderBuffer_{o}		= (),
+),
+
+
+"tour/site"			= (),
+\forall o \in SourceOrderSinkActiveBuffer (
+	tourOrderBuffer_{o}	:: 0,
+	idSiteOrderBuffer_{o}	:: "",
+
+	o			= (),
+	tourOrderBuffer_{o}	= (),
+	idSiteOrderBuffer_{o}	= (),
+),
+
+
+"VehicleActive"			= (),
+\forall v \in VehicleActiveBuffer (
+	tour2ActiveVehicleBuffer_{v}	:: 0,
+
+	nbDayVehicleBuffer_{v}		:: 0,
+	nbNightVehicleBuffer_{v}	:: 0,
+
+	makespanVehicleBuffer_{v}	:: 0,
+
+
+	tour2ActiveVehicleBuffer_{v}	= (),
+
+	nbDayVehicleBuffer_{v}		= (),
+	nbNightVehicleBuffer_{v}	= (),
+
+	makespanVehicleBuffer_{v}	= (),
+
+	\forall d \in DateVehicle_{v} (
+		timeActiveDateVehicleBuffer_{v,d}	:: 0,
+		makespanDateVehicleBuffer_{v,d} 	:: 0,
+
+		timeActiveDateVehicleBuffer_{v,d}	= (),
+		makespanDateVehicleBuffer_{v,d} 	= (),
+	),
+),
+
+
+\forall t \in TourActiveBuffer (
+	OrderTourBuffer_{t} \subset ORDER,
+
+	\forall o \in ORDER
+		tourOrderBuffer_{o} = t == o \in OrderTourBuffer_{t},
+),
+
+
+solutionBuf <- '()',

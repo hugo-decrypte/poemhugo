@@ -1,0 +1,60 @@
+%===============================================%
+%						%
+%	ScenarioMapVehicle2TSP.n			%
+%						%
+% (c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "OptimizeTour ",
+
+% Caption
+@ ("'" TAG_OPTIMIZE_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_OPTIMIZE_TOUR,
+
+% Label
+@ (" '" TAG_OPTIMIZE_TOUR "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ " _ ",
+
+% Object Id. Set / Object Item
+@ "'VRP_PATH' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX_MESSAGE "]'\\\n"),
+
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Script\ScriptTSP.n'\\\n"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*Selected(VRP_PATH;1;(string,IDTOUR))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+@ ("Reload _ _ _ _\n\n\n"),
+
+
+

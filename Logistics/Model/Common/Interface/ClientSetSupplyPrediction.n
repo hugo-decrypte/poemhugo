@@ -1,0 +1,97 @@
+/********************************************************/
+/*							*/
+/*		ClientSetPricePrediction.n		*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	PRODUCTPRICE = [1,()],
+
+	\forall i \in PRODUCTPRICE (
+		idProduct_{i}			:: "",
+
+		date1Product_{i}		:: defaultDateTime,
+		date2Product_{i}		:: defaultDateTime,
+
+		minPriceProduct_{i}		:: "",
+		producersMinPriceProduct_{i}	:: "",
+
+		quantityMinPriceProduct_{i}	:: 0,
+		weightMinPriceProduct_{i}	:: 0.0,
+		volumeMinPriceProduct_{i}	:: 0.0,
+
+		maxPriceProduct_{i}		:: "",
+		producersMaxPriceProduct_{i}	:: "",
+
+		quantityMaxPriceProduct_{i}	:: 0,
+		weightMaxPriceProduct_{i}	:: 0.0,
+		volumeMaxPriceProduct_{i}	:: 0.0,
+
+		probabilityProduct_{i}		:: 0.0,
+
+
+		idProduct_{i}			= (),
+
+		date1Product_{i}		= (),
+		date2Product_{i}		= (),
+
+		minPriceProduct_{i}		= (),
+		producersMinPriceProduct_{i}	= (),
+		quantityMinPriceProduct_{i}	= (),
+		weightMinPriceProduct_{i}	= (),
+		volumeMinPriceProduct_{i}	= (),
+
+		maxPriceProduct_{i}		= (),
+		producersMaxPriceProduct_{i}	= (),
+		quantityMaxPriceProduct_{i}	= (),
+		weightMaxPriceProduct_{i}	= (),
+		volumeMaxPriceProduct_{i}	= (),
+
+		probabilityProduct_{i}		= (),
+	),
+),
+
+
+'@' => (
+	database <- '@',
+
+	\forall i \in PRODUCTPRICE (
+		(SQL : "DELETE	FROM " DB_PREFIX "PRODUCT_PRICE
+			WHERE	idClub='"	idClubLogin
+				"' AND id='"	idProduct_{i}
+				"' AND date1='"	date1Product_{i} "'"),
+
+		(SQL : "INSERT 	INTO " DB_PREFIX "PRODUCT_PRICE(
+				idClub,id,date1,date2,
+				minPrice,producersMinPrice,quantityMinPrice,weightMinPrice,volumeMinPrice,
+				maxPrice,producersMaxPrice,quantityMaxPrice,weightMaxPrice,volumeMaxPrice,probability)
+			VALUES( '" 	idClubLogin
+				"','" 	idProduct_{i}
+				"','"	date1Product_{i}
+				"','"	date2Product_{i}
+
+				"',"	minPriceProduct_{i}
+				",'"	producersMinPriceProduct_{i}
+				"',"	quantityMinPriceProduct_{i}
+				","	weightMinPriceProduct_{i}
+				","	volumeMinPriceProduct_{i}
+
+				","	maxPriceProduct_{i}
+				",'"	producersMaxPriceProduct_{i}
+				"',"	quantityMaxPriceProduct_{i}
+				","	weightMaxPriceProduct_{i}
+				","	volumeMaxPriceProduct_{i}
+
+				","	probabilityProduct_{i} ")"),
+	),
+
+	'@' <- database,
+
+
+	(#PRODUCTPRICE " products handles" : !!),
+),

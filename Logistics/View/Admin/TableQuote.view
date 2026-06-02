@@ -1,0 +1,118 @@
+View ViewTableQUOTE 'Devis' 'Devis'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableQUOTE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Devis;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Center,Center,Center,Right,Left,Left,Left,Left,Left,Left,Left,Left}]"\
+"[DATAOBJ=QUOTE;FILLCOLOR=LINERGB]"
+
+Data QUOTE 'Devis' QUOTE HTTPSQL 0 '[FIND={ID,NAMECLIENT,PTDELIVERY,DATEQUOTE,DATEDELIVERY,DATEVALIDITY,AMOUNTHT,REFERENCE,PAYCONDITION,CUSTOMSINFO,INCOTERM,PRODUCTCONDITION,PACKAGING,COMMENTS,STATE}]'   [DOUBLECLICK=TableQuoteProduct] \
+"[15;(string,ID,ID,,15,,);(string,NAMECLIENT,Client,,20,,);(string,PTDELIVERY,Point livraison,,30,,);(date,DATEQUOTE,Date,,20,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEDELIVERY,Date livraison,,25,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEVALIDITY,Date validation,,25,,YYYY-MM-DD|DD/MM/YYYY);(float,AMOUNTHT,Montant HT(€),,25,,);(string,REFERENCE,Référence,,20,,);(string,PAYCONDITION,Mode règlement,,30,,);(string,CUSTOMSINFO,Info client,,20,,);(string,INCOTERM,Incoterm,,30,,);(string,PRODUCTCONDITION,Réalisation,,20,,);(string,PACKAGING,Conditionnement,,30,,);(string,COMMENTS,Commentaire,,20,,);(string,STATE,Etat,,20,,);(string,IDAGENCY,Agence ID,,15,0);\
+(string,IDCLIENT,ID client,,15.0.80,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT q.id AS ID, q.idClient AS IDCLIENT, cl.name as NAMECLIENT,\
+		 q.idAgency AS IDAGENCY, \
+		 (select City from POINTDELIVERY p where p.IdClient=q.IdClient and p.IdPoint=q.IdPointDelivery) as PTDELIVERY,\
+		 q.DateQuote as DATEQUOTE,\
+		 q.DateValid as DATEVALIDITY,\
+		 q.DateDelivery as DATEDELIVERY,\
+		 q.AmountHT   AS AMOUNTHT,\
+		 q.Reference  AS REFERENCE,\
+		 q.ProductCondition AS PRODUCTCONDITION,\
+		 q.PayCondition AS PAYCONDITION,\
+		 q.Packaging AS PACKAGING,\
+		 q.CustomsInfo AS CUSTOMSINFO,\
+		 q.Incoterm AS INCOTERM,\
+		 q.Comments AS COMMENTS,\
+		 (select (trim(LABEL) + '(' + ID + ')') from STATE s where s.ID=q.idState and s.CATEGORY='QUOTE') as STATE,\
+		 IIF(q.idState in (select s.Id from STATE s where s.CATEGORY='QUOTE') , (select Color from STATE s where s.Id=q.idState and s.CATEGORY='QUOTE'),\
+		 '(255 255 255)') AS LINERGB \
+	 FROM QUOTE q, CLIENT cl \
+	 WHERE q.IdClient=cl.id\
+	 AND q.DateQuote>format(Date(), 'YYYYMMDD')-30000\
+	 ORDER BY q.id"
+
+
+Script TableQuoteProduct 'Produits pour devis' _ 27 'Produits' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _ '[SINGLESEL=1;COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableQuoteProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);OWNEROBJ=IdQuote;IDOBJ={/*Selected(tableQUOTE;1;(string,ID))*/};TITLEOBJ={/*Selected(tableQUOTE;1;(string,ID))*/}]"
+
+Script TableProductForQuote 'Produits à ajouter pour devis' _ 22 'Produits à complémenter' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _ '[SINGLESEL=1;COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductForQuote.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits à ajouter pour devis {/*Selected(tableQUOTE;1;(string,ID))*/}; FAMILY='XXX'; NAMECLIENT={/*Selected(tableQUOTE;1;(string,NAMECLIENT))*/};IDQUOTE={/*Selected(tableQUOTE;1;(string,ID))*/}]"
+
+Script PrintQuote  'Imprimer devis' _ 80 'Imprimer' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintQuote.ini  Devis \
+	 {/*selected(tableQUOTE;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script CreateQuote  'Créer devis' _ 61 'Créer' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\CreateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(Créer devis;3;\
+(string,IDQUOTE,ID devis,,50.0.580,0,0,);\
+ (string,LABELCLIENT,Client,,50.0.580,0,,[/*CLIENT.LABELCLIENT*/]);\
+ (date,DATEDELIVERY,Date livraison,,10.0.580,1,YYYY-MM-DD);\
+ )*/}'\
+Reload _ _ _
+
+Script DuplicateQuote 'Dupliquer devis' _ 62 'Dupliquer' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\DuplicateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTE;2;(string,ID);(date, DATEDELIVERY);)*/} \
+{/*Input(L;Dupliquer devis [/*QUOTE.ID*/];2;\
+(string,IDQUOTE,ID devis,,50.0.580,0,0,);\
+(date,DATEDELIVERY,Date livraison,[/*QUOTE.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+)*/}'\
+Reload _ _ _
+
+Script ModifyQuote 'Modifier devis' _ 63 'Modifier' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\UpdateQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableQUOTE;1;(string,ID))*/} \
+{/*Input(MCM;Modifier devis [/*QUOTE.ID*/];4;\
+(date,DATEDELIVERY,Date livraison,[/*QUOTE.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+(date,DATEVALIDITY,Date validation,[/*QUOTE.DATEVALIDITY*/],10.0.580,1,YYYY-MM-DD);\
+(string,COMMENTS,Commentaire,[/*QUOTE.COMMENTS*/],50.0.580,1,,);\
+(string,STATE,Etat,[/*QUOTE.STATE*/],50.0.580,0,,[/*STATE.LABELSTATE*/]);\
+)*/}'\
+Reload _ _ _
+
+Script DeleteQuote 'Supprimer devis' _ 64 'Supprimer' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ 'Attention,Vous ne pouvez supprimer que des devis qui ne sont pas validés et mis en commande'  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\DeleteQuote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableQUOTE;1;(string,ID))*/}' \
+Reload _ _ _
+
+Script SetToOrder 'Mettre en commande' _ 65 'Mettre en commande' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Quote\SetToOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tableQUOTE;1;(string,ID))*/} \
+{/*Input(ML;Mettre en commande : Devis [/*QUOTE.ID*/];1;\
+(date,DATEDELIVERY,Date livraison,[/*QUOTE.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+ )*/}'\
+Reload _ _ _
+
+Script TableState  'Etat devis' _ 23 'Tableau état' _ 'tableQUOTE' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableState_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);CATEGORY='QUOTE';TITLEOBJ=Devis]"
+
+Data CLIENT 'Client' CLIENT HTTPSQL 0 _ _ \
+"[2;(string,IDCLIENT,ID client,,15.0.80,0);(string,LABELCLIENT,Identité Client,,100.0.100,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT cl.id AS IDCLIENT,\
+  (trim(cl.Name) + ' (' + trim(p.City) + ')') as LABELCLIENT \
+ FROM CLIENT cl, POINTDELIVERY p \
+ WHERE p.IdClient=cl.Id \
+ ORDER BY cl.Id"
+
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='QUOTE' \
+ORDER BY s.Id "
+

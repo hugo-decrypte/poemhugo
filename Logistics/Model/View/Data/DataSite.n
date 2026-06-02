@@ -1,0 +1,33 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		DataSite.n  			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Data
+@ "Data ",
+
+% ID
+@ "SITE '",
+
+% Caption
+@ TAG_DATA_SITE,
+
+% Group
+@ "' SITE ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ ("\"[2;(string,ID,ID,,255,0);(string,NAME,NAME,,255,0);(String,IDTYPESITE,IDTYPESITE,,255,0)]\"\\\n"),
+
+@ VIEWSQL,
+
+@ ("SELECT DISTINCT "SQL_TOP_PERCENT" s.id,s.name,s.idTypeSite AS IDTYPESITE 	FROM " DB_PREFIX "SITE s ORDER BY s.name\"\n\n"),
+

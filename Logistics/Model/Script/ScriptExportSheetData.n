@@ -1,0 +1,17 @@
+/********************************************************/
+/*	             ERP			*/
+/*							*/
+/*		ScriptExportSheetData.n		*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+
+
+['Work Directory'  "Model\Output\ExportSheetData.n"],
+

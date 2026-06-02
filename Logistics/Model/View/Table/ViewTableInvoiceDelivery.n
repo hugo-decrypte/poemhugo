@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableInvoiceDelivery.n         %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableInvoiceDelivery.n"], % wp : why not name TableInvoice ?
+
+'@' => (
+	tableInvoiceDelivery("INVOICE", TAG_TABLE,"INVOICE",true,"", (TAG_DELIVERY_INVOICE " (/*IDDELIVERY*/)"), ""), 	% JZ 0919
+
+
+	%('hh:mm:ss' "  " TAG_TABLE_RESULT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

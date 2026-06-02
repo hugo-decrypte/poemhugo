@@ -1,0 +1,1426 @@
+candidato
+planificado
+salió
+lanzado
+bloqueado
+suspendido
+indisponible
+disponible
+activo
+pasivo
+externo
+crítico
+ilimitado
+capacidad
+incapacidad
+divisible
+continuo
+preventivo
+indivisible
+retroalimentación planificada
+recurso acoplado
+Óptimo
+Factible
+Incompleto
+Modificado
+Vacío
+posición
+Inicio del día
+Fin del día
+Inicio de la ruta
+Fin de la ruta
+Inicio de carga
+Fin de carga
+Inicio entrega
+Fin entrega
+Inicio de pausa
+Fin de pausa
++
+
+%
+
+Motor de vista formateada
+Motor de documentación formateada
+Menú de inicio de sesión generado
+Todos los menús generados
+Todas las vistas generadas
+Min cantidad
+Min peso
+Min volumen
+Max cantidad
+Max peso
+Max volumen
+Etiqueta
+Detalle
+ID producto
+Nombre producto
+Detalle provisión
+Detalle pallets
+Detalle cotización
+Detalle pedido
+Detalle entrega
+Detalle factura
+Tipo camión
+Tabla camión
+Provisión
+Entrada en stock
+Entrega
+Proveedores
+Ofertas
+Ofertas proveedor
+Productos oferta
+Factura entrega
+del proveedor
+Pallet en stock
+Pallet entrega
+Productos para entrega
+Productos entrega
+Pallets entrega
+Modificar pallet entrega
+Eliminar entrega de la ruta
+Eliminar producto
+Eliminar productos no entregados
+Detalle pedidos
+Detalle pedidos para producto
+Productos provisión
+Entregas provisión
+Sin ruta para
+Pedidos para producto
+Pallets para producto
+Productos para cliente
+Pedidos para cliente
+Entregas para cliente
+Productos para entrada en stock
+Productos para cotización
+Productos para pedido
+Entregas para pedido
+Productos para pedido
+Productos para provisión
+Productos para oferta
+Entregas para ruta
+Productos a agregar para cotización
+Productos a agregar para pedido
+Productos a agregar para provisión
+Productos a agregar para oferta
+Pedidos a agregar para entrega
+Pedidos a agregar para ruta
+Entregas a agregar para ruta
+Productos a complementar
+Pedidos a complementar
+Entregas a complementar
+Productos para pallet
+Agregar pedido a ruta
+Agregar pedido
+Agregar entrega
+Agregar producto
+Pallet
+#Pallet
+No. pallet
+Nuevo pallet
+Pallets en stock
+Productos en pallet
+Pallets para producto
+Pallets para entrega
+Facturas para entrega
+Preparación entrega
+Preparación productos
+Preparar pallet
+Preparar entrega
+ID provisión
+Proveedor
+ID proveedor
+Nombre proveedor
+Provisión
+Fecha cotización
+Productos
+Tipo producto
+Familia producto
+Familia producto
+Producto Producto
+#Producto
+Kits
+Componentes
+Kit producto
+Componente producto
+Detalle pedido para producto
+Detalle pedido por fecha
+Pallets
+Entregas
+Tasa de defecto
+CA
+Pedidos
+Facturas
+Agregar/modificar #paquete
+Ciudad entrega
+País entrega
+del pedido
+del cliente
+de la ruta
+para cliente
+para ruta
+para producto
+para familia producto
+Entrega del pedido
+Editar ofertas del proveedor
+Modificar posición stock
+Estado pedido
+Estado entrada en stock
+Estado ruta
+Estado cotización
+Estado entrega
+Estado provisión
+Guía de entrega
+Actualizar datos cantidades
+Sincronizar datos cantidades
+Sincronizar direcciones entrega
+Modificar cantidad
+Modificar fecha de caducidad
+Modificar comentario
+Modificar comentario sobre producto
+Crear pallet
+Eliminar pallet
+Modificar entrada en stock
+Crear entrada en stock
+Eliminar entrada en stock
+Modificar cliente
+Crear cliente
+Eliminar cliente
+Agregar punto entrega
+Eliminar punto entrega
+Duplicar producto
+Crear producto
+Modificar producto
+Eliminar producto
+Duplicar kit producto
+Crear kit producto
+Modificar kit producto
+Eliminar kit producto
+Modificar medida cuantitativa  
+Modificar medida por pieza  
+Modificar órdenes  
+Orden / longitud  
+Orden / ancho  
+Orden / altura  
+Orden / profundidad  
+Longitud por pieza  
+Ancho por pieza  
+Altura por pieza  
+Profundidad por pieza  
+Volumen por pieza  
+Modificar familia  
+Duplicar familia  
+Crear familia  
+Eliminar familia  
+Duplicar presupuesto  
+Crear presupuesto  
+Modificar presupuesto  
+Eliminar presupuesto  
+Imprimir presupuesto  
+Modificar fecha de entrega  
+Duplicar pedido  
+Crear pedido  
+Modificar pedido  
+Eliminar pedido  
+Editar pedido  
+Duplicar ruta  
+Crear ruta  
+Modificar ruta  
+Eliminar ruta  
+Duplicar entrega  
+Crear entrega  
+Modificar entrega  
+Eliminar entrega  
+Duplicar provisión  
+Crear provisión  
+Modificar provisión  
+Eliminar provisión  
+Duplicar estado de pedido  
+Crear estado de pedido  
+Modificar estado de pedido  
+Eliminar estado de pedido  
+Duplicar factura  
+Crear factura  
+Modificar factura  
+Eliminar factura  
+Crear estado  
+Modificar estado  
+ID de pedido  
+ID de presupuesto  
+ID de detalle de pedido  
+Imprimir proforma  
+Imprimir confirmación de pedido  
+Imprimir orden de compra  
+Imprimir etiqueta de paleta  
+Imprimir hoja de preparación  
+Imprimir nota de entrega  
+Imprimir factura  
+Imprimir hoja de ruta  
+Poner productos en embalaje  
+Poner productos en paleta  
+Poner en pedido  
+Poner en entrega  
+Editar presupuesto  
+Editar detalle de presupuesto  
+Editar detalle de factura  
+Carga de camión (peso)  
+Carga de camión (cantidad)  
+Carga de camión (volumen)  
+Costo de camión  
+Recibo de camión  
+Beneficio de camión  
+Carga de ruta (peso)  
+Carga de ruta (cantidad)  
+Carga de ruta (volumen)  
+Histograma CA  
+Crear  
+Modificar  
+Duplicar  
+Eliminar  
+ID de ruta  
+Seleccionar  
+Deseleccionar  
+Imprimido el  
+Imprimido el {/*DATA1.3*/}  
+Período : {/*DATA1.2*/}  
+Año :   del {/*DATA1.1*/} al {/*DATA1.2*/}  
+Mes :   del {/*DATA1.1*/} al {/*DATA1.2*/}  
+Semana :   del {/*DATA1.1*/} al {/*DATA1.2*/}  
+Nombre y apellido : {/*DATA1.4*/}  
+página {/*PAGENUM*/}/{/*PAGECOUNT*/}  
+Ref. Ficha de Informe de Obra  
+Detalle de Actividades Anexas  
+Después de 2 horas de conducción consecutivas, el conductor y el pasajero están al 100%  
+Horas nocturnas de 21h a 6h  
+Depósito : especificar mantenimiento/preparación de obra ... en Comentarios  
+Estado de presencia de los obreros  
+Hormigón proyectado  
+Informe de Ausencia Anual  
+Informe de Actividad Mensual  
+Informe de Actividad Semanal  
+Informe de Actividad Anual  
+Ausencia no declarada  
+Ausente  
+JT  
+Tasa de ausencia / días hábiles  
+Productos del cliente  
+Objeto  
+Tiempo de  
+Días  
+de días  
+de noche  
+Descanso  
+Conducción  
+Pasajero  
+Personal  
+Grd  
+Carrito  
+C.P.  
+Cliente/Obra  
+Comentarios :  
+FOR  
+Perforación  
+INJ  
+Inyección  
+SCI  
+Sierra  
+BPJ  
+SCA  
+Buzo  
+RFT  
+Refuerzo  
+DIAG  
+Diagnóstico  
+MPX  
+Micro Pilotes  
+Cantidades en Letras y Observaciones :  
+Planificación previsional por mes  
+ID de vehículo  
+ID  
+Nombre  
+Tipo  
+Franja horaria  
+Tiempo  
+Tiempo  
+Tiempo inicial  
+Tiempo mostrado  
+Unidad de tiempo  
+Tiempo de tarea  
+Tiempo de recurso  
+Tiempo prolongado  
+Recurso  
+Grupo de recurso  
+Tipo de recurso  
+tramo horario diario  
+Categoría de recurso  
+Directorio  
+Archivado  
+Fecha  
+Hora  
+Longitud  
+Latitud  
+KM  
+Evento  
+Trabajo  
+Tarea  
+Franja horaria  
+Tipo de franja horaria  
+Día  
+Alias  
+Leyenda  
+Empleador  
+Creación  
+Crear celda  
+Editar tarea  
+Editar ausencia  
+Editar actividad  
+Editar evento  
+Una fecha del mes  
+Una fecha del año  
+Alerta  
+Marcas ausentes  
+Duplicado  
+Alerta de duplicado  
+Alerta de fechas inválidas  
+Comentario  
+Comentario adicional  
+Contrato  
+Nombre  
+Apellido  
+Título  
+Nacionalidad  
+Tarjeta de ID  
+Método de pago  
+Fecha de pago  
+Seguridad social  
+Teléfono  
+Móvil  
+Agencia
+Capital
+RCS
+SIREN
+Código de actividad
+Referencia
+Proyecto
+Lote
+Seleccionado
+Fecha de entrada
+Fecha de pedido
+Fecha límite
+Fecha de pago
+Fecha de entrada
+Fecha de validación
+Fecha de oferta
+Fecha de salida
+Fecha de expiración
+Factura
+Detalle de la factura
+Estado
+Código de barras
+Código QR
+Importe sin IVA (€)
+IVA (€)
+Total con IVA (€)
+IVA (%)
+Anticipo
+Reembolso
+Prima excepcional
+Prima de fin de año
+Prima de sábado
+Prima de riesgo
+Entrada de datos parada
+Retención diversa al neto
+#Desplazamiento París
+#Desplazamiento extranjero
+#Almuerzo París
+#Almuerzo extranjero
+#Noche París
+#Noche extranjero
+Cobrar para entregar
+Cobrar todos los posibles para entregar
+Cancelar Cobro
+N° Lote
+Fecha de entrega
+Seguimiento por
+Producto
+Realización
+Stock
+Alerta de stock
+Informe de stock
+Stock de seguridad
+Capacidad mínima de stock
+Capacidad máxima de stock
+Profundidad
+Adquisición
+Tiempo mínimo
+Peso por unidad
+Longitud por unidad
+Ancho por unidad
+Profundidad por unidad
+Volumen por unidad
+Índice
+Archivo a subir:
+Archivo a descargar:
+Copiar el nombre del archivo a continuación para exportar a EXCEL:
+Hoy
+Mañana
+ID banco
+Nombre del banco
+Cliente
+SIRET
+Número de IVA
+Cuenta bancaria
+Fax
+Email
+Dirección2
+Dirección de entrega
+Ciudad de entrega
+Dirección de facturación
+Dirección de facturación adicional
+Ausencia
+Duración
+Extensión
+Días ausentes
+Días laborables
+Exceso de horas extras
+Horas nocturnas
+Horas diurnas
+Tiempo de pausa
+Tiempo de conducción
+Tiempo de pasajero
+Horas extras
+Horas festivas
+KM
+Horas/día
+Horas/semana
+Horas extras semana
+Contador de horas
+Máx. horas extras semana
+Máx. contador de horas
+#Día anual
+Gastos de transporte
+Tiempo de transporte
+Vehículo personal
+Carrito
+Ausencias
+Planificación de personal
+Planificación de proyecto
+Actividad
+Actividades diarias
+Actividades semanales
+Actividades mensuales
+Tipo de tarea
+Tipo de desplazamiento
+Tipo de riesgo
+Riesgo
+Fecha de inicio
+Fecha de fin
+#Día trabajado
+#Almuerzo
+#Desplazamiento
+#Noche
+#Sábado
+#Riesgo
+Tipo de camión
+Almuerzo
+Almuerzo (€)
+Costo de utensilios
+Costo de noche (€)
+Costo de día (€)
+Costo de paleta
+Costo por unidad KM
+Tiempo fijado
+Tiempo de carga
+Unidad de tiempo de carga
+Unidad de tiempo de descarga
+Tipo de recurso
+Tasa
+Tasa de tiempo
+Color
+Tipo de hoja
+En capacidad paralela
+Categoría de recurso
+Cronología
+En capacidad paralela
+En capacidad secuencial
+En capacidad por stock
+Usuario
+Usuarios en línea
+Contraseña
+Modificar contraseña
+Contraseña actual
+Nueva contraseña
+Confirmar contraseña
+Calendario
+Festivo
+FESTIVO
+Semana
+Sem
+Tot
+TT
+HS
+C.H
+Día
+Vacaciones pagadas
+Síntesis de Trabajo
+Tabla de estado
+Resultado de cálculo
+Alerta
+Tabla de divisiones
+Tabla de contratos
+Tabla de clientes
+Tabla de agencias
+Tabla de calendario
+Tabla de franjas horarias
+Hoja de tiempo
+Tabla de proyectos
+Tabla de productos
+Tabla de empleadores
+Tipo de ausencias
+Tipo de tareas
+Tipo de desplazamientos
+Tipo de riesgo
+Tipo de hojas
+Tabla de recursos
+Hoja de tiempo
+Tabla de personal
+Registro de horas
+Horarios de trabajo personalizados
+Ausencias
+Actividades diarias
+Tabla de planificación
+Balance general
+Tabla de control de tasa de defecto
+Balance general
+Cantidades mensuales
+Pesos mensuales
+CA mensuales producto
+CA mensuales familia producto
+CA mensuales cliente  
+CA sobre un año móvil  
+Previsión de ventas  
+Previsión de ventas (cantidad)  
+Previsión de evolución de precios  
+Previsión de evolución de necesidades  
+Previsión  
+Actual  
+Tarjeta de vehículo  
+Tarjeta de recorrido  
+Parámetros de cálculo  
+Tabla de usuarios  
+Diario de trabajo  
+Dirección de entrega  
+Camión  
+Diagrama de vehículo  
+Diagrama de recorrido  
+Seguimiento de vehículo  
+Matriz de distancias  
+Mapa de sitios  
+Mapa de seguimiento de camiones  
+Tasa cantidad  
+Tasa peso  
+Tasa volumen  
+{Mon, Tue, Wed, Thu, Fri, Sat, Sun}  
+{Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec}  
+: Ventana de tiempo de pedido fuera de horizonte  
+: restricción de grupo de trabajo acoplada violada  
+: restricción de franja horaria acoplada violada  
+: restricción de tipo de franja horaria acoplada violada  
+: restricción de recurso acoplada violada  
+: restricción de tipo de recurso acoplada violada  
+: restricción de tipo de sitio acoplada violada  
+: restricción de sitio acoplada violada  
+: restricción de tarea acoplada violada  
+: restricción de recurso violada  
+ID tipo recurso  
+Nombre tipo recurso  
+Alineación  
+Imprimir informe semanal  
+Editar datos diarios  
+Rechazar datos diarios  
+Rechazar ausencias  
+Confirmar datos diarios  
+Calcular datos diarios  
+Calcular datos semanales  
+Calcular datos mensuales  
+Exportar datos mensuales  
+Calcular informe mensual  
+Imprimir informe mensual  
+Exportar informe mensual  
+Mostrar actividades históricas  
+Mostrar ausencias históricas  
+seleccionar un período  
+del mes o no archivado  
+Diagrama  
+Tabla dinámica personal  
+Año  
+Mes  
+Tabla dinámica personal  
+Descanso de almuerzo  
+Vehículo personal  
+Grd Dep  
+Recuperación  
+Comentario: Referencia hoja de informe de obra y/o detalle de actividades adicionales  
+Duración en número de horas  
+LIBELLE_JOUR  
+H.J  
+H.N  
+C 100%  
+P 50%  
+MAL.AT  
+Prima  
+Salario / INTERINO  
+Comida  
+IND KM  
+Histograma Recurso  
+Histograma tiempo  
+Histograma tarea  
+Proyectos  
+Recursos  
+ID padre  
+Sucesor  
+Los días de trabajo no son disjuntos para  
+Importar  
+Exportar  
+Imprimir  
+Editar  
+Rechazar  
+Confirmar  
+Suma HJ+IN  
+Suma NOCHE PARÍS  
+Suma NOCHE Provincia  
+Suma C 100%  
+Suma P 50%  
+Suma IND KM  
+Suma COMIDA  
+Suma COMIDA GD  
+Suma ENFERMEDAD  
+Tiempo de trabajo registrado para  
+Generar Actividades diarias  
+error de palabra clave en el búfer en  
+error de subíndice en el búfer en  
+error de argumento en el búfer en  
+error de sintaxis en el búfer en  
+error de sintaxis en el campo de la base de datos en  
+error de sintaxis en el archivo en  
+Error de sintaxis alrededor de  
+Error de palabra clave alrededor de  
+Error de subíndice en  
+Error de argumento alrededor de  
+Error celda:  
+Error tipo:  
+Fallo:  
+Fallo Fórmula:  
+Error Selección  
+Ausencia no modificable  
+Feriado no modificable  
+Error de entrada:  
+tipificado en  
+Fórmula ID inválida:  
+Numérico desconocido:  
+Conjunto desconocido:  
+XXXXXX  
+ID división está vacío  
+Depósito  
+#Cliente  
+Tiempo de trabajo  
+Duración  
+Beneficio  
+Costo  
+KM  
+Tiempo de trabajo  
+Duración total  
+#Vehículo  
+#Recorrido  
+Distancia (metros)  
+Tiempo (segundos)  
+Distancia  
+Hoja de ruta  
+Mapa  
+Diagrama  
+Histograma  
+Pedido  
+Sector  
+Zona  
+Lugar  
+10K  
+Kilómetro  
+No. recorrido  
+Recorrido  
+Fecha recorrido  
+Orden de Paso  
+#Pedido  
+#Pedido  
+Pedidos clave  
+Dirección  
+ID del sitio  
+Nombre del sitio  
+Lugar  
+Dirección calle  
+Ciudad  
+País  
+Código postal  
+Qté pedido  
+Qté en stock  
+Peso en stock  
+Costo en stock  
+Qté en tránsito  
+Peso en tránsito  
+Costo en tránsito  
+Qté en entrega  
+Peso en entrega  
+Costo en entrega  
+X  
+Y  
+Agregar  
+Receta  
+Distancia  
+Aceptar  
+Mover  
+Tabla  
+Aceptar Proyecto  
+Aceptar Vehículo  
+Agregar Proyecto  
+Agregar Vehículo  
+Eliminar Proyecto  
+Eliminar Vehículo  
+Editar Proyecto  
+Editar Cliente  
+Editar Vehículo  
+Modificar Vehículo  
+Mover Proyecto  
+Rechazar Proyecto  
+Rechazar Vehículo  
+No proforma  
+No factura  
+Fecha factura  
+Presupuesto  
+Detalle presupuesto
+No entrega  
+Nombre entrega  
+Código postal entrega  
+Dirección adicional entrega  
+Punto de entrega  
+Tiempo entrega  
+ID punto de entrega  
+ID agencia  
+Nombre agencia  
+ID cliente  
+Nombre cliente  
+Modificar precio  
+Modificar precio unitario  
+Modificar descuento  
+Entrada en stock  
+ID entrada  
+ID oferta  
+Hoy  
+#Día garantía  
+#Día expiración  
+ID línea  
+Seguimiento por  
+Correo  
+Remitente  
+Incoterm  
+Proforma  
+Modo de pago  
+Embalaje  
+Info cliente  
+Cantidad entregada  
+Cantidad restante  
+Stock total  
+Cantidad paquete  
+Cantidad defectuosa  
+Cantidad stock  
+Cantidad secuencial mínima  
+Cantidad secuencial máxima  
+Peso paquete  
+Peso restante  
+Peso neto  
+Peso total  
+Peso paleta  
+Chofer  
+ID chofer  
+Nombre chofer  
+#Paleta  
+#Paquetes  
+Resumen ausencias  
+Resumen tiempo reservados  
+Vista previa actividades  
+Vista previa vacaciones pagadas  
+Total tiempo reservado  
+Tiempo reducido  
+Tiempo pagado  
+Tipo ausencia  
+TOTAL  
+Total ausencia  
+Total trabajado  
+Total global  
+Tasa de ausencia  
+Longitud  
+Altura  
+Ancho  
+Nivel Técnico  
+Cantidad provisiones  
+No.  
+No hay vehículo disponible para el horario del servicio al cliente del pedido  
+Seleccione un empleado  
+Requerimiento de recurso de proceso de indexación no válido  
+Recurso inválido  
+Tipo de recurso inválido  
+Categoría de recurso inválida  
+Grupo de recurso inválido  
+No planificada para recorrido  
+Ninguna fórmula seleccionada  
+Ninguna franja horaria seleccionada  
+No Contrato  
+No tarea  
+No Recurso  
+No Grupo de Recurso  
+No Tipo de Recurso  
+: Fecha de recurso vacía  
+: Programa de recurso vacío  
+: conflictos de tareas con el calendario de trabajo de los recursos  
+: recurso no desechable; exclusivamente ocupado por la tarea  
+: restricción del grupo de recursos de tareas violada  
+: conflicto de tiempo de tarea  
+exceso no reducible  
+makespan no reducible  
+beneficio no reducible  
+Recurso(s) asignable(s) para  
+-->  
+Registros importados:  
+Registros existentes:  
+Registros exportados:  
+Paso  
+Intercambio  
+Relajación  
+Relajación completada  
+Solución óptima  
+Solución factible encontrada  
+Detenido sin solución  
+Sin solución  
+aumentado a  
+disminuido a  
+Solución inicial calculada  
+Guardar solución  
+Planificar con anticipación  
+planificar retrocediendo  
+implicado  
+grupo(s)  
+recurso(s)  
+proyecto(s)  
+trabajo(s)  
+tarea(s)  
+tarea(s) dividida(s)  
+Anteriormente acoplado  
+Completo  
+Terminado  
+Sin mejor solución  
+Solución óptima en términos de  
+Recarga  
+Contabilidad  
+  
+...  
+......  
+...........  
+........................................................................  
+No hay pedido para planificar  
+#Vehículo mínimo:  
+#Recorrido mínimo:  
+Optimizar nuevos pedidos  
+Optimizar pedidos planificados + nuevos pedidos  
+Relajación costo  
+Relajación cruzada  
+Máx cruzado  
+Desvío  
+Mejora  
+El sistema involucra la restricción de tiempo de trabajo diario del vehículo; Intente eliminarlo ajustando los horarios de turno  
+El sistema involucra la restricción de makespan diario del vehículo; Intente eliminarlo ajustando los horarios de turno  
+El sistema involucra la restricción de recorrido completado en un día  
+El sistema involucra la restricción de ventana de tiempo del pedido  
+El sistema involucra la restricción de tiempo máximo de ruta del pedido  
+El sistema involucra la regla de tiempo de ruta no interrumpible  
+El sistema involucra el tiempo de ruta completado en un día  
+El sistema termina en solución...  
+El sistema busca al menos 2 soluciones...  
+El sistema resuelve mediante optimización iterativa...  
+El sistema resuelve mediante optimización iterativa ilimitada...  
+El sistema involucra recurso secuencialmente capacitado. No es compatible con la programación hacia atrás  
+conflicto de tiempo de tarea en el recurso  
+Terminar en recuento de retroceso:  
+Terminar en brecha de retroceso:  
+Terminar en límite de retroceso:  
+Terminar en límite de tiempo:  
+Terminar en solución  
+Leer datos  
+Solución  
+Anterior  
+Presente  
+Resultado  
+ID Proyecto  
+Estado cálculo  
+Objetivo  
+Modo  
+Horizonte  
+Objetivos  
+Parámetros  
+Reglas  
+Regla  
+Restricción  
+Operación  
+Restricción  
+inicio  
+fin  
+; Tiempo:  
+EXCEL Tablas  
+minuto  
+segundo  
+IP  
+Puerto  
+ID Trabajo  
+Nombre Trabajo  
+ID tarea  
+Nombre tarea  
+Tasa  
+ID personal  
+ilimitado  
+Unicapacitado  
+Capacidad  
+Capacidad paralela  
+Capacidad secuencial  
+Min Capacidad secuencial  
+Max Capacidad secuencial  
+Min Capacidad paralela  
+Max Capacidad paralela  
+Tasa %  
+RSC  
+Min #vehículo  
+Max #vehículo
+Max #rutas  
+Max duración trabajo  
+Max tiempo trabajo  
+Cantidad inicial  
+Peso inicial  
+Volumen inicial  
+Sitio de depósito  
+:  
+Salida  
+Regreso  
+no modificable  
+Progreso  
+Rutas a relajar  
+Resolviendo  
+Configuración  
+Vaciar etiquetas  
+Horario normal  
+Mover tarea  
+Mover pedido  
+Lo antes posible  
+Lo más tarde posible  
+H salida  
+H regreso  
+Horizonte  
+Noche  
+Descanso franja 1  
+Descanso franja 2  
+Descanso franja 3  
+Noche franja 1  
+Noche franja 2  
+Descanso 1 inicio  
+Descanso 1 fin  
+Descanso 2 inicio  
+Descanso 2 fin  
+Descanso 3 inicio  
+Descanso 3 fin  
+Día inicio  
+Día fin  
+Tiempo Franja 1  
+Tiempo Franja 2  
+Tiempo Franja 3  
+Hora inicio  
+Hora fin  
+Noche inicio  
+Noche fin  
+Tiempo inicio  
+Tiempo fin  
+Inicio servicio  
+Fin servicio  
+Fin de ruta  
+Vehículo planificado  
+Ruta planificada  
+Planificación Inicio  
+Planificación fin  
+Duración planificada  
+Inicio real  
+Fin real  
+Registrado  
+Inicio lo más temprano  
+Fin lo más tarde  
+Inicio planificado  
+Fin planificado  
+Prioridad  
+
+Hacer clic en  
+Desplegar sistema  
+Lanzamiento sistema  
+Cierre sistema  
+Generar vistas  
+Importar datos  
+Exportar datos  
+Optimizar rutas  
+Optimizar por ruta  
+Optimizar  
+Reoptimizar  
+Optimización por ruta  
+Importar datos  
+Autorizado  
+Autorizado a  
+Índice  
+Contenido  
+Mensaje  
+Base de datos  
+instantáneo  
+copia de seguridad  
+solución actual  
+Mes  
+Número de búsquedas  
+¿OK?  
+Tiempo local  
+; Tiempo global:  
+Diagrama producto  
+Estricto  
+Número limitado  
+Crítico  
+Externo  
+Continuo  
+Divisible  
+Indivisible  
+Pasivo  
+Cuello de botella  
+Disponible  
+Candidato  
+Bloqueado  
+Estricto  
+Etiquetado  
+División  
+Asignación diaria  
+Activo en la planificación  
+Icono  
+Guardar  
+Instantáneo  
+Tomar un instantáneo  
+Restaurar un instantáneo  
+Operación cancelada  
+Día de trabajo  
+Hora de franja  
+Fecha de franja  
+
+/  
+División  
+Seleccionar/Deseleccionar  
+Seleccionar/Deseleccionar Regla  
+Seleccionar/Deseleccionar Objetivo  
+Elegido  
+Resolver la fórmula  
+Hoja de cálculo  
+
+Fórmula  
+Hoja  
+Categoría  
+Perfil  
+Línea  
+No línea  
+Columna  
+Rango  
+Valor  
+Excel  
+Ingresos  
+Camino  
+Campo  
+Menú  
+Función  
+Distancia  
+#Sitio  
+Sitio 1  
+Sitio 2  
+ID 1  
+ID 2  
+Servicio  
+Sucesor  
+a  
+Editable  
+Horario cliente  
+Tiempo de servicio  
+Tiempo de ruta  
+Times New Roman  
+Simulación  
+Eliminar irreversible. ¿Continuar?  
+Comparación de instantáneos  
+Admin  
+Cliente  
+Tipo Usuario  
+IP Usuario  
+ID Usuario  
+Nombre Usuario  
+Registro  
+Comentarios  
+ID proyecto  
+Nombre proyecto  
+ID recurso  
+Nombre recurso  
+Personal  
+Registro de horas  
+Parámetros  
+Instancia de proyecto  
+Resolver  
+Operación exitosa  
+Datos faltantes:  
+Borrar instantáneos  
+Borrar copias de seguridad  
+Limpiar datos  
+Borrar resultados  
+ID padre  
+Número de serie  
+Resultados borrados  
+Borrar registros  
+Interacción rápida  
+Importar / Exportar  
+Iniciar resultado  
+Datos planificados borrados  
+Resolver datos  
+Datos trabajos generados  
+Datos tareas generados  
+Datos tareas en lote generados  
+Datos planificados relacionados a leer  
+Tiempo de cálculo:  
+Cantidad  
+Solicitud
+Cantidad de recurso  
+Peso  
+Volumen  
+Parte  
+Super usuario:  
+Tabla de Datos  
+Bloquear  
+Desbloquear  
+€/T  
+T  
+KG  
+K€  
+€  
+GPS  
+Vacaciones pagadas  
+Archivo Excel  
+optimizado  
+ID Zona  
+ID División  
+ID Franja horaria  
+Nombre Franja horaria  
+ID Depósito  
+Nombre Depósito  
+Recurso programado  
+Eliminar Instantáneo  
+Añadir Sitio  
+Editar Sitio  
+Eliminar Sitio  
+Añadir distancia  
+Editar distancia  
+Eliminar distancia  
+Editar producto  
+Editar tarea  
+Añadir depósito  
+Editar Depósito  
+Eliminar Depósito  
+Parámetro  
+Mostrar/Ocultar  
+Por favor verifica la tarea:  
+Datos ya generados  
+Solución ya generada  
+: el número de grupos de recursos supera el límite  
+: el número de grupos de recursos externos supera el límite  
+Los costos por kilómetro son todos nulos  
+Calcular tiempo de trabajo para  
+Escribir el resultado  
+Sistema Involucra Restricciones de Enrutamiento Multi-Día de Vehículo  
+Sistema Involucra Restricciones de Enrutamiento Multi-Tour de Vehículo  
+Sistema Involucra Restricción de Tiempo de Trabajo Diario de Vehículo; Intenta Eliminarlo Ajustando los Tiempos de Turno  
+Sistema Involucra Restricción de Makespan Diario de Vehículo; Intenta Eliminarlo Ajustando los Tiempos de Turno  
+Sistema Involucra Restricción de Tour Completado Dentro de Un Día  
+Sistema Involucra Restricción de Ventana de Tiempo de Pedido  
+Horizonte de Planificación Vacío  
+Capacidad de los vehículos insuficiente  
+Capacidad de Tour de Vehículo Insuficiente; #Tour:  
+Capacidad de Horizonte de Vehículo Insuficiente; Horizonte:  
+¡El Proyecto Existe!  
+: Demasiados Proyectos; Límite Superior:  
+: la asignación del horario de recursos falla  
+Usuario inválido  
+Horario de trabajo desconocido  
+Sin respaldo  
+Sin instantáneo  
+El instantáneo existe  
+seleccione el instantáneo a restaurar  
+seleccione uno solo para modificar  
+seleccione uno solo para añadir  
+: ¡Sin autorización para calcular!  
+Solo uno a seleccionar  
+Por favor seleccione un solo club; Clubes seleccionados:  
+Irreversible. ¿Continuar?  
+¿Está seguro de sincronizar las cantidades?  
+¿Está seguro de sincronizar las direcciones de órdenes?  
+Club Superior Faltante  
+Recurso insuficiente para el tipo:  
+: Capacidad insuficiente del tipo de recurso  
+Verificar 't2' en las tablas CONFIG y RESOURCE  
+Actualizar después de esta operación  
+: El proyecto debe ser trasladado a un vehículo activo  
+: El proyecto no es aceptable para el vehículo  
+: Ventana temporal del proyecto fuera del horizonte  
+: Proyecto Fuera de Horizonte  
+ID Existe:  
+Máximo tres  
+: seleccione solo un proyecto candidato  
+La cantidad del proyecto debe ser mayor que 0:  
+: seleccione solo un proyecto planificado  
+Por favor regenera el menú  
+Proyecto sin candidato  
+Ningún proyecto  
+Actualizar resultados  
+Prohibido modificar el estado de los recursos  
+: seleccione solo un proyecto no disponible/candidato  
+Proceso periférico  
+Los proyectos seleccionados han sido publicados  
+Eliminación ilegal  
+: el tiempo de servicio debe ser mayor que 0  
+Ciclo de prioridad a la tarea  
+Solución generada  
+Trabajo agrupado  
+Trabajo ordenado  
+seleccione al menos una regla  
+La fecha seleccionada está vacía  
+: Vehículo no válido para bloquear el proyecto  
+Por favor seleccione un solo vehículo  
+La fecha de inicio debe ser anterior a la fecha de fin  
+registro vacío  
+registro repetido  
+Intersección con un registro existente  
+Error de entrada  
+: Solo seleccione recurso planificado  
+: Solo seleccione recurso candidato  
+: El nombre del mismo turno.  
+Error de datos  
+Direcciones de entrega no disponibles  
+Consejo  
+CA mensual  
+Cantidades mensuales  
+Pesos mensuales  
+Editar entrega  
+K€  
+Retraso en la entrega  
+Ruptura 2 meses  
+Stock insuficiente  
+Familia  
+Designación  
+Materia  
+Precio  
+Precio de catálogo  
+Precio unitario  
+Precio de compra  
+Precio de venta  
+Precio de referencia  
+Precio de presupuesto  
+Precio mínimo  
+Precio máximo  
+Productores  
+Cantidad unitaria  
+Peso unitario  
+Volumen unitario  
+Productores  
+Cantidad unitaria  
+Peso unitario  
+Volumen unitario  
+Probabilidad  
+CA  
+Descuento(%)  
+Descripción del descuento  
+Cantidad + un paquete  
+Volumen  
+Retraso  
+CA (K€)  
+Partes (1000)  
+Enero  
+Febrero  
+Marzo  
+Abril  
+Mayo  
+Junio  
+Julio  
+Agosto  
+Septiembre  
+Octubre  
+Noviembre  
+Diciembre  
+Ene  
+Feb  
+Mar  
+Abr  
+May  
+Jun  
+Jul  
+Ago  
+Sep  
+Oct  
+Nov  
+Dic  
+M+1  
+M+2  
+M+3  
+M+4  
+M+5  
+M+6  
+M+7  
+M+8  
+M+9  
+M+10  
+M+11  
+M+12  
+Entrega  
+Inventario  
+Demanda  
+Retraso  
+2 meses  
+3 meses  
+4 meses  
+>4 meses  
+Vehículo  
+Error en la matriz de distancias  
+Error en el tamaño de la matriz de distancias
+> 50%
+< 50%
+¿Desconexión?
+¿Generar las vistas?
+¿Modificar la contraseña?
+¿Limpiar los datos?
+Borrar los resultados. Irreversible. ¿Continuar?
+¿Vaciar etiquetas?
+Borrar los registros. Irreversible. ¿Continuar?
+¿Mover tarea?
+Hacer clic para desconectar
+Hacer clic para generar las vistas
+Hacer clic para limpiar los datos
+Hacer clic para borrar los resultados
+Hacer clic para optimizar las rutas
+Hacer clic para desplegar el sistema
+¿Importar datos?
+¿Exportar dato?
+¿Desplegar el sistema?
+¿Calcular datos diarios?
+¿Calcular datos mensuales?
+¿Exportar datos mensuales?
+Borrar los instantáneos. Irreversible. ¿Continuar?
+Borrar las copias de seguridad. Irreversible. ¿Continuar?
+¿Restaurar un instantáneo?
+Hacer clic para importar datos
+Hacer clic para exportar datos
+Hacer clic para calcular datos diarios
+Hacer clic para calcular datos mensuales
+Hacer clic para exportar datos mensuales

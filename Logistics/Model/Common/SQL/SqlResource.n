@@ -1,0 +1,239 @@
+/******************************************************/
+/*	          	ERP	              	      */
+/*	                                              */
+/*	 		SqlResource.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+TIPINFO_RESOURCE = (
+	"[/*ID*/]   [/*NAME*/]   [/*TYPE*/]    [/*RATE*/]%      [/*T1PLAN*/]   [/*T2PLAN*/]"
+%	%TAG_T20		": [/*T2*/]"
+%	%TAG_QUANTITY 	": [/*QUANTITY*/]   "
+),
+
+
+
+TIPINFO_HISTOGRAM_RESOURCE_TIME = (
+	"[/*NAMERESOURCE*/]    [/*CAPACITYCAPTION*/]    [/*RATECAPTION*/]% "
+	%"[/*NAMERESOURCE*/]    [/*NAMETYPERESOURCE*/]    [/*CAPACITYCAPTION*/]    [/*RATECAPTION*/]% "
+),
+
+
+TIPINFO_HISTOGRAM_RESOURCE_TASK = (
+	TIPINFO_TASK 	"   "
+
+	TAG_INIT_TIME	": [/*INITRESOURCETASK*/]   "
+
+	TAG_PROJECT	": [/*PROJECT*/]   "
+	%TAG_T11	": [/*T1ORDER*/]  "
+	%TAG_T22	": [/*T2ORDER*/]   "
+
+	TAG_JOB		": [/*IDJOB*/]"
+),
+
+
+
+
+sqlResourceStateName = (
+	SQL_AliasCategoryIs "'TASK' AND field='state' AND al.id=r.state)"
+),
+sqlResourceStateColor = (
+	SQL_ColorCategoryIs "'TASK' AND field='state' AND al.id=r.state)"
+),
+
+
+
+% If permission > READ then all related clubs visible else only user himself visible
+sqlResourceVisibility = (
+	SQL_ViewUserVisibleClubIs "r.idClub AND (" SQL_UserPermissionAbove STATE_WRITE "' OR usr.idResource=r.id)) "),
+
+
+
+% Only user resource visible
+sqlUserResourceOnly = (SQL_ViewUserOnly " AND usr.idResource=r.id)"),
+
+
+
+
+%Special for public
+sqlPublicVisibility = (
+	SQL_ViewUserVisibleClubIs "r.idClub AND (usr."
+	SQL_FIELD_PERMISSION ">='" STATE_READ "' OR usr.idResource=r.id OR usr.idResource IS NULL)) "),
+
+
+
+
+
+
+? databaseType (
+"ACCESS" :
+
+	sqlGroupresourceText= "' '+g.name AS [TEXT]",
+	sqlResourceText = "' '+r.name AS [TEXT]",
+
+	sqlGroupResourceType = (
+		SQL_AliasCategoryIs "'GROUPRESOURCE' AND al.id=g.type)"
+	),
+
+
+	sqlGroupResourceCaption = (
+		"g.id+' '+g.name+'  '+"
+		SQL_AliasCategoryIs "'GROUPRESOURCE' AND al.id=g.type)"
+	),
+	sqlResourceCaption = "r.id+' '+r.name",
+	
+
+	sqlGroupResourceRGB = (
+		"'" RGB_RESOURCE "'"
+		%"IIF(g.external='" STATE_TRUE "','" RGB_EXTERNAL "','" RGB_INTERNAL "')"
+	),
+	sqlResourceRGB = (
+		"IIF(r.state<'"STATE_ACTIVE"','" RGB_UNAVAILABLE "','" RGB_RESOURCE "')"
+	),
+
+
+	sqlResourceParent = "r.idGroupResource",
+
+
+
+	sqlHistogramRateX	= ("(SELECT count(*)+1 FROM " DB_PREFIX"RESOURCE r1 WHERE r1.id<r.id)"),
+	sqlHistogramRateY	= "ROUND(IIF(r.rate IS NULL,0,r.rate),2)",
+	sqlHistogramRateRGB	= ("IIF(t.maxCapacityParallel<=0,'" RGB_UNLIMITED "','" RGB_CAPACITATED "')"),
+	sqlRateCaption		= "CSTR(ROUND(IIF(r.rate IS NULL,0,r.rate),2))",
+
+	sqlCapacityCaption	= (
+		"IIF(t.maxCapacityParallel=0 OR t.maxCapacityParallel IS NULL,'"
+			TAG_UNLIMITED
+			"','" TAG_CAPACITY " '+CSTR(t.maxCapacityParallel))+"
+
+		"IIF(t.maxCapacitySequence=0 OR t.maxCapacitySequence IS NULL,'','    '+'"
+			TAG_SEQUENCE_CAPACITY "('+') '+CSTR(t.maxCapacitySequence))"
+	),
+	;
+
+
+
+"SQLSERVER" :
+
+	sqlResourceText = "' '+r.name AS [TEXT]",
+	sqlGroupresourceText= "' '+g.name AS [TEXT]",
+	
+	sqlGroupResourceType = (
+		SQL_AliasCategoryIs "'GROUPRESOURCE' AND al.id=g.type)"
+	),
+
+
+	sqlGroupResourceCaption = (
+		"g.id+' '+g.name+'  '+"
+		SQL_AliasCategoryIs "'GROUPRESOURCE' AND al.id=g.type)"
+	),
+	sqlResourceCaption = "r.id+' '+r.name",
+
+
+	sqlGroupResourceRGB = (
+		RGB_WHITE
+		%"CASE WHEN g.external='" STATE_TRUE "' THEN '" RGB_EXTERNAL "' ELSE '" RGB_INTERNAL "' END"
+	),
+	sqlResourceRGB = (
+		"CASE WHEN r.state<'"STATE_ACTIVE"' THEN '" RGB_UNAVAILABLE "' ELSE '" RGB_RESOURCE "' END"
+	),
+
+
+	sqlResourceParent = "r.idClub+' '+r.idGroupResource",
+
+
+
+	sqlHistogramRateX = ("(SELECT count(*)+1 FROM " DB_PREFIX"RESOURCE r1 WHERE r1.id<r.id)"),
+	sqlHistogramRateY = "(CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END)",
+	sqlHistogramRateRGB = ("CASE WHEN t.maxCapacityParallel<=0 THEN '" RGB_UNLIMITED "' ELSE '" RGB_CAPACITATED "'END"),
+	sqlRateCaption = "CAST((CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END) AS VARCHAR)",
+
+	sqlCapacityCaption = (
+		"CASE WHEN t.maxCapacityParallel=0 OR t.maxCapacityParallel IS NULL THEN '"
+			TAG_UNLIMITED
+			"' ELSE '" TAG_CAPACITY " '+CSTR(t.maxCapacityParallel) END+"
+
+		"CASE WHEN t.maxCapacitySequence=0 OR t.maxCapacitySequence IS NULL THEN '' ELSE '    '+'"
+			TAG_SEQUENCE_CAPACITY "('+') '+CSTR(t.maxCapacitySequence) END"
+	),
+	;
+
+
+
+"ORACLE" :
+	sqlResourceText = "' '||r.name AS TEXT",
+
+	sqlGroupresourceText= "' '||g.name AS TEXT",
+
+
+
+	sqlGroupResourceRGB = (
+		RGB_WHITE
+		%"CASE WHEN g.external='" STATE_TRUE "' THEN '" RGB_EXTERNAL "' ELSE '" RGB_INTERNAL "' END"
+	),
+	sqlResourceRGB = (
+		"CASE WHEN r.state<'"STATE_ACTIVE"' THEN '" RGB_UNAVAILABLE "' ELSE '" RGB_RESOURCE "' END"
+	),
+
+
+	sqlResourceParent	= "r.idClub||' '||r.idGroupResource",
+
+
+	sqlHistogramRateX = ("(SELECT count(*)+1 FROM " DB_PREFIX"RESOURCE r1 WHERE r1.id<r.id)"),
+	sqlHistogramRateY = "(CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END)",
+	sqlHistogramRateRGB = ("CASE WHEN t.maxCapacityParallel<=0 THEN '" RGB_UNLIMITED "' ELSE '" RGB_CAPACITATED "'END"),
+	sqlRateCaption = "TO_CHAR(CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END)",
+
+	sqlCapacityCaption = (
+		"CASE WHEN t.maxCapacityParallel=0 OR t.maxCapacityParallel IS NULL THEN '"
+			TAG_UNLIMITED
+			"' ELSE '" TAG_CAPACITY " '+CSTR(t.maxCapacityParallel) END+"
+
+		"CASE WHEN t.maxCapacitySequence=0 OR t.maxCapacitySequence IS NULL THEN '' ELSE '    '+'"
+			TAG_SEQUENCE_CAPACITY "('+') '+CSTR(t.maxCapacitySequence) END"
+	),
+	;
+
+
+
+"MYSQL" :
+	sqlResourceText = "CONCAT(' ',r.name) AS TEXT",
+
+	
+	sqlGroupresourceText= (
+			"CONCAT(' ',g.name AS TEXT)"
+	),
+
+	sqlGroupResourceRGB = (
+		RGB_WHITE
+		%"CASE WHEN g.external='" STATE_TRUE "' THEN '" RGB_EXTERNAL "' ELSE '" RGB_INTERNAL "' END"
+	),
+	sqlResourceRGB = (
+		"CASE WHEN r.state<'"STATE_ACTIVE"' THEN '" RGB_UNAVAILABLE "' ELSE '" RGB_RESOURCE "' END"
+	),
+
+
+	sqlResourceParent	= "CONCAT(r.idClub,' ',r.idGroupResource)",
+
+
+
+	sqlHistogramRateX = ("(SELECT count(*)+1 FROM " DB_PREFIX"RESOURCE r1 WHERE r1.id<r.id)"),
+	sqlHistogramRateY = "(CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END)",
+	sqlHistogramRateRGB = ("CASE WHEN t.maxCapacityParallel<=0 THEN '" RGB_UNLIMITED "' ELSE '" RGB_CAPACITATED "'END"),
+	sqlRateCaption = "CAST((CASE WHEN (r.rate IS NULL) THEN 0 ELSE ROUND(r.rate,2) END) AS VARCHAR)",
+
+	sqlCapacityCaption = (
+		"CASE WHEN t.maxCapacityParallel=0 OR t.maxCapacityParallel IS NULL THEN '"
+			TAG_UNLIMITED
+			"' ELSE '" TAG_CAPACITY " '+CSTR(t.maxCapacityParallel) END+"
+
+		"CASE WHEN t.maxCapacitySequence=0 OR t.maxCapacitySequence IS NULL THEN '' ELSE '    '+'"
+			TAG_SEQUENCE_CAPACITY "('+') '+CSTR(t.maxCapacitySequence) END"
+	),
+),
+
+

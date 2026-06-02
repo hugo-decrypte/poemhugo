@@ -1,0 +1,64 @@
+%===============================================%
+%						%
+%	ScenarioMapVehicle2MoveOrder.n		%
+%						%
+% (c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "MoveOrder ",
+
+% Caption
+@ ("'" TAG_MOVE_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_MOVE,
+
+% Label
+@ (" '" TAG_MOVE_ORDER "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ " _ ",
+
+% Object Id. Set / Object Item
+@ "'VRP_SITE' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("'" TAG_MOVE_ORDER " ?'"),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=3;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Interaction\Solver\Order\MoveOrderMap.n'\\\n"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(VRP_SITE;3;(string,IDORDER);(string,IDVEHICLE);(int,TOURVEHICLE))*/}  \\\n"),
+@ ("{/*Drop(VRP_PATH;2;(string,IDVEHICLE);(int,TOURVEHICLE))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+
+%@ ("Reload \"[VIEWID='" TAG_MAP_RESOURCE "']\"\n\n"),
+
+@ ("Reload \"[VIEWID=" TAG_MAP_RESOURCE "]\"\\\n"),
+@ ("Reload \"[VIEWID=ViewTableRESULT]\"\n\n"),
+
+
+

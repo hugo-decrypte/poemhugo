@@ -1,0 +1,80 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idObjSelectedBuffer				:: "",
+	idObjSelectedBuffer				= (),
+	
+	
+	dateDeliveryBuffer					:: "",
+	dateInvoiceBuffer					:: "",
+	datePaymentBuffer					:: "",
+	idInvoiceBuffer						:: "",
+	commentBuffer						:: "",
+	messageBuffer						:: "",
+	followedByBuffer					:: "",
+	stateBuffer							:: "",
+
+	
+	dateDeliveryBuffer				= (),
+	dateInvoiceBuffer				= (),
+	datePaymentBuffer				= (),
+	idInvoiceBuffer					= (),
+	commentBuffer					= (),
+	messageBuffer					= (),
+	followedByBuffer				= (),
+	stateBuffer						= (),
+	
+
+	'()' <- database,
+	
+
+	UpdateDelivery_SQL1 = (
+		"UPDATE " DB_PREFIX "DELIVERY set
+			DateDelivery='"dateDeliveryBuffer"',
+			DateInvoice='"dateInvoiceBuffer"',
+			DatePayment='"datePaymentBuffer"',
+			IdInvoice='"idInvoiceBuffer"',
+			Comments='"commentBuffer"',
+			CustomsInfo='"messageBuffer"',
+			FollowedBy='"followedByBuffer"'
+		WHERE Id = '"idObjSelectedBuffer"'"
+	),
+
+	databaseType = "ACCESS" => (
+
+		UpdateDelivery_SQL2 = (
+			"UPDATE " DB_PREFIX "DELIVERY d, " DB_PREFIX "STATE s
+			set d.IdState=s.Id
+			WHERE d.Id = '"idObjSelectedBuffer"'
+			  AND "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='DELIVERY'"
+		),
+
+		;
+		UpdateDelivery_SQL2 = (
+			"UPDATE " DB_PREFIX "DELIVERY set
+				IdState=(select s.Id from " DB_PREFIX "STATE s where "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"stateBuffer"' and s.CATEGORY='DELIVERY')
+			WHERE d.Id = '"idObjSelectedBuffer"'"
+		),
+	),
+
+	("UpdateDelivery_SQL2=" UpdateDelivery_SQL2 : ),
+
+	(SQL : UpdateDelivery_SQL1), 
+	(SQL : UpdateDelivery_SQL2), 
+	
+	database <- '()',
+),

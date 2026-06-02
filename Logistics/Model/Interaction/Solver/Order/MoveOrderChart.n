@@ -1,0 +1,71 @@
+/******************************************************/
+/*	          	Logistocs	              */
+/*                                                    */
+/*	       	MoveOrderChart.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadConfigDate.n"],
+['Work Directory' "Model\Common\Config\ReadDateTime.n"],
+
+['Work Directory' "Model\Input\Vehicle\ReadVehicle.n"],
+['Work Directory' "Model\Input\Vehicle\ReadResource.n"],
+
+['Work Directory' "Model\Input\Depot\ReadDepot.n"],
+['Work Directory' "Model\Input\Product\ReadProduct.n"],
+
+
+%1   3   "D2311022"	"21P02"   1 
+%1   3   "30P01-1"	2024-12-28 07:58   2024-12-28 08:27
+
+%("{/*Selected(ORDER;3;(string,ID);(string,IDVEHICLE);(int,TOURVEHICLE))*/} \\\n"),
+%("{/*Drop(VEHICLE;3;(string,ITEMID);(datetime,DRAGTIME,,,,," dateTimeFormatView ");(datetime,DROPTIME,,,,," dateTimeFormatView "))*/}"),
+
+
+'()' => (
+	% idOrder, idVehicle, idxTour
+	nbSelected = (),
+	nbSelected > 0,
+
+	nbParameterOrder = (),
+
+	\forall i \in [1, nbSelected] (
+		idOrderSelected_{i}		:: "",
+		idVehicle1Selected_{i}		:: "",
+		idxTourVehicle1Selected_{i}	:: 0,
+
+		idOrderSelected_{i}		= (),
+		idVehicle1Selected_{i}		= (),
+		idxTourVehicle1Selected_{i}	= (),
+	),
+
+
+	% idVehicle/idTour, idxTour
+	nbTourSelected = (),
+	nbTourSelected > 0,
+
+	nbParameterTour = (),
+
+	idTour2Relaxed		:: "",
+	t1Selected		:: defaultDateTime,
+	t2Selected		:: defaultDateTime,
+
+	idTour2Relaxed		= (),
+	t1Selected		= (),
+	t2Selected		= (),
+
+
+	Tour2Relaxed		= \{ tourId_{idTour2Relaxed} \},
+
+	idVehicle2Selected	= idResource_{vehicleTour_{tourId_{idTour2Relaxed}}},
+	idxTourVehicle2Selected	= idxTourVehicleTour_{tourId_{idTour2Relaxed}},
+),
+
+
+['Work Directory' "Model\Interaction\Solver\Order\MoveOrder.n"],
+

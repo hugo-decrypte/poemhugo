@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTablePallet.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTablePallet.n"],
+
+'@' => (
+	tablePallet("",TAG_TABLE,"PALLET",true,	"", "(/*TITLEOBJ*/)", "Packing", ""),	% JZ 1003 : Packing
+	tablePallet("",TAG_TABLE,"DELIVERYPALLET",true,"", "(/*TITLEOBJ*/)", "Delivery",""),	% JZ 1003 : Delivery
+	% check TablePallet.view for open view operation
+),

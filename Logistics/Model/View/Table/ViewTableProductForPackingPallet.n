@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Gestion Stock  	           %
+%                                                  %
+%  	ViewTableProductForPackingPallet.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductForPackingPallet.n"],
+
+'@' => (
+	tableProductForPackingPallet("",TAG_TABLE,"PRODUCTFORPACKING",true,"", (TAG_PRODUCT_FOR_PACKING " N° (/*IDPACKING*/) Palette N° (/*NOPALLET*/)"), ""),	% JZ 1018 : PRODUCTFORPACKING
+),

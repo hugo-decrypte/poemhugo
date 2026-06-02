@@ -1,0 +1,122 @@
+%==================================================%
+%                                                  %
+%	       ButtonOptimizeTSP.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+[viewDirectory "ButtonOptimizeTSP.view"] <- '@',
+
+% View Object	
+@ ("View "),
+
+% ID	
+@ ("'" TAG_OPTIMIZE_TOUR "' "), % bai 0709
+
+% Caption
+@ ("'" TAG_OPTIMIZE_TOUR "' "),	% Zhou 0708
+
+% Title	
+@ ("'" TAG_OPTIMIZE_TOUR "' "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+@ "\n\n",
+
+
+
+% Script Object	
+@ ("Script "),
+
+% ID
+@ ("OptimizeTSP"),
+
+% Caption
+@ (" '" TAG_OPTIMIZE_TOUR "' "),
+
+% Group	
+@ ("_ "),
+
+% Integer Code [0..1000]
+@ SCRIPT_OPTIMIZE_TOUR,	% Zhou 0708
+
+
+% Label	
+@ (" '" TAG_OPTIMIZE_TOUR "' "),
+
+% Object Group Set "{G1, G2, ...}"	
+@ ("_ "),
+
+% Object Id. Set / Object Item
+@ ("_ "),
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("_ "),
+%@ ("'" TAG_ASK_OPTIMIZE_TOUR "' "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_NCLSCRIPT_MESSAGE "Model\Script\ScriptTSP.n'"),
+
+
+@ NCL_ARGUMENT_BEGIN,
+
+% 1 1 for nbRecord,nbParameter
+@ ("1 1 {/*Input(" TAG_OPTIMIZE_TOUR "; 1;"),
+%@ ("(string,IDVEHICLE," TAG_VEHICLE ",[/*TOUR.IDVEHICLE*/],30." inputWidth ",,,[/*TOUR.IDVEHICLE*/]); "),
+@ ("(string,IDTOUR," TAG_TOUR ",[/*TOUR.IDTOUR*/],30." inputWidth ",,,[/*TOUR.IDTOUR*/])*/}"),
+
+@ NCL_ARGUMENT_END,
+
+
+['Work Directory' "Model\View\Data\DataTour.n"],
+%['Work Directory' "Model\View\Data\DataVehicle2.n"],
+
+
+'@' <- [viewDirectory "ButtonOptimizeTSP.view"],
+
+
+.
+
+
+@ NCL_ARGUMENT_BEGIN,
+
+% 1 2 for nbRecord,nbParameter
+@ ("1 2 {/*Input(" TAG_OPTIMIZE_TOUR "; 2;"),
+@ ("(string,IDVEHICLE," TAG_VEHICLE ",[/*VEHICLE2.IDVEHICLE*/],30." inputWidth ",,,[/*VEHICLE2.IDVEHICLE*/]); "),
+@ ("(int,TOURVEHICLE," TAG_TOUR_IDX ",1,10." inputWidth ",,,{1"),
+
+maxTourSelected = (maxTourVehicle = 0 ? 10 : maxTourVehicle),
+\forall i \in [2,maxTourSelected] (
+	@ ("," i),
+),
+@ "}))*/}'\n\n",
+
+@ NCL_ARGUMENT_END,

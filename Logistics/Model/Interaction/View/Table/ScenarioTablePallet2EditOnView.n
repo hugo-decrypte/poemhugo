@@ -1,0 +1,354 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTablePallet2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+%===========================================================================================
+%
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreatePallet ",
+
+% Caption
+@ (" '" TAG_INSERT_PALLET "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_INSERT_PALLET "' "),	% JZ 0926 A
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ ("'tablePALLET' "), 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+% Instruction... (When Count>0)
+CreatePallet_SQL1=(
+	"\"INSERT INTO " DB_PREFIX "PALLET (IdPacking, NoPallet, WeightPallet, Quantity, QuantityStock, QuantityReal, QuantityDefective, DatePreparation, DateDelivery, IdState) \
+	select pc.Id, max(N)+1, 30, 0, 0, 0, 0, "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'),  "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"'), '0'\
+	from " DB_PREFIX "PACKING pc,\
+		(select min(pl.NoPallet) as N, pl.IdPacking as IDP from " DB_PREFIX "PALLET pl where pl.IdPacking='[/*PALLET.IDPACKING*/]'\
+		and not exists (select 1 from " DB_PREFIX "PALLET pl0 where pl0.IdPacking=pl.IdPacking and pl0.NoPallet=pl.NoPallet+1)\
+	group by pl.IdPacking\
+    UNION ALL \
+     select distinct 0 as N, ' ' as IDP from " DB_PREFIX "PALLET pl0 where not exists (select 1 from " DB_PREFIX "PALLET pl where pl.IdPacking ='[/*PALLET.IDPACKING*/]' ) \
+    ) IDCM\
+  where pc.Id ='[/*PALLET.IDPACKING*/]'\
+   group by pc.Id \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	CreatePallet_SQL2=(
+		"\"update " DB_PREFIX "PACKING pc set NbPallet=0 where pc.Id ='[/*PALLET.IDPACKING*/]'\"\\\n"
+	),
+	CreatePallet_SQL3=(
+		"\"update " DB_PREFIX "PACKING pc inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pc.Id set pc.NbPallet=pc.NbPallet+1 where pc.Id ='[/*PALLET.IDPACKING*/]'\"\n\n"
+	),
+	;
+
+	CreatePallet_SQL2=(
+		"update " DB_PREFIX "PACKING set NbPallet=(select count(1) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) where Id ='[/*PALLET.IDPACKING*/]'"
+	),
+	CreatePallet_SQL3=(
+		"\"update " DB_PREFIX "PACKING set NbPallet=0 where Id ='[/*PALLET.IDPACKING*/]' and NbPallet is NULL \"\\\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\CreatePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(table"aliasTable";1;(string,IDPACKING))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ CreatePallet_SQL1,
+		@ CreatePallet_SQL2,
+		@ CreatePallet_SQL3,
+),
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyPallet ",
+
+% Caption
+@ ("'Modify Pallet' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" 'Modifier Palette' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ ("'table"aliasTable"' "), 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdatePallet_Input=(
+	"{/*Input(Modifier Palette;8;\\\n"
+	"(int,LENGTH,Longueur(CM),[/*"aliasTable".LENGTH*/],10.0.580,0);\\\n"
+	"(int,WIDTH,Largeur(CM),[/*"aliasTable".WIDTH*/],10.0.580,0);\\\n"
+	"(int,HEIGHT,Hauteur(CM),[/*"aliasTable".HEIGHT*/],10.0.580,0);\\\n"
+	"(float,WEIGHTPALLET,Poids Palette,[/*"aliasTable".WEIGHTPALLET*/],10.3.580,0);\\\n"
+	"(string,STOCKZONE,Secteur,[/*"aliasTable".STOCKZONE*/],5.0.580,1);\\\n"
+	"(string,STOCKROW,Rang,[/*"aliasTable".STOCKROW*/],5.0.580,1);\\\n"
+	"(string,STOCKCOLUMN,Colonne,[/*"aliasTable".STOCKCOLUMN*/],5.0.580,1);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*"aliasTable".COMMENTS*/],50.0.580,1);\\\n"
+	")*/}"
+),
+UpdatePallet_SQL1=(
+	"\"update " DB_PREFIX "PALLET set \
+		Length=[/*LENGTH*/], Width=[/*WIDTH*/], Height=[/*HEIGHT*/],\  WeightPallet=[/*WEIGHTPALLET*/],\
+		WeightGlobal = WeightNet + WeightPallet,\
+		IdZone='[/*STOCKZONE*/]', IdRow='[/*STOCKROW*/]', IdColumn='[/*STOCKCOLUMN*/]',\
+		Designation='[/*COMMENTS*/]'\
+	where IdPacking ='[/*"aliasTable".IDPACKING*/]' and NoPallet=[/*"aliasTable".NOPALLET*/]\"\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(table"aliasTable";2;(string,IDPACKING);(int,NOPALLET))*/} \\\n"),
+		@ UpdatePallet_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdatePallet_Input),
+		@ ("'\\\n"),
+		@ UpdatePallet_SQL1,
+),
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "DeletePallet ",
+
+% Caption
+@ (" '" TAG_DELETE_PALLET "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW3,
+
+% Label
+@ (" '" TAG_DELETE_PALLET "' "),	% JZ 0926 A
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePALLET' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+DeletePallet_SQL1=(
+	"\"Delete from " DB_PREFIX "PALLET p\
+		where not exists (select 1 from " DB_PREFIX "PALLET_PRODUCT lp where lp.IdPacking=p.IdPacking and lp.NoPallet=p.NoPallet)\
+		and p.IdPacking in ('[/*PALLET.IDPACKING*/]') and p.NoPallet in ([/*PALLET.NOPALLET*/]) \"\\\n"
+),
+
+databaseType = "ACCESS" => (
+
+	DeletePallet_SQL2=(
+		"\"update " DB_PREFIX "PACKING pc set NbPallet=0 where pc.Id in ('[/*PALLET.IDPACKING*/]')\"\\\n"
+	),
+	DeletePallet_SQL3=(
+		"\"update " DB_PREFIX "PACKING pc inner join " DB_PREFIX "PALLET pl on pl.IdPacking=pc.Id set pc.NbPallet=pc.NbPallet+1 where pc.Id in ('[/*PALLET.IDPACKING*/]')\"\n\n"
+	),
+	;
+
+	DeletePallet_SQL2=(
+		"update " DB_PREFIX "PACKING set NbPallet=(select count(1) from " DB_PREFIX "PALLET pl where pl.IdPacking=Id) where Id in ('[/*PALLET.IDPACKING*/]')"
+	),
+	DeletePallet_SQL3=(
+		"\"update " DB_PREFIX "PACKING set NbPallet=0 where Id in ('[/*PALLET.IDPACKING*/]') and NbPallet is NULL \"\\\n"
+	),
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\DeletePallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;2;(string,IDPACKING);(int,NOPALLET))*/}' \\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ DeletePallet_SQL1,
+		@ DeletePallet_SQL2,
+		@ DeletePallet_SQL3,
+),
+
+
+%===========================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyNoPallet ",
+
+% Caption
+@ ("'Modify No. Pallet' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW4,
+
+% Label
+@ (" 'Modifier Numéro Palette' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tablePALLET' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateNoPallet_Input=(
+	"{/*Input(Modifier Numéro Palette;1;\\\n"
+	"(int,NOPALLET," TAG_PALLET_IDX ",[/*PALLET.NOPALLET*/],10.0.580,0);\\\n"
+	")*/}\\\n"
+),
+UpdateNoPallet_SQL1=(
+	"\"update " DB_PREFIX "PALLET\
+		set NoPallet=[/*NOPALLET*/]\
+		where not exists (select 1 from " DB_PREFIX "PALLET p0 where p0.IdPacking=PALLET.IdPacking and p0.NoPallet = [/*NOPALLET*/])\
+		and IdPacking ='[/*PALLET.IDPACKING*/]' and NoPallet=[/*PALLET.NOPALLET*/]\"\n\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdateNoPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePALLET;2;(string,IDPACKING);(int,NOPALLET))*/} \\\n"),
+		@ UpdateNoPallet_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=1; MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateNoPallet_Input),
+		@ ("'\\\n"),
+		@ UpdateNoPallet_SQL1,
+),
+

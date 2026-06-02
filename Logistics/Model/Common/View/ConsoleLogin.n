@@ -1,0 +1,124 @@
+%******************************************%
+%	        ConsoleLogin.n	           %
+%	                                   % 
+% Copyright (C) 2000 ENGINEST SOFTWARE     %
+% All rights reserved.                     %
+%******************************************%
+
+
+% JZ 0204
+viewConfig	= ('Work Directory' "Boot\\" directoryClub_{clubId_{idClubLogin}} "\View\View.cfg"),
+[viewConfig],
+
+
+
+
+['Work Directory' serverViewRoot "ConsoleLogin.view"] <- '@',
+
+
+ % View Object	
+@ ("View "),
+
+% ID	
+@ ("LoginView "),
+
+% Caption	
+@ ("_ "),
+
+% Title	
+@ ("LoginView "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("GLOBALVARIABLE=1;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+
+
+% Global Parameters
+@ ("'{/*(GLOBALPARAMETERS;5;\\\n"),
+
+@ ("(string,USERID,,XXXXXXXX);\\\n"),
+@ ("(password,PASSWORD," TAG_PASSWORD ",,20.0.380,,XXXXXXXX);\\\n"),
+@ ("(string,PERMISSION,,XXXXXXXX);\\\n"),
+
+@ ("(string,SERVERIP,,"		"127.0.0.1"	");\\\n"),
+@ ("(string,SERVERPORT,,"	"89"		");\\\n"),
+
+%@ ("(string,SERVERDIRECTORY,,"	serverDirectory ");\\\n"),
+
+@ (")*/}'\n\n"),
+
+
+
+% Script Object	 
+@ ("\nScript "),
+
+% ID
+@ "Login",
+
+
+% Caption
+@ (" '" TAG_LOGIN "' "),
+
+
+% Group	
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_LOGIN,
+
+
+% Label
+@ (" '" TAG_LOGIN "' "),
+
+
+% Object Group Set "{G1, G2, ...}"	
+@ "_ ",
+
+
+% Object Id. Set / Object Item
+@ "_ ",
+
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=1;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Common\Interface\LoginClient.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("\"(/*PASSWORD*/)\""),
+@ NCL_ARGUMENT_END,
+
+
+'@' <- ['Work Directory' serverViewRoot "ConsoleLogin.view"],
+

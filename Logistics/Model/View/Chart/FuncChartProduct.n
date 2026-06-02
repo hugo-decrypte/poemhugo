@@ -1,0 +1,163 @@
+%==================================================%
+%                                                  %
+%            	      Scheduling    	           %
+%                                                  %
+%                 FuncChartProduct.n               %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+%timetable,viewtask, structured,expanded,bestfit : true,true, true,false,true
+
+%idTask		: TASK
+%idItem		: PROJECT
+%idDropScript	: MoveTask
+%idSelected	: Selected
+
+<chartProduct>(type, timetable,viewtask, structured,expanded,bestfit, id, idTask,idItem,idDropScript,idSelected,chartItemWidth, title, postfix)	% JZ 1023
+(
+	'()' => (
+		['Work Directory' "Model\Common\SQL\SqlProduct.n"],
+
+
+		'()' <- database,
+
+		% PRODUCT
+		(SQL : "UPDATE	" DB_PREFIX "PROCESS SET " DB_PREFIX "PROCESS.category='" PROCESS_ROOT "' WHERE " sqlProcessIsRoot),
+		(SQL : "UPDATE	" DB_PREFIX "PROCESS SET " DB_PREFIX "PROCESS.category='" PROCESS_LEAF "' WHERE " sqlProcessIsLeaf),
+		(SQL : "UPDATE	" DB_PREFIX "PROCESS SET " DB_PREFIX "PROCESS.category='" PROCESS_JOB "' WHERE " DB_PREFIX "PROCESS.category IS NULL"),
+
+		database <- '()',
+	),
+
+
+
+
+	'@' => (
+		viewFile = ("ChartProduct" postfix ".view"),
+
+
+		[viewDirectory viewFile] <- '@',
+
+
+		['Work Directory' "Model\Common\View\BeginChart.n"],	% JZ 1023
+
+
+		['Work Directory' "Model\Interaction\View\Chart\ScenarioChartProduct2Edit.n"],
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idItem "' "),
+
+		% Caption
+		@ (" '" title "' "),
+
+		% Group	
+		@ (" '" idItem "' "),
+
+		% Source type (Data/DB/File/Clicked/Selected)
+		@ typeDataUser,
+
+
+
+		@ (" 0 '[FIND={IDPROCESS,NAMEPROCESS}]; [TIPINFO=" TIPINFO_PROCESS_NON_TASK "]'  '_' \\\n"),
+
+		% Fields item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[4;(string,ID,"TAG_ID",,255,0);(string,ParentID,"TAG_PARENT",,255,0);"),
+		@ ("(string,IDPROCESS,"TAG_ID",,255,0);(string,NAMEPROCESS,"TAG_NAME",,255,0);(int,SERIALNO,"TAG_SERIAL_NO",,255,0);"), 
+		@ ("(string,TEXT,TEXT,,255,0);"), 
+		@ ("(string,COLOR,COLOR,,,);(string,IDCLUB,"TAG_CLUB",,255,0);]\"\\\n"),
+
+		% Data 
+		@ VIEWSQL,
+
+
+		@("SELECT	DISTINCT p.idClub	AS IDCLUB, \
+				p.idProcess		AS IDPROCESS, \
+				p.name			AS NAMEPROCESS, \
+				0			AS SERIALNO, \
+				NULL	 		AS ParentID, \
+				" sqlProcessProductId 	" AS ID, \
+				" sqlProductText 	", \
+				" sqlProductRGB		" AS COLOR \
+			FROM	" DB_PREFIX "APS_PRODUCT p,"sqlProcessStructure" pp \
+			WHERE	pp.idRoot=p.idProcess AND p.idClub IN " IDCLUBVIEW
+
+
+	"\\\nUNION SELECT	DISTINCT p.idClub	AS IDCLUB, \
+				n.id			AS IDPROCESS, \
+				n.name			AS NAMEPROCESS, \
+				n.idxParent		AS SERIALNO, \
+				" sqlProcessParentId 	" AS ParentID, \
+				" sqlProcessJobId 	" AS ID, \
+				" sqlProcessJobText 	", \
+				" sqlProductRGB		" AS COLOR \
+			FROM	" DB_PREFIX "APS_PRODUCT p,"sqlProcessStructure" pp," DB_PREFIX "PROCESS n \
+			WHERE	pp.idRoot=p.idProcess AND n.id=pp.id AND " sqlNotRoot " AND " sqlNotLeaf " AND p.idClub IN " IDCLUBVIEW
+
+		"\\\nORDER BY 1,4,2\"\n\n"),	% IDCLUB,SERIALNO,ID
+
+
+
+
+
+		% Data
+		@ "Data ",
+
+		% ID
+		@ (" '" idTask "' "),
+
+		% Caption	
+		@ (" '" idTask "' "),
+
+		% Group	
+		@ (" '" idTask "' "),
+
+		% Source type
+		@ typeDataUser,
+
+
+
+
+		@ (" 0 '[FIND={IDPROCESS,NAMEPROCESS,NAMEJOB}; TIPINFO=" TIPINFO_PROCESS_TASK "]'  '_' \\\n"),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[6;(string,ID,"TAG_TASK_ID",,255,0);(string,IDPROCESS,"TAG_ID",,255,0);(string,NAMEPROCESS,"TAG_NAME",,255,0);(string,IDSUCCESSOR,"TAG_SUCCESSOR",,255,0);(string,ItemID,"TAG_PARENT",,255,0);(string,NAMEJOB,"TAG_PARENT",,255,0);"),
+		@ ("(string,CAPTION,Caption,,255,0);(string,TEXT,Text,,255,0);(string,SERIALNO,"TAG_SERIAL_NO",,255,0);(string,IDCLUB,"TAG_CLUB",,20,0);(string,COLOR,COLOR,,,);"),
+
+		% Meaningless
+		@ ("(date,DateBegin,DateBegin,,,,"dateFormatView");(date,DateEnd,DateEnd,,,,"dateFormatView");"),
+		@ ("(time,TimeBegin,TimeBegin,,,,"timeFormatView");(time,TimeEnd,TimeEnd,,,,"timeFormatView");]\"\\\n"), 
+
+
+		@ VIEWSQL,
+
+		@("SELECT	DISTINCT p.idClub	AS IDCLUB, \
+				n.idxParent		AS SERIALNO, \
+				n.id			AS IDPROCESS, \
+				n.name			AS NAMEPROCESS, \
+				(SELECT p2.name FROM "DB_PREFIX "PROCESS p2 WHERE p2.id=pp.idParent) AS NAMEJOB, \
+				'"defaultDate		"' AS DateBegin, \
+				'"defaultDate		"' AS DateEnd, \
+				'"midnight00		"' AS TimeBegin, \
+				'"midnight24		"' AS TimeEnd, \
+				" sqlProcessItemId 	" AS ItemID, \
+				" sqlProcessTaskId 	" AS ID, \
+				" sqlProcessTaskText 	", \
+				" sqlProcessRGB		" AS COLOR \
+			FROM	" DB_PREFIX "APS_PRODUCT p,"sqlProcessStructure" pp," DB_PREFIX "PROCESS n \
+			WHERE	pp.idRoot=p.idProcess AND n.id=pp.id AND " sqlIsLeaf " AND p.idClub IN " IDCLUBVIEW
+
+		        "\\\nORDER BY 1,2,3\"\n\n"),		% IDCLUB,SERIALNO,IDPROCESS
+
+
+		['Work Directory' "Model\Common\View\EndChart.n"],
+
+
+		'@' <- [viewDirectory viewFile],
+	),
+),

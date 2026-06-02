@@ -1,0 +1,36 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		 Cancel.n                          %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+
+'()' => (
+	'()' <- database,
+
+	(SQL : SQL_SelectBackupMaxIdClubIs idClubLogin "'"),
+
+	() > 0, 
+	idBackup :: "",
+	idBackup = (),
+
+	(TAG_NO_BACKUP : idBackup <> TAG_EMPTY_STRING),	
+
+	(SQL : SQL_SelectBackupProjectIdClubBackupIs idBackup "'"),
+
+	IdClubBackup :: {""},
+	IdClubBackup = \{ \forall i \in [1,()] () \},
+
+	database <- '()',
+
+
+	\forall idClubActive \in IdClubBackup (
+		[['Work Directory' "Model\Interaction\Backup\Cancel0.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	),
+).

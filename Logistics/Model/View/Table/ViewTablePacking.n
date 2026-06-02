@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTablePacking.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTablePacking.n"],
+
+'@' => (
+	tablePacking("PACKING",TAG_TABLE,"PACKING",true,"TablePallet",TAG_TABLE_PACKING,""), % JZ 0917
+),

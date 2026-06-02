@@ -1,0 +1,39 @@
+﻿<Window x:Class="PoemClient.Source.View.KeyInputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestion des clés"
+        Width="400"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Name="LabelKey1" Text="" Margin="5" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox x:Name="Key1TextBox" Margin="5" Grid.Row="0" Grid.Column="1"/>
+
+        <TextBlock x:Name="LabelKey2" Text="" Margin="5" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+        <PasswordBox x:Name="Key2PasswordBox" Margin="5" Grid.Row="1" Grid.Column="1"/>
+
+        <TextBlock x:Name="LabelKey3" Text="" Margin="5" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
+        <TextBox x:Name="Key3TextBox" Margin="5" Grid.Row="2" Grid.Column="1"/>
+
+        <TextBlock x:Name="LabelKey4" Text="" Margin="5" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+        <PasswordBox x:Name="Key4PasswordBox" Margin="5" Grid.Row="3" Grid.Column="1"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="4" Grid.ColumnSpan="2" Margin="5">
+            <Button x:Name="ValidateButton" Content="Ok" Click="ValidateButton_Click" Margin="5"/>
+            <Button x:Name="CancelButton" Content="Cancel" Click="CancelButton_Click" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%          	Vehicle Routing              	   %
+%                                                  %
+% 		 EditLog.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],		% Zhou 0226
+
+'()' => (
+	nbLogBuffer :: 0,
+	nbParameter :: 0,
+
+	nbLogBuffer = (),
+	nbParameter = (),
+
+	( TAG_ONLY_ONE_TO_SELECT :
+		nbLogBuffer =< 1,
+	),
+
+	idLogBuffer :: 0,
+	idLogBuffer = (),
+),
+
+
+
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+'()' => (
+	permission0LogBuffer	:: "",
+	t1LogBuffer		:: '2000-01-01 00:00:00',
+	t2LogBuffer		:: '2000-01-01 00:00:00',
+	messageBuffer		:: "",
+	permissionLogBuffer	:: 0,
+
+	permission0LogBuffer	= (),
+	t1LogBuffer		= (),
+	t2LogBuffer		= (),
+	messageBuffer		= (),
+
+	permissionLogBuffer = (permission0LogBuffer = TAG_READ ? 0 : 1),
+
+	'()' <- database,
+/*
+	(SQL : "UPDATE	" DB_PREFIX "LOG
+		SET	" SQL_FIELD_PERMISSION "=" permissionLogBuffer ",
+			t1='" t1LogBuffer "',
+			t2='" t2LogBuffer "',
+			comments='" messageBuffer "'
+		WHERE 	id=" idLogBuffer),
+*/
+	(SQL : 	SQL_UpdateLog
+		SQL_SetLogPermissionToBe permissionLogBuffer
+		SQL_AndLetLogT1Be t1LogBuffer "'"
+		SQL_AndLetLogT2Be t2LogBuffer "'"
+		SQL_AndLetLogMessageBe messageBuffer "' "
+		SQL_WhereLogIdIs idLogBuffer), % Zhou 0822
+
+	database <- '()',
+),

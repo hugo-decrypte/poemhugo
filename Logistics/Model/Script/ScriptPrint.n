@@ -1,0 +1,89 @@
+/********************************************************/
+/*	             ERP				*/
+/*							*/
+/*		ScriptPrint.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	strPrintIniFile 	:: "",
+        strPrintOutputFile 	:: "",
+        strPrintOutputFile0 	:: "",
+	
+	strPrintIniFile 	= (),
+        strPrintOutputFile0 	= (),
+
+	nbIdObjet = (),
+	nbParam = (),
+	
+	\forall i \in [1, nbIdObjet] (
+		strIdObjet0_{i} :: "",
+		strIdObjet_{i}  :: "",
+		
+		strIdObjet0_{i} = (),
+
+		i < nbIdObjet =>(
+			strIdObjet_{i} = ("'" strIdObjet0_{i} "',"),
+			;
+			strIdObjet_{i} = ("'" strIdObjet0_{i} "'"),
+		),
+	),
+
+	strConcatObjet :: "",
+        strConcatObjet = [\forall i \in [1,nbIdObjet] strIdObjet_{i}],
+
+	strPrintOutputFile = ( strPrintOutputFile0 strConcatObjet ".PDF"),
+
+
+	%strPrintOutExtension>"" => (
+	%	strPrintOutputFile = ( strPrintOutputFile0 strConcatObjet "." strPrintOutExtension ),
+	%	;
+	%	strPrintOutputFile = ( strPrintOutputFile0 strConcatObjet ),
+	%),
+
+	("PoemClientDirectory=" PoemClientDirectory : ),
+	("poemPrintDirectory=" poemPrintDirectory : ),
+	("poemPrintExe=" poemPrintExe : ),
+	("poemPrintDirectory=" poemPrintDirectory : ),
+
+
+	% build the cmd string now....
+	strWinExe :: "",
+	strWinExe = (PoemClientDirectory poemPrintDirectory poemPrintExe " " serverDirectory poemPrintDirectory strPrintIniFile
+   		      " \"[DSN=" databaseName ";USR=" databaseUser ";DBPWD="  ";OWNER=" databaseOwner 
+		     ";DEVICENAME=" poemPrintDevice ";OUTPUT="serverDirectory poemPrintDirectory strPrintOutputFile "]\"  " 
+                     " \"" serverDirectory poemPrintDirectory "\" \"" strConcatObjet "\" \""  idUserLogin "\" \"" databasePassword "\""),
+
+	("CmdPrint=" strWinExe : ),
+
+	strOpenFile = ("\"" poemPrintBrowser "\" \"" poemPrintDirectory strPrintOutputFile "\" "),
+
+	(OS: strWinExe),
+	
+	%% (OS: strOpenFile),
+)
+
+.
+
+[72] [D:/POEM/Logistics/Model\Script\ScriptPrint.n](63,10): CmdPrint=
+D:/POEM/PoemClient/PoemPrint/PoemPrint.exe D:/POEM/Logistics/PoemPrint/PrintOrderConfirmation.ini "[DSN=Logistics;USR=;DBPWD=;OWNER=;DEVICENAME=Microsoft Print to PDF;OUTPUT=PoemPrint/ConfirmOrder'2410002_03'.PDF]"   "PoemPrint/" "'2410002_03'" "000" ""
+
+[78] [D:/POEM/Logistics/Model\Script\ScriptPrint.n](63,10): CmdPrint=D:/POEM/PoemClient/PoemPrint/PoemPrint.exe D:/POEM/Logistics/PoemPrint/PrintOrderConfirmation.ini "[DSN=POEM_Logistics;USR=;DBPWD=;OWNER=;DEVICENAME=Microsoft Print to PDF;OUTPUT=D:/POEM/PoemClient/PoemPrint/ConfirmOrder'2508001_00'.PDF]"   "PoemPrint/" "'2508001_00'" "000" ""
+
+
+\\Laptop-hcpmdc1f\erppartager
+2025/02/07 15:10:35  WinExec failed - The pdf file does not exist: <[WAITTIME=99999S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\http://192.168.1.52:89//FilePartager\ResourceAbsenceSummary000.pdf>
+
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe http://192.168.1.52:89//FILEPARTAGER\ResourceAbsenceSummary000.pdf
+
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTPATH*/)/ResourceAbsenceSummary(/*USERID*/).pdf
+
+\forall i \in [1,99999] (iTT_{i} = i,),
+
+	(OS: "D:\\ERP\\Model\\Script\\tt.bat"),

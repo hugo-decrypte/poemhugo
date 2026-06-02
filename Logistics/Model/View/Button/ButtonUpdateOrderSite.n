@@ -1,0 +1,98 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%	ButtonUpdateOrderSite.n		           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+[viewDirectory "ButtonUpdateOrderSite.view"] <- '@',
+
+ % View Object	
+@ ("View "),
+
+% ID	
+@ ("'" TAG_SYNCHRONIZE_SITE "' "),
+
+% Caption	
+@ ("_ "),
+
+% Title	
+@ ("'" TAG_SYNCHRONIZE_SITE "' "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+@ "\n\n",
+
+
+% Script Object	
+@ ("Script "),
+
+% ID	
+@ ("UpdateOrderSite '"),
+
+% Caption
+@ (TAG_SYNCHRONIZE_SITE "' "),
+
+% Group	
+@ ("_ "),
+
+% Integer Code [0..1000]	
+@ SCRIPT_SYNCHRONIZE_SITE,
+
+% Label	
+@ (" 'Synchroniser les quantités' "),
+
+% Object Group Set "{G1, G2, ...}"	
+@ ("_ "),
+
+% Object Id. Set / Object Item
+@ ("_ "),
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message	
+%@ ("_ "),
+@ ("'" TAG_ASK_SYNCHRONIZE_SITE "' "),
+
+
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=1;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Script\ScriptUpdateOrderSite.n'"),
+@ NCL_ARGUMENT_BEGIN,
+@ NCL_ARGUMENT_END,
+
+
+
+'@' <- [viewDirectory "ButtonUpdateOrderSite.view"],
+

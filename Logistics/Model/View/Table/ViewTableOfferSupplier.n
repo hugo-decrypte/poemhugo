@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableOfferSupplier.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOfferSupplier.n"],
+
+'@' => (
+	tableOfferSupplier("SUPPLIEROFFER",TAG_TABLE,"SUPPLIEROFFER",true,"", (TAG_OFFERS " (/*TITLEOBJ*/)"), ""),	% JZ 0922
+),

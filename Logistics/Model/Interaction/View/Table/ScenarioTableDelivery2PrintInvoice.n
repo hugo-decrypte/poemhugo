@@ -1,0 +1,111 @@
+%====================================================%
+%						     %
+%		     Logistics		             %
+%						     %
+%  	ScenarioTableDelivery2PrintInvoice.n    %
+%						     %
+%       (c)2000. Enginest. All rights reserved.	     %
+%====================================================%
+
+%% 2025.09.30 Jianyi 
+%%	filePrintCfg = "PrintInvoice",  = >
+%%	filePrintCfg = "PrintDeliveryInvoice",
+
+% Script
+@ "Script ",
+
+% ID
+@ "PrintInvoice ",
+
+% Caption
+@ (" '" TAG_PRINT_INVOICE  "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_PRINT3,
+
+% Label
+@ (" '" TAG_PRINT_INVOICE  "' "),	% JZ 0906
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableDELIVERY' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+% Instruction... (When Count>0)
+
+% print 
+
+
+%typeExecute = "NCL",
+% typeExecute = "SQLVIEW",
+
+%%filePrintCfg = "PrintDeliveryInvoice.ini",
+%%fileOutput	 = "InvoiceDelivery",
+%%dataTable	 = "tableDELIVERY",
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+
+		@ ("\t Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ ("\t '(/*SERVERPORT*/) (/*USERID*/)  PrintDeliveryInvoice.ini  InvoiceDelivery \\\n"),
+		@ ("\t {/*selected(tableDELIVERY;1;(string,ID))*/}' \\\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+
+		@ (" WinExec \"[WAITTIME=300S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t '(/*POEMPRINTEXE*/)'\\\n"),
+		@ ("\t '(/*POEMPRINTPATH*/)/PrintDeliveryInvoice.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTPATH*/)/InvoiceDelivery{/*selected(tableDELIVERY;1;(string,ID))*/}.pdf]'\\\n"),
+		@ ("\t '{/*selected(tableDELIVERY;1;(string,ID))*/}' \"'(/*CLUBID*/)'\"\\\n"),
+		@ ("\t '(/*POEMPRINTPATH*/)' _ _ _ _ \\\n"),
+	),
+
+
+
+? typeExecute (
+
+	"SQLVIEW" :
+		%  open pdf file by Edge
+		@ (" WinExec \"[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*OUTPUTPATH*/)/InvoiceDelivery{/*selected(tableDELIVERY;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+
+	"NCL" :
+		%  open pdf file by View Open Command
+		%@ (" Open '(/*OUTPUTPATH*/)/InvoiceDelivery{/*selected(tableDELIVERY;1;(string,ID))*/}.pdf' \n\n")
+	%%	@ (" Open 'http://(/*SERVERIP*/):(/*SERVERPORT*/)/(/*OUTPUTPATH*/)/InvoiceDelivery{/*selected(tableDELIVERY;1;(string,ID))*/}.pdf' \n\n")
+	
+		@ ("\t WinExec \"[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)/InvoiceDelivery{/*selected(tableDELIVERY;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+	),
+
+
+

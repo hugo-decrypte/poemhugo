@@ -1,0 +1,59 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		DataBackup.n  			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Data: SHIFT
+@ "Data ",
+
+% ID
+@ ("BACKUP '"),
+
+% Caption
+@ TAG_DATA_BACKUP,
+
+% Group
+@ "' BACKUP ",
+
+% Source type
+@ typeDataUser,
+
+@ (" 0 _ _ \\\n"),
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"	
+@ ("\"[4;(int,ID,ID,,,0);(int,MAXID,MAXID,,,0);(string,NAME,NAME,,255,0);(string,MAXNAME,MAXNAME,,,0)]\"\\\n"),
+
+@ VIEWSQL,
+
+databaseType = "SQLSERVER" =>( % bai 1024
+	@ ("SELECT	ID,\
+			a.MAXID,\
+			name,\
+			a.MAXNAME \
+		FROM	[" DB_BACKUP "], \
+			(SELECT	MAXID, \
+				name AS MAXNAME \
+			FROM	(SELECT MAX(id) AS MAXID FROM [" DB_BACKUP "] WHERE type='"TAG_TYPE_SNAPSHOT"') x1,[" DB_BACKUP "] x2 \
+			WHERE	x1.maxid=x2.id AND x2.type='"TAG_TYPE_SNAPSHOT"') a \
+		WHERE	type='" TAG_TYPE_SNAPSHOT "' AND \
+			idClub='" idClubLogin "' \
+		ORDER BY id\n\n"),
+	;
+	@ ("SELECT	ID,\
+			a.MAXID,\
+			name,\
+			a.MAXNAME \
+		FROM	" DB_BACKUP ", \
+			(SELECT	MAXID, \
+				name AS MAXNAME \
+			FROM	(SELECT MAX(id) AS MAXID FROM " DB_BACKUP " WHERE type='"TAG_TYPE_SNAPSHOT"') x1," DB_BACKUP " x2 \
+			WHERE	x1.maxid=x2.id AND x2.type='"TAG_TYPE_SNAPSHOT"') a \
+		WHERE	type='" TAG_TYPE_SNAPSHOT "' AND \
+			idClub='" idClubLogin "' \
+		ORDER BY id\n\n"),
+),
+

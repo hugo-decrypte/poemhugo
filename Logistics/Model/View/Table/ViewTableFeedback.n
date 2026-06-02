@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  TMS		    	           %
+%                                                  %
+%		ViewTableFeedback.n                %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableFeedback.n"],
+
+'@' => (
+	tableFeedback("FEEDBACK",TAG_TABLE,"FEEDBACK",true, "",TAG_TABLE_FEEDBACK, "",""),	
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_USER TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] "\n" : ),
+),

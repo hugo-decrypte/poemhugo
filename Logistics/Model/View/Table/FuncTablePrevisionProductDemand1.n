@@ -1,0 +1,79 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTablePrevisionProductDemand.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu  
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tablePrevisionProductDemand>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)	% JZ 1013
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : (related)),
+		viewFile = ("TablePrevisionProductDemand" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+		dateMonth :: "",
+		? databaseType (
+			"ACCESS" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"SQLSERVER" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"MYSQL" :
+				dateMonth = ("date_Add("SQL_CURRENTDATE", INTERVAL -M.NoMonth MONTH)"), 
+				;
+
+			"ORACLE" :
+				dateMonth = ("ADD_MONTHS("SQL_CURRENTDATE",-M.NoMonth)"),
+		),
+
+		@ ("SELECT  pd.ID 		as ID,\\\n"),
+		@ ("\t\t  pd.minQuantity	as MINQUANTITY, \\\n"),
+		@ ("\t\t  pd.minWeight 		as MINWEIGHT, \\\n"),
+		@ ("\t\t  pd.minVolume 		as MINVOLUME, \\\n"),
+		@ ("\t\t  pd.maxQuantity 	as MAXQUANTITY, \\\n"),
+		@ ("\t\t  pd.maxWeight 		as MAXWEIGHT, \\\n"),
+		@ ("\t\t  pd.maxVolume 		as MAXVOLUME, \\\n"),
+		@ ("\t\t  pd.probability	as PROBABILITY, \\\n"),
+		@ ("\t\t  '(255 255 255 )' 	as LINERGB \\\n"),
+	 	@ ("\t FROM  " DB_PREFIX "PRODUCT_DEMAND pd\\\n"),
+		@ ("\t WHERE pd.idClub='(/*CLUBID*/)' \\\n"),
+		@ ("\t ORDER BY pd.ID\"\n\n\n"),
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePrevisionProductDemand2EditOnView.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTablePrevisionProductDemand2EditProductDemand.n"],	
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

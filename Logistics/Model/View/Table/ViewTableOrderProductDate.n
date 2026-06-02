@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics  	           %
+%                                                  %
+%  		ViewTableOrderProductDate.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableOrderProductDate.n"],
+
+'@' => (
+	tableOrderProductDate("ORDERPRODUCTDATE",TAG_TABLE,"ORDERPRODUCTDATE",true,"",TAG_DETAIL_ORDER_DATE,""),
+),

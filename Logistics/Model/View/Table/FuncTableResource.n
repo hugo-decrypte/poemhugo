@@ -1,0 +1,105 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%  		FuncTableResource.n   	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%%% 2025.01.29 SQL_CURRENTDATE
+%%% 2025.07.12 ORDER BY r.id
+
+%%% 2025.07.31 color by category resource :
+%% 			" sqlResourceStateColor "				AS LINERGB \
+%% 	= >		(SELECT c.color FROM "DB_PREFIX "CATEGORYRESOURCE c WHERE r.idCategoryResource=c.id)		AS LINERGB \
+%% 	= >		(SELECT c.color FROM "DB_PREFIX "CLUB c WHERE r.idClub=c.id)		AS LINERGB \
+
+%%    + DATECONTRACT("Date Embauche")
+%%			(SELECT max(ct.dateStart) FROM "DB_PREFIX "CONTRACT ct WHERE r.id=ct.idResource) 		AS DATECONTRACT, \
+
+
+<tableResource>(id,type,aliasTable,bestfit, date1,date2, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		['Work Directory' "Model\Common\SQL\SqlResource.n"],
+
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableResource" postfix),
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+	    	@ ("SELECT "SQL_ClubNameIdIs "r.idClub) 							AS NAMECLUB, \
+			r.id											AS IDRESOURCE, \
+			r.name											AS NAMERESOURCE, \
+			r.idGroupResource									AS IDGROUPRESOURCE, \
+			(SELECT g.name FROM " DB_PREFIX "GROUPRESOURCE g WHERE r.idGroupResource=g.id)		AS NAMEGROUPRESOURCE, \
+			r.idCategoryResource 									AS IDCATEGORYRESOURCE, \
+			(SELECT c.name FROM " DB_PREFIX "CATEGORYRESOURCE c WHERE r.idCategoryResource=c.id)	AS NAMECATEGORYRESOURCE, \
+			r.idTypeResource 									AS IDTYPERESOURCE, \
+			(SELECT t.name FROM " DB_PREFIX "TYPERESOURCE t WHERE r.idTypeResource=t.id)		AS NAMETYPERESOURCE, \
+			" SQL_CASEWHEN "r.maxTour IS NULL" 	SQL_THEN "0" SQL_ELSE "r.maxTour) 		AS MAXTOUR, \
+			" SQL_CASEWHEN "r.maxMakespan IS NULL"	SQL_THEN "0" SQL_ELSE "r.maxMakespan) 		AS MAXMAKESPAN, \
+			" SQL_CASEWHEN "r.maxWorktime IS NULL"	SQL_THEN "0" SQL_ELSE "r.maxWorktime) 		AS MAXWORKTIME, \
+			" SQL_CASEWHEN "r.maxQuantity IS NULL"	SQL_THEN "0" SQL_ELSE "r.maxQuantity) 		AS MAXQUANTITY, \
+			" SQL_CASEWHEN "r.maxWeight IS NULL"	SQL_THEN "0" SQL_ELSE "r.maxWeight) 		AS MAXWEIGHT, \
+			" SQL_CASEWHEN "r.maxVolume IS NULL"	SQL_THEN "0" SQL_ELSE "r.maxVolume) 		AS MAXVOLUME, \
+			r.idShift										AS IDSHIFT, \
+			r.t1											AS T1, \
+			r.t2											AS T2, \
+			(SELECT distinct s.name FROM " DB_PREFIX "SHIFT s WHERE r.idShift=s.id)			AS NAMESHIFT, \
+			r.receipts 										AS RECEIPTS, \
+			r.state 										AS STATE,\
+			" SQL_AliasCategoryIs "'TASK' AND al.field='state' AND al.id=r.state)			AS NAMESTATE,\
+			" SQL_ColorCategoryIs "'TASK' AND al.field='state' AND al.id=r.state)			AS LINERGB \
+			FROM " DB_PREFIX "RESOURCE r \\\n"),
+
+
+
+		%sqlPublicVisibility = (
+		%	SQL_ViewUserVisibleClubIs "r.idClub AND (usr."
+		%	SQL_FIELD_PERMISSION "='" STATE_READ "' OR usr.idResource=r.id OR usr.idResource IS NULL)) "),
+
+
+
+		? related (
+		"InsertEventUser" :
+			@ (" WHERE " sqlUserResourceOnly ),
+			;
+
+		"InsertEvent" :
+			@ (" WHERE" sqlPublicVisibility ),
+			;
+
+			:
+			@ (" WHERE" sqlResourceVisibility ),
+		),
+
+		@ (" ORDER BY r.idClub,r.id \"\n\n\n"),
+
+
+		['Work Directory' "Model\View\Data\DataState.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResource2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResource2EditResource.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+
+	),
+),
+

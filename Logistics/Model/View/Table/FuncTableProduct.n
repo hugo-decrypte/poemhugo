@@ -1,0 +1,149 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  		 FuncTableProduct.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProduct" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\"\\\n"),
+
+
+		@ VIEWSQL,
+
+
+	dateAdd2M :: "",
+	dateAdd3M :: "",
+	dateAdd4M :: "",
+	dateMinus1Y :: "",
+
+	? databaseType (
+	"ACCESS" : 
+		dateAdd2M = ("dateAdd("SQL_DATEPART_MONTH",2,"SQL_CURRENTDATE")"),
+		dateAdd3M = ("dateAdd("SQL_DATEPART_MONTH",3,"SQL_CURRENTDATE")"),
+		dateAdd4M = ("dateAdd("SQL_DATEPART_MONTH",4,"SQL_CURRENTDATE")"),
+
+		dateMinus1Y = ("dateAdd("SQL_DATEPART_MONTH",-12,"SQL_CURRENTDATE")"),
+	;
+	"SQLSERVER" :
+		dateAdd2M = ("dateAdd("SQL_DATEPART_MONTH",2,"SQL_CURRENTDATE")"),
+		dateAdd3M = ("dateAdd("SQL_DATEPART_MONTH",3,"SQL_CURRENTDATE")"),
+		dateAdd4M = ("dateAdd("SQL_DATEPART_MONTH",4,"SQL_CURRENTDATE")"),
+
+		dateMinus1Y = ("dateAdd("SQL_DATEPART_MONTH",-12,"SQL_CURRENTDATE")"),
+	;
+	"MYSQL" :
+		dateAdd2M = ("addDate("SQL_CURRENTDATE", INTERVAL 2 MONTH)"),
+		dateAdd3M = ("addDate("SQL_CURRENTDATE", INTERVAL 3 MONTH)"),
+		dateAdd4M = ("addDate("SQL_CURRENTDATE", INTERVAL 4 MONTH)"),
+
+		dateMinus1Y = ("date_Add("SQL_CURRENTDATE", INTERVAL -12 MONTH)"),
+	;
+	"ORACLE" :
+		dateAdd2M = ("ADD_MONTHS("SQL_CURRENTDATE",2)"),
+		dateAdd3M = ("ADD_MONTHS("SQL_CURRENTDATE",3)"),
+		dateAdd4M = ("ADD_MONTHS("SQL_CURRENTDATE",4)"),
+
+		dateMinus1Y = ("ADD_MONTHS("SQL_CURRENTDATE",-12)"),
+),
+
+
+		 @ ("SELECT p.id AS ID, p.Reference as REFERENCE, p.LevelTech as LEVELTECH,\\\n"),
+ 		 @ (" p.designation AS DESIGNATION,p.DesignationTech AS DESIGNATIONTECH,\\\n"),
+ 		 @ (" "SQL_CASEWHEN"p.Family in (SELECT f.Id FROM " DB_PREFIX "FAMILYPRODUCT f "SQL_CASEEND", \\\n"),
+		 @ (" (SELECT "SQL_CONCAT"trim(f.DESIGNATION) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(f.ID) "SQL_CONCATWITH" ')' "SQL_CONCATEND" FROM " DB_PREFIX "FAMILYPRODUCT f where f.ID=p.Family),\\\n"),
+		 @ (" p.Family) AS FAMILY,\\\n"),
+ 		 @ (" "SQL_CASEWHEN"p.TypeProduct in (SELECT tp.Id FROM " DB_PREFIX "TYPEPRODUCT tp )"SQL_THEN" \\\n"),
+		 @ (" (SELECT "SQL_CONCAT"trim(tp.name) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(tp.ID) "SQL_CONCATWITH" ')' "SQL_CONCATEND" FROM " DB_PREFIX "TYPEPRODUCT tp where tp.ID=p.TypeProduct)"SQL_ELSE"\\\n"),
+		 @ (" p.TypeProduct"SQL_CASEEND" as TYPE, \\\n"),
+ 		 @ (" (select name from " DB_PREFIX "SUPPLIER s where s.id=p.idSupplier) as SUPPLIER,\\\n"),
+ 		 @ (" "SQL_FORMATNUM"(p.PriceUnit,"SQL_FORMATSCALE2") AS PRICE,\\\n"),
+ 		 @ (" p.QuantityStock AS QUANTITYSTOCK, p.QuantityPackaging AS QUANTITYPACKAGING,\\\n"),
+ 		 @ (" p.QuantityOrdered AS QUANTITYORDERED, p.QuantitySupplied AS QUANTITYSUPPLIED,\\\n"),
+ 		 @ (" p.MinQuantityStock AS MINQUANTITYSTOCK, p.NbDaysMinDurability as NBDAYSMINDURABILITY,\\\n"),
+ 		 @ (" p.NbDaysExpiration as NBDAYSEXPIRATION,\\\n"),
+		 @ (" p.selected as SELECTED,\\\n"),
+ 		 @ (" "SQL_CASEWHEN"p.Weight is not NULL and p.Weight>0"SQL_THEN" "SQL_FORMATNUM"(p.Weight,"SQL_FORMATSCALE3")"SQL_ELSE" ' '"SQL_CASEEND" AS WEIGHT,\\\n"),
+ 		 @ (" "SQL_CASEWHEN"p.Volume is not NULL and p.Volume>0"SQL_THEN" "SQL_FORMATNUM"(p.Volume,"SQL_FORMATSCALE3")"SQL_ELSE" ' '"SQL_CASEEND" AS VOLUME,\\\n"),
+		 @ (" p.WeightUnity AS WEIGHT_UNITY, p.LengthUnity AS LENGTH_UNITY,\\\n"),
+ 		 @ (" "SQL_FORMATNUM"(p.Length,"SQL_FORMATSCALE2") AS LENGTH, "SQL_FORMATNUM"(p.Height,"SQL_FORMATSCALE2") AS HEIGHT,\\\n"),
+ 		 @ (" "SQL_FORMATNUM"(p.Width,"SQL_FORMATSCALE2") AS WIDTH, "SQL_FORMATNUM"(p.Depth,"SQL_FORMATSCALE2") AS DEPTH,\\\n"),
+ 		 @ (" "SQL_CONCAT""SQL_FORMATNUM"(tabCM.QTYTODAY,"SQL_FORMATSCALE0") "SQL_CONCATWITH" '/' "SQL_CONCATWITH" "SQL_FORMATNUM"(tabCM.QTY2M,"SQL_FORMATSCALE0") "SQL_CONCATWITH" '/' "SQL_CONCATWITH" "SQL_FORMATNUM"(tabCM.QTY4M,"SQL_FORMATSCALE0")"SQL_CONCATEND" as QTYCMD,\\\n"),
+ 		 @ (" (select "SQL_FORMATNUM"(sum(LP.QuantityDefective)*100/sum(LP.QuantityReal), "SQL_FORMATSCALE2")\\\n"),
+  		 @ ("  from " DB_PREFIX "PALLET_PRODUCT LP\\\n"),
+  		 @ ("  where LP.IdProduct=p.Id\\\n"),
+   		 @ ("   and LP.QuantityReal<>0\\\n"),
+   		 @ ("   and LP.DateCreate>="SQL_FORMATDATE"("dateMinus1Y",'"SQL_FORMATDATESTR"')\\\n"),
+   		 @ ("   and LP.DateCreate<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+		 @ ("  group by LP.IdProduct) as DEFAULTRATE,\\\n"),
+ 		 @ (" "SQL_CASEWHEN"tabCM.QTYTODAY>0 "SQL_THEN" 'Livraison en retard'"SQL_ELSE"\\\n"),
+  		 @ (" "SQL_CASEWHEN"tabCM.QTY2M>p.QuantityStock "SQL_THEN" 'Rupture Stock 2 mois'"SQL_ELSE"\\\n"),
+  		 @ (" "SQL_CASEWHEN"p.QuantityOrdered>p.QuantityStock "SQL_THEN" 'Stock insuffisant' "SQL_ELSE"  ' '"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as STATE,\\\n"),
+
+		 @ (SQL_ClubNameIdIs"p.idClub) 	AS NAMECLUB,\\\n"),
+
+ 		 @ (" "SQL_CASEWHEN"tabCM.QTYTODAY>0"SQL_THEN" '(255 160 160)'"SQL_ELSE"\\\n"),
+  		 @ (" "SQL_CASEWHEN"tabCM.QTY2M>p.QuantityStock"SQL_THEN" '(255 200 200)'"SQL_ELSE"\\\n"),
+  		 @ (" "SQL_CASEWHEN"p.QuantityOrdered>p.QuantityStock"SQL_THEN" '(255 255 200)'"SQL_ELSE"\\\n"),
+  		 @ (" '(220 220 255)'"SQL_CASEEND""SQL_CASEEND""SQL_CASEEND" as LINERGB \\\n"),
+
+		 @ (" FROM " DB_PREFIX "PRODUCT p left join\\\n"),
+ 		 @ (" (select LO.IdProduct as IdA,\\\n"),
+      		 @ (" sum("SQL_CASEWHEN" O.DateDelivery<="SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"') "SQL_THEN" LO.QuantityRest "SQL_ELSE" 0 "SQL_CASEEND") as QTYTODAY,\\\n"),
+   	         @ (" sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("SQL_CURRENTDATE",  '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd2M", '"SQL_FORMATDATESTR"') "SQL_THEN" LO.QuantityRest "SQL_ELSE" 0 "SQL_CASEEND") as QTY2M,\\\n"),
+   	         @ (" sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd2M", '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd3M", '"SQL_FORMATDATESTR"') "SQL_THEN" LO.QuantityRest "SQL_ELSE" 0 "SQL_CASEEND") as QTY3M,\\\n"),
+		 @ (" sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd3M", '"SQL_FORMATDATESTR"') and O.DateDelivery<="SQL_FORMATDATE"("dateAdd4M", '"SQL_FORMATDATESTR"') "SQL_THEN" LO.QuantityRest "SQL_ELSE" 0 "SQL_CASEEND") as QTY4M,\\\n"),
+		 @ (" sum("SQL_CASEWHEN" O.DateDelivery>"SQL_FORMATDATE"("dateAdd4M", '"SQL_FORMATDATESTR"') "SQL_THEN" LO.QuantityRest "SQL_ELSE" 0 "SQL_CASEEND") as QTYP4M \\\n"),
+		 @ (" from " DB_PREFIX "ClientOrder O, " DB_PREFIX "ORDER_PRODUCT LO\\\n"),
+  		 @ (" where O.Id=LO.IdOrder and LO.QuantityRest>0 and O.idState<>'9'\\\n"),
+  		 @ (" group by LO.IdProduct \\\n"),
+ 		 @ (" ) tabCM on tabCM.IdA=p.ID \\\n"),
+		 @ (" ORDER BY p.Family,p.ID,p.Designation, p.DesignationTech\"\n\n\n\n"), 
+
+
+
+
+		
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2EditProduct.n"],
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableProductKit.n"],	% JZ 0930
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableProductForProduct.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableOrderMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableOrderProduct.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TablePalletProduct.n"],
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableDeliveryMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableDefaultRateMenu.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2TableBalanceRevenueMenu.n"],
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProduct2EditOnView.n"],	
+
+
+		['Work Directory' "Model\View\Data\DataFamilyProduct.n"],
+		['Work Directory' "Model\View\Data\DataTypeProduct.n"],
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

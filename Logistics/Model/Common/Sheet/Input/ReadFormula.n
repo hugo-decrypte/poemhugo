@@ -1,0 +1,50 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		ReadFormula.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Read Project	
+'()' => (
+	'()' <- database,
+
+	sqlFormula = (
+		"SELECT	" SQL_TOP_PERCENT "id,program
+		FROM	" DB_PREFIX "FORMULA
+		WHERE idClub IN " IDDOMCLUBLOGIN " AND category='" SHEET_TECHNIQUE "'
+		ORDER BY idClub,id"
+	),
+
+	(SQL : sqlFormula),
+
+	FORMULA = [1,()],
+
+	\forall f \in FORMULA \cup \{0\}
+		programFormula_{f} 		:: "",
+	programFormula_{0} = "",
+
+	\forall f \in FORMULA (
+		idFormula_{f} 			:: "",
+		programFormula_{f} 		:: "",
+
+		idFormula_{f} 			= (),
+		programFormula_{f} 		= (),
+	),
+
+	IDFORMULA = \{ \forall f \in FORMULA idFormula_{f} \},
+
+	database <- '()',
+
+
+
+	\forall i \in IDFORMULA \cup \{""\}
+		formulaId_{i} \in FORMULA \cup \{0\},
+
+	formulaId_{""} = 0,
+	\forall f \in FORMULA
+		formulaId_{idFormula_{f}} = f,
+),
+

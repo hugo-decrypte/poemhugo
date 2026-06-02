@@ -1,0 +1,47 @@
+%==================================================%
+%                                                  %
+%          	    Scheduling                 	   %
+%                                                  %
+% 		   DeleteSiteSite.n	   	   %
+%                                                  %
+%    (c)2000. Enginest. All rights reserved.       %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+
+'()' => (
+	nbSiteSiteSelected		= (),
+	nbParameterSelected		= (),
+
+	SiteSiteSelected		:: {""},
+
+	\forall i \in [1, nbSiteSiteSelected]( % Chen 0820
+		idSite1Selected_{i}	:: "",
+		idSite2Selected_{i}	:: "",
+
+		idSite1Selected_{i}	= (),
+		idSite2Selected_{i}	= (),
+	),
+
+	%SiteSiteSelected = \{ \forall i \in [1, nbSiteSiteSelected] (idSite1Selected_{i}idSite2Selected_{i}) \},
+	%IdSiteSiteSelected = \{ \forall s \in SiteSiteSelected idSite_{s} \},
+
+	'()' <- database,
+
+	\forall i \in [1, nbSiteSiteSelected](
+		(SQL : SQL_DeleteSiteSiteWhereSite1IsRtrim idSite1Selected_{i} "'," SQL_FuncInstr "('" idSite1Selected_{i} "','" stringLinkSymbol "'))) "
+			SQL_AndSiteSiteSite2IsRtrim idSite2Selected_{i}  "'," SQL_FuncInstr "('" idSite2Selected_{i} "','" stringLinkSymbol "')))"),
+	), % Chen 0820
+	%(SQL : "DELETE FROM " DB_PREFIX "SITE_SITE ss WHERE ss.idSite1+ss.idSite2 IN (" concatSetQuoted(IdSiteSiteSelected) ")"),
+
+	sqlOperationLog := TAG_DELETE_SITE_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

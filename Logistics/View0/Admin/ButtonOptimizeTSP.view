@@ -1,0 +1,14 @@
+View 'Optimiser par tournée' 'Optimiser par tournée' 'Optimiser par tournée' 255 255 255 _ 0 0 40 40 5 5 5 5 '[TRACELEVEL=0;TRACEFILE=;DEBUGLEVEL=0;SCROLLBAR=0;NATURESCALE=0;BESTFIT=1]'
+
+Script OptimizeTSP 'Optimiser par tournée' _ 8 'Optimiser par tournée' _ _ '0 0 40 40' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=1;CANCEL=1;SKIP=0;WAITCURSOR=0;;AUTOCLOSE=1]'\
+  Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptTSP.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) 1 1 {/*Input(Optimiser par tournée; 1;(string,IDTOUR,Tournée,[/*TOUR.IDTOUR*/],30.0.580,,,[/*TOUR.IDTOUR*/])*/}' 
+
+Data TOUR TOUR  TOUR HTTPSQL 0 _ _ \
+"[3;(string,IDTOUR,IDTOUR,,20,0); (string,IDVEHICLE,IDVEHICLE,,20,0); (int,TOURRESOURCE,TOURVEHICLE,,20,0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT	t.id		AS IDTOUR, \
+		t.idResource 	AS IDVEHICLE, \
+		t.tourResource 	AS TOURVEHICLE \
+	FROM	OPT_TOUR t \
+	WHERE  EXISTS (SELECT 1 FROM USER usr,CLUB_CLUB cc WHERE usr.id='010' AND cc.idClub=usr.idClub AND cc.idClubRelated=t.idClub)\
+	ORDER BY t.id"
+

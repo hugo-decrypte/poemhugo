@@ -1,0 +1,115 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 RemoveProduct.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idProductSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+
+	idOrderBuffer	:: "",
+
+	idOrderBuffer	= (),
+	
+
+	'()' <- database,
+	
+	RemoveProduct_SQL1 = (
+		"Delete from " DB_PREFIX "ORDER_PRODUCT 
+		WHERE IdOrder in ("idOrderBuffer")
+			and IdProduct in ("IDPRODUCTSELECTEDBUFFER")
+			and QuantityDelivered=0"
+	),
+
+	databaseType = "ACCESS" => (
+
+		%% set quantity for order
+		RemoveProduct_SQL2 = (
+			"Update " DB_PREFIX "CLIENTORDER O set O.Quantity=0, QuantityRest=0, O.Weight=0, O.AmountHT=0 WHERE O.ID in ("idOrderBuffer") "
+		),
+		RemoveProduct_SQL3 = (
+			"Update " DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder set 
+				O.Quantity=O.Quantity+OP.Quantity,
+				O.QuantityRest = O.QuantityRest + OP.QuantityRest,
+				O.AmountHT=O.AmountHT+ int(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount)+0.5)/100.0
+			WHERE O.ID in ("idOrderBuffer") "
+		),
+		RemoveProduct_SQL4 = (
+			"Update (" DB_PREFIX "CLIENTORDER O inner join " DB_PREFIX "ORDER_PRODUCT OP on O.ID=OP.IdOrder) inner join " DB_PREFIX "PRODUCT P on P.Id=OP.IdProduct  set 
+				O.Weight=O.Weight+OP.Quantity*P.Weight
+			WHERE O.ID in ("idOrderBuffer") "
+		),
+
+		%% set quantity for product
+		RemoveProduct_SQL5 = (
+			"Update " DB_PREFIX "PRODUCT P set P.QuantityOrdered=0 WHERE P.Id in ("IDPRODUCTSELECTEDBUFFER") "
+		),
+		RemoveProduct_SQL6 = (
+			"Update " DB_PREFIX "PRODUCT P inner join ( " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.ID=OP.IdOrder) ON P.id=OP.idorder set
+				P.QuantityOrdered=P.QuantityOrdered+OP.QuantityRest 
+				WHERE P.Id=OP.IdProduct and O.IdState<>'9'
+				AND P.Id in ("IDPRODUCTSELECTEDBUFFER") "
+		),
+
+	;
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		RemoveProduct_SQL2 = (
+			"Update " DB_PREFIX "CLIENTORDER set 
+				Quantity		=(select sum(OP.Quantity) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				QuantityRest	= (select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				AmountHT		= (select sum(TRUNCATE(OP.Quantity*OP.PriceUnit*(100.0-OP.Discount)+0.5)/100.0) from " DB_PREFIX "ORDER_PRODUCT OP where ID=OP.IdOrder),
+				Weight			=(select sum(OP.Quantity*P.Weight) from " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "PRODUCT P on P.Id=OP.IdProduct where CLIENTORDER.ID=OP.IdOrder and P.Weight is not NULL)
+			WHERE ID in ("idOrderBuffer")"
+		),
+
+		RemoveProduct_SQL3 = (
+			"Update " DB_PREFIX "CLIENTORDER set Quantity=0, QuantityRest=0, AmountHT=0 WHERE ID in ("idOrderBuffer") and Quantity is NULL "
+		),
+		RemoveProduct_SQL4 = (
+			"Update " DB_PREFIX "CLIENTORDER set Weight=0 WHERE ID in ("idOrderBuffer") and Weight is NULL "
+		),
+
+		RemoveProduct_SQL5 = (
+			"Update " DB_PREFIX "PRODUCT set
+				QuantityOrdered=(select sum(OP.QuantityRest) from " DB_PREFIX "ORDER_PRODUCT OP inner join " DB_PREFIX "CLIENTORDER O on O.ID=OP.IdOrder where PRODUCT.Id=OP.IdProduct and O.IdState<>'9')
+			WHERE Id in ("IDPRODUCTSELECTEDBUFFER")"),
+
+		RemoveProduct_SQL6 = (
+			"Update " DB_PREFIX "PRODUCT set QuantityOrdered=0 WHERE Id in ("IDPRODUCTSELECTEDBUFFER") and QuantityOrdered is NULL"
+		),
+
+	),
+
+	(SQL : RemoveProduct_SQL1), 
+	(SQL : RemoveProduct_SQL2), 
+	(SQL : RemoveProduct_SQL3), 
+	(SQL : RemoveProduct_SQL4), 
+	(SQL : RemoveProduct_SQL5), 
+	(SQL : RemoveProduct_SQL6), 
+
+	database <- '()',
+),

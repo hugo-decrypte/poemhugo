@@ -1,0 +1,115 @@
+View ViewTableSUPPLY 'Provision' 'Provision'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableSUPPLY _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Provision;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Center,Center,Center,Right,Right,Left,Left,Left,Left,Left,Left,Left}]"\
+"[DATAOBJ=SUPPLY;FILLCOLOR=LINERGB]"
+
+Data SUPPLY 'Provision' SUPPLY HTTPSQL 0 '[FIND={ID,IDSUPPLIER,NAMESUPPLIER,DATESUPPLY,DATEDELIVERY,DATELIMIT,QUANTITY,AMOUNTHT,REFERENCE,PRODUCTCONDITION,PAYCONDITION,PACKAGING,CUSTOMSINFO,INCOTERM,COMMENTS}]'   [DOUBLECLICK=TableSupplier] \
+"[15;(string,ID,ID,,20,,);(string,IDSUPPLIER,ID fournisseur,,25,,);(string,NAMESUPPLIER,Nom fournisseur,,30,,);(date,DATESUPPLY,Date devis,,20,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEDELIVERY,Date livraison,,30,,YYYY-MM-DD|DD/MM/YYYY);(date,DATELIMIT,Date limite,,20,,YYYY-MM-DD|DD/MM/YYYY);(int,QUANTITY,Quantité,,15,,);(float,AMOUNTHT,Montant HT(€),,25,,);(string,REFERENCE,Référence,,25,,);(string,PRODUCTCONDITION,Réalisation,,25,,);(string,PAYCONDITION,Mode règlement,,25,,);(string,PACKAGING,Conditionnement,,25,,);(string,CUSTOMSINFO,Info client,,20,,);(string,INCOTERM,Incoterm,,20,,);(string,COMMENTS,Commentaire,,25,,);(string,IDAGENCY,ID agence,,15,0);(string,NAMEAGENCY,Nom agence,,50,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT s.id AS ID, s.id AS IDSUPPLIER,\
+ (select Name from SUPPLIER sr where sr.Id=s.Id) as NAMESUPPLIER,\
+ s.DateSupply as DATESUPPLY,\
+ s.DateDelivery as DATEDELIVERY,\
+ s.DateLimit as DATELIMIT,\
+ s.Quantity   AS QUANTITY, s.AmountHT   AS AMOUNTHT, s.Reference  AS REFERENCE,\
+ s.ProductCondition AS PRODUCTCONDITION,\
+ s.PayCondition  AS PAYCONDITION, s.Packaging AS PACKAGING,\
+ s.CustomsInfo  AS CUSTOMSINFO, s.Incoterm  AS INCOTERM,\
+ s.Comments AS COMMENTS,\
+ s.idAgency AS IDAGENCY, ay.Name as NAMEAGENCY,\
+ '(255 255 255)' AS LINERGB \
+FROM SUPPLY s, AGENCY ay \
+WHERE s.IdAgency=ay.Id \
+and (s.IdState is NULL or s.IdState not in ('9') )\
+ORDER BY s.Id"
+
+
+Script TableSupplier 'Table Supplier' _ 21 'Fournisseurs' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableSupplier.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDSUPPLY={/*Selected(tableSUPPLY;1;(string,ID))*/};IDPRODUCT='XXX']"
+
+Script TableSupplyProduct 'Produits provision' _ 32 'Produits' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableSupplyProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDSUPPLY={/*Selected(tableSUPPLY;1;(string,ID))*/};IDPRODUCT='XXX']"
+
+Script TableProductForSupply 'Produits à ajouter pour provision' _ 22 'Produits à complémenter' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductForSupply.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDSUPPLY={/*Selected(tableSUPPLY;1;(string,ID))*/};FAMILY='XXX']"
+
+Script PrintSupply 'Print Supply' _ 80 'Imprimer' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+	 Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+	 '(/*SERVERPORT*/) (/*USERID*/)  PrintSupply.ini  SupplyOrder \
+	 {/*selected(tableSUPPLY;1;(string,ID))*/}' \
+	 WinExec "[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)SupplyOrder{/*selected(tableSUPPLY;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script CreateSupply 'Créer provision' _ 61 'Créer' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\CreateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  \
+{/*Input(Créer provision;3;\
+(string,LABELSUPPLIER,Fournisseur,,100.0.580,0,,[/*SUPPLIER.LABELSUPPLIER*/]);\
+(date,DATEDELIVERY,Date livraison,,10.0.580,1,YYYY-MM-DD);\
+(date,DATELIMIT,Date Limite,,10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+Script DuplicateSupply 'Dupliquer provision' _ 62 'Dupliquer' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\DuplicateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/} \
+{/*Input(L;Dupliquer provision [/*SUPPLY.ID*/];2;\
+(date,DATEDELIVERY,Date livraison,,10.0.580,1,YYYY-MM-DD);\
+(date,DATELIMIT,Date limite,,10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+
+
+
+
+Script ModifySupply 'Modifier provision' _ 63 'Modifier' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\UpdateSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/} \
+{/*Input(MO;Modifier provision [/*SUPPLY.ID*/];4;\
+(date,DATEDELIVERY,Date livraison,[/*SUPPLY.DATEDELIVERY*/],10.0.580,1,YYYY-MM-DD);\
+(string,INCOTERM,Incoterm,[/*SUPPLY.INCOTERM*/],50.0.580,1,,);\
+(string,COMMENTS,Commentaire,[/*SUPPLY.COMMENTS*/],50.0.580,1,,);\
+(string,STATE,Etat,[/*SUPPLY.STATESUPPLY*/],50.0.580,1,,[/*STATE.LABELSTATE*/]);\
+)*/}\
+'\
+Reload _ _ _
+
+
+
+
+Script DeleteSupply 'Supprimer provision' _ 64 'Supprimer' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Supply\DeleteSupply.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableSUPPLY;1;(string,ID))*/}' \
+Reload _ _ _
+
+Script TableState  'Etat provision' _ 23 'Tableau état' _ 'tableSUPPLY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableState_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);CATEGORY='SUPPLY';TITLEOBJ=Provision;]"
+
+SUPPLIER 'Supplier' SUPPLIER HTTPSQL 0 _ _ \
+"[2;(string,IDSUPPLIER,Fournisseur ID,,15.0.80,0);(string,LABELSUPPLIER,Identit  Fournisseur,,100.0.100,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT sp.Id AS IDSUPPLIER,\
+ (trim(sp.Name) + ' (' + trim(sp.City) + ')') as LABELSUPPLIER \
+ FROM SUPPLIER sp \
+ ORDER BY sp.Id"
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='SUPPLY' \
+ORDER BY s.Id "
+

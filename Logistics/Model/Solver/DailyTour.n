@@ -1,0 +1,150 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*                                                    */
+/*	         DailyTour.n	                      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+\forall o \in SOURCEORDER (
+	SpanTourOrder_{o} \subset TimeDate_{dateOrder_{o}},
+
+	%TimeOrder_{o} \subset TimeDate_{dateOrder_{o}}, % ??????
+	%TimeOrder_{o} \subset UnionHorizonTour_{tourOrder_{o}},
+
+
+	\forall d \in Date (
+		activeDateOrder_{o,d} == SpanTourOrder_{o} \cap TimeDate_{d} <> {},
+		activeDateOrder_{o,d} -> SpanTourOrder_{o} \subset TimeDate_{d},
+
+		%activeDateOrder_{o,d} -> TimeOrder_{o} \subset TimeDate_{d},
+
+		%activeDateOrder_{o,d} == dateOrder_{o} = d,
+		%activeDateOrder_{o,d} == TimeOrder_{o} \cap TimeDate_{d} <> {},
+		%activeDateOrder_{o,d} == SpanTourOrder_{o} \cap TimeDate_{d} <> {},
+	),
+
+	%#TimeRestOrder_{o} {v \in RESOURCE}{Schedule0Resource_{v}}
+),
+
+
+%\forall o,i \in SOURCEORDERSINK
+%	sameDateOrderOrder_{o,i} == dateOrder_{o} = dateOrder_{i},
+
+%\forall o<i \in SOURCEORDERSINK
+%	sameTourOrderOrder_{o,i} -> sameDateOrderOrder_{o,i},
+
+
+\forall t \in TOUR (
+	dateOrder_{sinkTour_{t}} = dateOrder_{sourceTour_{t}},
+
+	SpanTour_{t} \subset HorizonDateTour_{t,dateTour_{t}},
+
+	%SpanTour_{t} \subset UnionHorizonTour_{t},
+	%TimeDate_{dateInactive} = {},
+	%TimeTour_{t} \subset SpanTour_{t},
+	%TimeTour_{t} \subset TimeDate_{dateTour_{t}},
+),
+
+
+\forall o \in SOURCEORDER (
+	TimeRestOrder_{o} \subset SpanTourOrder_{o},
+
+	TimeRestOrder_{o} \subset ScheduleRestDateVehicle_{vehicleOrder_{o},dateOrder_{o}},
+),
+
+
+\forall o \in SourceActiveOrder
+	\bigoplus_{d \in Date}{activeDateOrder_{o,d}},
+
+
+
+\forall d \in Date
+	TourActiveDate_{d} = \{ \forall t \in TOUR (dateTour_{t} = d ? t : defaultDate) \} \setminus defaultDate,
+	%TourActiveDate_{d} = \{ \forall t \in TourActive (dateTour_{t} = d ? t : 0) \} \setminus 0,
+
+\forall d1<d2 \in Date
+	TourActiveDate_{d1} \cap TourActiveDate_{d2} = {},
+
+
+
+
+\forall v \in RESOURCE (
+	%DateActiveVehicle_{v} \subset DateVehicle_{v},	% ??????
+	DateActiveVehicle_{v} = \{ \forall d \in DateVehicle_{v} (activeDateVehicle_{v,d} ? d : dateInactive) \} \setminus dateInactive,
+
+
+	\forall d \in DateVehicle_{v} (
+		TourActiveDateVehicle_{v,d} = [_, _],
+		%TourActiveDateVehicle_{v,d} = [tour1DateVehicle_{v,d}, tour2ActiveDateVehicle_{v,d}],
+		TourActiveDateVehicle_{v,d} = TourActiveVehicle_{v} \cap TourActiveDate_{d},
+
+
+		SourceActiveOrderDateVehicle_{v,d} = \bigcup_{t \in TourActiveDateVehicle_{v,d}}{SourceOrderTour_{t}},
+		TimeActiveDateVehicle_{v,d} = \bigcup_{o \in SourceActiveOrderDateVehicle_{v,d}}{TimeActiveOrder_{o}},
+
+
+		TimeActiveDateVehicle_{v,d} = \bigcup_{t \in TourActiveDateVehicle_{v,d}}{TimeActiveTour_{t}},
+
+		\forall t1<t2 \in TourActiveDateVehicle_{v,d}
+			TimeActiveTour_{t1} \prec TimeActiveTour_{t2},
+
+
+		activeDateVehicle_{v,d} == d \in DateActiveVehicle_{v},
+		activeDateVehicle_{v,d} == TourActiveDateVehicle_{v,d} <> {},
+		activeDateVehicle_{v,d} == #SourceActiveOrderDateVehicle_{v,d} >= 2,
+		%activeDateVehicle_{v,d} == activeTour_{tour1DateVehicle_{v,d}},
+
+		#SourceActiveOrderDateVehicle_{v,d} >= #TourActiveDateVehicle_{v,d} * 2,
+
+
+
+		%TourActiveVehicle_{v} = TourVehicle_{v} \cap TourActive,
+		%activeTour_{t} == t \in TourActive,
+
+		%activeDateVehicle_{v,d} == SourceActiveOrderDateVehicle_{v,d} <> {},
+		%activeDateVehicle_{v,d} == TimeActiveDateVehicle_{v,d} <> {},
+		%activeDateVehicle_{v,d} == SpanDateVehicle_{v,d} <> {},
+
+		%Deduced by NCL
+		%\forall t \in TourActiveDateVehicle_{v,d}
+		%	activeTour_{t},
+		%	#SourceOrderTour_{t} > 1,
+
+		%#SourceActiveOrderDateVehicle_{v,d} = \sum_{t \in TourActiveDateVehicle_{v,d}}{#SourceOrderTour_{t}},
+		%\forall t \in TourActiveDateVehicle_{v,d}
+		%	activeTour_{t},	% ??????
+		%\forall o<i \in SourceActiveOrderDateVehicle_{v,d}
+		%	TimeActiveOrder_{o} \cap TimeActiveOrder_{i} = {},
+
+		#TimeActiveDateVehicle_{v,d} =< maxWorktimeDayVehicle_{v},
+		#TimeActiveDateVehicle_{v,d} =< maxWorktimeDateVehicle_{v,d},
+	),
+
+
+	activeVehicle_{v} == DateActiveVehicle_{v} <> {},	% 0825
+	activeVehicle_{v} == \bigvee_{d \in DateVehicle_{v}}{activeDateVehicle_{v,d}},
+
+
+	TourActiveVehicle_{v} = \bigcup_{d \in DateVehicle_{v}}{TourActiveDateVehicle_{v,d}},
+	TourActiveVehicle_{v} = \bigcup_{d \in DateActiveVehicle_{v}}{TourActiveDateVehicle_{v,d}},	% ??????
+
+	\forall d1<d2 \in DateVehicle_{v} (
+	%\forall d1<d2 \in DateActiveVehicle_{v} (
+		SourceActiveOrderDateVehicle_{v,d1} \cap SourceActiveOrderDateVehicle_{v,d2} = {},
+
+		TourActiveDateVehicle_{v,d1} \prec TourActiveDateVehicle_{v,d2},
+		%TimeActiveDateVehicle_{v,d1} \prec TimeActiveDateVehicle_{v,d2},
+	),
+
+
+	timeActiveVehicle_{v} =< maxWorktimeDayVehicle_{v} * #DateActiveVehicle_{v},
+
+	#DateActiveVehicle_{v} =< 1 -> makespanVehicle_{v} =< maxMakespanDayVehicle_{v},
+),
+
+
+% Redundant
+worktime = \sum_{t \in TourActive}{maxWorktimeDayTour_{t}} - \sum_{t \in TourActive}{maxWorktimeDayTour_{t}-timeActiveTour_{t}},
+

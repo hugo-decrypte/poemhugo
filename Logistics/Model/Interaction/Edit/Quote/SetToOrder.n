@@ -1,0 +1,134 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 SetToOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+
+	
+	idQuoteSelectedBuffer 			:: "",
+	dateDeliveryBuffer				:: 0,
+	
+	idQuoteSelectedBuffer 	= (),
+	dateDeliveryBuffer		= (),
+
+	
+	codeOrder = (SQL_CONCAT"'CO'"SQL_CONCATWITH"'"idQuoteSelectedBuffer"'"SQL_CONCATEND ),
+
+	'()' <- database,
+
+	SetToOrder_SQL1 = (
+		"INSERT INTO " DB_PREFIX "CLIENTORDER
+		(IdClub, Id, IdClient, IdPointDelivery, DateDelivery, IdAgency, Quantity, QuantityRest, Comments, IdState, Reference) 
+		select Q.IdClub, "codeOrder", Q.IdClient, Q.IdPointDelivery, '"dateDeliveryBuffer"', Q.IdAgency, Q.Quantity, Q.Quantity,'Devis '+ Q.Id, '0', Q.Id
+		from " DB_PREFIX "QUOTE Q
+		where Q.Id = '"idQuoteSelectedBuffer"'
+		and Q.IdState>='1'
+		and not exists (select 1 from " DB_PREFIX "CLIENTORDER O where O.Id="codeOrder")"
+	),
+
+	SetToOrder_SQL2 = (
+		"INSERT INTO " DB_PREFIX "ORDER_PRODUCT (IdOrder, IdProduct, Quantity, QuantityDelivered, QuantityRest, PriceUnit, Comments, DateDelivery,NoPallet) 
+		 select "codeOrder", IdProduct, 
+		 0, 0, 0, PriceUnit, Comments, '"dateDeliveryBuffer"', 1
+		FROM " DB_PREFIX "QUOTE_PRODUCT QP
+		WHERE IdQuote='"idQuoteSelectedBuffer"'
+		AND not exists (select 1 from " DB_PREFIX "ORDER_PRODUCT LO where LO.IdOrder="codeOrder" and LO.IdProduct=QP.IdProduct)"
+	),
+
+	databaseType = "ACCESS" => (
+		SetToOrder_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdProduct=QP.IdProduct
+			set LO.Quantity=QP.Quantity, LO.QuantityRest=QP.Quantity, LO.QuantityDelivered=0
+			where QP.IdQuote='"idQuoteSelectedBuffer"' and LO.IdOrder="codeOrder
+		),
+		
+		SetToOrder_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdOrder='CO'+QP.IdQuote and LO.IdProduct=QP.IdProduct
+			set LO.PriceUnit=QP.PriceUnit
+			where QP.IdQuote='"idQuoteSelectedBuffer"' and LO.IdOrder='CO'+'"idQuoteSelectedBuffer"' 
+			and (LO.PriceUnit is NULL or LO.PriceUnit<=0) "
+		),
+
+		SetToOrder_SQL5 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "QUOTE_PRODUCT QP on LO.IdOrder='CO'+QP.IdQuote and LO.IdProduct=QP.IdProduct
+			set LO.IdVAT=QP.IdVAT
+			where QP.IdQuote='"idQuoteSelectedBuffer"' and LO.IdOrder='CO'+'"idQuoteSelectedBuffer"' 
+			and (LO.IdVAT is NULL or LO.IdVAT<=' ') "
+		),
+
+		SetToOrder_SQL6 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT LO inner join " DB_PREFIX "PRODUCT P on LO.IdProduct=P.Id
+			set LO.IdVAT=P.IdVAT
+			where LO.IdOrder='CO'+'"idQuoteSelectedBuffer"'
+			and (LO.IdVAT is NULL or LO.IdVAT<=' ') "
+		),
+
+		;
+
+		SetToOrder_SQL3 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT LO 
+			set Quantity=(select QP.Quantity from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='"idQuoteSelectedBuffer"' and LO.IdProduct=QP.IdProduct),
+				QuantityRest=(select QP.Quantity from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='"idQuoteSelectedBuffer"' and LO.IdProduct=QP.IdProduct),
+				QuantityDelivered=0
+			where LO.IdOrder="codeOrder
+		),
+		
+		SetToOrder_SQL4 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT 
+			set PriceUnit=(select QP.PriceUnit from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='"idQuoteSelectedBuffer"' and ORDER_PRODUCT.IdProduct=QP.IdProduct)
+			where IdOrder="codeOrder" 
+			and (PriceUnit is NULL or PriceUnit<=0) "
+		),
+
+		SetToOrder_SQL5 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT 
+			set IdVAT=(select QP.IdVAT from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote='"idQuoteSelectedBuffer"' and ORDER_PRODUCT.IdProduct=QP.IdProduct)
+			where IdOrder="codeOrder" 
+			and (IdVAT is NULL or IdVAT<=' ') "
+		),
+
+		SetToOrder_SQL6 = (
+			"Update " DB_PREFIX "ORDER_PRODUCT 
+			set IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where IdProduct=Id)
+			where IdOrder="codeOrder"
+			and (IdVAT is NULL or IdVAT<=' ') "
+		),
+
+		
+	),
+
+
+
+	SetToOrder_SQL7 = (
+		"UPDATE " DB_PREFIX "QUOTE Q
+		set Q.DateDelivery='"dateDeliveryBuffer"', Q.IdState='3'
+		where Q.Id='"idQuoteSelectedBuffer"'"
+	),
+	
+	
+	(SQL :SetToOrder_SQL1), 
+	(SQL :SetToOrder_SQL2), 
+	(SQL :SetToOrder_SQL3), 
+	(SQL :SetToOrder_SQL4), 
+	(SQL :SetToOrder_SQL5), 
+	(SQL :SetToOrder_SQL6), 
+	(SQL :SetToOrder_SQL7), 
+	
+	
+
+	database <- '()',
+),
+.

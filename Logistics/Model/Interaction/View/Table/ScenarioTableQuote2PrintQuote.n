@@ -1,0 +1,105 @@
+%====================================================%
+%						     %
+%		     Logistics		             %
+%						     %
+%  	ScenarioTableQuote2PrintQuote.n   	    %
+%						     %
+%       (c)2000. Enginest. All rights reserved.	     %
+%====================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "PrintQuote ",
+
+% Caption
+@ (" '" TAG_PRINT_QUOTE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_PRINT,
+
+% Label
+@ (" '" TAG_PRINT "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableQUOTE' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+% Instruction... (When Count>0)
+
+% print 
+
+
+
+%typeExecute = "NCL",
+% typeExecute = "SQLVIEW",
+
+%filePrintCfg = "PrintQuote.ini",
+%fileOutput	 = "Devis",
+
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+
+		@ ("\t Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptPrint.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ ("\t '(/*SERVERPORT*/) (/*USERID*/)  PrintQuote.ini  Devis \\\n"),
+		@ ("\t {/*selected(tableQUOTE;1;(string,ID))*/}' \\\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+
+		@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t (/*POEMPRINTEXEPATH*/)PoemPrint.exe\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)/PrintQuote.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTAPPPATH*/)/Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf]'\\\n"),
+		@ ("\t '{/*selected(tableQUOTE;1;(string,ID))*/}' '(/*CLUBID*/)'\\\n"),
+		@ ("\t '(/*POEMPRINTAPPPATH*/)' _ _ _ _ \\\n"),
+	),
+
+
+
+? typeExecute (
+
+	"SQLVIEW" :
+		%  open pdf file by Edge
+		@ (" WinExec \"[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("  'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+
+	"NCL" :
+		%  open pdf file by View Open Command
+		%@ (" Open '(/*OUTPUTPATH*/)/Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' \n\n")
+	%%	@ (" Open 'http://(/*SERVERIP*/):(/*SERVERPORT*/)/(/*OUTPUTPATH*/)/Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' \n\n")
+		
+		@ ("\t WinExec \"[WAITTIME=600S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]\"\\\n"),
+		@ ("\t 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTAPPPATH*/)Devis{/*selected(tableQUOTE;1;(string,ID))*/}.pdf' _ _ _ _ _ \n\n"),
+		;
+	),

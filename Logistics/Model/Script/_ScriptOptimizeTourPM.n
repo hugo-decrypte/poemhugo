@@ -1,0 +1,85 @@
+/********************************************************/
+/*	             	Routing				*/
+/*							*/
+/*			ScriptTSP.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadUserLoginPM.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+['Work Directory' "Model\Common\Config\ReadDateTime.n"],
+
+
+'()' => (
+
+	%%%%%%%%%%%%% Reading Input Buffer %%%%%%%%%%%%%%
+	%%%%  user info
+
+
+	idClubLogin :: "",
+	idClubLogin	= "01", %% (),
+	( "Login Club : " idClubLogin : ),
+
+	IdClubSub :: \{""\},
+	IdClubSub = \{  \},
+
+	%%%% tour info
+	nbBuffer = 1, %% (),
+	( "nb Buffers : " nbBuffer : ),
+	Buffer = [1, nbBuffer],
+	nbParameter = 2, %% (),
+	( "nb parameters : " nbParameter : ),
+
+	\forall buf \in Buffer (
+		idTourBuffer_{buf}	:: "",
+		dateTourBuffer_{buf}	:: 0,
+
+		idTourBuffer_{buf}	= "2024022801", %% (),
+		dateTourBuffer_{buf}	= 20240228, %% (),
+
+		( "id Tour : " idTourBuffer_{buf} : ),
+		( TAG_TOUR_DATE " : " dateTourBuffer_{buf} : ),
+	),
+
+	%%%%%%%%%%%%% END Reading Input Buffer %%%%%%%%%%%%%%
+
+
+
+	%%%%% database config %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	['Work Directory' "Config\SQL\Database.config"],
+
+	( TAG_DATABASE_ERROR :
+		database = [databaseName : databaseUser : databasePassword],
+	),
+	%%%%% END database config %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+	ResultWithSolution = \{
+		AllSolutionsFound,OptimalSolutionProved,ApproximateSolutionFound,StoppedWithSolution
+	\},
+
+	\forall buf \in Buffer (
+		( "Optimize Tour : " buf " ( " idTourBuffer_{buf} " )" : ),
+
+		msgBuffer_{buf} := [['Work Directory' "Model\Solver\OptimizeTour.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	),
+
+
+	! \bigvee_{buf \in Buffer}{msgBuffer_{buf} \in ResultWithSolution} => (
+		(msgBuffer_{1} : false),
+	),
+
+
+	#Buffer > 1 => (
+		(TAG_COMPUTATION_TIME 'Global Time'[1..8] "\n" : ''),
+		;
+		(TAG_COMPUTATION_TIME 'Global Time'[1..8] "\n" : ),
+	),
+),

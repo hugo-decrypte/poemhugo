@@ -1,0 +1,42 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DuplicateProductFamily.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	idProductSelectedBuffer	::"",
+	idProductBuffer			:: "",
+	
+	idProductSelectedBuffer	= (),
+	idProductBuffer			= (),
+	
+
+
+	'()' <- database,
+
+	DuplicateProductFamily_SQL1 = (
+		"INSERT INTO " DB_PREFIX "FAMILYPRODUCT (Id, Designation,QuantityStock, QuantityOrdered, QuantitySupplied, MinStorageUnit, MaxStorageUnit) 
+		select '"idProductBuffer"', Designation,QuantityStock, QuantityOrdered, QuantitySupplied, MinStorageUnit, MaxStorageUnit
+		from " DB_PREFIX "FAMILYPRODUCT f
+		where f.Id ='"idProductSelectedBuffer"'"
+	),
+
+	(SQL : DuplicateProductFamily_SQL1), 
+	
+	
+
+	database <- '()',
+),

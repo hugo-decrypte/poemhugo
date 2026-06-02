@@ -1,0 +1,261 @@
+
+	minCapacity = i_P_INFTY;
+	maxCapacity = 0;
+
+
+	minBasic = maxBasic = 0;
+
+	if (maxCandidate >= 0) {
+		@<evaluate-"noBasicClique"-for-cliques-"dataClique/sizeClique"@>@;
+
+		topStack = -1;
+		
+		for (i = 0; i < sizeClique; i += 2) {
+			for (t = dataClique[i]; t <= dataClique[i+1]; t ++) {
+				if (t == t0) continue;
+
+				@<get-$C_{t}$-from-"idxIdxA(t,A),sort1IdxA(t,A),CB[],CF[]"@>@;
+
+				@<compute-"min/maxBasic_t,min/maxCapacity_t"-for-clique-"t"-not-"t0"@>@;
+
+				@<succeed-trivially-if-double-clique-premise-not-sound-for-min-capacity@>@;
+
+				@<compute-"minCapacity"-by-maximum-2-cliques-in-"minCapacity_t"-stack@>@;
+				@<compute-"maxCapacity"-by-maximum-2-cliques-in-"maxCapacity_t"-stack@>@;
+				@<update-"min/maxCapacity"-by-"min/maxBasic"-in-case-of-0-clique-in-stack@>@;
+
+				@<succeed-if-"m"-not-reduceable-in-terms-of-clique-"t"-?@>@;
+			}
+		}
+	}
+
+
+@
+@<compute-"min/maxBasic_t,min/maxCapacity_t"-for-clique-"t"-not-"t0"@>=
+{
+	minCapacity_t = minBasic_t = i_P_INFTY;
+	maxCapacity_t = maxBasic_t = 0;
+	
+
+	minCandidate_t = (
+		minCandidate > 0 ?
+		NON_0_CARD(C_t) - BASIC_CARD(C_t) :
+		LOWER_CARD(C_t) - BASIC_CARD(C_t)
+	);
+	maxCandidate_t = UPPER_CARD(C_t) - BASIC_CARD(C_t);
+	
+
+	break_clique_t = FALSE;
+	for (o = 0; o < sizeCandidate; o += 2) {
+		for (n = dataCandidate[o]; n <= dataCandidate[o+1]; n ++) {
+			if (cstNotInSet(n, C_t)) continue;
+
+			@<update-"min/maxBasic_t,min/maxCapacity_t"-by-"n"-in-clique-"t"@>@;
+		}
+		if (break_clique_t) break;
+	}
+	
+
+	basic_t = (BOOLEAN)(minBasic_t < i_P_INFTY);
+	feasible_t = (BOOLEAN)(minCapacity_t < i_P_INFTY && (topStack < 0 || maxCapacity_t > 0));
+
+	if (basic_t) {
+		@<update-"min/maxBasic"-by-"min/maxBasic_t"@>@;
+	}
+
+	else if (feasible_t) {
+		@<push-"min/maxCapacity_t"-to-stack@>@;
+	}
+}
+
+
+@
+@<update-"min/maxBasic_t,min/maxCapacity_t"-by-"n"-in-clique-"t"@>=
+{
+	@<get-$s_{t,n}$-from-sum-"ctr"-"ctrBOOLSUM"@>@;
+
+
+	@<enum-$C_{t}$-candidates-"nbCompatible_tn,nbCandidate_tn"@>@;
+	
+	@<evaluate-"basic_tn"-by-"C_t,nbCompatible_tn,nbCandidate_tn"@>@;
+
+	@<evaluate-compatible-non-0/lower-capacity-"c_0,c_1"-for-clique-"t"@>@;
+	@<skip-if-"nbCompatible_tn"-less-than-compatible-lower-capacity-"c_1"@>@;
+
+	@<finalize-candidate-non-0/lower-capacity-"c0,c1"-for-clique-"t"@>@;
+	@<skip-if-"nbCandidate_tn/maxCandidate"-less-than-candidate-lower-capacity-"c1"@>@;
+	
+	@<evaluate-compatible-upper-capacity-"c_2"-for-clique-"t"@>@;
+	@<finalize-candidate-upper-capacity-"c2"-for-clique-"t"@>@;
+
+	@<upper-capacity-"c_2"-is-0-if-"nbCompatible_tn"-less-than-compatible-non-0-capacity-"c_0"@>@;
+	@<upper-capacity-"c2"-is-0-if-"nbCandidate_tn"-less-than-candidate-non-0-capacity-"c0"@>@;
+
+	
+	@<update-"minBasic/Capacity_t"-by-"c1,basic_tn"@>@;
+	@<update-"maxBasic/Capacity_t"-by-"s_tn,BASIC_CARD(C_t),basic_tn"@>@;
+	
+
+	@<break-if-no-more-need-to-continue-by-"min/maxCapacity_t"in-clique-"t"@>@;
+}
+
+
+@ stack1Min : sorted from smallest to greatest for min capacities.
+
+@<compute-"minCapacity"-in-case-of-2-cliques-in-"minCapacity_t"-stack@>=
+{
+	for (o = 0; o < topStack; o ++) {
+		for (l = o+1; l <= topStack; l ++) {
+			c1 = I_DN_ADD(stack1Min[o], stack1Min[l]);
+			c2 = I_UP_ADD(stack2Min[o], stack2Min[l]);
+			
+			c1 = I_DN_ADD(c1, minBasic);
+			c2 = I_UP_ADD(c2, maxBasic);
+
+			if (capacityForCandidatesOk(c1,c2, minCandidate,maxCandidate)) {
+				CANDIDATE_CLIQUE_TO_STACK(topAccepted+1, i_N_INFTY,cliqueMin[o]);
+				CANDIDATE_CLIQUE_TO_STACK(topAccepted+2, i_N_INFTY,cliqueMin[l]);
+
+				@<evaluate-"non0/uppPenalty"-case-2-cliques-by-accepted-penalty-logic@>@;
+				@<evaluate-"non0/uppRejected"-case-2-cliques-by-accepted-penalty-logic@>@;
+				@<evaluate-"non0/uppAccepted"-case-2-cliques-by-accepted-penalty-logic@>@;
+			}
+		}
+	}
+}
+
+@
+@<update-"minCapacity"-in-case-of-1-clique-in-"minCapacity_t"-stack-is-feasible@>=
+{
+	for (o = 0; o <= topStack; o ++) {
+		c1 = I_DN_ADD(minBasic, stack1Min[o]);
+		c2 = I_UP_ADD(maxBasic, stack2Min[o]);
+		
+		if (capacityForCandidatesOk(c1,c2, minCandidate,maxCandidate)) {
+			CANDIDATE_CLIQUE_TO_STACK(topAccepted+1, i_N_INFTY,cliqueMin[o]);
+
+			@<evaluate-"non0/uppPenalty"-case-1-clique-by-accepted-penalty-logic@>@;
+			@<evaluate-"non0/uppRejected"-case-1-clique-by-accepted-penalty-logic@>@;
+			@<evaluate-"non0/uppAccepted"-case-1-clique-by-accepted-penalty-logic@>@;
+		}
+	}
+}
+
+@
+@<evaluate-"non0/uppAccepted"-case-1-cliques-by-accepted-penalty-logic@>@;
+{
+	non0Accepted = minCompatibleBasic;
+	uppAccepted  = maxCompatibleBasic;
+
+	for (o = 0; o <= topAccepted+1; o ++) {
+		t = cliqueAccepted(o);
+		n = candidateAccepted(o);
+		
+		@<get-$s_{t,n}$-from-sum-"ctr"-"ctrBOOLSUM"@>@;
+
+		non0Accepted = I_DN_ADD(non0Accepted, NON_0_INT(s_tn));
+		uppAccepted = I_UP_ADD(uppAccepted, UPPER_INT(s_tn));
+	}
+}
+
+@
+@<evaluate-"non0/uppAccepted"-case-2-cliques-by-accepted-penalty-logic@>@;
+{
+	non0Accepted = minCompatibleBasic;
+	uppAccepted = maxCompatibleBasic;
+
+	for (o = 0; o <= topAccepted+2; o ++) {
+		t = cliqueAccepted(o);
+		n = candidateAccepted(o);
+		
+		@<get-$s_{t,n}$-from-sum-"ctr"-"ctrBOOLSUM"@>@;
+
+		non0Accepted = I_DN_ADD(non0Accepted, NON_0_INT(s_tn));
+		uppAccepted  = I_UP_ADD(uppAccepted, UPPER_INT(s_tn));
+	}
+}
+
+@
+@<evaluate-"non0/uppPenalty"-case-1-clique-by-accepted-penalty-logic@>=
+{
+	non0Penalty = INT_NON_0_SUM_DIFFERENCE_BY_COUPLED_IN_DOM_BOOL_SUM(
+		shell,thread,ctr, ctrBOOLSUM, ctrSETINTMAPPING, A, C, dimF,
+		LxB, LxF,
+		valDiff,wiDiff,idxDiff,
+		stackAccepted,topAccepted+1, dataCandidate,sizeCandidate,
+		dataSub,&sizeSub, dataPenalty,&sizePenalty,
+		idx_idxA, sort1_idxA);
+
+	uppPenalty = INT_UPPER_SUM_DIFFERENCE_BY_COUPLED_IN_DOM_BOOL_SUM(
+		shell,thread,ctr, ctrBOOLSUM, ctrSETINTMAPPING, A, C, dimF,
+		UxB, UxF,
+		valDiff,wiDiff,idxDiff,
+		stackAccepted,topAccepted+1, dataCandidate,sizeCandidate,
+		dataSub,&sizeSub, dataPenalty,&sizePenalty,
+		idx_idxA, sort2_idxA);
+}
+
+@
+@<evaluate-"non0/uppPenalty"-case-2-cliques-by-accepted-penalty-logic@>=
+{
+	non0Penalty = INT_NON_0_SUM_DIFFERENCE_BY_COUPLED_IN_DOM_BOOL_SUM(
+		shell,thread,ctr, ctrBOOLSUM, ctrSETINTMAPPING, A, C, dimF,
+		LxB, LxF,
+		valDiff,wiDiff,idxDiff,
+		stackAccepted,topAccepted+2, dataCandidate,sizeCandidate,
+		dataSub,&sizeSub, dataPenalty,&sizePenalty,
+		idx_idxA, sort1_idxA);
+
+	uppPenalty = INT_UPPER_SUM_DIFFERENCE_BY_COUPLED_IN_DOM_BOOL_SUM(
+		shell,thread,ctr, ctrBOOLSUM, ctrSETINTMAPPING, A, C, dimF,
+		UxB, UxF,
+		valDiff,wiDiff,idxDiff,
+		stackAccepted,topAccepted+2, dataCandidate,sizeCandidate,
+		dataSub,&sizeSub, dataPenalty,&sizePenalty,
+		idx_idxA, sort2_idxA);
+}
+
+@
+@<evaluate-"non0/uppRejected"-case-1-clique-by-accepted-penalty-logic@>=
+{
+	non0Rejected = GREATEST_REJECTED_NON_0_INT_SUM_IF_ELEMENTS_ACCEPTED(
+		shell,thread,ctr,
+		NULL,NULL, NULL,NULL,&non0Rejected,
+		A, dimF, CF,xF, LxB,LxF,
+		stackAccepted,topAccepted+1, dataCandidate,sizeCandidate,
+		idx_idxA,idx_sort1,sort1_idxA,low_idx_c0);
+
+	uppRejected = SMALLEST_REJECTED_UPPER_INT_SUM_IF_ELEMENTS_ACCEPTED(
+		shell,thread,ctr,
+		NULL,NULL, NULL,NULL,&uppRejected,
+		A, dimF, CF,xF, UxB,UxF,
+		stackAccepted,topAccepted+1, dataCandidate,sizeCandidate,
+		idx_idxA,idx_sort2,sort2_idxA,upp_idx_c2);
+}
+
+@
+@<evaluate-"non0/uppRejected"-case-2-cliques-by-accepted-penalty-logic@>=
+{
+	non0Rejected = GREATEST_REJECTED_NON_0_INT_SUM_IF_ELEMENTS_ACCEPTED(
+		shell,thread,ctr,
+		NULL,NULL, NULL,NULL,&non0Rejected,
+		A, dimF, CF,xF, LxB,LxF,
+		stackAccepted,topAccepted+2, dataCandidate,sizeCandidate,
+		idx_idxA,idx_sort1,sort1_idxA,low_idx_c0);
+
+	uppRejected = SMALLEST_REJECTED_UPPER_INT_SUM_IF_ELEMENTS_ACCEPTED(
+		shell,thread,ctr,
+		NULL,NULL, NULL,NULL,&uppRejected,
+		A, dimF, CF,xF, UxB,UxF,
+		stackAccepted,topAccepted+2, dataCandidate,sizeCandidate,
+		idx_idxA,idx_sort2,sort2_idxA,upp_idx_c2);
+}
+
+
+
+
+			c1 = I_DN_ADD(c1StackMax(o), c1StackMax(l));
+			c2 = I_UP_ADD(c2StackMax(o), c2StackMax(l));
+
+
+

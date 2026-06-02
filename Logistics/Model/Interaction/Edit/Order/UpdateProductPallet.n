@@ -1,0 +1,59 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 UpdateProductPallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idProductSelectedBuffer_{i} 			:: "",
+		idProductSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "',"),
+			;
+			strIdProductSelectedBuffer_{i} = ("'" idProductSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDPRODUCTSELECTEDBUFFER :: "",
+	IDPRODUCTSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdProductSelectedBuffer_{i}],
+
+	idOrderBuffer	:: "",
+	palletBuffer	:: 0,
+
+	idOrderBuffer	= (),
+	palletBuffer	= (),
+	
+
+	
+
+	'()' <- database,
+
+	UpdatePallet_SQL1 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set NoPalletDelivery="palletBuffer
+		"  WHERE IdOrder in ("idOrderBuffer") and IdProduct in ("IDPRODUCTSELECTEDBUFFER")"
+	),
+	UpdatePallet_SQL2 = (
+		"Update " DB_PREFIX "ORDER_PRODUCT set NoPalletDelivery=1"
+		"  WHERE IdOrder in ("idOrderBuffer")"
+		"   and NoPalletDelivery is NULL"
+	),
+
+
+	(SQL : UpdatePallet_SQL1), 
+	(SQL : UpdatePallet_SQL2), 
+	'',
+	database <- '()',
+),

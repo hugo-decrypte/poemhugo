@@ -1,0 +1,35 @@
+%==================================================%
+%                                                  %
+%                Routing			   %
+%                                                  %
+%                ReoptimizeTSP.n	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	(TAG_SEPARATION_LINE : '()' ),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_OPTIMIZATION_TSP : '()'),
+
+
+
+	'()' <- database,
+
+	(SQL : "SELECT DISTINCT t.id FROM " DB_PREFIX "OPT_TOUR t," DB_PREFIX "RESOURCE r WHERE t.idClub='"
+		idClubLogin "' AND t.idResource=r.id"), 
+
+	TSP = [1,()],
+
+	\forall tsp \in TSP (
+		idTourTsp_{tsp} :: "",
+		idTourTsp_{tsp} = (),
+	),
+
+	database <- '()',
+
+
+	\forall tsp \in TSP (
+		resultTsp_{tsp} := [['Work Directory' "Model\Solver\SolveTSP.n"], ['Work Directory' "parallel.cfg"], 'Trace Level'],
+	),
+),

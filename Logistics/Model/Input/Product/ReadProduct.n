@@ -1,0 +1,82 @@
+%==================================================%
+%                                                  %
+%            	Vehicle Routing    	           %
+%                                                  %
+%		ReadProduct.n                      %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	(SQL:  "SELECT TOP 100 PERCENT pr.id,pr.name,pr.unitWeight,pr.unitVolume,pr.unitLength,pr.unitWidth,pr.unitHeight FROM OPT_PRODUCT pr ORDER BY pr.id,pr.name"),
+
+% JZ 1022 : OPT_PRODUCT
+
+	nbProduct = (),
+
+	PRODUCT	= [1, nbProduct],
+
+
+	\forall p \in PRODUCT \cup \{0\} (
+		unitWeightProduct_{p}	:: 0.0,
+		unitVolumeProduct_{p}	:: 0.0,
+		unitLengthProduct_{p}	:: 0.0,
+		unitWidthProduct_{p}	:: 0.0,
+		unitHeightProduct_{p}	:: 0.0,
+	),
+
+	unitWeightProduct_{0}	= 0.0,
+	unitVolumeProduct_{0}	= 0.0,
+	unitLengthProduct_{0}	= 0.0,
+	unitWidthProduct_{0}	= 0.0,
+	unitHeightProduct_{0}	= 0.0,
+
+
+	\forall p \in PRODUCT (
+		idProduct_{p} 		:: "",
+		nameProduct_{p} 	:: "",
+
+		unitWeightProduct_{p}	:: 0.0,
+		unitVolumeProduct_{p}	:: 0.0,
+
+		unitLengthProduct_{p}	:: 0.0,
+		unitWidthProduct_{p}	:: 0.0,
+		unitHeightProduct_{p}	:: 0.0,
+
+		idProduct_{p} 		= (),
+		nameProduct_{p} 	= (),
+
+		unitWeightProduct_{p}	= (),
+		unitVolumeProduct_{p}	= (),
+
+		unitLengthProduct_{p}	= (),
+		unitWidthProduct_{p}	= (),
+		unitHeightProduct_{p}	= (),
+
+
+
+		%unitWeightProduct_{p}	= (unitWeight0Product_{p} = 0.0 ? 1.0 : unitWeight0Product_{p}),
+		%unitVolumeProduct_{p}	= (unitVolume0Product_{p} = 0.0 ? 1.0 : unitVolume0Product_{p}), % Zhou 0426
+		%unitLengthProduct_{p}	= (unitLength0Product_{p} = 0.0 ? 1.0 : unitLength0Product_{p}),
+		%unitWidthProduct_{p}	= (unitWidth0Product_{p} = 0.0 ? 1.0 : unitWidth0Product_{p}),
+		%unitHeightProduct_{p}	= (unitHeight0Product_{p} = 0.0 ? 1.0 : unitHeight0Product_{p}),
+	),
+
+	database <- '()',
+),
+
+'()' => (
+	IDPRODUCT = \{ \forall p \in PRODUCT idProduct_{p} \},
+
+	
+	\forall i \in IDPRODUCT \cup \{""\}
+		productId_{i} \in PRODUCT \cup \{0\},
+
+	productId_{""} = 0,	% Zhou 0527
+	\forall i \in IDPRODUCT (
+		productId_{i} \in PRODUCT,
+		idProduct_{productId_{i}} = i,
+	),
+),

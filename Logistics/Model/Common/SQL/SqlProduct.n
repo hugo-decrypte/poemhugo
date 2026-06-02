@@ -1,0 +1,141 @@
+/******************************************************/
+/*	          	ERP	              	      */
+/*	                                              */
+/*	 	SqlProduct.n  	     	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+TIPINFO_PROCESS_NON_TASK = (
+	"[/*NAMEPROCESS*/]     [/*IDPROCESS*/]"
+%	TAG_QUANTITY ": [/*QUANTITYTASK*/]  [/*TASKDIVISIBLE*/]   "
+%	TAG_WORKTIME	": [/*TIMETASK*/]"
+),
+
+TIPINFO_PROCESS_TASK = (
+	"[/*NAMEPROCESS*/]     [/*IDPROCESS*/]"
+%	TAG_QUANTITY ": [/*QUANTITYTASK*/]  [/*TASKDIVISIBLE*/]   "
+%	TAG_WORKTIME	": [/*TIMETASK*/]"
+),
+
+
+
+sqlProcess1 = (
+	"(SELECT " DB_PREFIX "PROCESS_PROCESS.idProcess1 FROM " DB_PREFIX "PROCESS_PROCESS WHERE " DB_PREFIX "PROCESS_PROCESS.type='" STATE_SUB "')"
+),
+sqlProcess2 = (
+	"(SELECT " DB_PREFIX "PROCESS_PROCESS.idProcess2 FROM " DB_PREFIX "PROCESS_PROCESS WHERE " DB_PREFIX "PROCESS_PROCESS.type='" STATE_SUB "')"
+),
+
+
+sqlProcessIsRoot = (
+	DB_PREFIX "PROCESS.id NOT IN " sqlProcess2
+),
+
+sqlProcessIsLeaf = (
+	DB_PREFIX "PROCESS.id NOT IN " sqlProcess1
+),
+
+
+sqlIsRoot		= ("n.id=pp.idRoot"),
+sqlNotRoot		= ("n.id<>pp.idRoot"),
+
+sqlIsLeaf		= ("n.category='" PROCESS_LEAF "'"),
+sqlNotLeaf		= ("n.category<>'" PROCESS_LEAF "'"),
+
+sqlProcessTaskParent	= ("n.idxParent IS NOT NULL"),
+
+
+sqlProcessStructure = (
+	"(SELECT parent.idProcess2 AS id, parent.idProcess1 AS idParent, pn.idProcess1 AS idRoot FROM "
+		DB_PREFIX "PROCESS_PROCESS parent,"
+		DB_PREFIX "PROCESS_PROCESS pn WHERE parent.idProcess1=pn.idProcess2 AND pn.type='"
+		STATE_ROOT "' AND parent.type='" STATE_SUB "')"
+),
+
+
+
+? databaseType (
+"ACCESS" :
+	sqlProcessIdx = ("IIF(n.idxParent IS NULL,'',CSTR(n.idxParent))"),
+
+	sqlProductText		= "' '+p.name AS [TEXT]",
+	sqlProcessJobText	= "' '+n.name AS [TEXT]",
+
+	sqlProcessTaskText 	= ("' '+" sqlProcessIdx "+'  '+n.name AS [TEXT]"),
+
+
+
+
+	sqlProductRGB	= ("'" RGB_PRODUCT "'"),
+	sqlProcessRGB	= ("'" RGB_TASK "'"),
+
+
+
+
+	sqlProcessProductId	= ("p.id+p.idProcess"),
+
+	sqlProcessParentId 	= ("p.id+pp.idParent"),
+	sqlProcessJobId		= ("p.id+pp.id"),
+
+
+	sqlProcessItemId	= ("p.id+pp.idParent"),
+	sqlProcessTaskId	= ("p.id+pp.idParent+pp.id"),
+
+
+
+	sqlTaskId	= "rr.idProject+'_'+rr.idProcessJob+'_'+rr.idProcess",
+	;
+
+
+"SQLSERVER" :
+	sqlProcessIdx = ("IIF(n.idxParent IS NULL,'',CSTR(n.idxParent))"),
+
+	sqlProductText		= "' '+p.name AS [TEXT]",
+	sqlProcessJobText	= "' '+n.name AS [TEXT]",
+
+	sqlProcessTaskText 	= ("' '+" sqlProcessIdx "+'  '+n.name AS [TEXT]"),
+
+
+
+	sqlProductRGB	= ("'" RGB_PRODUCT "'"),
+	sqlProcessRGB	= ("'" RGB_TASK "'"),
+
+
+
+	sqlProcessProductId	= ("p.id+p.idProcess"),
+
+	sqlProcessParentId 	= ("p.id+pp.idParent"),
+	sqlProcessJobId		= ("p.id+pp.id"),
+
+
+	sqlProcessItemId	= ("p.id+pp.idParent"),
+	sqlProcessTaskId	= ("p.id+pp.idParent+pp.id"),
+
+
+
+	sqlTaskId	= "rr.idProject+'_'+rr.idProcessJob+'_'+rr.idProcess",
+	;
+
+
+"ORACLE" :
+	sqlProcessIdx = "TO_CHAR(n.idxParent)",
+	SQL_TASK_CAPTION = ("'" TAG_TASK ": '||n.name||'  '||n.id"),
+
+
+	sqlTaskId	= "rr.idProject||'_'||rr.idProcessJob||'_'||rr.idProcess",
+	;
+
+
+"MYSQL" : %benjaminSQL 0913
+	sqlProcessIdx = "TO_CHAR(n.idxParent)",
+	SQL_TASK_CAPTION = ("CONCAT('" TAG_TASK ": ',n.name,'  ',n.id)"),
+
+
+	sqlTaskId	= "CONCAT(rr.idProject,'_',rr.idProcessJob,'_',rr.idProcess)",
+),
+
+

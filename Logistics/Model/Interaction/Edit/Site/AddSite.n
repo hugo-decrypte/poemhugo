@@ -1,0 +1,100 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 AddSite.n		   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+'()' => (
+	aliasTable	= "SITE",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	(TAG_ONLY_ONE_TO_ADD : nbSelected = 1),
+
+
+	idSiteBuffer				:: "",
+	nameSiteBuffer				:: "",
+	typeSiteBuffer				:: "",
+	xSiteBuffer				:: 0,
+	ySiteBuffer				:: 0,
+	longitudeSiteBuffer			:: 0.0, % bai 0705
+	latitudeSiteBuffer			:: 0.0,
+
+	"IDSITE" \in IdFieldSelected => ( 
+		idSiteBuffer			= (),
+		;
+		idSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"NAMESITE" \in IdFieldSelected => (
+		nameSiteBuffer			= (),
+		;
+		nameSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"TYPESITE" \in IdFieldSelected => (
+		typeSiteBuffer			= (),
+		;
+		typeSiteBuffer			= TAG_EMPTY_STRING, 
+	),
+	"XSITE" \in IdFieldSelected => (
+		xSiteBuffer			= (),
+		;
+		xSiteBuffer			= 0, 
+	),
+	"YSITE" \in IdFieldSelected => (
+		ySiteBuffer			= (),
+		;
+		ySiteBuffer			= 0, 
+	),
+	"LONGITUDESITE" \in IdFieldSelected => ( % bai 0705
+		longitudeSiteBuffer		= (),
+		;
+		longitudeSiteBuffer		= 0.0, 
+	),
+	"LATITUDESITE" \in IdFieldSelected => (
+		latitudeSiteBuffer		= (),
+		;
+		latitudeSiteBuffer		= 0.0, 
+	),
+
+
+	'()' <- database,
+
+	(SQL : SQL_SelectSiteIdIdIsRtrim idSiteBuffer "')"), % Zhou 0831
+	%(SQL : "SELECT id FROM " DB_PREFIX "SITE WHERE id=RTRIM('" idSiteBuffer "')"), 
+		nbRecord = (),
+
+	(TAG_EXISTS_ID idSiteBuffer : nbRecord=0), 
+
+	(SQL : SQL_InsertIntoSiteValues "'" idSiteBuffer "',
+			'" nameSiteBuffer "',
+			'" typeSiteBuffer "',
+			'" xSiteBuffer "',
+			'" ySiteBuffer "',
+			'" \overline{longitudeSiteBuffer} "',
+			'" \overline{latitudeSiteBuffer} "')"),
+/*
+	(SQL : "INSERT 	INTO " DB_PREFIX "SITE (id,name,type,x,y,longitude,latitude)
+		VALUES( '" idSiteBuffer "',
+			'" nameSiteBuffer "',
+			'" typeSiteBuffer "',
+			'" xSiteBuffer "',
+			'" ySiteBuffer "',
+			'" \overline{longitudeSiteBuffer} "',
+			'" \overline{latitudeSiteBuffer} "')"), % bai 0705
+*/
+	sqlOperationLog := TAG_ADD_SITE,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

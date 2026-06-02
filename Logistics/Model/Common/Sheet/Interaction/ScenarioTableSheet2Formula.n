@@ -1,0 +1,65 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 	ScenarioTableSheet2Formula.n 		   %
+%                                                  %
+%      (c)2000. Enginest. All rights reserved.     %
+%==================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "SolveFormula ",
+
+% Caption
+@ ("'" TAG_SOLVE_FORMULA "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_SOLVE,
+
+% Label
+@ (" '" TAG_SOLVE_FORMULA "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSHEET' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Common\Sheet\Solver\SheetSolving.n'"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(tableSHEET;3;string,ID;(int,LINE);(string,[_FIELDID_]))*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+@ "Reload _ _ _ _\n\n",
+
+%@ ("\t'[(/*REPLY*/);id=" viewFile "]'\n\n"),
+
+
+
+

@@ -1,0 +1,115 @@
+View ViewTableCLIENT 'Client' 'Client'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableCLIENT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Client;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Left,Left,Left,Left,Center}]"\
+"[DATAOBJ=CLIENT;FILLCOLOR=LINERGB]"
+
+Data CLIENT 'Client' CLIENT HTTPSQL 0 '[FIND={ID,NAME,ADDRESS,CITY,NAMEDELIVERY,ADDRESSDELIVERY,CITYDELIVERY,POSTCODEDELIVERY,NBORDER}]'   [DOUBLECLICK=EditClient] \
+"[9;(string,ID,ID,,15,,);(string,NAME,Nom,,20,,);(string,ADDRESS,Adresse,,30,,);(string,CITY,Ville,,20,,);(string,NAMEDELIVERY,Nom livraison,,30,,);(string,ADDRESSDELIVERY,Adresse livraison,,30,,);(string,CITYDELIVERY,Ville livraison,,30,,);(string,POSTCODEDELIVERY,Code postal livraison,,30,,);(int,NBORDER,#Commande,,20,,);(string,ADDRESSDELIVERY,Adresse livraison,,100.0.100,0);\
+(string,ADDRESSSUPDELIVERY,Adresse sup livraison,,100.0.100,0);\
+(string,POSTCODE,Code postal,,10.0.50,0);\
+(string,ADDRESSINVOICE,Adresse facturation,,100.0.100,0);\
+(string,ADDRESSSUPINVOICE,Adresse sup facturation,,100.0.100,0);\
+(string,IDPOINTDELIVERY,ID point livraison,,30.0.100,0);\
+(string,POSTCODEDELIVERY,Code postal livraison,,10.0.50,0);\
+(string,CITYDELIVERY,Ville livraison,,50.0.100,0);\
+(string,COUNTRYDELIVERY,Pays livraison,,50.0.100,0);\
+(string,IDAGENCY,ID agence,,10.0.50,0);\
+(string,NAMEAGENCY,Nom agence,,100.0.100,0);\
+(string,NAMEBANK,Nom banque,,100.0.100,0);\
+(string,VATCODE,Numéro TVA,,30.0.100,0);\
+(string,SIRET,SIRET,,30.0.100,0);\
+(string,COUNTRY,Pays,,50.0.100,0);\
+(int,TOMORROW,Demain,,8.0.100,1);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT cl.id AS ID, cl.name AS NAME,\
+		 (trim(cl.PostCode)+' '+cl.City) AS CITY, cl.PostCode AS POSTCODE,\
+		 (trim(cl.Address)+(IIF(cl.AddressSup is not NULL and cl.AddressSup>' ',(', '+cl.AddressSup),' '))) AS ADDRESS,\
+		 cl.Address AS ADDRESSINVOICE,\
+		 cl.AddressSup AS ADDRESSSUPINVOICE,\
+		 cl.Country as COUNTRY,\
+		 cl.codeTax as VATCODE,\
+		 cl.establishment as SIRET,\
+		 cl.Comments as COMMENTS,\
+		 pd.IdPoint as IDPOINTDELIVERY,\
+		 pd.NameClient as NAMEDELIVERY,\
+		 (trim(pd.Address)+(IIF(pd.AddressSup is not NULL and pd.AddressSup>' ',(', '+pd.AddressSup),' '))) AS ADDRESSDELIVERYCOMPL,\
+		 pd.Address AS ADDRESSDELIVERY,\
+		 pd.AddressSup AS ADDRESSSUPDELIVERY,\
+		 (trim(pd.PostCode)+' '+pd.City) AS POSTCITYDELIVERY,\
+		 pd.City AS CITYDELIVERY,\
+		 pd.Country AS COUNTRYDELIVERY,\
+			pd.PostCode AS POSTCODEDELIVERY,\
+			(select count(1) from CLIENTORDER O where O.IdClient=cl.Id and O.IdPointDelivery=pd.IdPoint and O.IdState not in ('9') ) as NBORDER,\
+			cl.IdAgency as IDAGENCY,\
+			(select ay.Name from AGENCY ay where ay.Id=cl.IdAgency ) as NAMEAGENCY,\
+			(select b.Name from BANKACCOUNT b where b.Id=cl.BankAccount ) as NAMEBANK,\
+			format(DateAdd('d', 1, Date()), 'YYYYMMDD') as TOMORROW,\
+			'(255 255 255)' AS LINERGB \
+		 FROM CLIENT cl \
+		  left join POINTDELIVERY pd on pd.IdClient=cl.Id \
+		 ORDER BY cl.Id, pd.IdPoint"
+
+
+Script TableOrderClient  'Commandes pour client' _ 20 'Commandes' _ 'tableClient' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrder_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(250 250 250);IDTOUR='XXX';TITLEOBJ=Commandes pour client {/*Selected(tableCLIENT;1;(string,ID))*/};OWNEROBJ=IdClient;IDOBJ={/*Selected(tableCLIENT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX']"
+
+Script TableDeliveryClient 'Livraisons pour client' _ 25 'Livraisons' _ 'tableCLIENT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);NBDAY=7;OWNEROBJ=IdClient;IDOBJ={/*Selected(tableCLIENT;1;(string,ID))*/};TITLEOBJ=pour client {/*Selected(tableCLIENT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR='XXX';NBDAY=30]"
+
+Script TableBalanceSheetRevenueProduct  'CA' _ 34 'CA' _ 'tableCLIENT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableBalanceSheetRevenueProduct_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(250 250 250);OWNEROBJ=IdClient;IDOBJ={/*Selected(tableCLIENT;1;(string,ID))*/};FAMILY='XXX';TITLEOBJ=pour client {/*Selected(tableCLIENT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX']"
+
+Script CreateOrder 'Create Order' _ 15 'Créer commande' _ 'tableCLIENT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptClientCreateOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 '(/*SERVERPORT*/) (/*USERID*/) {/*Input(Créer commande;5;\
+(string,IDORDER,ID commande,,50.0.580,0,,);\
+(string,REFERENCE,Référence,,50.0.580,1,,);\
+(date,DATEDELIVERY,Date livraison,[/*CLIENT.TOMORROW*/],10.0.580,1,YYYY-MM-DD);\
+(string,CLIENT,Client,[/*CLIENT.ID*/],50.0.580,0,0,[/*CLIENT.ID*/]);\
+(string,POINTDELIVERY,Point livraison,[/*CLIENT.IDPOINTDELIVERY*/],50.0.580,0,0,[/*CLIENT.IDPOINTDELIVERY*/]);\
+)*/}' 
+
+Script EditClient 'Editer' _ 1 'Editer' _ 'tableCLIENT' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE CLIENT&IdClient in ({/*selected(tableCLIENT;1;(string,ID))*/})"\
+Reload _ _ _ _ 
+
+
+/// POINTDELIVERY /////////////// 
+Data POINTDELIVERY 'PointDelivery' POINTDELIVERY HTTPSQL 0 _ _ \
+"[5;(string,IDCLIENT,ID client,,15.0.80,0);(string,NAMECLIENT,Nom client Client,,15.0.80,0);(string,IDPOINT,Point ID,,15.0.80,0);(string,CITY,Ville,,15.0.80,0);(string,LABELCLIENT,Identit  Client,,100.0.100,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT \
+		 cl.id AS IDCLIENT, \
+		 cl.Name as NAMECLIENT,\
+		 p.City as CITY,\
+		 p.IdPoint as IDPOINT, \
+		 (trim(cl.Name) + ' (' + trim(p.City) + ')') as LABELCLIENT \
+	 FROM CLIENT cl, POINTDELIVERY p \
+	 WHERE p.IdClient=cl.Id"
+
+
+/// AGENCY /////////////// 
+Data AGENCY 'Agency' AGENCY HTTPSQL 0 _ _ \
+"[3;(string,IDAGENCY,ID agence,,15.0.80,0);(string,NAMEAGENCY,Nom agence,,100.0.100,0);(string,CITYAGENCY,Ville,,15.0.80,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT id AS IDAGENCY, \
+		 Name as NAMEAGENCY, \
+		 City as CITYAGENCY \
+	 FROM AGENCY"
+
+
+/// BANKACCOUNT /////////////// 
+Data BANKACCOUNT 'BankAccount' BANKACCOUNT HTTPSQL 0 _ _ \
+"[3;(string,IDBANK,ID banque,,15.0.80,0);(string,NAMEBANK,Nom banque,,100.0.100,0);(string,CITYBANK,Domiciliation,,15.0.80,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT id AS IDBANK, \
+		 Name as NAMEBANK, \
+		 Domiciliation as CITYBANK \
+	 FROM BANKACCOUNT"
+
+

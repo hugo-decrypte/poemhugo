@@ -1,0 +1,77 @@
+/********************************************************/
+/*							*/
+/*		ClientGetAddress.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%"httpProgram=Model/Common/Interface/GetAddressTable.n&CONFIG=ncl.cfg&DIRECTORY=./&REPLY=NULL"
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+'()' => (
+
+	'()' <- database,
+
+
+	sqlGetAddress = (
+		"SELECT id,name,name2,street,city,country,postcode FROM "
+		DB_PREFIX"SITE WHERE idClub='" idClubLogin "' AND selected='" STATE_TRUE "' ORDER BY id"),
+
+	(SQL: sqlGetAddress ),
+
+
+	SITE = [1, ()],
+
+	\forall s \in SITE (
+		idSite_{s}		:: "",
+		nameSite_{s}		:: "",
+		name2Site_{s}		:: "",
+		streetSite_{s}		:: "",
+		citySite_{s}		:: "",
+		countrySite_{s}		:: "",
+		postcodeSite_{s}	:: "",
+
+		idSite_{s}		= (),
+		nameSite_{s}		= (),
+		name2Site_{s}		= (),
+		streetSite_{s}		= (),
+		citySite_{s}		= (),
+		countrySite_{s}		= (),
+		postcodeSite_{s}	= (),
+	),
+
+
+	database <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ (#SITE "\n"),
+
+	\forall s \in SITE (
+		@ (	"'" idSite_{s}		"'  "
+			"'" nameSite_{s}	"'  "
+			"'" name2Site_{s}	"'  "
+			"'" streetSite_{s}	"'  "
+			"'" citySite_{s}	"'  "
+			"'" countrySite_{s}	"'  "
+			"'" postcodeSite_{s}	"'  \n"
+		),
+	),
+
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+),
+

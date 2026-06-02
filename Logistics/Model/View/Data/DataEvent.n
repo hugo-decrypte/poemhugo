@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataEvent.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: EVENT
+@ "Data ",
+
+% ID
+@ ("DATAEVENT '"),	
+
+% Caption
+%@ TAG_EVENT,
+@ ("DATA EVENT '"),
+
+% Group
+@ "' EVENT ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(date,MINDATE,,);(date,MAXDATE,,);]\" \\\n"),	
+
+@ VIEWSQL,
+
+@("SELECT	min(e.dateResource)     AS MINDATE, \
+		max(e.dateResource)     AS MAXDATE \
+		FROM " DB_PREFIX "EVENT e \"\n\n"),

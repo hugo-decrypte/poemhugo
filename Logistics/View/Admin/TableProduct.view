@@ -1,0 +1,172 @@
+View ViewTablePRODUCT 'Produit' 'Produit'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Produit;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Left,Right,Left,Left,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Right,Left,Left}]"\
+"[DATAOBJ=PRODUCT;FILLCOLOR=LINERGB]"
+
+Data PRODUCT 'Produit' PRODUCT HTTPSQL 0 '[FIND={NAMECLUB,ID,DESIGNATION,DESIGNATIONTECH,FAMILY,TYPE,SUPPLIER,WEIGHT,PRICE,MINQUANTITYSTOCK,QUANTITYSTOCK,QUANTITYORDERED,QUANTITYSUPPLIED,LENGTH,HEIGHT,WIDTH,DEPTH,VOLUME,STATE,SELECTED}]'   [DOUBLECLICK=TablePRODUCTORDER] \
+"[20;(string,NAMECLUB,Division,,20,,);(string,ID,ID,,20,,);(string,DESIGNATION,Désignation,,30,,);(string,DESIGNATIONTECH,Matière,,35,,);(string,FAMILY,Famille,,15,,);(string,TYPE,Type,,20,,);(string,SUPPLIER,Fournisseur,,20,,);(string,WEIGHT,Poids,,15,,);(string,PRICE,Prix unitaire,,15,,);(int,MINQUANTITYSTOCK,Stock sécurité,,25,,);(int,QUANTITYSTOCK,Qté stock,,20,,);(int,QUANTITYORDERED,Qté commande,,30,,);(int,QUANTITYSUPPLIED,Qté provision,,30,,);(float,LENGTH,Longueur,,15,,);(float,HEIGHT,Hauteur,,15,,);(float,WIDTH,Largeur,,15,,);(float,DEPTH,Profondeur,,20,,);(float,VOLUME,Volume,,15,,);(string,STATE,Etat,,20,,);(string,SELECTED,Sélectionné,,10,,);(color,LINERGB,(255 255 255),,13.0.0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT p.id AS ID, p.Reference as REFERENCE, p.LevelTech as LEVELTECH,\
+ p.designation AS DESIGNATION,p.DesignationTech AS DESIGNATIONTECH,\
+ IIF(p.Family in (SELECT f.Id FROM FAMILYPRODUCT f ), \
+ (SELECT (trim(f.DESIGNATION) + '(' + trim(f.ID) + ')' ) FROM FAMILYPRODUCT f where f.ID=p.Family),\
+ p.Family) AS FAMILY,\
+ IIF(p.TypeProduct in (SELECT tp.Id FROM TYPEPRODUCT tp ), \
+ (SELECT (trim(tp.name) + '(' + trim(tp.ID) + ')' ) FROM TYPEPRODUCT tp where tp.ID=p.TypeProduct),\
+ p.TypeProduct) as TYPE, \
+ (select name from SUPPLIER s where s.id=p.idSupplier) as SUPPLIER,\
+ format(p.PriceUnit,'0.00') AS PRICE,\
+ p.QuantityStock AS QUANTITYSTOCK, p.QuantityPackaging AS QUANTITYPACKAGING,\
+ p.QuantityOrdered AS QUANTITYORDERED, p.QuantitySupplied AS QUANTITYSUPPLIED,\
+ p.MinQuantityStock AS MINQUANTITYSTOCK, p.NbDaysMinDurability as NBDAYSMINDURABILITY,\
+ p.NbDaysExpiration as NBDAYSEXPIRATION,\
+ p.selected as SELECTED,\
+ IIF(p.Weight is not NULL and p.Weight>0, format(p.Weight,'0.000'), ' ') AS WEIGHT,\
+ IIF(p.Volume is not NULL and p.Volume>0, format(p.Volume,'0.000'), ' ') AS VOLUME,\
+ p.WeightUnity AS WEIGHT_UNITY, p.LengthUnity AS LENGTH_UNITY,\
+ format(p.Length,'0.00') AS LENGTH, format(p.Height,'0.00') AS HEIGHT,\
+ format(p.Width,'0.00') AS WIDTH, format(p.Depth,'0.00') AS DEPTH,\
+ (format(tabCM.QTYTODAY,'0') + '/' + format(tabCM.QTY2M,'0') + '/' + format(tabCM.QTY4M,'0')) as QTYCMD,\
+ (select format(sum(LP.QuantityDefective)*100/sum(LP.QuantityReal), '0.00')\
+  from PALLET_PRODUCT LP\
+  where LP.IdProduct=p.Id\
+   and LP.QuantityReal<>0\
+   and LP.DateCreate>=format(dateAdd('m',-12,Date()),'YYYY-MM-DD')\
+   and LP.DateCreate<format(Date(),'YYYY-MM-DD')\
+  group by LP.IdProduct) as DEFAULTRATE,\
+ IIF(tabCM.QTYTODAY>0 , 'Livraison en retard',\
+ IIF(tabCM.QTY2M>p.QuantityStock , 'Rupture Stock 2 mois',\
+ IIF(p.QuantityOrdered>p.QuantityStock , 'Stock insuffisant' ,  ' '))) as STATE,\
+(SELECT clb.name FROM CLUB clb WHERE clb.id=p.idClub) 	AS NAMECLUB,\
+ IIF(tabCM.QTYTODAY>0, '(255 160 160)',\
+ IIF(tabCM.QTY2M>p.QuantityStock, '(255 200 200)',\
+ IIF(p.QuantityOrdered>p.QuantityStock, '(255 255 200)',\
+ '(220 220 255)'))) as LINERGB \
+ FROM PRODUCT p left join\
+ (select LO.IdProduct as IdA,\
+ sum(IIF( O.DateDelivery<=format(Date(), 'YYYY-MM-DD') , LO.QuantityRest , 0 )) as QTYTODAY,\
+ sum(IIF( O.DateDelivery>format(Date(),  'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',2,Date()), 'YYYY-MM-DD') , LO.QuantityRest , 0 )) as QTY2M,\
+ sum(IIF( O.DateDelivery>format(dateAdd('m',2,Date()), 'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',3,Date()), 'YYYY-MM-DD') , LO.QuantityRest , 0 )) as QTY3M,\
+ sum(IIF( O.DateDelivery>format(dateAdd('m',3,Date()), 'YYYY-MM-DD') and O.DateDelivery<=format(dateAdd('m',4,Date()), 'YYYY-MM-DD') , LO.QuantityRest , 0 )) as QTY4M,\
+ sum(IIF( O.DateDelivery>format(dateAdd('m',4,Date()), 'YYYY-MM-DD') , LO.QuantityRest , 0 )) as QTYP4M \
+ from ClientOrder O, ORDER_PRODUCT LO\
+ where O.Id=LO.IdOrder and LO.QuantityRest>0 and O.idState<>'9'\
+ group by LO.IdProduct \
+ ) tabCM on tabCM.IdA=p.ID \
+ ORDER BY p.Family,p.ID,p.Designation, p.DesignationTech"
+
+
+
+Script TableProductForProduct  'Composants' _ 334 'Composants' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableProductProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);FAMILY='XXX';IDPRODUCT={/*Selected(tablePRODUCT;1;(string,ID))*/}]"
+
+Script TablePRODUCTORDER  'Commandes pour produit' _ 20 'Commandes' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrder_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);IDTOUR='XXX';TITLEOBJ=Commandes pour produit {/*Selected(tablePRODUCT;1;(string,ID))*/};OWNEROBJ=IdClient;IDOBJ='XXX';OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tablePRODUCT;1;(string,ID))*/}]"
+
+Script TableOrderProduct  'Détail commandes' _ 31 'Détail commandes' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrderProduct_Product.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);OWNEROBJ=IdORDER;IDOBJ='XXX';TITLEOBJ=Détail commandes pour produit {/*Selected(tablePRODUCT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tablePRODUCT;1;(string,ID))*/};IDPRODUCT={/*Selected(tablePRODUCT;1;(string,ID))*/};IDCLIENT='XXX';IDORDER='XXX']"
+
+
+Script TablePalletProduct  'Palettes pour produit' _ 22 'Palettes' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TablePalletProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);TITLEOBJ=Palettes pour produit {/*Selected(tablePRODUCT;1;(string,ID))*/};IDPACKING='XXX';NOPALLET=0;IDPRODUCT={/*Selected(tablePRODUCT;1;(string,ID))*/}]"
+
+
+Script TableDeliveryProduct  'Livraisons' _ 25 'Livraisons' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);OWNEROBJ=IdTour;IDOBJ='XXX';TITLEOBJ=pour produit {/*Selected(tablePRODUCT;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tablePRODUCT;1;(string,ID))*/};IDTOUR='XXX']"
+
+Script TableDefaultRateProduct  'Taux de défaut' _ 26 'Taux de défaut' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDefaultRate_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);FAMILY={/*Selected(tablePRODUCT;1;(string,FAMILY))*/};OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=pour famille produit {/*Selected(tablePRODUCT;1;(string,FAMILY))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tablePRODUCT;1;(string,ID))*/}]"
+
+Script TableBalancheRevenueArticle  'CA' _ 34 'CA' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableBalanceSheetRevenueProduct_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDCOLOR=(200 200 200);FAMILY={/*Selected(tablePRODUCT;1;(string,FAMILY))*/};OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=pour famille produit {/*Selected(tablePRODUCT;1;(string,FAMILY))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ={/*Selected(tablePRODUCT;1;(string,ID))*/}]"
+
+// Script 1. Create Product
+
+Script CreateProduct  'Créer produit' _ 61 'Créer' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\CreateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) \
+{/*Input(CPRD;Créer produit;4;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+(string,FAMILY,Famille,,50.0.580,0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\
+(string,DESIGNATION,Désignation,,100.0.580,1);\
+(string,TYPEPRODUCT,Type produit,,100.0.580,0,0,[/*TYPEPRODUCT.LABELTYPE*/]);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 2. Duplicate Product
+
+Script DuplicateProduct  'Dupliquer produit' _ 62 'Dupliquer' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DuplicateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) {/*Selected(tablePRODUCT;1;(string,ID))*/} \
+{/*Input(DPRD;Dupliquer produit;1;\
+(string,IDNEW,Nouveau ID,,20.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 3. Modify Product
+
+Script ModifyProduct 'Modifier produit' _ 63 'Modifier' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\UpdateProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCT;1;(string,ID))*/} \
+{/*Input(MPRD;Modifier produit;6;\
+(string,DESIGNATION,Désignation,[/*PRODUCT.DESIGNATION*/],100.0.580,0);\
+(string,DESIGNATIONTECH,Matière,[/*PRODUCT.DESIGNATIONTECH*/],50.0.580,1);\
+(string,FAMILY,Famille,[/*PRODUCT.FAMILY*/],50.0.580,0,1,[/*FAMILYPRODUCT.LABELFAMILY*/],1);\
+(string,TYPEPRODUCT,Type,[/*PRODUCT.TYPE*/],50.0.580,0,1,[/*TYPEPRODUCT.LABELTYPE*/],1);\
+(float,PRICE,Prix unitaire,[/*PRODUCT.PRICE*/],10.4.400,1);\
+(float,WEIGHT,Poids,[/*PRODUCT.WEIGHT*/],10.3.400,1);\
+)*/}\
+'\
+Reload _ _ _
+
+// Script 4. Delete Product
+
+Script DeleteProduct  'Supprimer produit' _ 64 'Supprimer' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\DeleteProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCT;1;(string,ID))*/}' \
+Reload _ _ _
+
+//// Script 5. Synchronization quantities between PRODUCT, ClientOrder, Delivery, Packing List=
+
+Script UpdateQuantities 'Mettre à jour des données quantités' _ 65 'Mettre à jour des données quantités' _ 'tablePRODUCT' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Script\ScriptUpdateProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)' \
+Reload _ _ _
+
+//// Script 6. update selected value
+
+Script SelectDeselect  'Sélectionnéer/Désélectionnéer' _ 66 'Sélectionnéer/Désélectionnéer' _ 'tablePRODUCT' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Product\SelectDeselectProduct.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tablePRODUCT;1;(string,ID))*/}  \
+'\
+Reload _ _ _
+
+Data FAMILYPRODUCT 'Famille Produit' FAMILYPRODUCT HTTPSQL 0 _ _ \
+"[2;(string,IDFAMILY,Statut ID,,15.0.80,0);(string,LABELFAMILY,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT f.Id AS IDFAMILY,\
+	 (trim(f.DESIGNATION) + '(' + trim(f.ID) + ')') as LABELFAMILY \
+	 FROM FAMILYPRODUCT f \
+	 ORDER BY f.Designation,f.Id"
+
+Data TYPEPRODUCT 'Type Produit' TYPEPRODUCT HTTPSQL 0 _ _ \
+"[2;(string,IDTYPE,Statut ID,,15.0.80,0);(string,LABELTYPE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT tp.Id AS IDTYPE,\
+ (trim(name) + '(' + trim(ID) + ')') as LABELTYPE \
+	 FROM TYPEPRODUCT tp \
+	 ORDER BY tp.Id"
+

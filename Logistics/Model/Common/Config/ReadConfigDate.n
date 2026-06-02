@@ -1,0 +1,35 @@
+%==================================================%
+%                                                  %
+%            		ERP		 	   %
+%                                                  %
+%		ReadConfigDate.n               	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	
+'()' => (
+
+
+	t1 :: defaultDateTime,
+	t2 :: defaultDateTime,
+
+
+	'()' <- database,
+
+
+	(SQL : "SELECT parameter FROM " DB_PREFIX "CONFIG WHERE type='datetime' AND idClub='" idClubActive "' ORDER BY id"),
+
+	() = 2,
+
+	t1 = (),
+	t2 = (),
+
+	database <- '()',
+
+
+	date1 = t1[dateFormat],
+	date2 = t2[dateFormat],
+
+	DATE = [date1, date2],
+	HORIZON = [t1, t2],
+),

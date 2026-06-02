@@ -1,0 +1,66 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableDefaultRate.n 	   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableDefaultRate>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),	% JZ 0926 A
+		viewFile = ("TableDefaultRate" postfix),
+		
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(string,ID,No " TAG_MONTH ",,10,0);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+			
+		@ ("SELECT  "SQL_CONCAT""SQL_FORMATDATE"(max(LP.DateCreate),'"SQL_FORMATDATE_Y"')"SQL_CONCATWITH""SQL_FORMATNUM"(M.NoMonth,"SQL_FORMATSCALE0")"SQL_CONCATEND" as ID,\\\n"),
+		@ ("\t\t "SQL_CONCAT""SQL_FORMATDATE"(max(LP.DateCreate),'"SQL_FORMATDATE_Y "')"SQL_CONCATWITH"'  '"SQL_CONCATWITH"M.NameFR"SQL_CONCATEND" as NAMEMONTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective)*100/(sum(LP.QuantityReal)+1), "SQL_FORMATSCALE2") as QUANTITY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective*a.PriceUnit)*100/(sum(LP.QuantityReal*a.PriceUnit)+1), "SQL_FORMATSCALE2") as COST,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective*a.Weight)*100/(sum(LP.QuantityReal*a.Weight)+1),"SQL_FORMATSCALE2") as WEIGHT,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t\t FROM " DB_PREFIX "PRODUCT a, " DB_PREFIX "PALLET_PRODUCT LP, " DB_PREFIX "MONTHLABEL M \\\n"),
+		@ ("\t\t WHERE LP.IdProduct=a.ID and a.TypeProduct<>'F'\\\n"),
+		@ ("\t AND LP.DateCreate>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and LP.DateCreate<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+ 		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(LP.DateCreate,'"SQL_FORMATDATE_M"')+0 \\\n"),
+		@ ("\t\t GROUP BY M.NoMonth, M.NameFR \\\n"),
+		@ ("\t\t UNION SELECT\\\n"),
+		@ ("\t\t "SQL_CONCAT""SQL_FORMATDATE"(max(LP.DateCreate),'"SQL_FORMATDATE_Y"')"SQL_CONCATWITH"'99'"SQL_CONCATEND" as ID, '" TAG_TOTAL "' as NAMEMONTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective)*100/(sum(LP.QuantityReal)+1), "SQL_FORMATSCALE2") as QUANTITY,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective*a.PriceUnit)*100/(sum(LP.QuantityReal*a.PriceUnit)+1), "SQL_FORMATSCALE2") as COST,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(sum(LP.QuantityDefective*a.Weight)*100/(sum(LP.QuantityReal*a.Weight)+1),"SQL_FORMATSCALE2") as WEIGHT,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT a, " DB_PREFIX "PALLET_PRODUCT LP," DB_PREFIX "MONTHLABEL M \\\n"),
+		@ ("\t WHERE LP.IdProduct=a.ID and a.TypeProduct<>'F'\\\n"),
+		@ ("\t AND LP.DateCreate>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and LP.DateCreate<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(LP.DateCreate,'"SQL_FORMATDATE_M"')+0 \\\n"),
+		@ ("\t ORDER by ID \"\n\n"),
+						
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

@@ -1,0 +1,93 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 AddDepot.n		   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+ 
+['Work Directory' "Model\Common\Config\ReadMacroView.n"], % bai 0705
+
+'()' => (
+	aliasTable	= "DEPOT",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	(TAG_ONLY_ONE_TO_ADD : nbSelected = 1),
+
+
+	idDepotBuffer				:: "",
+	nameDepotBuffer				:: "",
+	idSiteDepotBuffer			:: "",
+	t1DepotBuffer				:: defaultDateTime,
+	t2DepotBuffer				:: defaultDateTime,
+	idTypeVehicleBuffer			:: "",
+
+	"IDDEPOT" \in IdFieldSelected => ( % bai 0222
+		idDepotBuffer			= (),
+		;
+		idDepotBuffer			= TAG_EMPTY_STRING, 
+	),
+	"NAMEDEPOT" \in IdFieldSelected => (
+		nameDepotBuffer			= (),
+		;
+		nameDepotBuffer			= TAG_EMPTY_STRING, 
+	),
+	"IDSITEDEPOT" \in IdFieldSelected => (
+		idSiteDepotBuffer		= (),
+		;
+		idSiteDepotBuffer		= TAG_EMPTY_STRING, 
+	),
+	"T1DEPOT" \in IdFieldSelected => (
+		t1DepotBuffer			= (),
+		;
+		t1DepotBuffer			= defaultDateTime, 
+	),
+	"T2DEPOT" \in IdFieldSelected => (
+		t2DepotBuffer			= (),
+		;
+		t2DepotBuffer			= defaultDateTime, 
+	),
+	"IDTYPEVEHICLE" \in IdFieldSelected => (
+		idTypeVehicleBuffer		= (),
+		;
+		idTypeVehicleBuffer		= TAG_EMPTY_STRING, 
+	),
+
+	'()' <- database,
+
+	%(SQL : "SELECT id FROM " DB_PREFIX "DEPOT WHERE id=RTRIM('" idDepotBuffer "')"), 
+	(SQL : SQL_SelectDepotIdIdIs idDepotBuffer "')"),  % Zhou 0831
+		nbRecord = (),
+
+	(TAG_EXISTS_ID idDepotBuffer : nbRecord=0), 
+/*
+	(SQL : "INSERT 	INTO " DB_PREFIX "DEPOT (id,name,idSite,t1,t2,IdTypeVehicle)
+		VALUES( '" idDepotBuffer "',
+			'" nameDepotBuffer "',
+			'" idSiteDepotBuffer "',
+			'" t1DepotBuffer "',
+			'" t2DepotBuffer "',
+			'" idTypeVehicleBuffer "')"),
+*/
+	(SQL : 	SQL_InsertIntoDepotValues
+		" '" idDepotBuffer "',
+		'" nameDepotBuffer "',
+		'" idSiteDepotBuffer "',
+		'" t1DepotBuffer "',
+		'" t2DepotBuffer "',
+		'" idTypeVehicleBuffer "')"), % bai 0815
+
+
+	sqlOperationLog := TAG_ADD_PRODUCT,
+	['Work Directory' "Model\Output\WriteLog.n"],
+
+	database <- '()',
+),

@@ -1,0 +1,79 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  		 FuncTableProductKit.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+%%% 2025.10.26 type product for kit is "KIT"
+%% prd.TypeProduct in ('KIT')
+
+<tableProductKit>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductKit" postfix),
+
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\"\\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT prd.id AS ID, \\\n"),
+		@ ("\t\t prd.Designation AS DESIGNATION,prd.DesignationTech AS DESIGNATIONTECH,\\\n"),
+		@ ("\t\t prd.TypeProduct as TYPEPRODUCT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.PriceUnit,"SQL_FORMATSCALE4") AS PRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.PurchasePrice,"SQL_FORMATSCALE4") AS PURCHASEPRICE,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Length,"SQL_FORMATSCALE0") AS LENGTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Height,"SQL_FORMATSCALE0") AS HEIGHT,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Width,"SQL_FORMATSCALE0") AS WIDTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Depth,"SQL_FORMATSCALE0") AS DEPTH,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Volume,"SQL_FORMATSCALE0") AS VOLUME,\\\n"),
+		@ ("\t\t "SQL_FORMATNUM"(prd.Weight,"SQL_FORMATSCALE1") AS WEIGHT,\\\n"),
+
+		%@ ("\t\t "SQL_FORMATNUM"(prd.Parameter1,"SQL_FORMATSCALE1") AS PARAMETER1,\\\n"),
+		%@ ("\t\t "SQL_FORMATNUM"(prd.Parameter2,"SQL_FORMATSCALE1") AS PARAMETER2,\\\n"),
+		%@ ("\t\t prd.Formula1 AS FORMULA1,\\\n"),
+		%@ ("\t\t prd.Formula2 AS FORMULA2,\\\n"),
+		%@ ("\t\t '(220 220 255)' as LINERGB \\\n"),
+
+		@ ("\t\t (select "SQL_CONCAT"trim(LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" ID "SQL_CONCATWITH" ')'"SQL_CONCATEND" from " DB_PREFIX "STATE s where s.ID=prd.idState and s.CATEGORY='PRODUCT') as STATE,\\\n"),
+ 		@ ("\t\t "SQL_CASEWHEN"prd.idState in (select s.Id from " DB_PREFIX "STATE s where s.CATEGORY='PRODUCT') "SQL_THEN" (select Color from " DB_PREFIX "STATE s where s.Id=prd.idState and s.CATEGORY='PRODUCT')"SQL_ELSE"\\\n"),
+   		@ ("\t\t '(255 255 255)') AS LINERGB \\\n"),
+		@ (" FROM " DB_PREFIX "PRODUCT prd \\\n"),
+		@ (" WHERE prd.TypeProduct in ('KIT') \\\n"),
+		@ (" ORDER BY prd.ID\"\n\n\n\n"), 
+
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductKit2EditProductKit.n"],	% JZ 1001
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductKit2TableProductForProduct.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductKit2EditOnView.n"],
+
+
+
+		%=====================
+		['Work Directory' "Model\View\Data\DataFamilyProduct.n"],
+		['Work Directory' "Model\View\Data\DataTypeProduct.n"],
+		%=====================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

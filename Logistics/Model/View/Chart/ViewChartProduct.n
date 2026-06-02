@@ -1,0 +1,24 @@
+%==================================================%
+%                                                  %
+%            	     Scheduling    	           %
+%                                                  %
+%		  ViewChartProduct.n               %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\View\Chart\FuncChartProduct.n"],
+
+'@' => (
+
+	chartProduct(
+		TAG_DIAGRAM_PRODUCT,
+		false,true, true,true,true,
+		"PRODUCTTASK", "TASK","PRODUCT", "", "Selected", 360,
+		TAG_DIAGRAM_PRODUCT, ""),	% JZ 1023
+
+
+	%chartProduct(TAG_DIAGRAM_PRODUCT,true,""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_DIAGRAM_PRODUCT TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),

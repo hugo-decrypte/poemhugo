@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableDeliveryNote.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableDeliveryNote.n"],
+
+'@' => (
+	tableDeliveryNote("OPT_ORDER",TAG_TABLE,"DELIVERYNOTE",true,"EditDeliveryNote",TAG_DELIVERY_NOTE,	"",	""),
+),

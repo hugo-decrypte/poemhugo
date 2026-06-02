@@ -1,0 +1,64 @@
+/******************************************************/
+/*	         Vehicle Routing	              */
+/*	                                              */
+/*		ReadOrder.n   			      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+
+	ruleOptimizePlannedCandidate => (
+		sqlWhereStateOrder = ("WHERE state>='" STATE_CANDIDATE "'"),
+		;
+
+		ruleRelaxation => (
+			sqlWhereStateOrder = ("WHERE state='" STATE_PLANNED "'"),
+			;
+
+			sqlWhereStateOrder = ("WHERE state='" STATE_CANDIDATE "'"),
+		),
+	),
+
+
+	sqlReadOrder = (
+		"SELECT id,idSite2,priority,idClient,idProduct,quantity,weight,volume,timeFixed,receipts,strict,t1Service0,t2Service0,idShift,IdTypeResource,IdResource0,state
+		FROM " DB_PREFIX "OPT_ORDER "
+		sqlWhereStateOrder " AND idClub='" idClubLogin "' ORDER BY id"),
+
+
+
+	['Work Directory' "Model\Input\Order\ReadOrder0.n"],
+
+
+
+	ruleOptimizeCandidate \vee ruleOptimizePlannedCandidate => (
+		TAG_NO_ORDER_SELECTED :
+		ORDER <> {}
+	),
+
+
+
+	\forall t \in TOUR (
+		idOrder_{sourceTour_{t}} = TAG_SOURCE,
+		idOrder_{sinkTour_{t}}	 = TAG_SINK,
+
+	),
+
+
+
+	\forall i \in IDORDER (
+		orderId_{i} \in ORDER,
+		idOrder_{orderId_{i}} = i,
+	),
+
+
+
+	\forall o \in ORDER (
+		OrderSiteOrder_{o} = \{
+			\forall i \in ORDER
+			(idSite2Order_{o} = idSite2Order_{i} ? i : 0)
+		\} \setminus 0,
+	),
+),

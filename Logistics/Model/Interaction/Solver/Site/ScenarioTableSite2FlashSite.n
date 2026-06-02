@@ -1,0 +1,61 @@
+%===============================================================%
+%								%
+%			Scheduling				%
+%								%
+%		ScenarioTableSite2FlashSite.n		%
+%								%
+%	(c)2000. Enginest. All rights reserved.			%
+%===============================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "FlashSite ",
+
+% Caption
+@ ("_ "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_FLASH_SITE,
+
+% Label
+@ (" '" TAG_LABEL_UNLABEL "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSITE' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ ("'[COUNT=1;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n"),
+),
+
+% Instruction... (When Count>0)
+@ ("\tNcl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\\Interaction\\Solver\\Site\\FlashSite.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+
+@ ("\t'(/*SERVERPORT*/) (/*USERID*/) "),
+@ ("\t{/*selected(tableSITE;1;(string,IDSITE))*/}'\\\n"),
+
+
+%@ ("\t'[(/*REPLY*/);id=" viewFile "]'\n\n"),

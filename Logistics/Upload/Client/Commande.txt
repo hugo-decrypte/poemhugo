@@ -1,0 +1,9 @@
+﻿SHEET_NUMBER=1;
+SHEET_NAME=Commande;10;6;
+Commande;Client;Adresse;Ville;Date commande;Date livraison;#Produit;#Palette;Quantité;Commentaire;
+idCommande;client;adresse;ville;dateCommande;dateLivraison;idProduit;idPalette;quantite;commentaire;
+string key;string;string;string;date;date;int;int;int;string;
+2012286_00;SAHGEV;ENTREE 1, 9 RUE DE MONTUREUX;GEVIGNEY;28/03/2022;25/04/2022;2;11;;;
+28092023;BOX IND;17 ALLEE DES GRANDS PAQUIS;Nancy;28/09/2023;29/09/2023;2;301;;par téléphone;
+A72664_00;BUREL PRODUCTION;Parc d'activité de la Gaultière;CHATEAUBOURG;19/05/2022;20/04/2023;1;0;;;
+4500010864_00;KUHN HUARD SA;43 RUE D'ANCENIS;CHATEAUBRIANT;10/07/2023;23/02/2024;1;300;1014;Créé;

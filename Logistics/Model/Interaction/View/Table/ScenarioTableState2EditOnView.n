@@ -1,0 +1,167 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableState2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreateState ",
+
+% Caption
+@ (" '" TAG_INSERT_STATE "' "),	% JZ 0911
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+
+% Label
+@ (" '" TAG_INSERT "' "),	% JZ 1003
+
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSTATE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+CreateState_Input=(
+	"{/*Input(" TAG_INSERT_STATE ";4;\\\n"
+	"(string,ID," TAG_ID ",,50." inputWidth ",0,,);\\\n"
+	"(string,LABEL," TAG_LABEL ",,50." inputWidth ",0,,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",,50." inputWidth ",0,,);\\\n"
+	"(color,COLOR,Couleur,(255 255 255),50." inputWidth ",0,,);\\\n"
+	")*/}\\\n"
+),
+CreateState_SQL1=(
+	"\"INSERT INTO " DB_PREFIX "STATE (Id, Category, Label, Comments, Color) \\\n"
+	"  select distinct '[/*ID*/]', (/*CATEGORY*/), '[/*LABEL*/]', '[/*COMMENTS*/]', '[/*COLOR*/]'\\\n"
+	"  from " DB_PREFIX "STATE s0\\\n"
+	"  where not exists (select 1 from " DB_PREFIX "STATE s where s.ID='[/*ID*/]'  and s.Category=(/*CATEGORY*/) )'\"\n\n\n"
+),
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\State\CreateState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*CATEGORY*/)  \\\n"),
+		@ CreateState_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" CreateState_Input),
+		@ ("'\\\n"),
+		@ CreateState_SQL1,
+),
+
+%=======================================================================================================================
+%
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyState ",
+
+% Caption
+@ (" '" TAG_UPDATE_STATE "' "),
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW2,
+
+% Label
+@ (" '" TAG_UPDATE "' "),	
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSTATE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2; COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+
+% Instruction... (When Count>0)
+UpdateState_Input=(
+	"{/*Input(" TAG_UPDATE_STATE ";3;\\\n"
+	"(string,LABEL," TAG_LABEL ",[/*STATE.LABEL*/],50." inputWidth ",0,,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*STATE.COMMENTS*/],50." inputWidth ",0,,);\\\n"
+	"(color,COLOR,Couleur,[/*STATE.COLOR*/],50." inputWidth ",0,,);\\\n"
+	")*/}\\\n"
+),
+UpdateState_SQL1=(
+	"\"Update " DB_PREFIX "STATE \\\n"
+	"  set Label= '[/*LABEL*/]', Comments='[/*COMMENTS*/]', Color='[/*COLOR*/]'\\\n"
+	"  where ID='[/*STATE.ID*/]' and  Category=(/*CATEGORY*/)\"\n\n"
+),
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ (" '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\State\UpdateState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  (/*CATEGORY*/) {/*Selected(tableSTATE;1;(string,ID);)*/} \\\n"),
+		@ UpdateState_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+		@ ("'" UpdateState_Input),
+		@ ("'\\\n"),
+		@ UpdateState_SQL1,
+),
+

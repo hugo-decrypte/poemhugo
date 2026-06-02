@@ -1,0 +1,70 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductToProductPieceOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idProductBuffer :: "",
+	
+	
+	idProductBuffer = (),
+	
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjBuffer_{i} 		:: "",
+		idObjBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "',"),
+			;
+			strIdObjBuffer_{i} = ("'" idObjBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJBUFFER :: "",
+	IDOBJBUFFER = [\forall i \in [1, nbSelected] strIdObjBuffer_{i}],
+	
+	ordLengthByPieceBuffer 	:: 0,  
+	orWidthByyPieceBuffer 	:: 0,
+	ordHeightyPieceBuffer 	:: 0,
+	ordDepthyPieceBuffer 	:: 0,
+	
+	
+	ordLengthByPieceBuffer = (),
+	orWidthByyPieceBuffer 	= (),
+	ordHeightyPieceBuffer 	= (),
+	ordDepthyPieceBuffer 	= (),
+	
+		   
+
+	'()' <- database,
+	
+
+	UpdateProductToProductPieceOrdre_SQL1 = (
+		"Update " DB_PREFIX "PRODUCT_COMPONENT SET
+		   OrderByLength="ordLengthByPieceBuffer",
+		   OrderByHeight="ordHeightyPieceBuffer",
+		   OrderByWidth= "orWidthByyPieceBuffer",
+		   OrderByDepth= "ordDepthyPieceBuffer" 
+		  WHERE IdProduct in ("idProductBuffer")
+		   and IdSubProduct="IDOBJBUFFER" "
+	),
+
+	(SQL : UpdateProductToProductPieceOrdre_SQL1), 
+	
+	
+	database <- '()',
+),

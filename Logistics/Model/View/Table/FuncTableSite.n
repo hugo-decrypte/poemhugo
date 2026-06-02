@@ -1,0 +1,63 @@
+%==================================================%
+%                                                  %
+%  		FuncTableSite.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableSite>(id,type,aliasTable,bestfit, doubleclick,title,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (idUserPostfix = "" ? "" : idUserLogin),
+		viewFile = ("TableSite" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB,,,13.0.0);(string,IDSITE,,,);]\" \\\n"),
+
+		@ VIEWSQL,
+
+	     	@("SELECT	s.idClub 				AS IDCLUB, \
+				" SQL_ClubNameIdIs "s.idClub)		AS NAMECLUB,\
+    				s.id					AS ID, \
+				s.name					AS NAME,\
+				s.name2					AS SECONDNAME,\
+				s.idTypeSite				AS NAMETYPESITE,\
+				s.idTypeTrip				AS NAMETYPETRIP,\
+				s.idTypeRisk				AS NAMETYPERISK,\
+				s.street				AS STREET,\
+				s.city					AS CITY,\
+				s.country				AS COUNTRY,\
+				s.postcode				AS POSTCODE,\
+				s.latitude				AS LATITUDE,\
+				s.longitude				AS LONGITUDE,\
+				s.comments				AS COMMENTS,\
+				s.selected				AS SELECTED,\
+				" SQL_AliasCategoryIs "'BOOL' AND al.id=s.selected) 	AS NAMESELECTED,\
+				IIF(s.selected='" STATE_TRUE "', '" RGB_CRITICAL "', '" RGB_WHITE "' )	AS LINERGB \
+			FROM " DB_PREFIX "SITE s\
+			WHERE " SQL_ViewUserVisibleClubIs "s.idClub)\
+			ORDER BY s.idClub,s.id\n\n"),
+
+
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSite2EditOnView.n"],
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableSite2EditSite.n"],
+
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

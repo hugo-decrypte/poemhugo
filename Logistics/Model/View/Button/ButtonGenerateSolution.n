@@ -1,0 +1,130 @@
+%==================================================%
+%                                                  %
+%	       ButtonGenerateSolution.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+[viewDirectory "ButtonGenerateSolution.view"] <- '@',
+
+% View Object	
+@ ("View "),
+
+% ID
+%@ ("Reoptimize '"),		
+@ ("'" TAG_GENERATE_SOLUTION "' "), % bai 0709
+
+% Caption
+@ ("_ "),	% Zhou 0708
+
+% Title	
+@ ("'" TAG_GENERATE_SOLUTION "' "),
+
+% Color(R G B)	
+@ ("255 255 255 "),
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 40 40 "),
+
+% Margin	
+@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("DEBUGLEVEL=0;"),
+@ ("SCROLLBAR=0;"),
+@ ("NATURESCALE=0;"),
+@ ("BESTFIT=1]'"),
+@ "\n\n",
+
+
+
+% Script Object	
+@ ("Script "),
+
+% ID
+@ ("GenerateSolution '"), % bai 0709
+
+% Caption
+@ (TAG_GENERATE_SOLUTION "' "),
+
+% Group	
+@ ("_ "),
+
+% Integer Code [0..1000]
+@ SCRIPT_GENERATE_SOLUTION,
+
+
+% Label	
+@ (" '" TAG_CLICK_TO_GENERATE_SOLUTION "' "),
+
+% Object Group Set "{G1, G2, ...}"	
+@ ("_ "),
+
+% Object Id. Set / Object Item
+@ ("_ "),
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"	
+@ ("'0 0 40 40' "),
+
+% Color "(R G B)" / "[Label format]"	
+@ ("_ "),
+
+% Icon file	
+@ ("_ "),
+
+% Alert message
+@ ("_ "),
+%@ ("'" TAG_ASK_GENERATE_SOLUTION "' "),
+
+
+
+
+SetOpt = ("{" TAG_OPTIMIZE_CANDIDATE "," TAG_OPTIMIZE_PLANNED_CANDIDATE "," TAG_RELAXATION "}"),
+
+
+nclInputOrder = (
+	"{/*Input(" TAG_GENERATE_SOLUTION ";1;(string,ORDER," TAG_SELECT ","
+	TAG_OPTIMIZE_PLANNED_CANDIDATE ",50." inputWidth ",,," SetOpt ")*/}"
+),
+
+nclInputOrderClub = (
+	"{/*Input(" TAG_GENERATE_SOLUTION ";2;(string,ORDER," TAG_SELECT ","
+	TAG_OPTIMIZE_PLANNED_CANDIDATE ",50." inputWidth ",,," SetOpt ");(set,CLUBID,"
+	TAG_CLUB_ID ",[/*CLUB.IDCLUB*/],,,,[/*CLUB.IDCLUB*/])*/}"
+),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX_BREAK "]'\\\n"),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (NCLSCRIPT "Model\Script\ScriptGenerateSolution.n'"),
+
+%@ NCL_ARGUMENT_BEGIN,
+@ NCL_ARGUMENT_PARALLEL_BEGIN,
+
+idClubLogin \not\in IdRelatedClubLogin => (
+	#IdClubRelatedLogin > 1 => (
+		@ nclInputOrderClub,
+		;
+
+		@ nclInputOrder,
+	),
+	;
+
+	@ nclInputOrder,
+),
+
+@ NCL_ARGUMENT_END_WITH,
+@ ("Reload \"[VIEWID=ViewTableRESULT]\"\n\n"),
+
+
+'@' <- [viewDirectory "ButtonGenerateSolution.view"],
+
+

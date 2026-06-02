@@ -1,0 +1,42 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 CreateTour.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	nameDriverBuffer	:: "",
+	immatricBuffer		:: "",
+	dateTourBuffer		:: "",
+	
+	nameDriverBuffer	= (),
+	immatricBuffer		= (),
+	dateTourBuffer		= (),
+
+	'()' <- database,
+	
+	CreateTour_SQL1 = (
+		"INSERT INTO " DB_PREFIX "TOUR (Id, IdDriver, IdVehicle, DateTour, Quantity, Tonnage, Volume, NbPallet, IdAgency, IdState) 
+		  select '"dateTourBuffer"'+"SQL_FORMATNUM"(" SQL_CASEWHEN "N is NULL" SQL_THEN "0" SQL_ELSE "N" SQL_CASEEND "+1,"SQL_FORMATSCALE0") as ID, dr.Id, v.Id, "dateTourBuffer", 0,0,0,0, v.IdAgency, '0' as State 
+		  from
+		   (select max(N0) as N from
+			(select (mid(max(t.Id),9,2)+0) as N0 from " DB_PREFIX "TOUR t where t.Id like '"dateTourBuffer"'+'%' union all
+			 select 0 as N0 from " DB_PREFIX "TOUR t where not exists (select 1 from " DB_PREFIX "TOUR t0 where t0.Id like '"dateTourBuffer"'+'%')
+			)) tabID,
+			" DB_PREFIX "DRIVER dr, " DB_PREFIX "VEHICLE v
+		  where trim(dr.LastName) + ', ' + dr.FirstName = '"nameDriverBuffer"'
+		   and v.Immatric='"immatricBuffer"'"
+	),
+	
+	(SQL : CreateTour_SQL1), 
+	
+
+	database <- '()',
+),

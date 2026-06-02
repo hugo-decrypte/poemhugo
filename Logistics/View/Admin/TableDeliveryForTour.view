@@ -1,0 +1,69 @@
+View ViewTableDELIVERYFORTOUR 'Livraisons à complémenter (/*TITLEOBJ*/)' 'Livraisons à complémenter (/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableDELIVERYFORTOUR _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Livraisons à complémenter (/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Center,Center,Center,Right,Right,Left}]"\
+"[DATAOBJ=DELIVERYFORTOUR;FILLCOLOR=LINERGB]"
+
+Data DELIVERYFORTOUR 'Livraisons à complémenter (/*TITLEOBJ*/)' DELIVERYFORTOUR HTTPSQL 0 '[FIND={ID,NAMECLIENT,ADDRESSDELIVERY,DATEDELIVERY,DATEINVOICE,DATEPAYMENT,AMOUNTHT,WEIGHT,STATE}]'   [DOUBLECLICK=] \
+"[9;(string,ID,Livraison,,10,,);(string,NAMECLIENT,Client,,20,,);(string,ADDRESSDELIVERY,Adresse,,20,,);(date,DATEDELIVERY,Date livraison,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEINVOICE,Date facture,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEPAYMENT,Date paiement,,15,,YYYY-MM-DD|DD/MM/YYYY);(string,AMOUNTHT,Montant HT(€),,15,,);(string,WEIGHT,Poids,,10,,);(string,STATE,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0);]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\
+		 (select (trim(PtD.Address)+', '+trim(PtD.PostCode)+' '+PtD.City) from POINTDELIVERY PtD where PtD.IdClient=d.IdClient and PtD.IdPoint=d.IdPointDelivery) as ADDRESSDELIVERY,\
+		 d.AmountHT as AMOUNTHT,\
+		 d.DateDelivery as DATEDELIVERY,\
+		 d.DateInvoice as DATEINVOICE,\
+		 d.DatePayment as DATEPAYMENT,\
+		 (select sum(p.Weight*DP.Quantity) from DELIVERY_PRODUCT DP inner join PRODUCT p on p.Id=DP.IdProduct where DP.IdDelivery=d.Id) as WEIGHT,\
+		 (select LABEL from STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY') as STATE,\
+		 1 as ORD,\
+		 IIF(d.idState in (select s.Id from STATE s where s.CATEGORY='DELIVERY'),(select Color from STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY'),\
+		   '(255 230 230)') AS LINERGB \
+	 FROM DELIVERY d, CLIENT cl \
+	 WHERE d.IdClient=cl.Id \
+	 AND (d.Id in (select DP.IdDelivery from DELIVERY_PRODUCT DP where (DP.(/*OWNERSUBOBJ*/) in ((/*IDSUBOBJ*/)) ) or 'XXX' in ((/*IDSUBOBJ*/)) ) )\
+	 AND (d.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)) ) \
+	 UNION ALL SELECT\
+		 d.id AS ID, d.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\
+		 (select (trim(PtD.Address)+', '+trim(PtD.PostCode)+' '+PtD.City) from POINTDELIVERY PtD where PtD.IdClient=d.IdClient and PtD.IdPoint=d.IdPointDelivery) as ADDRESSDELIVERY,\
+		 d.AmountHT as AMOUNTHT,\
+		 d.DateDelivery as DATEDELIVERY,\
+		 d.DateInvoice as DATEINVOICE,\
+		 d.DatePayment as DATEPAYMENT,\
+		 (select sum(p.Weight*DP.Quantity) from DELIVERY_PRODUCT DP inner join PRODUCT p on p.Id=DP.IdProduct where DP.IdDelivery=d.Id) as WEIGHT,\
+		 (select LABEL from STATE s where s.Id=d.idState and s.CATEGORY='DELIVERY') as STATE,\
+		 2 as ORD,\
+		  '(255 255 255)' AS LINERGB \
+	 FROM DELIVERY d, CLIENT cl \
+	 WHERE d.IdClient=cl.Id \
+	 AND d.idState<>'9'\
+	 AND ('XXX' not in ((/*IDTOUR*/)) and (d.IdTour is NULL or d.IdTour<=' ') ) \
+	 ORDER BY ORD, ID "
+
+
+//////Table///////////////////////////////////////////
+
+Script TableDeliveryProduct 'Produits' _ 25 'Produits' _ 'tableDELIVERY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDeliveryProduct.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits pour livraison {/*Selected(tableDELIVERY;1;(string,ID))*/};IDDELIVERY={/*Selected(tableDELIVERY;1;(string,ID))*/}]"
+
+Script TablePreparationDelivery  'Préparer livraison' _ 35 'Préparer livraison' _ 'tableDELIVERY' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDeliveryPreparation.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);IDDELIVERY={/*Selected(tableDELIVERY;1;(string,ID))*/}]"
+
+Script AddDeliveryToTour  'Ajouter livraison' _ 61 'Ajouter livraison' _ 'tableDELIVERYFORTOUR' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\AddDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) {/*Selected(tableDELIVERYFORTOUR;1;(string,ID);)*/} \
+'\
+Reload _ _ _
+
+Script RemoveDeliveryFromTour 'Enlever livraison du tournée' _ 62 'Enlever livraison du tournée' _ 'tableDELIVERYFORTOUR' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\RemoveDelivery.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) {/*Selected(tableDELIVERYFORTOUR;1;(string,ID);)*/} \
+'\
+Reload _ _ _
+

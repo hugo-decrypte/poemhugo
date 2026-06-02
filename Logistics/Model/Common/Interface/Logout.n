@@ -1,0 +1,28 @@
+%==================================================%
+%                                                  %
+% 		 Logout.n			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+	'()' <- database,
+
+	(SQL : "UPDATE	" DB_PREFIX "LOG
+		SET	t2='" 'yyyy-mm-dd hh:mm:ss' "',"SQL_FIELD_PERMISSION"='" STATE_READ "'
+		WHERE	idUser='" idUserLogin "' AND (t2 IS NULL OR t2='" TAG_EMPTY_STRING "')"),
+
+
+	database <- '()',
+
+
+	( TAG_USER_CLUB_IS idClubLogin : ),
+
+	( TAG_USER_SERVER_IS serverIpLogin ":" serverPortLogin : ),
+
+
+
+	( TAG_USER_ID_IS idUserLogin : '()' ),
+),

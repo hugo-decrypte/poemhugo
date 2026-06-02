@@ -1,0 +1,112 @@
+%==================================================%
+%                                                  %
+%            	  Gestion Stock    	           %
+%                                                  %
+%  	FuncTableProductForPackingPallet.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductForPackingPallet>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableProductForPackingPallet" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableProductForPackingPallet" postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,20.0.50,0);\\\n"),
+		@ ("(float,PRICE,Prix unitaire,,8.2.50,0);\\\n"),
+		@ ("(float,WEIGHT,Poids,,8.2.50,0);\\\n"),
+		@ ("(float,WEIGHTPACKAGE,Poids/Paquet,,8.2.50,0);\\\n"),
+		@ ("(int,PALLET,Palette,,8.0.50,0);\\\n"),
+		@ ("(float,WEIGHTPALLET,Poids Palette,,8.2.50,0);\\\n"),
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT \\\n"),
+		@ ("\t\t Prd.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t  Prd.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t  Prd.Family as FAMILY,\\\n"),
+		@ ("\t\t  Prd.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+		@ ("\t\t  Prd.QuantityStock as QUANTITYSTOCK,\\\n"),
+		@ ("\t\t  Prd.QuantityOrdered as QUANTITYORDERED,\\\n"),
+		@ ("\t\t  Prd.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t  Prd.Weight as WEIGHTUNIT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(Prd.Weight*Prd.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+		@ ("\t\t  ' ' as NBPACKAGE,\\\n"),
+		@ ("\t\t  ' ' as QUANTITY,\\\n"),
+		@ ("\t\t  ' ' as QUANTITYDELIVERY,\\\n"),
+		@ ("\t\t  ' ' as QUANTITYREST,\\\n"),
+		@ ("\t\t  ' ' as QUANTITYDEFECTIVE,\\\n"),
+		@ ("\t\t  ' ' as DATECREATE,\\\n"),
+		@ ("\t\t  ' ' as DATEEXPIRATION,\\\n"),
+		@ ("\t\t  ' ' as WEIGHT,\\\n"),
+		@ ("\t\t  ' ' AS IDPACKING,\\\n"),
+		@ ("\t\t  ' ' as COMMENTS,\\\n"),
+		@ ("\t\t  ' ' as PALLET,\\\n"),
+		@ ("\t\t  ' ' as WEIGHTPALLET,\\\n"),
+		@ ("\t\t  0 as INCOMMAND,\\\n"),
+		@ ("\t\t  ' ' AS STATE,\\\n"),
+		@ ("\t\t  '(255 255 255)' AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT Prd \\\n"),
+		@ ("\t WHERE ( Prd.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+		@ ("\t  and Prd.TypeProduct<>'F'\\\n"),
+		@ ("\t  and Prd.Id not in (select PaPrd.IdProduct from " DB_PREFIX "PALLET_PRODUCT PaPrd where PaPrd.IdPacking in ((/*IDPACKING*/)) and PaPrd.NoPallet in ((/*NOPALLET*/))) \\\n"),
+		@ ("\t UNION ALL \\\n"),
+		@ ("\t SELECT \\\n"),
+		@ ("\t\t  Prd.Id as IDPRODUCT,\\\n"),
+		@ ("\t\t  Prd.Designation as DESIGNATION,\\\n"),
+		@ ("\t\t  Prd.Family as FAMILY,\\\n"),
+		@ ("\t\t  Prd.QuantityPackaging as QUANTITYPACKAGE,\\\n"),
+		@ ("\t\t  Prd.QuantityStock as QUANTITYSTOCK,\\\n"),
+		@ ("\t\t  Prd.QuantityOrdered as QUANTITYORDERED,\\\n"),
+		@ ("\t\t  Prd.PriceUnit as PRICE,\\\n"),
+		@ ("\t\t  Prd.Weight as WEIGHTUNIT,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(Prd.Weight*Prd.QuantityPackaging,"SQL_FORMATSCALE1") as WEIGHTPACKAGE,\\\n"),
+ 		@ ("\t\t  " SQL_CASEWHEN " "SQL_FORMATNUM"(PaPrd.Quantity*100/Prd.QuantityPackaging,"SQL_FORMATSCALE0")="SQL_FORMATNUM"(PaPrd.Quantity/Prd.QuantityPackaging,"SQL_FORMATSCALE0")*100" 
+					SQL_THEN " "SQL_FORMATNUM"(PaPrd.Quantity/Prd.QuantityPackaging,"SQL_FORMATSCALE0")" 
+					SQL_ELSE " "SQL_FORMATNUM"(PaPrd.Quantity/Prd.QuantityPackaging,"SQL_FORMATSCALE1")" SQL_CASEEND " as NBPACKAGE,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(PaPrd.Quantity,"SQL_FORMATSCALE0") as QUANTITY,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(PaPrd.QuantityOut,"SQL_FORMATSCALE0") as QUANTITYDELIVERY,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(PaPrd.QuantityStock,"SQL_FORMATSCALE0") as QUANTITYREST,\\\n"),
+		@ ("\t\t  "SQL_FORMATNUM"(PaPrd.QuantityDefective,"SQL_FORMATSCALE0") as QUANTITYDEFECTIVE,\\\n"),
+		@ ("\t\t  PaPrd.DateCreate as DATECREATE,\\\n"),
+		@ ("\t\t  PaPrd.DateExpiration as DATEEXPIRATION,\\\n"),
+		@ ("\t\t  format(Prd.Weight*PaPrd.Quantity,'0.0') as WEIGHT,\\\n"),
+		@ ("\t\t  Pal.IdPacking AS IDPACKING,\\\n"),
+		@ ("\t\t  PaPrd.Comments as COMMENTS,\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN "PaPrd.NoPallet is NULL" SQL_THEN "0" SQL_ELSE "PaPrd.NoPallet" SQL_CASEEND " as PALLET,\\\n"),
+		@ ("\t\t  (select "SQL_FORMATNUM"(sum(Pal0.Quantity*Prd0.Weight),"SQL_FORMATSCALE1") from " DB_PREFIX "PALLET_PRODUCT Pal0 inner join " DB_PREFIX "PRODUCT Prd0 on Prd0.Id=Pal0.IdProduct where Pal0.IdPacking=Pal.IdPacking and Pal0.NoPallet=PaPrd.NoPallet) as WEIGHTPALLET,\\\n"),
+		@ ("\t\t  1 as INCOMMAND,\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN ""SQL_FORMATNUM"(PaPrd.Quantity*100/Prd.QuantityPackaging,"SQL_FORMATSCALE0")<>"SQL_FORMATNUM"(PaPrd.Quantity/Prd.QuantityPackaging,"SQL_FORMATSCALE0")*100" SQL_THEN "'Paquet incomplet'" SQL_ELSE "'' " SQL_CASEEND " AS STATE,\\\n"),
+		@ ("\t\t  " SQL_CASEWHEN ""SQL_FORMATNUM"(PaPrd.Quantity*100/Prd.QuantityPackaging,"SQL_FORMATSCALE0")<>"SQL_FORMATNUM"(PaPrd.Quantity/Prd.QuantityPackaging,"SQL_FORMATSCALE0")*100" SQL_THEN "'(255 255 160)'" SQL_ELSE "\\\n"),
+		@ ("\t\t   " SQL_CASEWHEN "PaPrd.Quantity=0" SQL_THEN "'(200 200 200)'" SQL_ELSE "\\\n"),
+		@ ("\t\t    '(150 150 255)'" SQL_CASEEND " " SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT Prd \\\n"),
+		@ ("\t  inner join (" DB_PREFIX "PALLET Pal inner join " DB_PREFIX "PALLET_PRODUCT PaPrd on Pal.IdPacking=PaPrd.IdPacking and Pal.NoPallet=PaPrd.NoPallet) on PaPrd.IdProduct=Prd.Id \\\n"),
+		@ ("\t WHERE ( Prd.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\\\n"),
+		@ ("\t AND (Pal.IdPacking in ((/*IDPACKING*/)) and Pal.NoPallet in ((/*NOPALLET*/)) )\\\n"),
+		@ ("\t ORDER BY INCOMMAND desc, Family, DESIGNATION, IDPRODUCT \"\n\n"), 
+
+
+		%=====================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductForPackingPallet2EditOnView.n"],
+		%=====================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

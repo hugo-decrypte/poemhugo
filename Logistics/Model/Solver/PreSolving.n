@@ -1,0 +1,917 @@
+%==================================================%
+%                                                  %
+%                Vehicle Routing                   %
+%                                                  %
+%                   PreSolving.n                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%['Work Directory' "Model\Input\Vehicle\ReadResource.n"],
+
+
+'()' => (
+	\forall v \in RESOURCE
+		idSite10Vehicle_{v} <> "" => (
+			idSite1Vehicle_{v} = idSite10Vehicle_{v},
+
+			idSite20Vehicle_{v} <> "" => (
+				idSite2Vehicle_{v} = idSite20Vehicle_{v},
+				;
+				idSite2Vehicle_{v} = idSite10Vehicle_{v},
+			),
+			;
+
+			idSite1Vehicle_{v} = idSite20Vehicle_{v},
+			idSite2Vehicle_{v} = idSite20Vehicle_{v},
+		),
+
+
+	IdSiteOrder = \{ \forall o \in ORDER idSite2Order_{o} \},
+
+
+	IDSITE = (
+		IdSiteOrder \cup \{
+			\forall v \in RESOURCE idSite1Vehicle_{v}
+		\} \cup \{
+			\forall v \in RESOURCE idSite2Vehicle_{v}
+		\} \cup \{
+			\forall d \in DEPOT idSiteDepot_{d}
+		\} \cup \bigcup_{v \in RESOURCE}{IdSiteVehicle_{v}}
+	) \setminus "",
+
+
+	['Work Directory' "Model\Input\Site\ReadSiteOrder.n"],
+	['Work Directory' "Model\Input\Site\ReadSiteSite.n"],
+
+	['Work Directory' "Model\Solver\ParameterizeTimeDistance.n"],
+
+
+	['Work Directory' "Model\Common\Solver\ParameterizeResourceTime.n"],
+	['Work Directory' "Model\Common\Solver\ParameterizeObjective.n"],
+
+
+	\forall o \in ORDER (
+		site2Order_{o} = siteId_{idSite2Order_{o}},
+	),
+
+
+	\forall s \in SITE (
+		OrderSite_{s} = \{
+			\forall o \in ORDER (site2Order_{o} = s ? o : 0)
+		\} \setminus 0,
+	),
+
+	\forall t \in TOUR (
+		\forall s \in SITE (
+			dSiteSite1Tour_{t,s} = dSiteSite_{siteId_{idSite1Vehicle_{vehicleTour_{t}}},s},
+			dSite2TourSite_{s,t} = dSiteSite_{s,siteId_{idSite2Vehicle_{vehicleTour_{t}}}},
+		),
+
+		\forall s,i \in SITE (
+			detourSiteSiteTour_{t,s,i} = (
+				dSiteSite1Tour_{t,s} + dSiteSite_{s,i} - dSiteSite1Tour_{t,i}
+			),	% / dSiteSite1Tour_{t,i},
+
+			detourRateSiteSiteTour_{t,s,i} = (
+				dSiteSite1Tour_{t,s} + dSiteSite_{s,i} - dSiteSite1Tour_{t,i}
+			),	% / dSiteSite1Tour_{t,i},
+
+
+
+			sAreaSiteSiteTour_{t,s,i} =
+			(dSiteSite1Tour_{t,s} + dSiteSite_{s,i} + dSite2TourSite_{i,t}) / 2,
+
+			areaSquareSiteSiteTour_{t,s,i} =
+				sAreaSiteSiteTour_{t,s,i} *
+				(sAreaSiteSiteTour_{t,s,i} - dSiteSite1Tour_{t,s}) *
+				(sAreaSiteSiteTour_{t,s,i} - dSiteSite_{s,i}) *
+				(sAreaSiteSiteTour_{t,s,i} - dSite2TourSite_{i,t}),
+
+
+			/*areaSquareRightSiteSiteTour_{t,s,i} =
+				{(dSiteSite1Tour_{t,s}*dSite2TourSite_{i,t}) / 2}^2,
+
+			compatibleSiteSiteTour_{t,s,i} == (
+				areaSquareSiteSiteTour_{t,s,i} =<
+				(dSiteSite1Tour_{t,s} * dSiteSite1Tour_{t,i} / 2)^2
+				%dSiteSite1Tour_{t,s}^2 + dSiteSite1Tour_{t,i}^2
+			),*/
+
+
+			%dRightSiteSiteTour_{t,s,i} = 
+			%\sqrt{dSiteSite1Tour_{t,s}^2 + dSiteSite1Tour_{t,i}^2},
+
+
+			%detourSiteSiteTour_{t,s,i} =
+			%areaSquareSiteSiteTour_{t,s,i} / dSiteSite1Tour_{t,i},
+		),
+
+		\forall o \in ORDER (
+			dOrderSite1Tour_{t,o} = dSiteSite1Tour_{t,site2Order_{o}},
+			dSite2TourOrder_{o,t} = dSite2TourSite_{site2Order_{o},t},
+
+			\forall s \in SITE (
+				detourSiteOrderTour_{t,o,s} =
+				detourRateSiteSiteTour_{t,site2Order_{o},s},
+
+				detourOrderSiteTour_{t,s,o} =
+				detourRateSiteSiteTour_{t,s,site2Order_{o}},
+
+				
+				areaSquareSiteOrderTour_{t,o,s} =
+				areaSquareSiteSiteTour_{t,site2Order_{o},s},
+			),
+		),
+
+
+		%\forall o,i \in ORDER (
+			%dRightOrderOrderTour_{t,o,i} =
+			%dRightSiteSiteTour_{t,site2Order_{o},site2Order_{i}},
+
+			%detourOrderOrderTour_{t,o,i} =
+			%detourSiteSiteTour_{t,site2Order_{o},site2Order_{i}},
+
+			%areaSquareRightOrderOrderTour_{t,o,i} =
+			%areaSquareRightSiteSiteTour_{t,site2Order_{o},site2Order_{i}},
+		%),
+	),
+
+	\forall o \in ORDER
+	\forall s \in SITE (
+		dOrderSite_{s,o} = dSiteSite_{s,site2Order_{o}},
+	),
+
+
+	%\forall t \in TOUR
+	%\forall s,i \in SITE (
+	%	detourSiteSiteTour_{t,s,i} = \underline{detour0SiteSiteTour_{t,s,i}},
+	%),
+
+
+	%maxTimeSiteSite = \max_{s<>i \in SITE}{tSiteSite_{s,i}},	% JZ 09010
+
+
+	maxVehicleConfig	= (maxVehicle = 0 ? nbVehicle : maxVehicle),
+	maxTourConfig		= (maxTour = 0 ? nbTour : maxTour),
+	maxOrderTourConfig	= (maxOrderTour = 0 ? nbOrder : maxOrderTour),
+
+	maxMakespanConfig	= (maxMakespanDay = 0 ? timeDay : maxMakespanDay),	% timeFormat
+	maxWorktimeConfig	= (maxWorktimeDay = 0 ? timeDay : maxWorktimeDay),	% timeFormat
+
+
+	\forall t \in TYPEVEHICLE (
+		maxWeightTypeVehicle_{t} 	= (maxWeight0TypeVehicle_{t} = 0.0 ? +\infty : maxWeight0TypeVehicle_{t}),
+		maxVolumeTypeVehicle_{t} 	= (maxVolume0TypeVehicle_{t} = 0.0 ? +\infty : maxVolume0TypeVehicle_{t}),
+	),
+
+
+	\forall t \in TYPEVEHICLE (
+		maxVehicleTypeVehicle_{t} 	= (maxVehicle0TypeVehicle_{t} = 0 ? maxVehicleConfig : maxVehicle0TypeVehicle_{t}),
+
+		maxMakespanDayTypeVehicle_{t} 	= (maxMakespanDay0TypeVehicle_{t} = 0 ? maxMakespanConfig : maxMakespanDay0TypeVehicle_{t}),
+		maxWorktimeDayTypeVehicle_{t} 	= (maxWorktimeDay0TypeVehicle_{t} = 0 ? maxWorktimeConfig : maxWorktimeDay0TypeVehicle_{t}),
+
+		maxOrderTypeVehicle_{t} 	= (maxOrder0TypeVehicle_{t} = 0 ? maxOrderTourConfig : maxOrder0TypeVehicle_{t}),
+		maxQuantityTypeVehicle_{t} 	= (maxQuantity0TypeVehicle_{t} = 0 ? +\infty : maxQuantity0TypeVehicle_{t}),
+
+		maxWeightTypeVehicle_{t} 	= (maxWeight0TypeVehicle_{t} = 0.0 ? +\infty : maxWeight0TypeVehicle_{t}),
+		maxVolumeTypeVehicle_{t} 	= (maxVolume0TypeVehicle_{t} = 0.0 ? +\infty : maxVolume0TypeVehicle_{t}),
+		%maxWeightTypeVehicle_{t} 	= \overline{(maxWeight0TypeVehicle_{t} = 0.0 ? +\infty : maxWeight0TypeVehicle_{t})},
+		%maxVolumeTypeVehicle_{t} 	= \overline{(maxVolume0TypeVehicle_{t} = 0.0 ? +\infty : maxVolume0TypeVehicle_{t})},
+
+		lengthTypeVehicle_{t} 		= (length0TypeVehicle_{t} = 0.0 ? +\infty : length0TypeVehicle_{t}),
+		widthTypeVehicle_{t} 		= (width0TypeVehicle_{t} = 0.0 ? +\infty : width0TypeVehicle_{t}),
+		heightTypeVehicle_{t} 		= (height0TypeVehicle_{t} = 0.0 ? +\infty : height0TypeVehicle_{t}),
+	),
+
+
+	\forall o \in ORDER (
+		timeFixedOrder_{o} :: 0,
+		timeFixedOrder_{o} = \lfloor \underline{timeFixed0Order_{o} * timeRatio + 0.5} \rfloor,
+	),
+
+
+
+	\forall v \in RESOURCE (
+		site1Vehicle_{v} = siteId_{idSite1Vehicle_{v}},
+		site2Vehicle_{v} = siteId_{idSite2Vehicle_{v}},
+
+
+		SiteVehicle_{v} =
+			\{ \forall i \in IdSiteVehicle_{v} siteId_{i} \} \cup
+			\{site1Vehicle_{v}\} \cup \{site2Vehicle_{v}\},
+
+		DepotVehicle_{v} = \{
+			\forall d \in DEPOT (siteDepot_{d} \in SiteVehicle_{v} ? d : 0)
+		\} \setminus 0,
+
+		SiteDepotVehicle_{v} = \{ \forall d \in DepotVehicle_{v} siteDepot_{d} \},
+
+
+
+		costDayVehicle_{v}	= costDayTypeVehicle_{typeVehicleVehicle_{v}},
+		costNightVehicle_{v}	= costNightTypeVehicle_{typeVehicleVehicle_{v}},
+
+
+		minWorktimeDayVehicle_{v} 	= (minWorktimeDay0Vehicle_{v} 	= 0 ? minWorktimeDayTypeVehicle_{typeVehicleVehicle_{v}}: minWorktimeDay0Vehicle_{v}),
+		maxWorktimeDay1Vehicle_{v} 	= (maxWorktimeDay0Vehicle_{v} 	= 0 ? maxWorktimeDayTypeVehicle_{typeVehicleVehicle_{v}}: maxWorktimeDay0Vehicle_{v}),
+
+
+		minMakespanDayVehicle_{v} 	= (minMakespanDay0Vehicle_{v} 	= 0 ? minMakespanDayTypeVehicle_{typeVehicleVehicle_{v}}: minMakespanDay0Vehicle_{v}),
+		maxMakespanDay1Vehicle_{v} 	= (maxMakespanDay0Vehicle_{v} 	= 0 ? maxMakespanDayTypeVehicle_{typeVehicleVehicle_{v}}: maxMakespanDay0Vehicle_{v}),
+
+
+		minOrderTourVehicle_{v} 	= (minOrderTour0Vehicle_{v} 	= 0 ? minOrderTypeVehicle_{typeVehicleVehicle_{v}}: minOrderTour0Vehicle_{v}),
+		maxOrderTourVehicle_{v} 	= (maxOrderTour0Vehicle_{v} 	= 0 ? maxOrderTypeVehicle_{typeVehicleVehicle_{v}}: maxOrderTour0Vehicle_{v}),
+
+		minQuantityTourVehicle_{v} 	= (minQuantityTour0Vehicle_{v} 	= 0 ? minQuantityTypeVehicle_{typeVehicleVehicle_{v}}	: minQuantityTour0Vehicle_{v}),
+		maxQuantityTourVehicle_{v} 	= (maxQuantityTour0Vehicle_{v} 	= 0 ? maxQuantityTypeVehicle_{typeVehicleVehicle_{v}}	: maxQuantityTour0Vehicle_{v}),
+
+		minWeightTourVehicle_{v} 	= (minWeightTour0Vehicle_{v} 	= 0.0 ? minWeightTypeVehicle_{typeVehicleVehicle_{v}}	: minWeightTour0Vehicle_{v}),
+		maxWeightTourVehicle_{v} 	= (maxWeightTour0Vehicle_{v} 	= 0.0 ? maxWeightTypeVehicle_{typeVehicleVehicle_{v}}	: maxWeightTour0Vehicle_{v}),
+
+		minVolumeTourVehicle_{v} 	= (minVolumeTour0Vehicle_{v} 	= 0.0 ? minVolumeTypeVehicle_{typeVehicleVehicle_{v}}	: minVolumeTour0Vehicle_{v}),
+		maxVolumeTourVehicle_{v} 	= (maxVolumeTour0Vehicle_{v} 	= 0.0 ? maxVolumeTypeVehicle_{typeVehicleVehicle_{v}}	: maxVolumeTour0Vehicle_{v}),
+
+
+		minQuantityVehicle_{v}	= minQuantityTourVehicle_{v} * minTourByVehicle_{v},
+		maxQuantityVehicle_{v}	= maxQuantityTourVehicle_{v} * maxTourByVehicle_{v},
+
+		minWeightVehicle_{v}	= minWeightTourVehicle_{v} * minTourByVehicle_{v},
+		maxWeightVehicle_{v}	= maxWeightTourVehicle_{v} * maxTourByVehicle_{v},
+
+		minVolumeVehicle_{v}	= minVolumeTourVehicle_{v} * minTourByVehicle_{v},
+		maxVolumeVehicle_{v}	= maxVolumeTourVehicle_{v} * maxTourByVehicle_{v},
+	),
+
+
+	\forall t \in TOUR (
+		Site1Tour_{t} = \{ site1Vehicle_{vehicleTour_{t}} \} \cup SiteVehicle_{vehicleTour_{t}},
+		Site2Tour_{t} = \{ site2Vehicle_{vehicleTour_{t}} \} \cup SiteVehicle_{vehicleTour_{t}},
+
+		typeVehicleTour_{t}	= typeVehicleVehicle_{vehicleTour_{t}},
+
+
+		minQuantityTour_{t}	= minQuantityTourVehicle_{vehicleTour_{t}},
+		maxQuantityTour_{t}	= maxQuantityTourVehicle_{vehicleTour_{t}},
+
+		minWeightTour_{t}	= minWeightTourVehicle_{vehicleTour_{t}},
+		maxWeightTour_{t}	= maxWeightTourVehicle_{vehicleTour_{t}},
+
+		minVolumeTour_{t}	= minVolumeTourVehicle_{vehicleTour_{t}},
+		maxVolumeTour_{t}	= maxVolumeTourVehicle_{vehicleTour_{t}},
+	),
+
+
+	\forall t \in TOUR (
+		costUnitTour_{t}	= costUnitTypeVehicle_{typeVehicleTour_{t}},
+		costKilometerTour_{t}	= costKilometerTypeVehicle_{typeVehicleTour_{t}},
+	),
+
+
+	weightCapacitated == \bigvee_{t \in TOUR}{maxWeightTour_{t} < +\infty},
+	volumeCapacitated == \bigvee_{t \in TOUR}{maxVolumeTour_{t} < +\infty},
+
+
+	quantity = \sum_{o \in ORDER}{quantityOrder_{o}},
+	weight = \sum_{o \in ORDER}{weightOrder_{o}},
+	volume = \sum_{o \in ORDER}{volumeOrder_{o}},
+
+	% receipts
+	receipts = \sum_{o \in ORDER}{receiptsOrder_{o}},
+
+
+	minQuantityOrder = \min_{o \in ORDER}{quantityOrder_{o}},
+	minWeightOrder = \min_{o \in ORDER}{weightOrder_{o}},
+	minVolumeOrder = \min_{o \in ORDER}{volumeOrder_{o}},
+
+	ORDER = {} => (
+		minQuantityOrder	= 0,
+		minWeightOrder		= 0.0,
+		minVolumeOrder		= 0.0,
+	),
+
+
+	(TAG_RESOURCE_TOUR_CAPACITY_INSUFFICIENT #TOUR :
+		maxQuantity = \sum_{t \in TOUR}{maxQuantityTour_{t}},
+		quantity =< maxQuantity,
+
+		maxWeight = \sum_{t \in TOUR}{maxWeightTour_{t}},
+		weight =< maxWeight,
+
+		maxVolume = \sum_{t \in TOUR}{maxVolumeTour_{t}},
+		volume =< maxVolume,
+	),
+
+
+	maxOrderByOrder		= \max_{t \in TOUR}{maxOrderTourVehicle_{vehicleTour_{t}}},
+	maxOrderByQuantity	= \max_{t \in TOUR}{\lceil \underline{maxQuantityTour_{t} / minQuantityOrder} \rceil},
+	maxOrderByWeight	= \max_{t \in TOUR}{\lceil \underline{maxWeightTour_{t} / minWeightOrder} \rceil},
+	maxOrderByVolume	= \max_{t \in TOUR}{\lceil \underline{maxVolumeTour_{t} / minVolumeOrder} \rceil},
+
+
+	maxOrderTourFinal = \min(
+		maxOrderByOrder, maxOrderByQuantity, maxOrderByWeight, maxOrderByVolume
+	),
+
+
+	%maxOrderTourFinal =
+	%\min(maxOrderByOrder,
+	%	\min(maxOrderByQuantity,
+	%		\min(maxOrderByWeight,maxOrderByVolume))),
+
+
+	\forall t \in TOUR (
+		minOrderByTour_{t} = minOrderTourVehicle_{vehicleTour_{t}},
+		maxOrderByTour_{t} = \min(maxOrderTourVehicle_{vehicleTour_{t}}, maxOrderTourFinal),
+	),
+
+
+	Site1Vehicle = \{ \forall v \in RESOURCE site1Vehicle_{v} \},
+	Site2Vehicle = \{ \forall v \in RESOURCE site2Vehicle_{v} \},
+
+	SiteDepot = \bigcup_{v \in RESOURCE}{SiteDepotVehicle_{v}},
+
+	SiteVehicleDepot = SiteDepot \cup Site1Vehicle \cup Site2Vehicle,
+
+
+	% VehicleTypeVehicle
+	\forall t \in TYPEVEHICLE (
+		VehicleTypeVehicle_{t} = \{
+			\forall v \in RESOURCE (typeVehicleVehicle_{v} = t ? v : 0)
+		\} \setminus 0,
+
+		minQuantityTourTypeVehicle_{t}	= \sum_{v \in VehicleTypeVehicle_{t}}{minQuantityTourVehicle_{v}},
+		maxQuantityTourTypeVehicle_{t}	= \sum_{v \in VehicleTypeVehicle_{t}}{maxQuantityTourVehicle_{v}},
+		maxWeightTourTypeVehicle_{t}	= \sum_{v \in VehicleTypeVehicle_{t}}{maxWeightTourVehicle_{v}},
+		maxVolumeTourTypeVehicle_{t}	= \sum_{v \in VehicleTypeVehicle_{t}}{maxVolumeTourVehicle_{v}},
+	),
+
+	\forall v \in RESOURCE (
+		\forall p \in PRODUCT (
+			quantity0ProductVehicle_{v,p} :: 0,
+			weight0ProductVehicle_{v,p} :: 0.0,
+			volume0ProductVehicle_{v,p} :: 0.0,
+
+			minQuantityProductVehicle_{v,p} :: 0,
+			maxQuantityProductVehicle_{v,p} :: 0,
+			maxWeightProductVehicle_{v,p} :: 0.0,
+			maxVolumeProductVehicle_{v,p} :: 0.0,
+		),
+
+		\forall i \in [1,nbProductVehicle_{v}] (
+			productIdxVehicle_{v,i} = productId_{idProductIdxVehicle_{v,i}},
+
+			quantity0ProductVehicle_{v,productIdxVehicle_{v,i}} = quantity0IdxVehicle_{v,i},
+			weight0ProductVehicle_{v,productIdxVehicle_{v,i}} = weight0IdxVehicle_{v,i},
+			volume0ProductVehicle_{v,productIdxVehicle_{v,i}} = volume0IdxVehicle_{v,i},
+
+			minQuantityProductVehicle_{v,productIdxVehicle_{v,i}} = minQuantityIdxVehicle_{v,i},
+			maxQuantityProductVehicle_{v,productIdxVehicle_{v,i}} = maxQuantityIdxVehicle_{v,i},
+			maxWeightProductVehicle_{v,productIdxVehicle_{v,i}} = maxWeightIdxVehicle_{v,i},
+			maxVolumeProductVehicle_{v,productIdxVehicle_{v,i}} = maxVolumeIdxVehicle_{v,i},
+		),
+
+		ProductVehicle_{v} = \{ \forall i \in [1,nbProductVehicle_{v}] productIdxVehicle_{v,i} \},
+
+		\forall p \in PRODUCT \setminus ProductVehicle_{v} (
+			quantity0ProductVehicle_{v,p} = 0,
+			weight0ProductVehicle_{v,p} = 0.0,
+			volume0ProductVehicle_{v,p} = 0.0,
+			minQuantityProductVehicle_{v,p} = 0,
+			maxQuantityProductVehicle_{v,p} = 0,
+			maxWeightProductVehicle_{v,p} = 0.0,
+			maxVolumeProductVehicle_{v,p} = 0.0,
+		),
+	),
+
+
+	% HORIZON
+	HORIZON_sink	= [\inf HORIZON,\sup HORIZON + 1],
+
+
+	% ScheduleExtendedVehicle_{v}
+	\forall v \in RESOURCE (
+		% special for inactive tours
+		t2ExtendedVehicle_{v} :: defaultDateTime,
+		t2ExtendedVehicle_{v} = \sup Schedule0Resource_{v} + 1,
+
+		ScheduleExtendedVehicle_{v} = Schedule0Resource_{v} \cup \{ t2ExtendedVehicle_{v} \}, % JZ 0711
+
+
+		%HorizonVehicle_{v} = [\inf Schedule0Resource_{v}, \sup Schedule0Resource_{v}],
+
+
+		\forall d \in DATE \cup \{ dateInactive \}
+			ScheduleDateVehicle_{v,d} = Schedule0Resource_{v} \cap HorizonDate_{d}, % Zhou 0601
+
+		notDailyConstrainedVehicle_{v} == (
+			#DATE = 1 || 
+			maxMakespanDay1Vehicle_{v} >= \max_{d \in DATE}{#ScheduleDateVehicle_{v,d}} &&
+			\bigwedge_{d \in DATE}{ScheduleDateVehicle_{v,d} \subset HorizonDate_{d}}
+		),
+	),
+
+
+	% Capacity
+	\forall t \in TYPEVEHICLE (
+		\forall p \in PRODUCT (
+			minQuantityProductTypeVehicle_{t,p} :: 0,
+			maxQuantityProductTypeVehicle_{t,p} :: 0,
+
+			maxWeightProductTypeVehicle_{t,p} :: 0.0,
+			maxVolumeProductTypeVehicle_{t,p} :: 0.0,
+		),
+
+		\forall i \in [1,nbProductTypeVehicle_{t}] (
+			productIdxTypeVehicle_{t,i} = productId_{idProductIdxTypeVehicle_{t,i}},
+
+			minQuantityProductTypeVehicle_{t,productIdxTypeVehicle_{t,i}} = minQuantityIdxTypeVehicle_{t,i},
+			maxQuantityProductTypeVehicle_{t,productIdxTypeVehicle_{t,i}} = maxQuantityIdxTypeVehicle_{t,i},
+
+			maxWeightProductTypeVehicle_{t,productIdxTypeVehicle_{t,i}} = maxWeightIdxTypeVehicle_{t,i},
+			maxVolumeProductTypeVehicle_{t,productIdxTypeVehicle_{t,i}} = maxVolumeIdxTypeVehicle_{t,i},
+		),
+
+		ProductTypeVehicle_{t} = \{ \forall i \in [1,nbProductTypeVehicle_{t}] productIdxTypeVehicle_{t,i} \},
+
+		\forall p \in PRODUCT \setminus ProductTypeVehicle_{t} (
+			minQuantityProductTypeVehicle_{t,p} = 0,
+			maxQuantityProductTypeVehicle_{t,p} = +\infty,
+
+			maxWeightProductTypeVehicle_{t,p} = +\infty,
+			maxVolumeProductTypeVehicle_{t,p} = +\infty,
+		),
+	),
+
+
+	\forall d \in DEPOT (
+		\forall p \in PRODUCT (
+			minQuantityProductDepot_{d,p} :: 0,
+			maxQuantityProductDepot_{d,p} :: 0,
+		),
+
+		\forall i \in [1,nbProductDepot_{d}] (
+			productIdxDepot_{d,i} = productId_{idProductIdxDepot_{d,i}},
+
+			minQuantityProductDepot_{d,productIdxDepot_{d,i}} = minQuantityIdxDepot_{d,i},
+			maxQuantityProductDepot_{d,productIdxDepot_{d,i}} = maxQuantityIdxDepot_{d,i},
+		),
+
+		ProductDepot_{d} = \{ \forall i \in [1,nbProductDepot_{d}] productIdxDepot_{d,i} \},
+
+		\forall p \in PRODUCT \setminus ProductDepot_{d} (
+			minQuantityProductDepot_{d,p} = 0,
+			maxQuantityProductDepot_{d,p} = +\infty,
+		),
+	),
+
+	Tour1Vehicle = \{ \forall v \in RESOURCE tour1Vehicle_{v} \},
+
+	\forall p \in PRODUCT (
+		\forall t \in TOUR (
+			minQuantityProductTour_{t,p} :: 0,
+			maxQuantityProductTour_{t,p} :: 0,
+
+			maxWeightProductTour_{t,p} :: 0.0,
+			maxVolumeProductTour_{t,p} :: 0.0,
+		),
+
+		\forall t \in TOUR \setminus Tour1Vehicle (
+			minQuantityProductTour_{t,p} = minQuantityProductTypeVehicle_{typeVehicleTour_{t},p},
+			maxQuantityProductTour_{t,p} = maxQuantityProductTypeVehicle_{typeVehicleTour_{t},p},
+
+			maxWeightProductTour_{t,p} = maxWeightProductTypeVehicle_{typeVehicleTour_{t},p},
+			maxVolumeProductTour_{t,p} = maxVolumeProductTypeVehicle_{typeVehicleTour_{t},p},
+		),
+
+		\forall v \in RESOURCE (
+			minQuantityProductTour_{tour1Vehicle_{v},p} =
+			minQuantityProductTypeVehicle_{typeVehicleVehicle_{v},p}, %- quantity0ProductVehicle_{v,p},
+
+			maxQuantityProductTour_{tour1Vehicle_{v},p} =
+			maxQuantityProductTypeVehicle_{typeVehicleVehicle_{v},p}, %- quantity0ProductVehicle_{v,p},
+
+
+			maxWeightProductTour_{tour1Vehicle_{v},p} =
+			maxWeightProductTypeVehicle_{typeVehicleVehicle_{v},p}, %- weight0ProductVehicle_{v,p},
+
+			maxVolumeProductTour_{tour1Vehicle_{v},p} =
+			maxVolumeProductTypeVehicle_{typeVehicleVehicle_{v},p}, %- volume0ProductVehicle_{v,p},
+		),
+	),
+
+
+	\forall p \in PRODUCT
+		OrderProduct_{p} = \{
+			\forall o \in ORDER
+			(idProductOrder_{o} = idProduct_{p} ? o : 0)
+		\} \setminus 0,
+
+
+
+	weightCapacitatedByProducts == \bigvee_{t \in TOUR,p \in PRODUCT}{
+		maxWeightProductTour_{t,p} < +\infty
+	},
+	volumeCapacitatedByProducts == \bigvee_{t \in TOUR,p \in PRODUCT}{
+		maxVolumeProductTour_{t,p} < +\infty
+	},
+
+	quantityCapacitatedByProducts == \bigvee_{t \in TOUR,p \in PRODUCT}{
+		minQuantityProductTour_{t,p} > 0 ||
+		maxQuantityProductTour_{t,p} < +\infty
+	} \vee \bigvee_{d \in DEPOT,p \in PRODUCT}{
+		minQuantityProductDepot_{d,p} > 0 ||
+		maxQuantityProductDepot_{d,p} < +\infty
+	},
+
+
+
+	\forall o \in SOURCEORDERSINK
+		TimeWin0Order_{o} :: HORIZON,
+
+	\forall o \in ORDER (
+		shiftOrder_{o} \in SHIFT0,
+
+		shiftOrder_{o} = shiftId_{idShiftOrder_{o}},
+
+		%DayShiftOrder_{o} = DayShift_{shiftOrder_{o}},
+		%DayShiftOrder_{o} \subset [1,7],
+		%DateOrder_{o} = DATE \cap \bigcup_{d \in DayShiftOrder_{o}}{DateDay_{d}},
+	),
+
+	\forall d \in DATE
+	\forall o \in ORDER
+		TimeShiftDateOrder_{o,d} = TimeDateShift_{shiftOrder_{o},d},
+
+	\forall o \in ORDER (
+		TimeWin0Order_{o} =
+			[t1Service0Order_{o}, t2Service0Order_{o}] \cap \bigcup_{d \in DATE}{TimeShiftDateOrder_{o,d}},
+
+		(idOrder_{o} TAG_ORDER_TIME_WIN_NOT_IN_HORIZON idOrder_{o} :
+			TimeWin0Order_{o} <> {},
+		),
+	),
+
+	\forall o \in SOURCESINK
+		TimeWin0Order_{o} = HORIZON,
+
+
+
+
+	% Prefixed/locked logic
+	\forall o \in ORDER (
+		IdVehicle0Order_{o} <> {} => (
+			Vehicle0Order_{o} = \{ \forall i \in IdVehicle0Order_{o} resourceId_{i} \},
+			;
+			Vehicle0Order_{o} = RESOURCE,
+		),
+
+		IdTypeVehicleOrder_{o} = (IdTypeVehicle0Order_{o} = {} ? IDTYPEVEHICLE : IdTypeVehicle0Order_{o}),
+
+		VehicleOrder_{o} = Vehicle0Order_{o} \cap \bigcup_{i \in IdTypeVehicleOrder_{o}}{VehicleTypeVehicle_{typeVehicleId_{i}}},
+	),
+
+
+
+
+	% tourSource
+	\forall s \in SOURCE
+		tourSource_{s} :: 0,
+
+
+	\forall d \in DATE
+	\forall t \in TOUR (
+		ScheduleDateTour_{t,d} = ScheduleDateVehicle_{vehicleTour_{t},d},
+
+		Horizon0DateTour_{t,d} = [\inf ScheduleDateTour_{t,d}, \sup ScheduleDateTour_{t,d}],
+		ScheduleDateTour_{t,d} = {} => Horizon0DateTour_{t,d} = {},
+	),
+
+
+	\forall t \in TOUR (
+		timeFixedTour_{t} = timeFixedTypeVehicle_{typeVehicleVehicle_{vehicleTour_{t}}},
+
+		( idResource_{vehicleTour_{t}} TAG_SERVICE_TIME_GT_0 : 
+			timeFixedTour_{t} > 0 || timeLoadingUnitTypeVehicle_{typeVehicleTour_{t}} > 0,
+		),
+
+		SourceTour_{t}	= \{ sourceTour_{t} \},
+		SinkTour_{t}	= \{ sinkTour_{t} \},
+
+		tourSource_{sourceTour_{t}} = t,
+
+		dailyConstrainedTour_{t} == ! notDailyConstrainedVehicle_{vehicleTour_{t}},
+
+
+		Schedule0Tour_{t} = Schedule0Resource_{vehicleTour_{t}},
+		ScheduleExtendedTour_{t} = ScheduleExtendedVehicle_{vehicleTour_{t}},
+
+		UnionHorizonTour_{t} = \bigcup_{d \in DATE}{Horizon0DateTour_{t,d}},
+	),
+
+
+
+	UnionHorizon = \bigcup_{t \in TOUR}{UnionHorizonTour_{t}},
+
+
+	% Date: Reduced DATE
+	Date = UnionHorizon[dateFormat],
+
+
+	\forall d \in Date \cup \{ dateInactive \} (
+		TimeDate_{d} :: DefaultDateTime,
+		TimeDate_{d} = [_, _],
+	),
+
+	TimeDate_{dateInactive} = {},
+	\forall d \in Date
+		TimeDate_{d} = UnionHorizon \cap HorizonDate_{d},
+
+
+
+	\forall v \in RESOURCE (
+		DateVehicle_{v} = DateResource_{v} \cap Date,
+
+		ScheduleRestVehicle_{v} = HORIZON \setminus Schedule0Resource_{v},
+
+		\forall d \in DateVehicle_{v} \cup \{ dateInactive \} (
+			HorizonDateVehicle_{v,d} = [\inf ScheduleDateVehicle_{v,d}, \sup ScheduleDateVehicle_{v,d}],
+			ScheduleDateVehicle_{v,d} = {} => HorizonDateVehicle_{v,d} = {},
+
+			ScheduleRestDateVehicle_{v,d} = TimeDate_{d} \setminus Schedule0Resource_{v},
+		),
+
+		HorizonDateVehicle_{v,dateInactive} = {},
+	),
+
+
+	\forall t \in TOUR
+	\forall d \in DateVehicle_{vehicleTour_{t}} \cup \{ dateInactive \}
+		HorizonDateTour_{t,d} = HorizonDateVehicle_{vehicleTour_{t},d},
+
+
+	\forall v \in RESOURCE (
+		\forall d \in DateVehicle_{v} (
+			ScheduleDateVehicle_{v,d} = Schedule0Resource_{v} \cap HorizonDate_{d},
+
+			maxWorktime0DateVehicle_{v,d} = #{ScheduleDateVehicle_{v,d}},
+			maxMakespan0DateVehicle_{v,d} = #{[\inf ScheduleDateVehicle_{v,d}, \sup ScheduleDateVehicle_{v,d}]},
+
+			maxWorktimeDateVehicle_{v,d} = \min(
+				maxWorktime0DateVehicle_{v,d}, maxWorktimeDay1Vehicle_{v}
+			),
+			maxMakespanDateVehicle_{v,d} = \min(
+				maxMakespan0DateVehicle_{v,d}, maxMakespanDay1Vehicle_{v}
+			),
+		),
+
+
+		maxWorktimeDayVehicle_{v} = \max_{d \in DateVehicle_{v}}{maxWorktimeDateVehicle_{v,d}},
+		maxMakespanDayVehicle_{v} = \max_{d \in DateVehicle_{v}}{maxMakespanDateVehicle_{v,d}},
+
+
+		maxWorktimeVehicle_{v} = \sum_{d \in DateVehicle_{v}}{maxWorktimeDateVehicle_{v,d}},
+	),
+
+
+	\forall t \in TOUR (
+		maxWorktimeDayTour_{t}	= maxWorktimeDayVehicle_{vehicleTour_{t}},
+		maxMakespanDayTour_{t}	= maxMakespanDayVehicle_{vehicleTour_{t}},
+	),
+
+
+
+	totalWorktime = \sum_{v \in RESOURCE}{maxWorktimeVehicle_{v}},
+	totalMakespan = \sum_{v \in RESOURCE}{maxMakespanDayVehicle_{v}*#DATE},
+
+
+
+	\forall o \in SOURCEORDER (
+		TimeDateOrder_{o} = \bigcup_{d \in Date \cap TimeWin0Order_{o}["yyyy-mm-dd"]}{TimeDate_{d}},
+
+		TimeWinOrder_{o} = (
+			!ruleTimeWindow ?
+			TimeDateOrder_{o} : (
+				strictTimeOrder_{o} ?
+				TimeWin0Order_{o} : [\inf TimeWin0Order_{o}, \sup TimeDateOrder_{o}]
+			)
+		),
+	),
+
+
+
+	\forall o \in ORDER (
+		TAG_ORDER_SCHEDULE_INFEASIBLE idOrder_{o} " : " TimeWinOrder_{o} :
+
+		\bigvee_{v \in RESOURCE}{
+			\inf Schedule0Resource_{v} - 1 +
+			tSiteSite_{site1Vehicle_{v},siteId_{idSite2Order_{o}}} =<
+			\sup TimeWinOrder_{o}
+		},
+
+		\bigvee_{v \in RESOURCE}{
+			\inf TimeWinOrder_{o} - 1 +
+			tSiteSite_{siteId_{idSite2Order_{o}},site2Vehicle_{v}} =<
+			\sup Schedule0Resource_{v}
+		},
+	),
+
+
+
+	%\forall o<>n \in ORDER
+	%	OrderOrderOrder_{o,n} = ORDER \setminus \{ o, n \},
+
+
+	% NextHeuristicsOrder
+	%maxTimeOrder = \max_{o<>i \in ORDER}{
+	%	tSiteSite_{siteId_{idSite2Order_{o}},siteId_{idSite2Order_{i}}}
+	%} / 4,
+
+	\forall o \in ORDER
+		nbOrderSiteOrder_{o} = \sum_{i \in ORDER}{(idSite2Order_{o} = idSite2Order_{i})},
+
+		/*NextHeuristicsOrder_{o} = SINK \cup \{
+			\forall i \in ORDER (
+				tSiteSite_{siteId_{idSite2Order_{o}},siteId_{idSite2Order_{i}}} =< maxTimeOrder ?
+				i : 0
+			)
+		\} \setminus 0,*/
+
+
+
+/*
+	% Symmetry
+	\forall v \in RESOURCE
+		idTypeScheduleSiteVehicle_{v} = (
+			idTypeVehicleVehicle_{v} " " Schedule0Resource_{v} " " idSite1Vehicle_{v} " " idSite2Vehicle_{v}
+		),	% ?????? risk ?
+
+	IdTypeScheduleSite = \{ \forall v \in RESOURCE idTypeScheduleSiteVehicle_{v} \},
+
+	\forall v \in RESOURCE
+		IdTypeSite1Site2Vehicle_{v} \subset IdTypeScheduleSite, 
+
+	\forall i \in IdTypeScheduleSite
+		VehicleIdTypeScheduleSite_{i} = \{
+			\forall v \in RESOURCE
+			(idTypeScheduleSiteVehicle_{v} = i ? v : 0)
+		\} \setminus 0,
+
+	\forall v \in RESOURCE (
+		VehicleIdenticalTypeScheduleSiteVehicle_{v} = \{
+			\forall i \in VehicleIdTypeScheduleSite_{idTypeScheduleSiteVehicle_{v}}
+			(Schedule0Resource_{v} = Schedule0Resource_{i} ? i : 0)
+		\} \setminus 0,
+
+		idIdenticalTypeScheduleSiteVehicle_{v} = (VehicleIdenticalTypeScheduleSiteVehicle_{v} ""),
+	),
+
+	IdIdenticalTypeScheduleSite = \{
+		\forall v \in RESOURCE idIdenticalTypeScheduleSiteVehicle_{v}
+	\},
+
+	\forall i \in IdIdenticalTypeScheduleSite
+		VehicleIdIdenticalTypeScheduleSite_{i} = \{
+			\forall v \in RESOURCE
+			(idIdenticalTypeScheduleSiteVehicle_{v} = i ? v : 0)
+		\} \setminus 0,
+
+
+
+	\forall t \in TOUR
+		Tour1IdenticalVehicleTour_{t} =
+		\bigcup_{i \in IdIdenticalTypeScheduleSite}{(
+			vehicleTour_{t} \in VehicleIdIdenticalTypeScheduleSite_{i} ?
+
+			\bigcup_{v \in VehicleIdIdenticalTypeScheduleSite_{i}}{TourVehicle_{v}} : {}
+		)} \cap Tour1Vehicle,
+*/
+
+
+
+
+
+	%TAG_TOUR_COMPLETED_WITHIN_ONE_DAY
+	%TAG_ROUTE_TIME_INTERRUPTIBLE
+	%TAG_RESOURCE_OBJECTIVE_NUMBER_LIMIT
+	%TAG_RESOURCE_AVAILABILITY_TIMELINE
+	%TAG_ORDER_STRICT_TIME_WINDOW
+
+
+	% Rules
+	ruleVehicleMultiTourRouting = \bigvee_{v \in RESOURCE}{maxTourByVehicle_{v} > 1},
+
+	ruleWorktimeDay == \bigvee_{v \in RESOURCE}{#SlotShift_{shiftResource_{v}} > maxWorktimeDayVehicle_{v}},
+	ruleMakespanDay == \bigvee_{v \in RESOURCE}{#TimeShift_{shiftResource_{v}} > maxMakespanDayVehicle_{v}},
+
+	ruleOrderTimeWindow == ruleTimeWindow && \bigvee_{o \in ORDER}{#TimeWinOrder_{o} < #TimeDateOrder_{o}},
+
+	ruleMultiDayRouting == (#Date > 1),
+
+
+
+	infoProject = (identity "  " objectiveVehicle " : " nbVehicle "    " TAG_ORDER_NB " : " nbOrder "    " TAG_OBJECTIVE " : " nameObjectiveTop "    " TAG_HORIZON " : " t1 " -> " t2),
+
+
+	ruleOptimizeCandidate || ruleOptimizePlannedCandidate => (
+		(TAG_OPTIMIZE " " infoProject : '()' ),
+		;
+		(TAG_REOPTIMIZE " (" TAG_RELAXATION " " sqlOperationLog ") " infoProject  : '()' ),
+	),
+
+
+
+	(TAG_SEPARATION_LINE : '()' ),
+
+	% Info for multi-day routing
+	ruleMultiDayRouting => (
+		'hh:mm:ss' TAG_TAB_1 TAG_VEHICLE_MULTI_DAY_ROUTING_INVOLVED : '()'
+	),
+
+	% Info for multi-day routing
+	ruleVehicleMultiTourRouting => (
+		'hh:mm:ss' TAG_TAB_1 TAG_VEHICLE_MULTI_TOUR_ROUTING_INVOLVED : '()'
+	),
+
+	% Info for special tour constraints
+	ruleDailyTour && ruleMultiDayRouting => (
+		'hh:mm:ss' TAG_TAB_1 TAG_TOUR_WITHIN_ONE_DAY_CONSTRAINT_INVOLVED : '()'
+	),
+
+	% Info for special order constraints
+	ruleOrderTimeWindow => (
+		'hh:mm:ss' TAG_TAB_1 TAG_ORDER_TIME_WINDOW_CONSTRAINT_INVOLVED : '()'
+	),
+
+	!ruleRouteTimeInterruptible => (
+		'hh:mm:ss' TAG_TAB_1 TAG_ORDER_ROUTE_TIME_NOT_INTERRUPTIBLE_RULE_INVOLVED : '()'
+	), 
+
+
+
+	% Info for special vehicle constraints
+	ruleWorktimeDay => (
+		'hh:mm:ss' TAG_TAB_1 TAG_RESOURCE_DAILY_WORKTIME_CONSTRAINT_INVOLVED : '()'
+	),
+	ruleMakespanDay => (
+		'hh:mm:ss' TAG_TAB_1 TAG_RESOURCE_DAILY_MAKESPAN_CONSTRAINT_INVOLVED : '()'
+	),
+
+
+
+
+	\bigvee_{t \in TYPEVEHICLE}{costKilometerTypeVehicle_{t} =< 0.0} => (
+		'hh:mm:ss' TAG_TAB_1 TAG_KILOMETER_COST_0  : '()'
+	),
+// ????????
+
+	nameObjectiveTop = objectiveProfit && receipts =< 0.0 => (
+		'hh:mm:ss' TAG_TAB_1 TAG_MODIFY_MEANINGLESS_PROFIT_TO_COST  : '()'
+	),
+
+
+	%('hh:mm:ss' TAG_SEPARATION_LINE : '()' ),
+
+
+
+	% OrderProximityOrder
+	%\forall o,i \in ORDER
+	%	timeOrderOrder_{o,i} = tSiteSite_{siteId_{idSite2Order_{o}},siteId_{idSite2Order_{i}}},
+	%maxTimeOrderOrder = \max_{o,i \in ORDER}{timeOrderOrder_{o,i}},
+	%maxRouteTime0ByRatio = \lceil maxTimeOrderOrder * maxRouteTimeRatio \rceil,
+	%maxRouteTimeByRatio = (maxRouteTime0ByRatio = 0 ? +\infty : maxRouteTime0ByRatio),
+	%maxRouteTimeConfig = (maxRouteTime = 0 ? +\infty : maxRouteTime),
+	%maxRouteTimeSolver = (maxRouteTimeByRatio > maxRouteTimeConfig ? maxRouteTimeConfig : maxRouteTimeByRatio),
+	%maxTourRadius0ByRatio = \lceil maxTimeOrderOrder * maxTourRadiusRatio \rceil,
+	%maxTourRadiusByRatio = (maxTourRadius0ByRatio = 0 ? +\infty : maxTourRadius0ByRatio),
+	%maxTourRadiusConfig = (maxTourRadius = 0 ? +\infty : maxTourRadius),
+	%maxTourRadiusSolver = (maxTourRadiusByRatio > maxTourRadiusConfig ? maxTourRadiusConfig : maxTourRadiusByRatio),
+	%\forall o \in ORDER (
+	%	OrderNotCoupledOrder_{o} = \{
+	%		\forall i \in ORDER \setminus o
+	%		(timeOrderOrder_{o,i} > maxTourRadiusSolver ? i : 0)
+	%	\} \setminus 0,
+	%),*/
+
+	% NextOrder
+	%\forall o \in SOURCEORDER
+	%	NextNonSinkOrder_{o} :: {},
+	%\forall o \in SOURCE
+	%	NextNonSinkOrder_{o} = ORDER,
+	%\forall o \in ORDER
+	%	NextNonSinkOrder_{o} = \{
+	%		\forall i \in ORDER
+	%		(tSiteSite_{siteId_{idSite2Order_{o}},siteId_{idSite2Order_{i}}} =< maxRouteTimeSolver ? i : 0)
+	%	\} \setminus 0,
+
+	%\forall o \in SOURCEORDER
+	%	NextOrder_{o} :: {},
+	%\forall o \in ORDER
+	%	NextOrder_{o} = ORDERSINK,
+	%	%NextOrder_{o} = SINK \cup NextNonSinkOrder_{o}, % Very strong constraint
+	%\forall t \in TOUR
+	%	NextOrder_{sourceTour_{t}} = SinkTour_{t} \cup ORDER,
+
+),

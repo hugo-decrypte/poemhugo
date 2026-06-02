@@ -1,0 +1,56 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeleteSupply.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	'()' <- database,
+	
+	DeleteSupply_SQL1= (
+		"Delete from " DB_PREFIX "SUPPLY_PRODUCT 
+		where IdSupply IN ("IDOBJSELECTEDBUFFER")
+		and exists (select 1 from " DB_PREFIX "SUPPLY where Id=IdSupply and (IdState is NULL or IdState='0') )"
+	),
+	DeleteSupply_SQL2= (
+		"delete from " DB_PREFIX "SUPPLY
+		where SUPPLY.Id in ("IDOBJSELECTEDBUFFER") and (SUPPLY.IdState is NULL or SUPPLY.IdState='0') 
+		and not exists (select 1 from " DB_PREFIX "SUPPLY_PRODUCT LO0 where SUPPLY.Id=LO0.IdSupply)"
+	),
+	DeleteSupply_SQL3= (
+		"Update " DB_PREFIX "SUPPLY
+		set Comments='NON Supprimée'
+		where Id IN ("IDOBJSELECTEDBUFFER")"
+	),
+	
+	(SQL : DeleteSupply_SQL1), 
+	(SQL : DeleteSupply_SQL2), 
+	(SQL : DeleteSupply_SQL3),
+	
+	database <- '()',
+),
+.

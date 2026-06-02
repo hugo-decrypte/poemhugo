@@ -1,0 +1,53 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableOrder2TableDeliveryMenu.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableDeliveryOrder ",
+
+% Caption
+@ (" '" TAG_DELIVERY_FOR_ORDER "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_TABLE_DELIVERY,
+
+% Label
+@ (" '" TAG_DELIVERIES "' "),	% JZ 0908
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableDelivery_Menu.view" OPENTABLE_END),	% JZ 0926 A : TableDelivery_Menu
+
+@ (TABLE_ARGUMENTS "NBDAY=7;OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=" TAG_OF_ORDER " {/*Selected(tableORDER;1;(string,ID))*/};OWNERSUBOBJ=IdOrder;IDSUBOBJ={/*Selected(tableORDER;1;(string,ID))*/};IDTOUR='XXX']\"\n\n"),
+

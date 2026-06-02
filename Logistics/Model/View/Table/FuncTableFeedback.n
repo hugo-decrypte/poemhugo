@@ -1,0 +1,51 @@
+%==================================================%
+%                                                  %
+%  		FuncTableFeedback.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+<tableFeedback>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableFeedback" postfix),
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\" \\\n"),  % li 0628
+
+
+
+		@ VIEWSQL,
+
+	       @("SELECT f.idClub						AS NAMECLUB, \
+			f.id							AS IDFEEDBACK, \
+			f.idResource						AS IDRESOURCE, \
+			f.datetime						AS T0, \
+			f.latitude						AS LATITUDE, \
+			f.longitude						AS LONGITUDE, \
+			f.KM							AS KM, \
+			f.state							AS STATE, \
+			" SQL_AliasCategoryIs "'EVENT' AND al.id=f.state)	AS NAMESTATE,\
+			" SQL_ColorCategoryIs "'EVENT' AND al.id=f.state)	AS LINERGB \
+		FROM	" DB_PREFIX "FEEDBACK f \
+		ORDER BY f.idResource,f.datetime \"\n\n"), 
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),
+

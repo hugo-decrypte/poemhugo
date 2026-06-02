@@ -1,0 +1,100 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		ReadCalendar.n			   %
+%                			           %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+'()' => (
+
+	year = dateStartPlanning["yyyy"],
+
+	firstYearDate :: defaultDate,
+	firstYearDate["yyyy"] = year,
+	firstYearDate["mm"] = 1,
+	firstYearDate["dd"] = 1,
+
+	DateCalendar = [firstYearDate, dateEndPlanning],
+
+
+
+	'()' <- database,
+
+
+	\forall d \in DateCalendar (
+		year_{d}	= d["yyyy"],
+		month_{d}	= d["mm"],
+		day_{d}		= d["dd"],
+
+		weekday_{d}	:: 0,
+		noWeek_{d}	:: 0,
+		isHoliday_{d}	:: 0,
+		isSunday_{d}	:: 0,
+		isSaturday_{d}	:: 0,
+
+		SQL_Weekday_{d} = ("SELECT DatePart(" SQL_DATEPART_WEEKDAY ", '" d "'" SQL_FIRSTWEEKDAY "), DatePart("SQL_DATEPART_WEEK", '" d "'" SQL_FIRSTWEEKDAY ") "),
+
+	%%	("SQL_Weekday_{d} = " SQL_Weekday_{d} : ),
+		(SQL : SQL_Weekday_{d} ),
+
+		1 = (),
+		weekday_{d} = (),
+		noWeek_{d}  = (),
+
+		isSaturday_{d}	= (weekday_{d} = 6),
+		isSunday_{d}	= (weekday_{d} = 7),
+
+		%("d= " d " weekday_{d}= " weekday_{d} : ),
+		%("d= " d " noWeek_{d}= " noWeek_{d} : ),
+	),
+
+	Week \subset [1, 53],
+	Week = \{ \forall d \in DateCalendar noWeek_{d} \},
+
+	\forall w \in Week (
+		DateWeek_{w} \subset DateCalendar,
+		\forall d \in DateCalendar
+			d \in DateWeek_{w} == noWeek_{d} = w,
+
+		%("DateWeek_{w} = " DateWeek_{w} : ),
+	),
+
+	SQL_SEL_Calendar = (
+		"SELECT id, type, weekday "
+		"FROM " DB_PREFIX "CALENDAR "
+		"WHERE id>='" dateStartPlanning "' AND id<='" dateEndPlanning "' AND type='" CALENDAR_HOLIDAY "'"
+	),
+
+	(SQL : SQL_SEL_Calendar ),
+
+	nbSelHoliday = (),
+	IdxHoliday \subset [1, #DateCalendar],
+	IdxHoliday = [1, nbSelHoliday],
+	\forall i \in IdxHoliday (
+		dateIdx_{i}	:: defaultDate,
+		typeIdx_{i}	:: 0,
+		weekdayIdx_{i}	:: 0,
+
+		dateIdx_{i}	= (),
+		typeIdx_{i}	= (),
+		weekdayIdx_{i}	= (),
+	),
+
+	database <- '()',
+
+	DateHoliday \subset DateCalendar,
+	DateHoliday = \{ \forall i \in IdxHoliday dateIdx_{i} \},
+
+	("DateHoliday = " DateHoliday : ),
+
+	\forall d \in DateHoliday (
+		isHoliday_{d} = 1,
+	),
+	\forall d \in DateCalendar \setminus DateHoliday (
+		isHoliday_{d} = 0,
+	),
+
+),

@@ -1,0 +1,94 @@
+/******************************************************/
+/*                                                    */
+/*	ScriptClientCreateOrder.n					      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+
+'()' => (
+
+	nbParameter = 5,
+	( "nb parameters : " nbParameter : ),
+
+	idOrder			:: "",
+	reference		:: "",
+	dateDelivery	:: 0,
+	idClient		:: "",
+	idPointDelivery	:: "",
+
+	idOrder			= (),
+	reference		= (),
+	dateDelivery	= (),
+	idClient		= (),
+	idPointDelivery	= (),
+),
+
+'@' => (
+	database <- '@',
+
+		insertOrder = (
+			"INSERT INTO " DB_PREFIX "CLIENTORDER (IdClub, Id, Reference, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, IdState)"
+			"  select cl.IdClub, '" idOrder "', '" reference "', cl.Id, p.IdPoint, "SQL_FORMATDATE"("SQL_CURRENTDATE", '"SQL_FORMATDATENUM"'), " dateDelivery ", cl.IdAgency, '0' "
+			"  from " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id "
+			"where cl.ID='" idClient "' and p.IdPoint='" idPointDelivery "'"
+		),
+
+
+		( "insertOrder= " insertOrder : ),
+
+		(SQL :  insertOrder ),
+
+	'@' <- database,
+
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+),
+
+
+
+.
+
+
+
+'()' => (
+	%%%% month info
+	nbSelected = (),
+	( "nb Selected : " nbSelected : ),
+
+	nbParameter = (),
+	( "nb parameters : " nbParameter : ),
+
+	Selected = [1, nbSelected],
+	\forall i \in Selected (
+		idResourceSelected_{i}		:: "",
+		dateResourceSelected_{i}	:: defaultDate,
+
+		idResourceSelected_{i}		= (),
+		dateResourceSelected_{i}	= (),
+	),
+),
+
+'@' => (
+	database <- '@',
+
+	\forall i \in Selected (
+		(SQL :  "UPDATE	" DB_PREFIX "RESOURCE_ABSENCE SET state='" STATE_DELETED "'
+			WHERE	idResource='" idResourceSelected_{i}
+				"' AND dateResource='" dateResourceSelected_{i}
+				"' AND state<='" STATE_GENERATED "'"
+		),
+	),
+
+	'@' <- database,
+
+
+
+	(TAG_TASK_ACCOMPLISHED : !!),
+),
+

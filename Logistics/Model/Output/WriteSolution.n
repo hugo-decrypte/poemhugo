@@ -1,0 +1,16 @@
+/******************************************************/
+/*	          	Logistocs	              */
+/*                                                    */
+/*	       		WriteSolution.n	              */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	['Work Directory'  "Model\Input\Solver\ReadSolutionBuffer.n"],
+),
+
+'@' => (
+	['Work Directory' "Model\Output\WriteSolutionSql.n"],
+),

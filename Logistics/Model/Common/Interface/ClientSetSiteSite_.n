@@ -1,0 +1,94 @@
+/********************************************************/
+/*							*/
+/*		ClientSetSiteSite.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%                nbSite          
+% -------------------------------------
+% |                                   |
+% |                                   | nbRecord
+% |                                   |
+% -------------------------------------
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	idTypeResource	= (),
+	idTypeRisk	= (),
+
+
+	nbRecord	= (),
+	nbSite		= (),
+	
+
+	\forall r \in [1,nbRecord]
+	\forall s \in [1,nbSite] (
+		id1SiteRecord_{r,s}		:: "",
+		id2SiteRecord_{r,s}		:: "",
+		distanceSiteRecord_{r,s}	:: "",
+		timeSiteRecord_{r,s}		:: "",
+
+		id1SiteRecord_{r,s}		= (),
+		id2SiteRecord_{r,s}		= (),
+		distanceSiteRecord_{r,s}	= (),
+		timeSiteRecord_{r,s}		= (),
+	),
+),
+
+
+'@' => (
+	database <- '@',
+
+	\forall r \in [1,nbRecord]
+	\forall s \in [1,nbSite] (
+		(SQL : "DELETE	FROM " DB_PREFIX "SITE_SITE
+			WHERE	idTypeResource='"	idTypeResource
+				"' AND idTypeRisk='"	idTypeRisk
+				"' AND idSite1='"	id1SiteRecord_{r,s}
+				"' AND idSite2='"	id2SiteRecord_{r,s}		"'"),
+
+		(SQL : "INSERT 	INTO " DB_PREFIX "SITE_SITE(
+				idTypeResource,idTypeRisk,idSite1,idSite2,distance,duration)
+			VALUES( '" 			idTypeResource
+				"','"			idTypeRisk
+				"','"			id1SiteRecord_{r,s}
+				"','"			id2SiteRecord_{r,s}
+				"',"			distanceSiteRecord_{r,s}
+				"," 			timeSiteRecord_{r,s} 		")"),
+	),
+
+	'@' <- database,
+
+
+	%TAG_DISTANCE_WRITTEN = " distances écrites",
+
+	(nbRecord " * " nbSite " distances handles" : !!),
+),
+
+
+.
+
+
+'@' => (
+	output = ['Work Directory' "TestSiteSite.txt"],
+
+	output <- '@',
+
+	\forall r \in [1,nbRecord]
+	\forall s \in [1,nbSite] (
+		@ (id1SiteRecord_{r,s} "  "),
+		@ (id2SiteRecord_{r,s} "  "),
+		@ (distanceSiteRecord_{r,s} "  "),
+		@ (timeSiteRecord_{r,s} "  \n"),
+	),
+
+	'@' <- output,
+),
+
+.
+
+
+

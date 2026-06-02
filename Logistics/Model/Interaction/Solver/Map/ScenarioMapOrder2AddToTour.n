@@ -1,0 +1,78 @@
+%=======================================================%
+%		Routing					%
+%							%
+%		ScenarioMapOrder2AddToTour.n		%
+%							%
+%	This is a part of the NCL Models.		%
+%	Copyright (C) 2000 ENGINEST SOFTWARE		%
+%		All rights reserved.			%
+%=======================================================%
+
+% Script: ADD
+@ "Script ",
+
+% ID
+@ "AddToTour ",
+
+% Caption
+@ ("'" TAG_ADD_ORDER_TO_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_INSERT,
+
+% Label
+@ (" '" TAG_ADD_ORDER_TO_TOUR "' "), 
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'ORDER' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+%@ ("'" TAG_ASK_MODIFY_ORDER "' "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2; NETNCL=HTTP; SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/); MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+
+% Instruction... (When Count>0)
+@ ("\tNcl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Solver\Order\AddToTour.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+
+@ ("\t'(/*SERVERPORT*/) (/*USERID*/) \\\n"),
+@ ("\t{/*selected(ORDER;1;(string,ID))*/} \\\n"), 
+
+@ ("\t{/*Input(" TAG_ADD_ORDER_TO_TOUR ";2;"), 
+@ ("(string,IDVEHICLE," TAG_VEHICLE_ID ",[/*VEHICLE2.IDVEHICLE*/],10." inputWidth ",,,[/*VEHICLE2.IDVEHICLE*/]);\\\n"),
+
+
+%@ ("\t\t(int,TOURVEHICLE," TAG_RESOURCE_TOUR ",1,,,,{1,2,3,4,5,6,7,8,9,10}))*/}'\\\n"),
+@ ("\t\t(int,TOURVEHICLE," TAG_TOUR_IDX ",1,10." inputWidth ",,,{1"),
+
+maxTourSelected = (maxTourVehicle = 0 ? 10 : maxTourVehicle),
+\forall i \in [2,maxTourSelected] (
+	@ ("," i),
+),
+@ "}))*/}'\\\n",
+
+%@ ("\t'[(/*REPLY*/);id=" viewFile "]'\n\n"),
+@ ("\tReload _ _ _ _\n\n"),

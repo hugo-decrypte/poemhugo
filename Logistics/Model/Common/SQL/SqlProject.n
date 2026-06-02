@@ -1,0 +1,189 @@
+/******************************************************/
+/*	          	ERP	              	      */
+/*	                                              */
+/*	 		SqlProject.n  	     	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+TIPINFO_PROJECT = (
+	"[/*IDITEM*/]   [/*NAMEITEM*/]      [/*IDPRODUCT*/]   [/*NAMEPRODUCT*/]   [/*QUANTITY*/]      [/*T1*/]   [/*T2*/]"
+%	TAG_T20		": [/*T2*/]"
+%	%TAG_QUANTITY 	": [/*QUANTITY*/]   "
+),
+
+
+
+
+sqlJobQuantity	= (ruleProjectQuantityToNode ?  "n.ratioQuantity*o.quantity" : "n.ratioQuantity"),
+
+
+? databaseType (
+"ACCESS" :
+
+	%sqlProcessSerialNumber = ("IIF(rr.idxParent IS NULL,'',CSTR(rr.idxParent))"),
+	%sqlTaskProjectText = ("' '+rr.idResource+' '+rr.idTask AS [TEXT]"),
+
+	sqlProjectText	= "' '+o.name AS [TEXT]",
+	sqlJobText	= "' '+n.name AS [TEXT]",
+
+
+	sqlProjectId	= ("o.id+'_'+p.idProcess"),
+
+
+	sqlParentId	= ("o.id+'_'+pp.idParent"),
+	sqlJobId	= ("o.id+'_'+n.id"),
+
+
+	sqlProjectRGB = (
+		"IIF(o.state<'"STATE_PLANNED"','" RGB_INACTIVE "','" RGB_JOB "')"
+	),
+
+
+	sqlProjectT1		= ("IIF(o.t1 IS NULL OR o.t1='"TAG_EMPTY_STRING"','"defaultDateTime"',o.t1)"),
+	sqlProjectT2		= ("IIF(o.t2 IS NULL OR o.t2='"TAG_EMPTY_STRING"','"defaultDateTime"',o.t2)"),
+
+
+	sqlProjectQuantity	= "CSTR(o.quantity)",
+	sqlProjectPriority	= "CSTR(IIF(o.priority IS NULL,0,o.priority))",
+
+
+
+	? timeFormat (
+	"","hh" :
+		sqlPrecisionTime	= "h",
+		sqlDivisionTime		= "",
+		sqlDivisionSecond	= "/60/60",
+	;
+	"hh:mm" :
+		sqlPrecisionTime	= "n",
+		sqlDivisionTime		= "",
+		sqlDivisionSecond	= "/60",	
+	;
+	"hh:mm:ss" :
+		sqlPrecisionTime	= "s",
+		sqlDivisionTime		= "",
+		sqlDivisionSecond	= "",		
+	),
+
+
+	strDateT1 = ("LEFT(FORMAT(DATEADD('"sqlPrecisionTime"',-1,o.t1),'yyyy-mm-dd "timeFormat"'),10)"),
+	strDateT2 = ("LEFT(FORMAT(DATEADD('"sqlPrecisionTime"',1,o.t2),'yyyy-mm-dd "timeFormat"'),10)"),	% li 0408
+	strTimeT1 = ("RIGHT(FORMAT(DATEADD('"sqlPrecisionTime"',-1,o.t1),'yyyy-mm-dd "timeFormat"')," lenStrTimeFormat ")"),
+	strTimeT2 = ("RIGHT(FORMAT(DATEADD('"sqlPrecisionTime"',1,o.t2),'yyyy-mm-dd "timeFormat"')," lenStrTimeFormat ")"),
+	;
+
+
+"SQLSERVER":
+	sqlProjectText		= "' '+o.name AS TEXT",
+	sqlJobText		= "' '+n.nameJob AS TEXT",
+
+	%sqlProjectCaption	= "o.name+'   '+o.id",
+	%sqlJobCaption		= "p.name+'   '+p.id",
+
+
+	sqlProjectId	= ("o.id+'_'+p.idProcess"),
+
+
+	sqlParentId	= ("o.id+'_'+pp.idParent"),
+	sqlJobId	= ("o.id+'_'+n.id"),
+
+
+	sqlProjectRGB = (
+		"IIF(o.state<'"STATE_PLANNED"','" RGB_INACTIVE "','" RGB_JOB "')"
+	),
+
+
+	sqlProjectT1		= ("IIF(o.t1 IS NULL OR o.t1='"TAG_EMPTY_STRING"','"defaultDateTime"',o.t1)"),
+	sqlProjectT2		= ("IIF(o.t2 IS NULL OR o.t2='"TAG_EMPTY_STRING"','"defaultDateTime"',o.t2)"),
+
+
+	sqlProjectQuantity	= "CSTR(o.quantity)",
+	sqlProjectPriority	= "CSTR(IIF(o.priority IS NULL,0,o.priority))",
+
+
+
+
+	? timeFormat (
+	"","hh" :
+		sqlPrecisionTime	= "hh",
+		sqlDivisionTime		= "1/24",
+		sqlDivisionSecond	= "/60/60",
+		;
+	"hh:mm" :
+		sqlPrecisionTime	= "n",
+		sqlDivisionTime		= "1/24/60",	
+		sqlDivisionSecond	= "/60",
+		;
+	"hh:mm:ss" :
+		sqlPrecisionTime	= "s",	
+		sqlDivisionTime		= "1/24/60/60",
+		sqlDivisionSecond	= "",	
+	),
+
+
+	strDateT1 = ("CONVERT(VARCHAR(10),DATEADD(dd,-1,SUBSTRING(o.t1,1,10)),108)"),
+	strDateT2 = ("CONVERT(VARCHAR(10),DATEADD(dd,-1,SUBSTRING(o.t2,1,10)),108)"),
+		
+	timeFormat = "hh" =>(
+		strTimeT1 = ("CAST(SUBSTRING(o.t1,12," lenStrTimeFormat ")-1 AS VARCHAR)"),
+		strTimeT2 = ("CAST(SUBSTRING(o.t2,12," lenStrTimeFormat ")+1 AS VARCHAR)"),
+		;
+		strTimeT1 = ("CONVERT(VARCHAR(10),DATEADD("sqlPrecisionTime",-1,o.t1),108)"),
+		strTimeT2 = ("CONVERT(VARCHAR(10),DATEADD("sqlPrecisionTime",1,o.t2),108)"),
+	),
+	;
+
+
+"ORACLE" :
+	? timeFormat (
+	"","hh" :
+		sqlPrecisionTime	= "hh24",
+		sqlDivisionTime		= "1/24",
+		sqlDivisionSecond	= "/60/60",
+		;
+	"hh:mm" :
+		sqlPrecisionTime	= "hh24:mi",
+		sqlDivisionTime		= "1/24/60",	
+		sqlDivisionSecond	= "/60",
+		;
+	"hh:mm:ss" :
+		sqlPrecisionTime	= "hh24:mi:ss",	
+		sqlDivisionTime		= "1/24/60/60",
+		sqlDivisionSecond	= "",	
+	),
+
+
+	strDateT1 = ("TO_CHAR(TO_DATE(SUBSTR(o.t1,1,10),'d')-1,'d')"),
+	strDateT2 = ("TO_CHAR(TO_DATE(SUBSTR(o.t2,1,10),'d')+1,'d')"),
+	strTimeT1 = ("TO_CHAR(TO_DATE(SUBSTR(o.t1,12," lenStrTimeFormat "),'" sqlPrecisionTime "')-"sqlDivisionTime",'" sqlPrecisionTime "')"),
+	strTimeT2 = ("TO_CHAR(TO_DATE(SUBSTR(o.t2,12," lenStrTimeFormat "),'" sqlPrecisionTime "')+"sqlDivisionTime",'" sqlPrecisionTime "')"),
+	;
+
+
+"MYSQL":
+	? timeFormat (
+	"","hh" :
+		sqlPrecisionTime 	= "HOUR",
+		;
+	"hh:mm" :
+		sqlPrecisionTime 	= "MINUTE",
+		;
+	"hh:mm:ss" :
+		sqlPrecisionTime 	= "SECOND",
+	),
+
+
+	strDateT1 = ("SUBSTR(DATE_ADD(SUBSTR(o.t1,1,10),INTERVAL -1 d),1,10)"),
+	strDateT2 = ("SUBSTR(DATE_ADD(SUBSTR(o.t2,1,10),INTERVAL 1 d),1,10)"),
+	strTimeT1 = ("SUBSTR(DATE_ADD(o.t1,INTERVAL -1 " sqlPrecisionTime "),12," lenStrTimeFormat ")"),
+	strTimeT2 = ("SUBSTR(DATE_ADD(o.t2,INTERVAL 1 " sqlPrecisionTime "),12," lenStrTimeFormat ")"),
+),
+
+! ruleSchedulingBackward,	% ??????
+
+sqlDateDeadline = (ruleSchedulingBackward ? strDateT1 : strDateT2),
+sqlTimeDeadline = (ruleSchedulingBackward ? strTimeT1 : strTimeT2),

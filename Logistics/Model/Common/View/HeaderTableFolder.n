@@ -1,0 +1,40 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%		HeaderTableFolder.n                %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+@ "\"[]\" - \\\n",		% JZ 1013
+
+%@ ("\"[HORIZONTALLINEWIDTH=1;VERTICALLINEWIDTH=1;HORIZONTALLINECOLOR=" tableHeaderLineColor ";VERTICALLINECOLOR=" tableHeaderLineColor ";FILLCOLOR=" tableTitleFillColor ";]\" \\\n"),
+%@ "- ",		@ "\\\n",
+
+
+
+% Title
+@ ("\"[TITLE=" title ";FONTCOLOR=" tableTitleFontColor ";FONTSIZE=" tableFolderTitleFontSize ";FONTNAME="tableTitleFont";LINESEPARATOR=\\n;HEIGHT=30;BORDER=0;]\"\\\n"),
+
+
+% JZ 1013
+
+% [Horizontal header options]:
+@ ("\"[FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableFolderXFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+% [Vertical header options]:
+@ ("\"[FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableFolderYFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+
+
+% [Horizontal header options]:
+%@ ("\"[BORDERCOLOR=" tableHeaderFillColor ";FILLCOLOR=" tableHeaderFillColor ";LINEWIDTH=1;LINECOLOR=" tableFolderLineColor ";FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableFolderXFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+% [Vertical header options]:
+%@ ("\"[BORDERCOLOR=" tableHeaderFillColor ";FILLCOLOR=" tableHeaderFillColor ";LINEWIDTH=1;LINECOLOR=" tableFolderLineColor ";FONTCOLOR=" tableHeaderFontColor ";FONTSIZE=" tableFolderYFontSize ";FONTNAME="tableTextFont";]\" \\\n"),
+
+
+% [Table cell options]:
+@ ("\"[MARGIN=" tableMargin ";FONTCOLOR=" tableFolderFontColor ";FONTSIZE=" tableFolderFontSize ";FONTNAME="tableTextFont";] \\\n"),
+

@@ -1,0 +1,149 @@
+/******************************************************/
+/*	                                              */
+/*		ReadOrderTSP.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+sqlReadOrder = (
+	"SELECT o.id,o.idSite2,o.priority,o.idProduct,o.quantity,o.weight,o.volume,o.timeFixed,o.receipts,o.t1Service0,o.t2Service0,o.idShift,c.idShift,o.strict
+	FROM " DB_PREFIX "OPT_ORDER o," DB_PREFIX "OPT_CLIENT c WHERE o.state>='" STATE_CANDIDATE
+	"' AND o.idClub='" idClubLogin "' AND o.idClient=c.id AND o.idResource='" idVehicleTSP "' AND o.tourResource=" idxTourVehicleTSP " ORDER BY o.id"
+),
+
+
+( SQL: sqlReadOrder),
+
+
+OrderTSP	= [1, ()],
+
+SourceOrderTSP		= SourceTSP \cup OrderTSP,
+OrderSinkTSP		= OrderTSP  \cup SinkTSP,
+SourceOrderSinkTSP	= SourceTSP \cup OrderTSP \cup SinkTSP,
+
+
+\forall o \in SourceOrderSinkTSP (
+	idOrder_{o} :: "",
+	strictTimeOrder_{o} :: true,
+
+	priorityOrder_{o} :: 0,
+
+	quantityOrder_{o} >= 0,
+	weightOrder_{o} >= 0.0,
+	volumeOrder_{o} >= 0.0,
+
+	receiptsOrder_{o} :: 0.0,
+),
+
+\forall o \in OrderTSP (
+	idSite2Order_{o} 	:: "",
+
+	idProductOrder_{o} 	:: "",
+
+	quantity0Order_{o} 	:: 0,
+	weight0Order_{o} 	:: 0.0,
+	volume0Order_{o} 	:: 0.0,
+
+	timeFixed0Order_{o}	:: 0,
+
+
+	t1Service00Order_{o}	:: defaultDateTime,
+	t2Service00Order_{o}	:: defaultDateTime,
+
+	idShift0Order_{o} 	:: "",
+	idShiftClientOrder_{o} 	:: "",
+
+
+	idOrder_{o} 		= (),
+	idSite2Order_{o} 	= (),
+	priorityOrder_{o} 	= (),
+
+	idProductOrder_{o} 	= (),
+
+	quantity0Order_{o} 	= (),
+	weight0Order_{o} 	= (),
+	volume0Order_{o} 	= (),
+
+	timeFixed0Order_{o}	= (),
+
+	receiptsOrder_{o}	= (),
+
+
+	t1Service00Order_{o}	= (),
+	t2Service00Order_{o}	= (),
+	idShift0Order_{o} 	= (),
+	idShiftClientOrder_{o} 	= (),
+
+	strictTimeOrder_{o} 	== (() = STATE_TRUE),
+
+
+	t1Service0Order_{o} = (
+		t1Service00Order_{o} < t1 || t1Service00Order_{o} = defaultDateTime ?
+		t1 : t1Service00Order_{o}
+	),
+
+	t2Service0Order_{o} = (
+		t2Service00Order_{o} > t2 || t2Service00Order_{o} = defaultDateTime ?
+		t2 : t2Service00Order_{o}
+	),
+
+	(idOrder_{o} TAG_ORDER_TIME_WIN_NOT_IN_HORIZON idOrder_{o} " : " t1Service0Order_{o} " " t2Service0Order_{o} :
+		t1Service0Order_{o} =< t2Service0Order_{o},
+	),
+),
+
+\forall o \in SourceTSP \cup SinkTSP (
+	priorityOrder_{o} = 0,
+
+	quantityOrder_{o} = 0,
+	weightOrder_{o} = 0.0,
+	volumeOrder_{o} = 0.0,
+
+	receiptsOrder_{o} = 0.0,
+	!strictTimeOrder_{o},
+),
+
+
+\forall o \in OrderTSP (
+	quantityOrder_{o} >= 0,
+	weightOrder_{o} >= 0.0,
+	volumeOrder_{o} >= 0.0,
+	
+	idProductOrder_{o} \in IDPRODUCT \cup \{""\},
+
+	weightQtyOrder_{o} = quantity0Order_{o} * unitWeightProduct_{productId_{idProductOrder_{o}}},
+	volumeQtyOrder_{o} = quantity0Order_{o} * unitVolumeProduct_{productId_{idProductOrder_{o}}},
+
+	quantityOrder_{o} = \underline{quantity0Order_{o}},
+	weightOrder_{o} = \underline{(weight0Order_{o} > weightQtyOrder_{o} ? weight0Order_{o} : weightQtyOrder_{o})}, % Zhou 0724
+	volumeOrder_{o} = \underline{(volume0Order_{o} > volumeQtyOrder_{o} ? volume0Order_{o} : volumeQtyOrder_{o})}, % Zhou 0724
+
+
+	idShiftOrder_{o} = (idShift0Order_{o} <> "" ? idShift0Order_{o} : idShiftClientOrder_{o}),
+),
+
+IdOrderTSP = \{ \forall o \in OrderTSP idOrder_{o} \},
+
+
+idOrder_{source} = TAG_SOURCE,
+idOrder_{sink}	 = TAG_SINK,
+
+\forall i \in IdOrderTSP (
+	orderId_{i} \in OrderTSP,
+	idOrder_{orderId_{i}} = i,
+),
+
+
+
+IdSiteOrder = \{ \forall o \in OrderTSP idSite2Order_{o} \},
+
+IDSITE = (
+	IdSiteOrder \cup \{
+		idSite1Vehicle, idSite2Vehicle
+	\} \cup \{
+		idSite1TSP, idSite2TSP
+	\}
+) \setminus "",
+
+

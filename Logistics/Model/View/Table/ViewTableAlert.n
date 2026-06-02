@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%		ViewTableAlert.n                   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableAlert.n"],
+
+'@' => (
+	tableAlert("ALERT",TAG_TABLE,"ALERT",true,"", TAG_STOCK_ALERT,"",""), 	% JZ 0915
+
+	('hh:mm:ss' "  " TAG_TABLE_ALERT TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ), 
+),

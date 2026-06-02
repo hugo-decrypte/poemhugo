@@ -1,0 +1,45 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  		 FuncTableProductType.n	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductType>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductType" postfix),
+
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT tp.id AS ID, \\\n"),
+		@ ("\t tp.Name AS NAME,\\\n"),
+		@ ("\t tp.idTypeProcess as IDTYPEPROCESS,\\\n"),
+		@ ("\t '(255 255 255)' as LINERGB \\\n"),
+		@ (" FROM " DB_PREFIX "TYPEPRODUCT tp \\\n"),
+		@ (" ORDER BY tp.id\"\n\n\n\n"), 
+
+		
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductKit2EditProductKit.n"],
+% JZ 1018
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

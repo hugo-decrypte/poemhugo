@@ -1,0 +1,138 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductForQuoteQty.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	
+	idQuoteBuffer :: "",
+	
+	idQuoteBuffer = (),
+	
+
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	
+	qtyBuffer		:: "",
+	qtyBuffer		= (),
+
+	'()' <- database,
+	
+	%% insert if not exists
+	UpdateProductForQuoteQty_SQL1 = (
+		"INSERT INTO " DB_PREFIX "QUOTE_PRODUCT (IdQuote, IdProduct, Quantity, Discount, Comments) "
+		"  select q.Id, P.Id, "qtyBuffer" , 0, ' ' "
+		"  from " DB_PREFIX "QUOTE q, " DB_PREFIX "PRODUCT P "
+		"  WHERE q.Id in ("idQuoteBuffer") and P.Id in ("IDOBJSELECTEDBUFFER")"
+		"   and not exists (select 1 from " DB_PREFIX "QUOTE_PRODUCT QP where QP.IdQuote=q.Id and QP.IdProduct=P.Id) "
+	),
+	%% update qty
+	UpdateProductForQuoteQty_SQL2 = (
+		"Update " DB_PREFIX "QUOTE_PRODUCT set Quantity="qtyBuffer" "
+		"  WHERE IdQuote in ("idQuoteBuffer")"
+		"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+	),
+
+	databaseType = "ACCESS" => (
+		%% price referece, VAT
+		UpdateProductForQuoteQty_SQL3 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct"
+			"   set QP.PriceUnitReference=P.PriceUnit, QP.IdVAT=P.IdVAT "
+			"  WHERE QP.IdQuote in ("idQuoteBuffer")"
+			"   and QP.IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+
+		%% price
+		UpdateProductForQuoteQty_SQL4 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP inner join " DB_PREFIX "PRODUCT P on P.Id=QP.IdProduct "
+			"  set QP.PriceUnit=P.PriceUnit"
+			"  WHERE (QP.PriceUnit is NULL or QP.PriceUnit<=0) and QP.IdQuote in ("idQuoteBuffer")"
+		),
+
+		%% amount HT
+		UpdateProductForQuoteQty_SQL5 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT QP set QP.AmountHT=QP.Quantity*QP.PriceUnit*(100.0-QP.Discount)/100.0"
+			"  WHERE QP.IdQuote in ("idQuoteBuffer")"
+			"   and QP.IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+
+		%% quote qty, amount HT
+		UpdateProductForQuoteQty_SQL6 = (
+			"Update " DB_PREFIX "QUOTE q set"
+			"   q.Quantity=0,"
+			"   q.AmountHT=0 "
+			"  WHERE q.Id in ("idQuoteBuffer")"
+		),
+		UpdateProductForQuoteQty_SQL7 = (
+			"Update " DB_PREFIX "QUOTE q inner join " DB_PREFIX "QUOTE_PRODUCT QP on q.Id=QP.IdQuote set"
+			"   q.Quantity=q.Quantity+QP.Quantity,"
+			"   q.AmountHT=q.AmountHT+QP.AmountHT "
+			"  WHERE q.Id in ("idQuoteBuffer")"
+		),
+
+	;
+		UpdateProductForQuoteQty_SQL3 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT set "
+			"   PriceUnitReference=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct), "
+			"   IdVAT=(select P.IdVAT from " DB_PREFIX "PRODUCT P where P.Id=IdProduct) "
+			"  WHERE IdQuote in ("idQuoteBuffer")"
+			"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateProductForQuoteQty_SQL4 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT "
+			"  set PriceUnit=(select P.PriceUnit from " DB_PREFIX "PRODUCT P where P.Id=IdProduct) "
+			"  WHERE (PriceUnit is NULL or PriceUnit<=0) and IdQuote in ("idQuoteBuffer")"
+		),
+		UpdateProductForQuoteQty_SQL5 = (
+			"Update " DB_PREFIX "QUOTE_PRODUCT set AmountHT=Quantity*PriceUnit*(100.0-Discount)/100.0"
+			"  WHERE IdQuote in ("idQuoteBuffer")"
+			"   and IdProduct in ("IDOBJSELECTEDBUFFER") "
+		),
+		UpdateProductForQuoteQty_SQL6 = (
+			"Update " DB_PREFIX "QUOTE set"
+			"   Quantity=(select sum(QP.Quantity) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote),"
+			"   AmountHT=(select sum(QP.AmountHT) from " DB_PREFIX "QUOTE_PRODUCT QP where Id=QP.IdQuote) "
+			"  WHERE Id in ("idQuoteBuffer")"
+		),
+		UpdateProductForQuoteQty_SQL7 = (
+			"Update " DB_PREFIX "QUOTE set"
+			"   Quantity=0,"
+			"   AmountHT=0 "
+			"  WHERE Id in ("idQuoteBuffer") and Quantity is NULL "
+		),
+	),
+
+	(SQL : UpdateProductForQuoteQty_SQL1), 
+	(SQL : UpdateProductForQuoteQty_SQL2), 
+	(SQL : UpdateProductForQuoteQty_SQL3), 
+	(SQL : UpdateProductForQuoteQty_SQL4), 
+	(SQL : UpdateProductForQuoteQty_SQL5), 
+	(SQL : UpdateProductForQuoteQty_SQL6), 
+	(SQL : UpdateProductForQuoteQty_SQL7), 
+	
+	
+	database <- '()',
+),

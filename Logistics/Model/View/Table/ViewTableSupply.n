@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableSupply.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableSupply.n"],
+
+'@' => (
+	tableSupply("SUPPLY",TAG_TABLE,"SUPPLY",true,"TableSupplier",TAG_SUPPLY,""),
+),

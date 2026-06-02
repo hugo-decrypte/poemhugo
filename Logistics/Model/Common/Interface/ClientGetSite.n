@@ -1,0 +1,212 @@
+/********************************************************/
+/*							*/
+/*		ClientGetSite.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%   selected           matrix          
+% -------------------------------------
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        | matrix
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% -------------------------------------
+% |                                   |
+% |                                   |
+% |                                   | selected
+% |                                   |
+% |                                   |
+% |                                   |
+% -------------------------------------
+
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+'()' => (
+	'()' <- database,
+
+
+/*
+	% Total sites
+	(SQL: "SELECT id,latitude,longitude FROM " DB_PREFIX "SITE WHERE idClub='" idClubLogin "' ORDER BY id"),
+
+	SITE = [1, ()],
+
+	\forall s \in SITE (
+		idSite_{s}		:: "",
+		latitudeSite_{s}	:: "",
+		longitudeSite_{s}	:: "",
+
+		idSite_{s}		= (),
+		latitudeSite_{s}	= (),
+		longitudeSite_{s}	= (),
+	),
+	IDSITE = \{ \forall s \in SITE idSite_{s} \},
+
+	\forall i \in IDSITE
+		siteId_{i} \in SITE,
+
+	\forall s \in SITE
+		siteId_{idSite_{s}} = s,
+*/
+
+
+
+
+	% ORDER
+	(SQL: "SELECT DISTINCT s.id FROM " DB_PREFIX "SITE s, " DB_PREFIX "OPT_ORDER o WHERE o.idSite2=s.id AND o.state>='" STATE_CANDIDATE "' AND o.idClub='" idClubLogin "' ORDER BY s.id"),
+
+	IdSiteOrder :: {""},
+	IdSiteOrder = \{ \forall i \in [1, ()] () \},
+
+
+
+	% GROUPRESOURCE
+	(SQL: "SELECT DISTINCT idSite FROM " DB_PREFIX "GROUPRESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite"),
+
+	IdSiteGroupResourcce :: {""},
+	IdSiteGroupResourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+
+	% RESOURCE
+	(SQL: "SELECT DISTINCT idSite1 FROM " DB_PREFIX "RESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	IdSite1Resourcce :: {""},
+	IdSite1Resourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+	(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX "RESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite2"),
+
+	IdSite2Resourcce :: {""},
+	IdSite2Resourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+
+	% SITE
+	IDSITE = (IdSiteOrder \cup IdSiteGroupResourcce \cup IdSite1Resourcce \cup IdSite2Resourcce) \setminus "",
+
+	SITE = [1,#IDSITE],
+	\forall s \in SITE
+		idSite_{s} = IDSITE[s],
+
+	\forall i \in IDSITE
+		siteId_{i} \in SITE,
+
+	\forall s \in SITE
+		siteId_{idSite_{s}} = s,
+
+
+
+
+	% latitude,longitude
+	\forall s \in SITE (
+		(SQL: "SELECT latitude,longitude FROM " DB_PREFIX "SITE WHERE id='" idSite_{s} "'"),
+
+		() > 0,
+
+		latitudeSite_{s}	:: "",
+		longitudeSite_{s}	:: "",
+
+		latitudeSite_{s}	= (),
+		longitudeSite_{s}	= (),
+	),
+
+
+
+
+	% Selected sites required to be recomputed
+	(SQL: "SELECT DISTINCT id FROM " DB_PREFIX "SITE WHERE selected='" STATE_TRUE "' AND idClub='" idClubLogin "' ORDER BY id"),
+
+	IdSiteSelected :: {""},
+	IdSiteSelected = \{ \forall i \in [1, ()] () \} \cap IDSITE,
+	SiteSelected = \{ \forall i \in IdSiteSelected siteId_{i} \},
+
+
+
+
+	% Matrix sites by idSite1 : Site1Matrix
+	(SQL: "SELECT DISTINCT idSite1 FROM " DB_PREFIX "SITE_SITE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	IdSite1Matrix :: {""},
+	IdSite1Matrix = \{ \forall i \in [1, ()] () \} \cap IDSITE,
+
+	Site1Matrix = \{ \forall i \in IdSite1Matrix \setminus IdSiteSelected siteId_{i} \},
+
+
+
+	% Matrix sites by idSite2 : Site2Matrix
+	(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "'"),
+
+	maxSite2 = (),
+
+	\forall s \in Site1Matrix (
+		(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' AND idSite1='" idSite_{s} "'"),
+
+		nbSite2Site1_{s} = (),
+		nbSite2Site1_{s} =< maxSite2,
+
+		IdSite2Site1_{s} :: {""},
+		IdSite2Site1_{s} = \{ \forall i \in [1, nbSite2Site1_{s}] () \} \cap IdSite1Matrix,
+	),
+
+	IdSite2Matrix :: {""},
+	IdSite2Matrix = \bigcap_{s \in Site1Matrix}{IdSite2Site1_{s}},
+
+	Site1Matrix = {} -> IdSite2Matrix = {},
+
+
+	% Matrix sites verified valid for idSite1/idSite2 : SiteMatrix
+	SiteMatrix = \{ \forall i \in IdSite2Matrix \setminus IdSiteSelected siteId_{i} \},
+
+
+	database <- '()',
+),
+
+
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+	% Matrix sites verified valid for idSite1/idSite2 : #SiteMatrix * #SiteMatrix not to be recomputed
+	@ (#SiteMatrix "  \n"),
+
+	\forall s \in SiteMatrix (
+		@ (	"'" 	idSite_{s}
+			"'  '"	latitudeSite_{s}
+			"'  '"	longitudeSite_{s} "'  \n"
+		),
+	),
+	@ "\n",
+
+
+
+	% Selected sites required to be recomputed
+	@ (#SiteSelected "  \n"),
+
+	\forall s \in SiteSelected (
+		@ ("'" idSite_{s} "'  '" latitudeSite_{s} "'  '" longitudeSite_{s} "'\n"),
+	),
+
+
+	'@' <- messageBuffer,
+
+!!,
+
+	( message : '.'),	% Sent to solution message
+),
+

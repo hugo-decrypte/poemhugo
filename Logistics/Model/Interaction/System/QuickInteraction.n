@@ -1,0 +1,65 @@
+%==================================================%
+%						   %
+%            	    Scheduling    	           %
+%						   %
+% 	      QuickInteraction.n 	       	   %
+%                                                  %	
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadMacro.n"],
+
+'()' => ( 
+	%idClubBuffer			:: "",
+	ordBuffer                       :: 0,
+	interactionBuffer		:: "",
+
+	nbInteractionSelected		= (),
+	nbParameterSelected		= (),
+
+	%idClubBuffer			= (),
+	ordBuffer                       = (),
+	interactionBuffer		= (),
+
+
+	? interactionBuffer (
+	"IMPORTEXPORT":
+		? ordBuffer (
+		1:	[['Work Directory' "Model\Interface\ImportInputTable.n"],	['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		2:	[['Work Directory' "Model\Interface\ImportFeedback.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		3:	[['Work Directory' "Model\View\Gantt\ViewGanttMenu.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'], % Zhou 0402
+			;
+
+		4:	[['Work Directory' "Model\Script\ScriptGenerateExcel.n"],	['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		5:	[['Work Directory' "Model\\Interface\\ExportAllLaunched.n"],	['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+		), % Zhou 0822
+		;
+
+
+	"CANCEL":
+		? ordBuffer (
+		1:	[['Work Directory' "Model\Interaction\Solver\Task\ClearLabel.n"],	['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		2:	[['Work Directory' "Model\Interaction\Backup\ClearSnapshot.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		3:	[['Work Directory' "Model\Interaction\Backup\ClearBackup.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'],
+			;
+
+		4:	[['Work Directory' "Model\Interaction\Backup\ClearLog.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'],  % li 0707
+			;
+
+		5:	[['Work Directory' "Model\Interaction\Backup\Cancel.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'], % Zhou 0402
+			%[['Work Directory' "Model\Interaction\Solver\State\ClearLastGroup.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+		),
+	),
+),

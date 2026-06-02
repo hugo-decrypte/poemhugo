@@ -1,0 +1,53 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableTour2TableDeliveryForTour.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableDeliveryForTour ",
+
+% Caption
+@ (" '" TAG_DELIVERY_TO_ADD_FOR_TOUR "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_ADD_TO_TOUR,
+
+% Label
+@ (" '" TAG_DELIVERY_TO_ADD "' "),
+
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableDeliveryForTour.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS 
+"OWNEROBJ=IdTour;IDOBJ={/*Selected(tableTOUR;1;(string,ID))*/};TITLEOBJ=" TAG_FOR_TOUR " {/*Selected(tableTOUR;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR={/*Selected(tableTOUR;1;(string,ID))*/}]\"\n\n"),

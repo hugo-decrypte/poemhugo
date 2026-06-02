@@ -1,0 +1,60 @@
+View ViewTableDELIVERYNOTE 'Bon de livraison' 'Bon de livraison'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableDELIVERYNOTE _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Bon de livraison;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Right,Left,Left,Right,Right,Right,Right,Right,Right,Left,Right,Center,Center,Center}]"\
+"[DATAOBJ=DELIVERYNOTE;FILLCOLOR=LINERGB]"
+
+Data DELIVERYNOTE 'Bon de livraison' DELIVERYNOTE HTTPSQL 0 '[FIND={ID,CLIENT,PRIORITY,SITE,IDPRODUCT,QUANTITY,WEIGHT,VOLUME,TIMEFIXED,COST,RECEIPTS,IDVEHICLE,TOURVEHICLE,T1PLAN,T2PLAN,STATE}]'   [DOUBLECLICK=EditDeliveryNote] \
+"[16;(string,ID,ID,,15,,);(string,CLIENT,Client,,15,,);(int,PRIORITY,Priorité,,18,,);(string,SITE,Lieu,,30,,);(string,IDPRODUCT,Produit,,25,,);(int,QUANTITY,Quantité,,15,,);(float,WEIGHT,Poids,,15,,);(float,VOLUME,Volume,,15,,);(int,TIMEFIXED,Temps fixé,,20,,);(float,COST,Coût,,12,,);(float,RECEIPTS,Recette,,20,,);(string,IDVEHICLE,Ressource,,30,,);(int,TOURVEHICLE,Tournée,,30,,);(string,T1PLAN,Le plus tôt,,30,,);(string,T2PLAN,Le plus tard,,30,,);(string,STATE,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0);(datetime,T1WINDOW,T1WINDOW,,,,YYYY-MM-DD HH:MM|MM/DD/YYYY HH:MM);\
+(datetime,T2WINDOW,T2WINDOW,,,,YYYY-MM-DD HH:MM|MM/DD/YYYY HH:MM);(int,QUANTITY,QUANTITY,,20,0);\
+(string,IDVEHICLE,,,20,0);(string,IDVEHICLE0,,,20,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT o.id AS ID, o.idClient AS CLIENT, \
+IIF(o.priority IS NULL,0,o.priority) AS PRIORITY, \
+(trim(s.id) + ' ' + s.name ) AS SITE,\
+o.idProduct AS IDPRODUCT,\
+IIF(o.quantity IS NULL , 0 , o.quantity) AS QUANTITY,\
+IIF(o.weight IS NULL,0,o.weight) AS WEIGHT, \
+IIF(o.volume IS NULL,0,o.volume) AS VOLUME, \
+IIF(o.state='1' , 'candidate' , IIF(o.state='2' , 'planned',IIF(o.state='3','launched' , 'unavailable'))) AS STATE, \
+IIF(o.state='1' , '(0 224 224)' , IIF(o.state='0' , '(248 248 248)' , '(255 255 255)')) AS LINERGB, \
+'(/*USERID*/)' AS IDUSER, \
+o.t1Service0 AS T1WINDOW, o.t2Service0 AS T2WINDOW, o.idResource AS IDVEHICLE, o.tourResource AS TOURVEHICLE, \
+o.t1 AS T1PLAN, o.t2 AS T2PLAN, o.receipts AS RECEIPTS, o.cost AS COST, o.timeService  AS TIMESERVICE, \
+o.timeFixed AS TIMEFIXED, o.IdResource0 AS IDRESOURCE0, o.t2Service0 AS T2SERVICE0 \
+FROM OPT_ORDER o, SITE s \
+WHERE o.idSite2=s.id AND o.idClub='(/*CLUBID*/)' \
+ORDER BY o.state DESC, o.selected DESC "
+
+
+Data STATE 'State' STATE HTTPSQL 0 _ _ \
+"[2;(string,IDSTATE,Statut ID,,15.0.80,0);(string,LABELSTATE,Libellé,,50.0.300,0);]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=select s.Id AS IDSTATE, \
+	(trim(LABEL) + '(' + trim(ID) + ')') as LABELSTATE \
+	FROM STATE s \
+WHERE s.Category='DELIVERYNOTE' \
+ORDER BY s.Id "
+
+Script SelectDeselect  'Sélectionnéer/Désélectionnéer' _ 61 'Sélectionnéer/Désélectionnéer' _ 'tableDELIVERYNOTE' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Order\SelectDeselectDeliveryNote.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableDELIVERYNOTE;1;(string,ID))*/}  \
+'\
+Reload _ _ _
+
+Script ModifyDeliveryNote 'Modifier état' _ 62 'Modifier état' _ 'tableDELIVERYNOTE' '( 0 0 0 0 )' _ _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\ORDER\UpdateDeliveryNoteState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableDELIVERYNOTE;1;(string,ID))*/} \
+{/*Input(MCM;Modifier état;1;\
+(string,STATEHERE,Etat,[/*DELIVERYNOTE.STATE*/],50.0.580,0,,[/*STATE.LABELSTATE*/]);\
+)*/}'\
+Reload _ _ _
+
+Script EditDeliveryNote 'Editer' _ 1 'Editer' _ 'tableDELIVERYNOTE' '( 0 0 0 0 )' _ _ _ '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' WinExec "[WAITTIME=600S;CONSOLE=0;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F);WORKDIR=(/*CLIENTDIRECTORY*/)]" '(/*POEMDATAEXEPATH*/)PoemData.exe' "(/*POEMDATACONFIG*/)?[PROFILE=(UID=(/*USERID*/),PWD=(/*PASSWORD*/),ACCESS=(/*PERMISSION*/));DSN=(DSN=(/*DBNAME*/),UID=(/*DBUSER*/),PWD=(/*DBPWD*/),OWNER=(/*DBOWNER*/));SERVER=(SERVER=(/*SERVERIP*/),PORT=(/*SERVERPORT*/),TIMEOUT=100000,UID=,PWD=,PROXYNAME=,PROXYBYPASS=);]?OPEN TABLE OPT_ORDER&Id in ({/*selected(tableDELIVERYNOTE;1;(string,ID))*/})"\
+Reload _ _ _ _ 
+
+

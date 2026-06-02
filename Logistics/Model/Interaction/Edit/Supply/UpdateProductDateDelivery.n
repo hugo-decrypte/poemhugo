@@ -1,0 +1,51 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateProductDateDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	% Input buffer
+	idSupplyBuffer 	:: "",
+	idSupplyBuffer	= (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idObjSelectedBuffer_{i} 			:: "",
+		idObjSelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "',"),
+			;
+			strIdObjSelectedBuffer_{i} = ("'" idObjSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDOBJSELECTEDBUFFER :: "",
+	IDOBJSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdObjSelectedBuffer_{i}],
+
+	dateDeliveryBuffer	:: "",
+	dateDeliveryBuffer	= (),
+
+	'()' <- database,
+
+	UpdateProductDateDelivery_SQL1 = (
+		"Update " DB_PREFIX "SUPPLY_PRODUCT set
+			DateDelivery='"dateDeliveryBuffer"'
+		WHERE IdSupply in ("idSupplyBuffer")
+		and IdProduct in ("IDOBJSELECTEDBUFFER")"
+	),
+	
+	(SQL : UpdateProductDateDelivery_SQL1), 
+
+	
+	database <- '()',
+),

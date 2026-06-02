@@ -1,0 +1,427 @@
+/******************************************************/
+/*	                                              */
+/*	 	SqlTask.n  	     	      	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+TIPINFO_TASK = (
+	"[/*IDTASK*/]   [/*IDPROJECT*/]   [/*NAMEPROCESS*/]   [/*NAMERESOURCE*/]   [/*NAMETYPERESOURCE*/]     [/*QUANTITYRESOURCE*/]   [/*TIMERESOURCE*/]   [/*DIVISIBLE*/]      [/*T1PLAN*/]   [/*T2PLAN*/]"
+),
+
+%TIPINFO_TASK = (
+%	"[/*IDTASK*/]   [/*NAMEPROJECT*/]   [/*NAMEPROCESS*/]   [/*NAMERESOURCE*/]   [/*NAMETYPERESOURCE*/]     [/*QUANTITYRESOURCE*/]   [/*TIMERESOURCE*/]   [/*DIVISIBLE*/]      [/*T1PLAN*/]   [/*T2PLAN*/]"
+%	TAG_QUANTITY ": [/*QUANTITYTASK*/]  [/*TASKDIVISIBLE*/]   "
+%	TAG_WORKTIME	": [/*TIMETASK*/]"
+%),
+
+
+SQL_T1REAL_NULL				= ("rr.t1Real IS NULL"),
+SQL_T2REAL_NULL				= ("rr.t2Real IS NULL"),
+
+
+SQL_T1REAL_NOT_NULL			= ("rr.t1Real IS NOT NULL"),
+SQL_T2REAL_NOT_NULL			= ("rr.t2Real IS NOT NULL"),
+SQL_T2EXTENDEDREAL_NOT_NULL		= ("rr.t2ExtendedReal IS NOT NULL"),
+
+SQL_T1T2REAL_NOT_NULL			= ("rr.t1Real IS NOT NULL AND rr.t2Real IS NOT NULL"),
+
+SQL_IDRESOURCEREAL_NOT_NULL		= ("rr.idResourceReal IS NOT NULL"),
+SQL_IDSITEREAL_NOT_NULL			= ("rr.idSiteReal IS NOT NULL"),
+SQL_QUANTITYRESOURCEREAL_NOT_NULL	= ("rr.quantityResourceReal IS NOT NULL"),
+
+
+
+SQL_FEEDBACK_NOT_NULL = (
+	SQL_QUANTITYRESOURCEREAL_NOT_NULL " OR "
+	SQL_T1REAL_NOT_NULL " OR "
+	SQL_T2REAL_NOT_NULL " OR "
+	SQL_T2EXTENDEDREAL_NOT_NULL
+),
+
+
+? databaseType (
+"ACCESS":
+	SQL_IDRESOURCE		= ("IIF(" SQL_IDRESOURCEREAL_NOT_NULL 		",rr.idResourceReal,rr.idResource)"),
+	SQL_IDSITE		= ("IIF(" SQL_IDSITEREAL_NOT_NULL 		",rr.idSiteReal,rr.idSite)"),
+	SQL_RESOURCE_QUANTITY	= ("IIF(" SQL_QUANTITYRESOURCEREAL_NOT_NULL 	",rr.quantityResourceReal,rr.quantityResource)"),
+	SQL_T1			= ("IIF(" SQL_T1REAL_NOT_NULL 			",rr.t1Real,rr.t1)"),
+	SQL_T2			= ("IIF(" SQL_T2REAL_NOT_NULL 			",rr.t2Real,rr.t2)"),
+	SQL_T2EXTENDED		= ("IIF(" SQL_T2EXTENDEDREAL_NOT_NULL 		",rr.t2ExtendedReal,rr.t2Extended)"),
+	;
+
+"SQLSERVER","ORACLE":
+	SQL_IDRESOURCE		= ("CASE WHEN " SQL_IDRESOURCEREAL_NOT_NULL	" THEN rr.idResourceReal ELSE rr.idResource END"),
+	SQL_IDSITE		= ("CASE WHEN " SQL_IDSITEREAL_NOT_NULL		" THEN rr.idSiteReal ELSE rr.idSite END"),
+	SQL_RESOURCE_QUANTITY	= ("CASE WHEN " SQL_QUANTITYRESOURCEREAL_NOT_NULL " THEN rr.quantityResourceReal ELSE rr.quantityResource END"),
+	SQL_T1			= ("CASE WHEN " SQL_T1REAL_NOT_NULL 		" THEN rr.t1Real ELSE rr.t1 END"),
+	SQL_T2			= ("CASE WHEN " SQL_T2REAL_NOT_NULL 		" THEN rr.t2Real ELSE rr.t2 END"),
+	SQL_T2EXTENDED		= ("CASE WHEN " SQL_T2EXTENDEDREAL_NOT_NULL 	" THEN rr.t2ExtendedReal ELSE rr.t2Extended END"),
+	;
+
+"MYSQL":
+	SQL_IDRESOURCE		= ("IF(" SQL_IDRESOURCEREAL_NOT_NULL 		",rr.idResourceReal,rr.idResource)"),
+	SQL_IDSITE		= ("IF(" SQL_IDSITEREAL_NOT_NULL 		",rr.idSiteReal,rr.idSite)"),
+	SQL_RESOURCE_QUANTITY	= ("IF(" SQL_QUANTITYRESOURCEREAL_NOT_NULL 	",rr.quantityResourceReal,rr.quantityResource)"),
+	SQL_T1			= ("IF(" SQL_T1REAL_NOT_NULL 			",rr.t1Real,rr.t1)"),
+	SQL_T2			= ("IF(" SQL_T2REAL_NOT_NULL 			",rr.t2Real,rr.t2)"),
+	SQL_T2EXTENDED		= ("IF(" SQL_T2EXTENDEDREAL_NOT_NULL		",rr.t2ExtendedReal,rr.t2ExtendedReal)"),
+),
+
+
+
+SQL_WhereAbsenceTimeDuplicate = (
+	" WHERE rr1.idResource=rr.idResource AND rr1.dateStart+rr1.timeStart<>rr.dateStart+rr.timeStart AND rr1.dateStart+rr1.timeStart<rr.dateEnd+rr.timeEnd AND rr1.dateEnd+rr1.timeEnd>=rr.dateStart+rr.timeStart"
+),
+SQL_WhereTaskTimeDuplicate = (
+	" WHERE rr1.idResource=rr.idResource AND rr1.t1<>rr.t1 AND rr1.t1<rr.t2 AND rr1.t2>=rr.t1"
+),
+
+
+
+
+SQL_AbsenceDuplicate = (
+	"EXISTS(SELECT 1 FROM " DB_PREFIX "RESOURCE_ABSENCE rr1" SQL_WhereAbsenceTimeDuplicate ")"
+),
+SQL_TaskDuplicate = (
+	"EXISTS(SELECT 1 FROM " DB_PREFIX "RESOURCE_TASK rr1" SQL_WhereTaskTimeDuplicate
+	" AND rr1.idProject=rr.idProject)"
+),
+
+
+% rr means resource related
+SQL_ResourceIsUser = (
+	"rr.idResource=(SELECT u.idResource FROM " SQL_TABLE_USER  " u WHERE u.id='(/*USERID*/)')"
+),
+
+
+
+SQL_ActivityStateName = (
+	SQL_AliasCategoryIs "'ACTIVITY' AND al.field='state' AND al.id=rr.state)"
+),
+
+SQL_TaskStateName = (
+	SQL_AliasCategoryIs "'TASK' AND al.field='state' AND al.id=rr.state)"
+),
+
+SQL_TaskStateColor = (
+	SQL_ColorCategoryIs "'TASK' AND al.field='state' AND al.id=rr.state)"
+),
+SQL_ActivityStateColor = (
+	SQL_ColorCategoryIs "'ACTIVITY' AND al.field='state' AND al.id=rr.state)"
+),
+
+
+
+
+
+? databaseType (
+"ACCESS":
+	SQL_AbsenceColor = (
+		"IIF(" SQL_AbsenceDuplicate ","
+			SQL_RGB_ALERT_1
+			",IIF(" SQL_ResourceIsUser
+				",'" RGB_ORANGE
+				"',IIF(rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd,'"
+					RGB_RED
+					"'," SQL_ActivityStateColor ")))"
+	),
+	SQL_AbsenceComments = (
+		"IIF(" SQL_AbsenceDuplicate ",'"
+			TAG_DUPLICATE_ALERT
+			"',IIF(rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd,'"
+				TAG_DATE_ALERT
+				"',rr.comments))"
+	),
+
+	SQL_TaskColor = (
+		"IIF(" SQL_TaskDuplicate ","
+			SQL_RGB_ALERT_1
+			",IIF(" SQL_ResourceIsUser
+				",'" RGB_ORANGE
+				"',IIF(rr.t1 > rr.t2,'"
+					RGB_RED
+					"'," SQL_TaskStateColor ")))"
+	),
+	SQL_TaskAdvice = (
+		"IIF(" SQL_TaskDuplicate ",'"
+			TAG_DUPLICATE_ALERT
+			"',IIF(rr.t1 > rr.t2,'"
+				TAG_DATE_ALERT
+				"',rr.advice))"
+	),
+	;
+
+
+"SQLSERVER","ORACLE","MYSQL":
+	SQL_AbsenceColor = (
+		"CASE WHEN " SQL_AbsenceDuplicate " THEN "
+			SQL_RGB_ALERT_1
+			" ELSE CASE WHEN " SQL_ResourceIsUser " THEN '" RGB_ORANGE "' ELSE " SQL_ActivityStateColor " END END"
+	),
+	SQL_TaskColor = (
+		"CASE WHEN " SQL_TaskDuplicate " THEN "
+			SQL_RGB_ALERT_1
+			" ELSE CASE WHEN " SQL_ResourceIsUser " THEN '" RGB_ORANGE "' ELSE " SQL_TaskStateColor " END END"
+	),
+
+	SQL_AbsenceComments = (
+		"CASE WHEN " SQL_AbsenceDuplicate " THEN '" TAG_DUPLICATE_ALERT "' ELSE rr.comments END"
+	),
+	SQL_TaskAdvice = (
+		"CASE WHEN " SQL_TaskDuplicate " THEN '" TAG_DUPLICATE_ALERT "' ELSE rr.advice END"
+	),
+),
+
+
+sqlSuccessorId = "rr.idTaskResourceSucc",
+
+
+
+? databaseType (
+"ACCESS" :
+	sqlResourceTaskId	= "rr.idResource+rr.idTask",
+
+
+	sqlTaskItem	= "rr.idResource",
+
+	sqlTaskIdx	= ("IIF(rr.idxParent IS NULL,'',CSTR(rr.idxParent))"),
+	sqlTaskText	= ("' '+" sqlTaskIdx "+'   '+rr.idProcess AS [TEXT]"),
+	%sqlTaskText	= ("' '+rr.idResource+'   '+rr.idProcess AS [TEXT]"),
+
+
+	sqlTaskStartDate	= ("LEFT(" SQL_T1 ",10)"),
+	sqlTaskStartTime	= ("RIGHT(" SQL_T1 "," lenStrTimeFormat ")"),
+	sqlTaskStartTime2	= ("IIF((LEFT(" SQL_T1 ",10)<'" date1 "'),'" midnight00 "'," sqlTaskStartTime ")"),
+
+	sqlTaskEndDate		= ("LEFT(" SQL_T2 ",10)"),
+	sqlTaskEndTime		= ("RIGHT(" SQL_T2 "," lenStrTimeFormat ")"),
+	sqlTaskEndTime2		= ("IIF((LEFT(" SQL_T2 ",10)>'" date2 "'),'" midnight24 "'," sqlTaskEndTime ")"),
+
+	sqlTaskExtendedEndDate	= ("LEFT(" SQL_T2EXTENDED ",10)"),
+	sqlTaskExtendedEndTime	= ("RIGHT(" SQL_T2EXTENDED "," lenStrTimeFormat ")"),
+	sqlTaskExtendedEndTime2	= ("IIF((LEFT(" SQL_T2EXTENDED ",10)>'" date2 "'),'" midnight24 "'," sqlTaskExtendedEndTime ")"),
+
+
+	sqlTaskContinuous	= ("IIF(rr.continuous='" STATE_TRUE "','" TAG_CONTINUOUS "','')"),
+	sqlTaskDivisible	= ("IIF(rr.divisible='" STATE_TRUE "','" TAG_DIVISIBLE "','" TAG_INDIVISIBLE "')"),
+
+
+
+	sqlAbsenceId	= "rr.idResource+rr.idTypeAbsence+rr.dateStart+rr.timeStart",
+	sqlAbsenceText 	= "' '+rr.idTypeAbsence AS [TEXT]",
+
+	sqlAbsenceStartDate	= ("IIF(rr.dateStart<'" date1	"','" date1 "',rr.dateStart)"),
+	sqlAbsenceStartTime	= ("IIF(rr.dateStart<'" date1	"','" midnight00 "',rr.timeStart)"),
+
+	sqlAbsenceEndDate	= ("IIF(rr.dateEnd>'" date2	"','" date2 "',rr.dateEnd)"),
+	sqlAbsenceEndTime	= ("IIF(rr.dateEnd>'" date2	"','" midnight24 "',rr.timeEnd)"),
+
+	sqlAbsenceT1	= ("IIF(rr.dateStart<'" date1	"','" date1 "'+' '+'" midnight00 "',rr.dateStart+' '+rr.timeStart)"),
+	sqlAbsenceT2	= ("IIF(rr.dateEnd>'" date2	"','" date2 "'+' '+'" midnight24 "',rr.dateEnd+' '+rr.timeEnd)"),
+
+
+	
+	sqlResourceHolidayId	= "r.id+rr.id",
+	sqlProjectHolidayId	= "o.id+rr.id",
+
+	sqlHolidayText 	= ("' '+'" TAG_HOLIDAY "' AS [TEXT]"),
+
+
+	sqlHolidayT1	= ("rr.id+' '+'" midnight00 "'"),
+	sqlHolidayT2	= ("rr.id+' '+'" midnight24 "'"),
+
+
+	sqlTaskRGB = (
+		"IIF(rr.selected='" STATE_TRUE "'," SQL_RGB_ATTENTION_3
+			",IIF(" SQL_T1 " > " SQL_T2 ",'" RGB_ALERT_2 
+				"','" RGB_TASK "'))"
+	),
+	sqlAbsenceRGB = (
+		"IIF(rr.selected='" STATE_TRUE "'," SQL_RGB_ATTENTION_3
+			",IIF(rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd,'" RGB_ALERT_2 
+				"','" RGB_ABSENCE "'))"
+	),
+
+
+	;
+
+
+"SQLSERVER" :
+	sqlResourceTaskId	= "rr.idResource+rr.idTask",
+
+	%% 2025.01.29 add  sqlTaskItem
+	sqlTaskItem	= "rr.idResource",
+
+	sqlTaskIdx = ("CASE WHEN rr.idxParent IS NULL THEN '' ELSE CSTR(rr.idxParent) END"),
+	sqlTaskText	= ("' '+" sqlTaskIdx "+'   '+rr.idProcess AS [TEXT]"),
+	%sqlTaskText	= ("' '+rr.idResource+'   '+rr.idProcess AS [TEXT]"),
+
+	sqlTaskStartDate	= ("LEFT(" SQL_T1 ",10)"),
+	sqlTaskStartTime	= ("RIGHT(" SQL_T1 "," lenStrTimeFormat ")"),
+	sqlTaskStartTime2	= ("CASE WHEN (" sqlTaskStartDate "<" sqlDate1 ") THEN '" midnight00 "' ELSE " sqlTaskStartTime " END"),
+
+	sqlTaskEndDate		= ("LEFT(" SQL_T2 ",10)"),
+	sqlTaskEndTime		= ("RIGHT(" SQL_T2 "," lenStrTimeFormat ")"),
+	sqlTaskEndTime2		= ("CASE WHEN (" sqlTaskEndDate ">" sqlDate2 ") THEN '" midnight24 "' ELSE " sqlTaskEndTime " END"),
+
+	sqlTaskExtendedEndDate	= ("LEFT(" SQL_T2EXTENDED ",10)"),
+	sqlTaskExtendedEndTime	= ("RIGHT(" SQL_T2EXTENDED "," lenStrTimeFormat ")"),
+	sqlTaskExtendedEndTime2	= ("CASE WHEN (" sqlTaskExtendedEndDate ">" sqlDate2 ") THEN '" midnight24 "' ELSE " sqlTaskExtendedEndTime " END"),
+
+
+
+	sqlTaskContinuous	= ("CASE WHEN (rr.continuous='" STATE_TRUE "') THEN '" TAG_CONTINUOUS "' ELSE '' END"),
+	sqlTaskDivisible	= ("CASE WHEN (rr.divisible='" STATE_TRUE "') THEN '" TAG_DIVISIBLE "' ELSE '" TAG_INDIVISIBLE "' END"),
+
+
+
+	%%% 2025.01.29 add sqlAbsenceId, sqlAbsenceText for SQLSERVER
+	sqlAbsenceId	= "rr.idResource+rr.idTypeAbsence+rr.dateStart+rr.timeStart",
+	sqlAbsenceText 	= "' '+rr.idTypeAbsence AS [TEXT]",
+
+	sqlAbsenceStartDate	= ("CASE WHEN rr.dateStart<" sqlDate1 " THEN " sqlDate1 " ELSE rr.dateStart END"),
+	sqlAbsenceStartTime	= ("CASE WHEN rr.dateStart<" sqlDate1 " THEN '" midnight00 "' ELSE rr.timeStart END"),
+
+	sqlAbsenceEndDate	= ("CASE WHEN rr.dateEnd>" sqlDate2 " THEN " sqlDate2 " ELSE rr.dateEnd END"),
+	sqlAbsenceEndTime	= ("CASE WHEN rr.dateEnd>" sqlDate2 " THEN '" midnight24 "' ELSE rr.timeEnd END"),
+
+	%%% 2025.01.29 add sqlAbsenceT1, sqlAbsenceT2 for SQLSERVER
+	sqlAbsenceT1	= ("IIF(rr.dateStart<'" date1	"','" date1 "'+' '+'" midnight00 "',rr.dateStart+' '+rr.timeStart)"),
+	sqlAbsenceT2	= ("IIF(rr.dateEnd>'" date2	"','" date2 "'+' '+'" midnight24 "',rr.dateEnd+' '+rr.timeEnd)"),
+
+
+
+	sqlResourceHolidayId	= "r.id+rr.id",
+	sqlProjectHolidayId	= "o.id+rr.id",
+
+	sqlHolidayText 	= ("' '+'" TAG_HOLIDAY "' AS [TEXT]"),
+
+
+	sqlHolidayT1	= ("rr.id+' '+'" midnight00 "'"),
+	sqlHolidayT2	= ("rr.id+' '+'" midnight24 "'"),
+
+
+
+
+
+	sqlTaskRGB = (
+		"CASE WHEN rr.selected='" STATE_TRUE "' THEN " SQL_RGB_ATTENTION_3 " ELSE '" RGB_TASK RGB_TASK "' END"
+	),
+	sqlAbsenceRGB = (
+		"CASE WHEN rr.selected='" STATE_TRUE "' THEN " SQL_RGB_ATTENTION_3
+			" ELSE CASE WHEN rr.dateStart+rr.timeStart > rr.dateEnd+rr.timeEnd, THEN " RGB_ALERT_2 
+				"' ELSE '" RGB_ABSENCE "' END END"
+	),
+	;
+
+
+"ORACLE" :
+	SQL_TASK_NAME = (
+		"CASE WHEN rr.idxParentTask IS NULL THEN '' ELSE " SQL_p_ORDTOPARENTTASK " END ||' '||rr.nameTask"
+	),
+	SQL_TASK_TEXT = (
+		SQL_TASK_NAME "||CASE WHEN rr.state=" STATE_LOCKED " THEN ' "SIGN_LOCKED"' ELSE '' END"
+	),
+
+	sqlTaskRGB = (
+		"CASE WHEN rr.selected='" STATE_TRUE "' THEN " SQL_RGB_ATTENTION_3 " ELSE '" RGB_TASK RGB_TASK "' END"
+	),
+
+	sqlResourceTaskId	= "rr.idResource||rr.idProcess",
+
+	sqlTaskItem	= "rr.idResource",
+	%sqlTaskItem	= "rr.idClub||' '||rr.idResource",
+
+	%%% 2025.01.29 add sqlTaskIdx for ORACLE
+	sqlTaskIdx = ("CASE WHEN rr.idxParent IS NULL THEN '' ELSE CSTR(rr.idxParent) END"),
+	sqlTaskText	= ("TO_CHAR(" sqlTaskIdx "||'   '||rr.nameTask"),
+	%sqlTaskText	= "TO_CHAR(IIF(rr.idxParentTask IS NULL,'',CSTR(rr.idxParentTask)))||' '||rr.nameTask",
+
+
+	sqlTaskStartDate	= "SUBSTR(CASE WHEN rr.t1RealTask IS NOT NULL AND rr.t1RealTask<>' ' THEN (CASE WHEN rr.t1RealTask<rr.t1Task THEN rr.t1RealTask ELSE rr.t1Task END) ELSE rr.t1Task END,1,10)",
+	sqlTaskStartTime	= ("CASE WHEN (SUBSTR(" SQL_T1 ",1,10)<" sqlDate1 ") THEN '" midnight00 "' ELSE SUBSTR(" SQL_T1 ",12," lenStrTimeFormat ") END"),
+
+	sqlTaskEndDate	= ("CASE WHEN SUBSTR(" SQL_T2 ",1,10)>" sqlDate2 "  THEN \
+				CASE WHEN SUBSTR(" SQL_T2 ",12," lenStrTimeFormat ") ='" midnight24 "' THEN \
+				TO_CHAR(TO_DATE(" sqlDate2 ",'" SQL_FORMATDATE_FR "')+1,'" SQL_FORMATDATE_FR "') ELSE " sqlDate2 " END \
+			ELSE\
+			CASE WHEN SUBSTR(" SQL_T2 ",12," lenStrTimeFormat ") ='" midnight24 "' \
+			THEN \
+				TO_CHAR(TO_DATE(SUBSTR(" SQL_T2 ",1,10),'" SQL_FORMATDATE_FR "')+1,'" SQL_FORMATDATE_FR "') \
+			ELSE \
+				SUBSTR(" SQL_T2 ",1,10) \
+			END \
+			END "),
+	sqlTaskExtendedEndDate	= ("LEFT(" SQL_T2EXTENDED ",10)"),
+
+	sqlTaskEndTime0	= ("TO_CHAR(TO_DATE(SUBSTR(" SQL_T2 ",12," lenStrTimeFormat "),'" timeInterval "')+"timeDivide",'" timeInterval "')"),
+	sqlTaskEndTime	= ("CASE WHEN (SUBSTR(" SQL_T2 ",1,10)>" sqlDate2 ") THEN '"midnight24"'  ELSE " sqlTaskEndTime0 " END"),
+	sqlTaskExtendedEndTime	= ("IIF((LEFT(" SQL_T2EXTENDED ",10)>'" date2 "'),'" midnight24 "',RIGHT(" SQL_T2EXTENDED "," lenStrTimeFormat "))"),
+	;
+
+
+"MYSQL" :
+	SQL_TASK_NAME = (
+		"CASE WHEN rr.idxParentTask IS NULL THEN '' ELSE " SQL_p_ORDTOPARENTTASK " END ||' '||rr.nameTask"
+	),
+	SQL_TASK_TEXT = (
+		"CONCAT(" SQL_TASK_NAME ",CASE WHEN rr.state=" STATE_LOCKED " THEN ' "SIGN_LOCKED"' ELSE '' END)"
+	),
+
+	sqlTaskRGB = (
+		"CASE WHEN rr.selected='" STATE_TRUE "' THEN " SQL_RGB_ATTENTION_3 " ELSE '" RGB_TASK RGB_TASK "' END"
+	),
+
+	sqlResourceTaskId	= "CONCAT(rr.idResource,rr.idTask)",
+
+	sqlTaskItem	= "rr.idResource",
+
+	%%% 2025.01.29 add sqlTaskIdx for MYSQL
+	sqlTaskIdx = ("CASE WHEN rr.idxParent IS NULL THEN '' ELSE CSTR(rr.idxParent) END"),
+	sqlTaskText	= ("CONCAT(" sqlTaskIdx ",'   ',rr.nameTask)"),
+
+
+
+	sqlTaskStartDate	= ("SUBSTR(CASE WHEN rr.t1RealTask IS NOT NULL AND rr.t1RealTask<>' ' THEN (CASE WHEN rr.t1RealTask<rr.t1Task THEN rr.t1RealTask ELSE rr.t1Task END) ELSE rr.t1Task END,1,10)"),
+	sqlTaskStartTime	= ("CASE WHEN (SUBSTR(" SQL_T1 ",1,10)<" sqlDate1 ") THEN '" midnight00 "' ELSE SUBSTR(" SQL_T1 ",12," lenStrTimeFormat ")"),
+
+	sqlTaskEndDate	= ("CASE WHEN SUBSTR(" SQL_T2 ",1,10)>" sqlDate2 " THEN \
+			CASE WHEN SUBSTR(" SQL_T2 ",12," lenStrTimeFormat ") ='" midnight24 "' \
+			THEN \
+				STR_TO_DATE(DATE_FORMAT(" sqlDate2 ",'" SQL_FORMATDATE_FR "')+1,'" SQL_FORMATDATE_FR "') \
+			ELSE " sqlDate2 " \
+			END \
+			ELSE\
+			CASE WHEN SUBSTR(" SQL_T2 ",12," lenStrTimeFormat ") ='" midnight24 "' \
+			THEN \
+				STR_TO_DATE(DATE_FORMAT(SUBSTR(" SQL_T2 ",1,10),'" SQL_FORMATDATE_FR "')+1,'" SQL_FORMATDATE_FR "') \
+			ELSE \
+				SUBSTR(" SQL_T2 ",1,10) \
+			END \
+			END "),
+	sqlTaskExtendedEndDate	= ("LEFT(" SQL_T2EXTENDED ",10)"),
+
+	sqlTaskEndTime0	= ("SUBSTR(DATE_ADD(" SQL_T2 ",INTERVAL 1 " timeInterval "),12," lenStrTimeFormat ")"),
+	sqlTaskEndTime	= ("CASE WHEN (SUBSTR(" SQL_T2 ",1,10)>" sqlDate2 ") THEN '"midnight24"' ELSE " sqlTaskEndTime0 " END"),
+	sqlTaskExtendedEndTime	= ("IIF((LEFT(" SQL_T2EXTENDED ",10)>'" date2 "'),'" midnight24 "',RIGHT(" SQL_T2EXTENDED "," lenStrTimeFormat "))"),
+),
+
+
+
+sqlDate1 = ("(SELECT MIN(" sqlTaskStartDate ") FROM " DB_PREFIX "RESOURCE_TASK rr)"),
+sqlDate2 = ("(SELECT MAX(" sqlTaskEndDate ") FROM " DB_PREFIX "RESOURCE_TASK rr)"),
+
+
+sqlAndAbsenceDate1 = (date1 = defaultDate ? " " : (" AND rr.dateEnd>='"	date1 "'")),
+sqlAndAbsenceDate2 = (date2 = defaultDate ? " " : (" AND rr.dateStart<='" date2 "'")),
+	
+
+sqlAndHolidayDate1 = (date1 = defaultDate ? " " : (" AND rr.id>='" date1 "'")),
+sqlAndHolidayDate2 = (date2 = defaultDate ? " " : (" AND rr.id<='" date2 "'")),
+
+
+

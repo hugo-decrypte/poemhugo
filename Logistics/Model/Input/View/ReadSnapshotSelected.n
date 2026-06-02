@@ -1,0 +1,72 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+%		ReadSnapshotSelected.n     	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+	% bai 0416
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+'()' => (
+	nbSnaptshotSelected		:: 0,
+	nbParameterSelected		:: 0,
+	IdClubSelected			:: {""},
+	IdBackupSelected		:: {""},
+	NameBackupSelected		:: {""},	
+	TypeBackupSelected		:: {""},
+
+
+	nbSnaptshotSelected		= (),
+	nbParameterSelected		= (),
+	
+	\forall i \in [1, nbSnaptshotSelected](
+		idClubSelected_{i}		:: "",
+		idBackupSelected_{i}		:: "",
+		nameBackupSelected_{i}		:: "",
+		typeBackupSelected_{i}		:: "",
+
+		idClubSelected_{i}		= (),	
+		idBackupSelected_{i}		= (),
+		nameBackupSelected_{i}		= (),
+		typeBackupSelected_{i}		= (),
+	),
+
+	IdBackupSelected	= \{ \forall i \in [1, nbSnaptshotSelected] idBackupSelected_{i} \},
+	NameBackupSelected	= \{ \forall i \in [1, nbSnaptshotSelected] nameBackupSelected_{i} \},
+	TypeBackupSelected	= \{ \forall i \in [1, nbSnaptshotSelected] typeBackupSelected_{i} \},
+	IdClubSelected		= \{ \forall i \in [1, nbSnaptshotSelected] idClubSelected_{i} \},
+),
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"], 
+
+'()' => (
+	(TAG_AT_MOST_THREE :
+		nbSnaptshotSelected =< maxResult
+	),
+
+
+	'()' <- database,
+
+	(SQL : SQL_SelectSnaphostMinT1WinMaxT2WinProjectStateGreater STATE_INVALID " "
+		SQL_SelectSnaphostMinT1WinMaxT2WinBackupProjectStateGreater STATE_INVALID " "
+		SQL_AndWhereBackupProjectIdIn concatSetQuoted(IdBackupSelected) ")) aa "), % Chen 0830
+
+
+	nbMinMaxPlan	= (),
+
+	MINMAXPLAN	= [1, nbMinMaxPlan],
+	MINMAXPLAN <> {},
+
+	\forall o \in MINMAXPLAN (
+		minPlan 		:: defaultDate,
+		maxPlan			:: defaultDate,
+
+		minPlan 		=(),
+		maxPlan			=(),
+	),
+
+	database <- '()',
+),

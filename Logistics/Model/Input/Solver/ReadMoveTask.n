@@ -1,0 +1,45 @@
+%===============================================%
+%						%
+%            	  Scheduling			%
+%						%
+%		ReadMoveTask.n			%
+%						%
+% (c)2000 Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+'()' => (
+	(TAG_SELECTION_ERROR :
+		nbSelected = (),
+		nbSelected > 0,
+
+		6 = (),
+	),
+
+	\forall i \in [1, nbSelected] (
+		idTaskSelected_{i}	:: "",
+
+		idResource1Selected_{i}	:: "",
+		idResource2Selected_{i}	:: "",
+
+		t1TaskSelected_{i}	:: defaultDateTime,
+		t2TaskSelected_{i}	:: defaultDateTime,
+
+		idTaskSelected_{i}	= (),
+
+		idResource1Selected_{i}	= (),
+		t1TaskSelected_{i}	= (),
+
+		idResource2Selected_{i}	= (),
+		t2TaskSelected_{i}	= (),
+	),
+
+	IdTaskInteraction = \{ \forall i \in [1,nbSelected] idTaskSelected_{i} \},
+
+
+	t1TaskInteraction = \min_{i \in [1, nbSelected]}{t1TaskSelected_{i}},
+	t2TaskInteraction = \max_{i \in [1, nbSelected]}{t2TaskSelected_{i}},
+),

@@ -1,0 +1,32 @@
+/********************************************************/
+/*	        	Routing	          		*/
+/*	                                        	*/
+/*			ReadResource.n   		*/
+/*                                                	*/
+/* Copyright (C) 2000 ENGINEST SOFTWARE        		*/
+/* All rights reserved.                         	*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Input\Calendar\ReadShift.n"],
+
+'()' => (
+	\forall v \in RESOURCE (
+		shiftResource_{v} = shiftId_{idShiftVehicle_{v}},
+
+		t10Resource_{v} = (t100Vehicle_{v} = defaultDateTime ? t1 : t100Vehicle_{v}),
+		t20Resource_{v} = (t200Vehicle_{v} = defaultDateTime ? t2 : t200Vehicle_{v}),
+	),
+
+
+	'()' <- database,
+
+
+	Resource0 = RESOURCE,
+
+	['Work Directory' "Model\Common\Input\Calendar\ReadResourceShift.n"],
+	['Work Directory' "Model\Common\Input\Calendar\ReadResourceAbsence.n"],
+
+
+	database <- '()',
+),
+

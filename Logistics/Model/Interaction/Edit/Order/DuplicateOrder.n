@@ -1,0 +1,55 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 DuplicateOrder.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	nbParameter	= (),
+	nbSelected	= (),
+	
+	idOrderSelectedBuffer		:: "",
+	idOrderBuffer 				:: "",
+    referenceBuffer 			:: "",
+	dateDeliveryBuffer			:: 0,
+	
+	idOrderSelectedBuffer	= (),
+	idOrderBuffer 			= (),
+    referenceBuffer 		= (),
+	dateDeliveryBuffer		= (),
+
+	
+
+	'()' <- database,
+
+	DuplicateOrder_SQL1 = (
+		"INSERT INTO " DB_PREFIX "CLIENTORDER (IdClub, Id, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, Quantity, QuantityRest, Comments, Reference, IdState)
+		 SELECT O.IdClub, '"idOrderBuffer"', O.IdClient, O.IdPointDelivery, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), '"dateDeliveryBuffer"', O.IdAgency, O.Quantity, O.Quantity,
+		 "SQL_CONCAT"'Dupliquée de '"SQL_CONCATWITH" O.Id"SQL_CONCATEND", '"referenceBuffer"', '0'
+		 FROM " DB_PREFIX "CLIENTORDER O
+		 WHERE O.Id = '"idOrderSelectedBuffer"'"
+	),
+("DuplicateOrder_SQL1=" DuplicateOrder_SQL1 : ),
+	
+	DuplicateOrder_SQL2 = (
+		"INSERT INTO " DB_PREFIX "ORDER_PRODUCT (IdOrder, IdProduct, Quantity, QuantityDelivered, QuantityRest, PriceUnit, Discount, Comments, DateOrder, DateDelivery,NoPallet) 
+		 SELECT O.Id, OP.IdProduct,OP.Quantity, 0, OP.Quantity, OP.PriceUnit, OP.Discount, OP.Comments, "SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"'), '"dateDeliveryBuffer"', OP.NoPallet
+         FROM " DB_PREFIX "CLIENTORDER O," DB_PREFIX "ORDER_PRODUCT OP
+	     WHERE O.Id='"idOrderBuffer"'
+         AND OP.IdOrder = '"idOrderSelectedBuffer"'"
+	),
+
+
+	(SQL : DuplicateOrder_SQL1), 
+	(SQL : DuplicateOrder_SQL2), 
+
+	database <- '()',
+),

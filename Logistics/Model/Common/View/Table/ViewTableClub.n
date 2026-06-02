@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	  ERP-HR	   	           %
+%                                                  %
+% 		ViewTableClub.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableClub.n"],
+
+'@' => (
+	tableClub("CLUB",TAG_TABLE,"CLUB",true,"EditClub",TAG_TABLE_CLUB,"",""),	% JZ 1021
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_CLUB TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),
+

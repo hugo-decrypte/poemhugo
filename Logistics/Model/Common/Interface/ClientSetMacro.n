@@ -1,0 +1,62 @@
+/********************************************************/
+/*							*/
+/*		    SetMacros.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+'()' => (
+	%macroFile = (),
+	translatedMacroFile = (),
+
+
+	TranslatedMacro = [1, ()],
+
+	\forall i \in TranslatedMacro (
+		translatedMacro_{i} :: "",
+		translatedMacro_{i} = (),
+	),
+
+
+
+	macroConfig = ('Work Directory' "Boot/" directoryClubLogin "/View/Macro.cfg"),
+	%macroConfig = ('Work Directory' macroFile),
+
+
+	'()' <- [macroConfig],
+
+	nbMacro = #([macroConfig], ",\n"),
+
+
+	Macro = [1, nbMacro],
+
+	\forall i \in Macro (
+		nameMacro_{i}	:: "",
+		valueMacro_{i}	:: "",
+
+		nameMacro_{i} 	= () : " ",
+		"="		= () : " ",
+		valueMacro_{i}	= () : ",\n",
+	),
+
+
+	[macroConfig] <- '()',
+),
+
+'@' => (
+	translatedMacroConfig = ('Work Directory' downloadDirectory directoryClubLogin "/" translatedMacroFile),
+	%translatedMacroConfig = ('Work Directory' translatedMacroFile),
+
+
+	[translatedMacroConfig] <- '@',
+
+	\forall i \in TranslatedMacro (
+		@ (nameMacro_{i} " = \"" translatedMacro_{i} "\",\n"),
+	),
+
+	'@' <- [translatedMacroConfig],
+),
+

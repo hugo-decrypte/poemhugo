@@ -1,0 +1,33 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ReadDepotSelected.n		%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+	% bai 0505
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+
+% Read input buffer
+'()' => (
+	nbDepotSelected			= (),
+	nbParameterSelected		= (),
+
+	\forall i \in [1,nbDepotSelected] (
+		idClubSelected_{i}	:: "",
+		idDepotSelected_{i}	:: "",
+
+		idClubSelected_{i}	= (),
+		idDepotSelected_{i}	= (),
+	),
+
+	IdDepotSelected = \{ \forall i \in [1, nbDepotSelected] idDepotSelected_{i} \},
+
+),
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+['Work Directory' "Model\Common\Function\FuncConcatSet.n"],
+

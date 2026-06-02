@@ -1,0 +1,62 @@
+%===============================================%
+%						%
+%		Scheduling			%
+%						%
+%  ScenarioMapClient2EditClientZone.n		%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "EditClientZone ",
+
+% Caption
+@ ("'Edit Client Zone' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_CLIENT_ZONE,
+
+% Label
+@ (" 'Edit Client Zone' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'CLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+scriptSolverType = "PoemServer" => (
+	@ (" '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \\\n"),
+	;
+	@ "'[COUNT=2;MESSAGE=0;CANCEL=0;SKIP=0]'\\\n",
+),
+
+% Instruction... (When Count>0)
+@ ("\tNcl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\\Interaction\\Solver\\Map\\EditClientZone.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+
+@ ("\t'(/*SERVERPORT*/) (/*USERID*/) "),
+@ ("\t{/*selected(CLIENT;1;(string,ID))*/} \\\n"),
+@ ("\t{/*Input(Edit Client Zone;1;(string,IDZONE," TAG_ZONE_ID ",[/*ZONE2.IDZONE*/],30." inputWidth ",,,[/*ZONE2.IDZONE*/]);)*/}\'\\\n"),
+
+@ ("\tReload _ _ _ _\n\n"),

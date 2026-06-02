@@ -1,0 +1,41 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 CreateQuote.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	idQuoteBuffer 		:: "",
+	labelClientBuffer 	:: "",
+	dateDeliveryBuffer	:: 0,
+	
+	idQuoteBuffer 		= (),
+	labelClientBuffer	= (),
+	dateDeliveryBuffer	= (),
+
+	
+
+	'()' <- database,
+
+	CreateQuote_SQL1=(
+		"INSERT INTO " DB_PREFIX "QUOTE (Id, IdClient, IdPointDelivery, DateQuote, DateValid, DateDelivery, IdAgency, IdState) 
+		select '" idQuoteBuffer "', cl.Id, p.IdPoint, format("SQL_CURRENTDATE", '"SQL_FORMATDATESTR"'), format("SQL_CURRENTDATE"+30, '"SQL_FORMATDATENUM"'), '"dateDeliveryBuffer"', cl.IdAgency, '0' 
+		FROM " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id
+		WHERE "SQL_CONCAT"trim(cl.Name) "SQL_CONCATWITH" ' (' "SQL_CONCATWITH" trim(p.City) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '"labelClientBuffer"' "
+	),
+	
+
+	(SQL : CreateQuote_SQL1), 
+	
+
+	database <- '()',
+),

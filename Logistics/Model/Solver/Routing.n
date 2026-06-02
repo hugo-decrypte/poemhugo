@@ -1,0 +1,1524 @@
+/******************************************************/
+/*	          	Routing	             	      */
+/*                                                    */
+/*	         	Routing.n                     */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+VehicleActive \subset RESOURCE,
+#VehicleActive =< maxVehicleConfig,
+
+
+
+TourActive \subset TOUR,
+#TourActive =< maxTourConfig,
+
+/******************************************************/
+/*                     ORDER                          */
+/******************************************************/
+
+\forall o \in SOURCEORDERSINK (
+	vehicleOrder_{o} = vehicleTour_{tourOrder_{o}},
+	typeVehicleOrder_{o} = typeVehicleTour_{tourOrder_{o}},
+
+
+	costKilometerTourOrder_{o} = costKilometerTour_{tourOrder_{o}},
+
+
+/*
+	tourOrder_{o} \in TOUR,
+	t1Order_{o} :: defaultDateTime,
+	t2Order_{o} :: defaultDateTime,			% special for inactive tours
+
+	t1Order_{o} >= t1,
+	t2Order_{o} >= t1,
+
+	
+	TimeOrder_{o} \subset HORIZON_sink,
+	TimeOrder_{o} = [t1Order_{o},t2Order_{o}],	% time from o to next
+				
+
+	dateOrder_{o} \in Date \cup \{ dateInactive \},
+
+	siteOrder_{o} \in SITE,
+*/
+),
+
+
+%?? `nbTourActive`,
+
+
+
+\forall o \in SINK
+	#TimeOrder_{o} =< 1,
+
+\forall o \in ORDER
+	dateOrder_{o} = t1Order_{o}["yyyy-mm-dd"],
+
+
+% Coupling and precedence
+\forall o,i \in SOURCEORDERSINK (
+	sameTourOrderOrder_{o,i} \equiv tourOrder_{o} = tourOrder_{i},
+	precOrderOrder_{o,i} \equiv TimeOrder_{o} \prec TimeOrder_{i},
+	chainedOrderOrder_{o,i} \equiv sameTourOrderOrder_{o,i} \wedge precOrderOrder_{o,i},
+),
+
+
+\forall t \in TOUR (
+	OrderTour_{t} \subset ORDER,
+	#OrderTour_{t} =< maxOrderByTour_{t},
+
+
+	\forall o \in ORDER
+		coupledOrderTour_{t,o} == t = tourOrder_{o},
+
+	\forall o,i \in ORDER
+		sameTourOrderOrderTour_{t,o,i} \equiv coupledOrderTour_{t,o} \wedge coupledOrderTour_{t,i},
+		%sameTourOrderOrderTour_{t,o,i} \equiv inTourOrder_{o,t} \wedge inTourOrder_{i,t},
+		%sameTourOrderOrderTour_{t,o,i} \equiv coupledOrderTour_{t,o} \wedge sameTourOrderOrder_{o,i},
+
+
+	\forall o \in ORDER (
+		cardIfOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{sameTourOrderOrderTour_{t,o,i}},
+		%cardIfOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{sameTourOrderOrder_{o,i}},
+
+
+		quantityIfOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{quantityOrder_{i} * sameTourOrderOrderTour_{t,o,i}},
+
+		weightCapacitated =>
+		weightIfOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{weightOrder_{i} * sameTourOrderOrderTour_{t,o,i}},
+
+		volumeCapacitated =>
+		volumeIfOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{volumeOrder_{i} * sameTourOrderOrderTour_{t,o,i}},
+
+
+
+		cardIfNotOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{! sameTourOrderOrderTour_{t,o,i}},
+
+
+		quantityIfNotOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{quantityOrder_{i} * ! sameTourOrderOrderTour_{t,o,i}},
+
+		weightCapacitated =>
+		weightIfNotOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{weightOrder_{i} * ! sameTourOrderOrderTour_{t,o,i}},
+
+
+		volumeCapacitated =>
+		volumeIfNotOrderTour_{t,o} = \sum_{i \in OrderTour_{t}}{volumeOrder_{i} * ! sameTourOrderOrderTour_{t,o,i}},
+
+
+		%cardIfChainedOrderTour_{t,o} =
+		%\sum_{i \in OrderTour_{t}}{chainedOrderOrder_{o,i}} + 
+		%\sum_{i \in OrderTour_{t}}{chainedOrderOrder_{i,o}} + 1,
+
+		%cardIfChainedOrderTour_{t,o} =< #OrderTour_{t},
+	),
+),
+
+
+
+% site1Tour/site2Tour
+\forall t \in TOUR (
+	site1Tour_{t} :: 0,
+	site2Tour_{t} :: 0,
+
+	site1Tour_{t} \in Site1Tour_{t},
+	site2Tour_{t} \in Site2Tour_{t},
+),
+
+\forall v \in RESOURCE (
+	site1Tour_{tour1Vehicle_{v}} = site1Vehicle_{v},
+	site2Tour_{tour2Vehicle_{v}} = site2Vehicle_{v},
+),
+
+\forall o \in SOURCE
+	siteOrder_{o} = site1Tour_{tourOrder_{o}},
+
+\forall o \in SINK
+	siteOrder_{o} = site2Tour_{tourOrder_{o}},
+
+\forall o \in ORDER
+	siteOrder_{o} = siteId_{idSite2Order_{o}},
+
+
+
+% dOrderOrder/tOrderOrder
+\forall o,i \in SOURCEORDERSINK (
+	tOrderOrder_{o,i} :: defaultTime,
+	tOrderOrder_{o,i} >= 0,
+
+	dOrderOrder_{o,i} = dSiteSite_{siteOrder_{o},siteOrder_{i}},
+	tOrderOrder_{o,i} = tSiteSite_{siteOrder_{o},siteOrder_{i}},
+),
+
+
+
+% Tour time constraint
+\forall t \in TOUR (
+	SpanTour_{t} = [t1Tour_{t},t2Tour_{t}],
+
+	%makespanTour_{t} :: defaultTime,
+	%makespanTour_{t} = t2Tour_{t} - t1Tour_{t} + 1,
+
+	t1NextSourceTour_{t} = t1Order_{nextSourceTour_{t}},
+
+	t1NextSourceTour_{t} \in HORIZON_sink,
+
+	%timeSourceTour_{t} = timeOrder_{sourceTour_{t}},
+),
+
+
+\forall o \in SOURCEORDER (
+	% Active time constraint
+	ScheduleOrder_{o} = Schedule0Resource_{vehicleOrder_{o}},
+	TimeActiveOrder_{o} = TimeOrder_{o} \cap ScheduleOrder_{o},
+
+
+	\inf TimeActiveOrder_{o} = t1Order_{o},
+	\sup TimeActiveOrder_{o} = t2Order_{o},
+
+	% Rest time constraint
+	TimeRestOrder_{o} = TimeOrder_{o} \setminus ScheduleOrder_{o},
+	TimeOrder_{o} = TimeActiveOrder_{o} \cup TimeRestOrder_{o},
+	TimeRestOrder_{o} \subset ScheduleRestVehicle_{vehicleOrder_{o}},
+
+
+	% Recursive sorting constraint
+	TimeOrder_{o} \prec TimeOrder_{nextOrder_{o}},
+
+
+	% Active order constraint
+	activeOrder_{o} == TimeOrder_{o} <> {},
+	activeOrder_{o} == timeActiveOrder_{o} > 0,
+
+	activeOrder_{o} == o \in SourceActiveOrder,
+	activeOrder_{o} == dateOrder_{o} <> dateInactive,
+
+	
+
+	mileageOrder_{o} > 0 -> activeOrder_{o},
+
+	activeOrder_{o} -> t1Order_{o} \in ScheduleOrder_{o},
+	t2Order_{o} \in ScheduleOrder_{o},
+
+
+	SpanTourOrder_{o} = SpanTour_{tourOrder_{o}},
+
+
+	\forall d \in Date (
+		activeDateOrder_{o,d} == dateOrder_{o} = d,
+		activeDateOrder_{o,d} == TimeOrder_{o} \cap TimeDate_{d} <> {},
+
+		activeDateOrder_{o,d} -> SpanTourOrder_{o} \cap TimeDate_{d} <> {},
+	),
+
+
+	activeOrder_{o} == \bigvee_{d \in Date}{activeDateOrder_{o,d}},
+
+
+	%t2Order_{o} \in ScheduleOrder_{o},
+
+	mileageOrder_{o} = dOrderOrder_{o,nextOrder_{o}},
+
+	nextOrder_{o} \in ORDERSINK,
+
+	timeServiceOrder_{o}	:: defaultTime, % Possibly 0 at sources
+	time0ServiceOrder_{o}	:: defaultTime, % Normally always > 0
+
+	timeToNextOrder_{o}	:: defaultTime,
+	timeActiveOrder_{o}	:: defaultTime,
+
+
+	timeToNextOrder_{o} = tOrderOrder_{o,nextOrder_{o}},
+
+	timeServiceOrder_{o} = #TimeServiceOrder_{o},
+	timeRestOrder_{o} = #TimeRestOrder_{o},
+
+
+	timeServiceOrder_{o} = activeOrder_{o} * time0ServiceOrder_{o},
+
+	timeServiceRestOrder_{o} = timeServiceOrder_{o} + timeRestOrder_{o},
+	timeServiceRestOrder_{o} = activeOrder_{o} * (time0ServiceOrder_{o} + timeRestOrder_{o}),
+
+
+	timeActiveOrder_{o} = #TimeActiveOrder_{o},
+	timeActiveOrder_{o} = timeServiceOrder_{o} + timeToNextOrder_{o},
+
+
+	timeOrder_{o} = #TimeOrder_{o},
+	timeOrder_{o} = timeToNextOrder_{o} + timeServiceRestOrder_{o},
+),
+
+
+% Special for service time
+% Set partitioning
+\forall t \in TOUR (
+	SourceOrderTour_{t} = SourceTour_{t} \cup OrderTour_{t},
+
+	OrderSinkTour_{t} = OrderTour_{t} \cup SinkTour_{t},
+
+	tourOrder_{sourceTour_{t}} = t,
+	tourOrder_{sinkTour_{t}}   = t,
+
+
+	% date
+	t1NextSourceTour_{t} :: defaultDateTime,
+
+	dateTour_{t} \in \{ \forall o \in SourceOrderTour_{t} dateOrder_{o} \},
+	dateTour_{t} \in \{ \forall o \in OrderTour_{t} dateOrder_{o} \} \cup \{ dateInactive \},
+
+	dateTour_{t} = t1NextSourceTour_{t}[dateFormat] ||
+	dateTour_{t} = dateInactive,
+
+
+	%?? `quantityTour`,	% ??????
+
+
+	% Max quantity constraint
+	quantityTour_{t} = \sum_{o \in OrderTour_{t}}{quantityOrder_{o}},
+
+
+	quantityTour_{t} = 0 \vee
+	quantityTour_{t} \in [minQuantityTour_{t}, maxQuantityTour_{t}],
+
+
+	quantityCapacitatedByProducts =>
+	\forall p \in PRODUCT (
+		quantityProductTour_{t,p} = \sum_{o \in OrderProductTour_{t,p}}{quantityOrder_{o}},
+
+		quantityProductTour_{t,p} \in [minQuantityProductTour_{t,p}, maxQuantityProductTour_{t,p}] \vee
+		quantityProductTour_{t,p} = 0,	% Zhou 1201
+	),
+
+
+	weightTour_{t} >= 0.0,
+	volumeTour_{t} >= 0.0,
+
+
+	% Max weight/volume constraint
+	weightCapacitated => (
+		weightTour_{t} = \sum_{o \in OrderTour_{t}}{weightOrder_{o}},
+		weightTour_{t} \in [0.0, maxWeightTour_{t}],
+
+		activeTour_{t} == weightTour_{t} > 0.0,
+
+		%rateWeightTour_{t} = weightTour_{t} / maxWeightTour_{t},
+		%rateWeightTour_{t} = 0.0 || rateWeightTour_{t} > 0.5,
+	),
+	volumeCapacitated => (
+		volumeTour_{t} = \sum_{o \in OrderTour_{t}}{volumeOrder_{o}},
+		volumeTour_{t} \in [0.0, maxVolumeTour_{t}],
+
+		activeTour_{t} == volumeTour_{t} > 0,
+
+		%rateVolumeTour_{t} = volumeTour_{t} / maxVolumeTour_{t},
+		%rateVolumeTour_{t} = 0.0 || rateVolumeTour_{t} > 0.5,
+	),
+
+	weightCapacitatedByProducts =>
+	\forall p \in PRODUCT (
+		weightProductTour_{t,p} = \sum_{o \in OrderProductTour_{t,p}}{weightOrder_{o}},
+		weightProductTour_{t,p} \in [0.0, maxWeightProductTour_{t,p}],
+	),
+	volumeCapacitatedByProducts =>
+	\forall p \in PRODUCT (
+		volumeProductTour_{t,p} = \sum_{o \in OrderProductTour_{t,p}}{volumeOrder_{o}},
+		volumeProductTour_{t,p} \in [0.0, maxVolumeProductTour_{t,p}],
+	),
+
+
+	mileageTour_{t} = \sum_{o \in SourceOrderTour_{t}}{mileageOrder_{o}}, 
+
+	costMileageTour_{t} = mileageTour_{t} * costKilometerTour_{t},
+	costQuantityTour_{t} = quantityTour_{t} * costUnitTour_{t},
+
+
+	costTour_{t} = costMileageTour_{t} + costQuantityTour_{t},
+
+
+	time0ServiceTour_{t} =
+		timeFixedTour_{t} + \lceil quantityTour_{t} * timeLoadingUnitTypeVehicle_{typeVehicleTour_{t}} \rceil,
+		%timeFixedTour_{t} + \lceil weightTour_{t} * timeLoadingUnitTypeVehicle_{typeVehicleTour_{t}} \rceil,
+
+
+	% Special for non 0 int logic
+	time0ServiceOrder_{sourceTour_{t}} = time0ServiceTour_{t},
+
+	timeActiveOrder_{sourceTour_{t}} = activeTour_{t} * (time0ServiceTour_{t} + timeToNextOrder_{sourceTour_{t}}),
+	timeOrder_{sourceTour_{t}} = activeTour_{t} * (time0ServiceTour_{t} + timeToNextOrder_{sourceTour_{t}} + timeRestOrder_{sourceTour_{t}}),
+),
+
+
+\forall o \in ORDER (
+	tourOrder_{o} \in TourVehicle_{vehicleTour_{tourOrder_{o}}},
+
+	timeLoadingUnitOrder_{o} = timeLoadingUnitTypeVehicle_{typeVehicleOrder_{o}},
+	timeUnloadingUnitOrder_{o} = timeUnloadingUnitTypeVehicle_{typeVehicleOrder_{o}},
+
+	time0ServiceOrder_{o} = timeFixedOrder_{o} + \lfloor quantityOrder_{o} * timeUnloadingUnitOrder_{o} + 0.5 \rfloor,
+
+	(idOrder_{o} TAG_SERVICE_TIME_GT_0 : time0ServiceOrder_{o} > 0),
+),
+
+
+\forall o<>i \in SOURCEORDER
+	nextOrder_{o} <> nextOrder_{i},
+
+
+%\forall o<>i \in SOURCEORDERSINK (
+%	tourOrder_{o} <> tourOrder_{i} || TimeOrder_{o} \cap TimeOrder_{i} = {},
+%	%vehicleOrder_{o} <> vehicleOrder_{i} || TimeOrder_{o} \cap TimeOrder_{i} = {},
+%), % ??????
+
+
+
+
+/*******************************************************/
+/*                  TYPEVEHICLE                        */
+/*******************************************************/
+
+% Vehicle number constraints
+\forall t \in TYPEVEHICLE (
+	VehicleActiveTypeVehicle_{t} = VehicleTypeVehicle_{t} \cap VehicleActive,
+
+	nbVehicleTypeVehicle_{t} = #{VehicleActiveTypeVehicle_{t}},
+
+	nbVehicleTypeVehicle_{t} \in [minVehicleTypeVehicle_{t},maxVehicleTypeVehicle_{t}],
+),
+
+
+
+/********************************************************/
+/*                        RESOURCE                       */
+/********************************************************/
+
+\forall t \in TOUR (
+	TAG_RESOURCE_HORIZON_CAPACITY_INSUFFICIENT HORIZON :
+
+	TimeActiveTour_{t} = \bigcup_{o \in SourceOrderTour_{t}}{TimeActiveOrder_{o}},
+
+	%timeActiveTour_{t} = \sum_{o \in SourceOrderTour_{t}}{timeActiveOrder_{o}},
+	%\forall o \in SourceOrderTour_{t}
+	%	timeActiveOrder_{o} > 0,		% BUG if source only
+
+	TimeTour_{t} = \bigcup_{o \in SourceOrderTour_{t}}{TimeOrder_{o}},
+
+	TimeActiveTour_{t} = TimeTour_{t} \cap Schedule0Tour_{t},
+	% BUG ?????? % JZ 0711
+	%?? #TimeActiveTour_{5} =< 175, See DEMO
+
+	%TimeActiveTour_{t} \subset Schedule0Tour_{t},
+
+
+	#TimeActiveTour_{t} =< maxWorktimeDayTour_{t},
+	#TimeTour_{t} =< maxMakespanDayTour_{t},
+
+	timeActiveTour_{t} = #TimeActiveTour_{t},
+),
+
+
+\forall v \in RESOURCE (
+	TourActiveVehicle_{v}	= TourVehicle_{v} \cap TourActive,
+
+
+	TourActiveVehicle_{v}	= [tour1Vehicle_{v},tour2ActiveVehicle_{v}],
+
+	tour2ActiveVehicle_{v}	=< tour2Vehicle_{v},
+
+	\forall t \in TourVehicle_{v} \setminus tour2Vehicle_{v} (
+		site2Tour_{t} = site1Tour_{t+1},
+	),
+
+
+	SourceVehicle_{v}	= \bigcup_{t \in TourVehicle_{v}}{SourceTour_{t}},
+	SinkVehicle_{v}		= \bigcup_{t \in TourVehicle_{v}}{SinkTour_{t}},
+	SourceActiveVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{SourceTour_{t}},
+
+
+	SourceOrderVehicle_{v}	= \bigcup_{t \in TourVehicle_{v}}{SourceOrderTour_{t}},
+	SourceActiveOrderVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{SourceOrderTour_{t}},
+
+
+	OrderSinkVehicle_{v}	= \bigcup_{t \in TourVehicle_{v}}{OrderSinkTour_{t}},
+
+
+	\forall o \in SourceOrderVehicle_{v} (
+		nextOrder_{o} \in OrderSinkVehicle_{v},
+
+		%siteOrder_{o} \in SiteVehicle_{v},	% BUG
+	),
+
+	OrderVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{OrderTour_{t}},
+
+
+	%OrderVehicle_{v} = SourceOrderVehicle_{v} \setminus SourceVehicle_{v},
+	%OrderVehicle_{v} = OrderSinkVehicle_{v} \setminus SinkVehicle_{v},
+	%OrderVehicle_{v} = SourceActiveOrderVehicle_{v} \setminus SourceVehicle_{v},
+
+	SourceOrderVehicle_{v}		= OrderVehicle_{v} \cup SourceVehicle_{v},
+	OrderSinkVehicle_{v}		= OrderVehicle_{v} \cup SinkVehicle_{v},
+	SourceActiveOrderVehicle_{v}	= OrderVehicle_{v} \cup SourceActiveVehicle_{v},
+
+
+	mileageVehicle_{v} = \sum_{t \in TourActiveVehicle_{v}}{mileageTour_{t}},
+
+	%TimeVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{TimeTour_{t}},
+	%TimeVehicle_{v} = \bigcup_{o \in SourceOrderVehicle_{v}}{TimeOrder_{o}},
+	%TimeVehicle_{v} = \bigcup_{d \in DateVehicle_{v}}{TimeDateVehicle_{v,d}},
+
+
+	% TimeActiveVehicle
+	TimeActiveVehicle_{v} = \bigcup_{o \in SourceOrderVehicle_{v}}{TimeActiveOrder_{o}},
+	TimeActiveVehicle_{v} = \bigcup_{o \in SourceActiveOrderVehicle_{v}}{TimeActiveOrder_{o}},	% ??????
+
+	#TourVehicle_{v} > 1 => (
+		TimeActiveVehicle_{v} = \bigcup_{t \in TourVehicle_{v}}{TimeActiveTour_{t}},
+		TimeActiveVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{TimeActiveTour_{t}}, 		% ??????
+	),
+
+	TimeActiveVehicle_{v} = \bigcup_{d \in DateVehicle_{v}}{TimeActiveDateVehicle_{v,d}},
+
+
+	\forall t1<t2 \in TourVehicle_{v} (
+		TimeActiveTour_{t1} \prec TimeActiveTour_{t2},
+
+
+		
+		%activeTour_{t2} -> activeTour_{t1},
+		%TimeTour_{t1} \prec TimeTour_{t2}, % ??????
+		% Redundant constraint, useful in case of INACTIVE tour
+		%t2Tour_{t1} =< t2Tour_{t2},
+	),
+
+
+	%site1Tour_{tour1Vehicle_{v}} = site1Vehicle_{v},
+	site2Tour_{tour2ActiveVehicle_{v}} = site2Vehicle_{v},
+
+
+	%#TourActiveVehicle_{v} > 1 => (
+	%	site2Tour_{tour1Vehicle_{v}} \in SiteVehicle_{v},
+	%	\forall t \in TourActiveVehicle_{v} \setminus \{tour1Vehicle_{v},tour2ActiveVehicle_{v}\} (
+	%		site1Tour_{t} \in SiteVehicle_{v},
+	%		site2Tour_{t} \in SiteVehicle_{v},
+	%	),
+	%	site1Tour_{tour2ActiveVehicle_{v}} \in SiteVehicle_{v},
+	%),
+
+
+	%[t1Tour_{tour1Vehicle_{v}}, t2Tour_{tour2ActiveVehicle_{v}}] \subset HorizonVehicle_{v},
+	%TimeVehicle_{v} = [t1Tour_{tour1Vehicle_{v}}, t2Tour_{tour2ActiveVehicle_{v}}],
+	%TimeVehicle_{v} \subset HorizonVehicle_{v},
+	
+
+	timeActiveVehicle_{v}	=< maxWorktimeVehicle_{v},
+	timeActiveVehicle_{v}	= #TimeActiveVehicle_{v},
+
+
+	#TourVehicle_{v} > 1 => (
+		timeActiveVehicle_{v} 	= \sum_{o \in SourceOrderVehicle_{v}}{timeActiveOrder_{o}},
+		timeActiveVehicle_{v} 	= \sum_{o \in SourceActiveOrderVehicle_{v}}{timeActiveOrder_{o}},	% ??????
+
+		timeActiveVehicle_{v}	= \sum_{t \in TourVehicle_{v}}{timeActiveTour_{t}},
+		timeActiveVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{timeActiveTour_{t}},		% ??????
+	),
+
+
+	% Capacity
+	quantityVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{quantityTour_{t}},
+
+ 
+ 
+	% Max quantity constraint
+	quantityVehicle_{v} = \sum_{o \in OrderVehicle_{v}}{quantityOrder_{o}},
+	quantityVehicle_{v} =< maxQuantityVehicle_{v},
+
+	quantityCapacitatedByProducts =>
+	\forall p \in PRODUCT (
+		quantityProductVehicle_{v,p} = \sum_{o \in OrderProductVehicle_{v,p}}{quantityOrder_{o}},
+		quantityProductVehicle_{v,p} =< maxQuantityProductVehicle_{v,p} * maxTourByVehicle_{v},
+	),
+
+
+	% Max weight/volume constraint
+	weightCapacitated => (
+		weightVehicle_{v} = \sum_{t \in TourActiveVehicle_{v}}{weightTour_{t}},
+		weightVehicle_{v} = \sum_{o \in OrderVehicle_{v}}{weightOrder_{o}},
+		weightVehicle_{v} =< maxWeightVehicle_{v},
+	),
+	volumeCapacitated => (
+		volumeVehicle_{v} = \sum_{t \in TourActiveVehicle_{v}}{volumeTour_{t}},
+		volumeVehicle_{v} = \sum_{o \in OrderVehicle_{v}}{volumeOrder_{o}},
+		volumeVehicle_{v} =< maxVolumeVehicle_{v},
+	),
+
+
+	% Cost
+	nbDayVehicle_{v}	:: 0,
+	nbNightVehicle_{v}	:: 0,
+
+
+	%costMileageVehicle_{v} = \sum_{t \in TourActiveVehicle_{v}}{costMileageTour_{t}} / #OrderVehicle_{v},
+	%OrderVehicle_{v} = {} => costMileageVehicle_{v} = 0.0,
+% ????????
+
+	costVehicle_{v} =
+		costDayVehicle_{v} * nbDayVehicle_{v} +
+		costNightVehicle_{v} * nbNightVehicle_{v} +
+		\sum_{t \in TourActiveVehicle_{v}}{costTour_{t}},
+
+
+	activeVehicle_{v} == v \in VehicleActive,
+
+	activeVehicle_{v} == activeTour_{tour1Vehicle_{v}},
+	activeVehicle_{v} == OrderVehicle_{v} <> {},
+	activeVehicle_{v} == makespanVehicle_{v} > 0,
+	activeVehicle_{v} == timeActiveVehicle_{v} > 0,
+),
+
+
+
+/******************************************************/
+/*                     TOUR                           */
+/******************************************************/
+
+(TAG_RESOURCE_TOUR_CAPACITY_INSUFFICIENT #TOUR :
+	SOURCEORDER = \bigcup_{t \in TOUR}{SourceOrderTour_{t}},
+	SourceActiveOrder = \bigcup_{t \in TourActive}{SourceOrderTour_{t}},
+
+	SOURCEORDER = \bigcup_{v \in RESOURCE}{SourceOrderVehicle_{v}},
+
+	SourceActiveOrder = \bigcup_{v \in RESOURCE}{SourceActiveOrderVehicle_{v}},
+
+
+	SourceActiveOrder = \bigcup_{v \in VehicleActive}{SourceActiveOrderVehicle_{v}},
+
+	\forall v<i \in RESOURCE
+		SourceActiveOrderVehicle_{v} \cap SourceActiveOrderVehicle_{i} = {}, % ??????
+
+	\forall t<i \in TOUR
+		SourceOrderTour_{t} \cap SourceOrderTour_{i} = {},
+
+	ORDER = \bigcup_{v \in RESOURCE}{OrderVehicle_{v}}, % ??????
+	ORDER = \bigcup_{t \in TOUR}{OrderTour_{t}}, % ??????
+
+	ORDER = \bigcup_{v \in VehicleActive}{OrderVehicle_{v}},
+	ORDER = \bigcup_{t \in TourActive}{OrderTour_{t}},
+
+	\forall v<i \in RESOURCE
+		OrderVehicle_{v} \cap OrderVehicle_{i} = {},
+
+	\forall t<i \in TOUR
+		OrderTour_{t} \cap OrderTour_{i} = {},
+),
+
+
+%\forall t<>i \in TOUR
+%	OrderTour_{t} \cap OrderTour_{i} = {},
+%ORDER = \bigcup_{t \in TOUR}{OrderTour_{t}},
+
+
+% Order not coupled constraint
+%\forall o \in ORDER
+%\forall i \in OrderNotCoupledOrder_{o}
+%	! sameTourOrderOrder_{o,i},
+
+
+%['Work Directory' "Model\Debug\DebugSolution.n"],
+%['Work Directory' "Model\Debug\WriteDebug.n"],
+
+% prevOrder
+%\forall o \in ORDERSINK
+%	prevOrder_{o} \in SOURCEORDER,
+%\forall o \in SOURCEORDER
+%	prevOrder_{nextOrder_{o}} = o, % ??????
+
+
+\forall o \in SOURCEORDER
+\forall n \in ORDERSINK
+	nextOrder_{o} = n == o = prevOrder_{n},
+
+
+\forall t \in TOUR (
+	t1Tour_{t} = \inf{TimeActiveTour_{t}},
+	t2Tour_{t} = \sup{TimeActiveTour_{t}},
+
+
+	t1Tour_{t} = \inf{TimeTour_{t}},
+	t2Tour_{t} = \sup{TimeTour_{t}},
+
+	t1Tour_{t} \in ScheduleExtendedTour_{t},
+	t2Tour_{t} \in Schedule0Tour_{t},
+
+	%activeTour_{t} -> t1Tour_{t} \in Schedule0Tour_{t},
+
+	rearTour_{t} = prevOrder_{sinkTour_{t}},
+
+	t1Tour_{t} = t1Order_{sourceTour_{t}},
+	t2Tour_{t} = t2Order_{rearTour_{t}},
+
+	%t1Order_{sinkTour_{t}} = t2Tour_{t} + 1,
+	% NO: sink datetime determined internally in routing algorithm
+
+
+	\forall o \in SourceOrderTour_{t} (
+		nextOrder_{o} \in OrderSinkTour_{t},
+
+		% union non-empty implying subset non-empty
+		activeTour_{t} -> activeOrder_{o},	% ????????
+	),
+
+
+	IdZoneTour_{t} = \{ \forall o \in OrderTour_{t} idZoneOrder_{o} \},
+
+
+	\forall o \in ORDER (
+		inZoneTourOrder_{o,t} == idZoneOrder_{o} \in IdZoneTour_{t},
+
+		o \in OrderTour_{t} == t = tourOrder_{o},
+		%o \in OrderTour_{t} == tourOrder_{o} = t,
+		% ?????? ENFORCE_SETINTMAPPING_PARTITIONING_FOR_FLOATSUM
+	),
+
+
+	\forall p \in PRODUCT
+		OrderProductTour_{t,p} = OrderTour_{t} \cap OrderProduct_{p},
+
+
+	nextSourceTour_{t} = nextOrder_{sourceTour_{t}},
+	%prevSinkTour_{t} = prevOrder_{sinkTour_{t}},
+
+
+	% Active logic
+	activeTour_{t} == t \in TourActive,
+
+
+
+	activeTour_{t} == sourceTour_{t} \in SourceActive,
+	activeTour_{t} == sinkTour_{t} \in SinkActive,
+
+	activeTour_{t} == #SourceOrderTour_{t} > 1,
+	activeTour_{t} == OrderTour_{t} <> {},
+
+	activeTour_{t} == quantityTour_{t} > 0,
+	activeTour_{t} == timeActiveTour_{t} > 0,
+
+	%activeTour_{t} == timeOrder_{sourceTour_{t}} > 0,
+
+	activeTour_{t} == #TimeTour_{t} > 0,
+	activeTour_{t} == TimeActiveTour_{t} <> {},
+
+	activeTour_{t} == activeOrder_{sourceTour_{t}},
+
+	%activeTour_{t} == nextSourceTour_{t} \in OrderTour_{t},
+	activeTour_{t} == nextSourceTour_{t} <> sinkTour_{t},
+	activeTour_{t} == rearTour_{t} <> sourceTour_{t},
+
+
+	activeTour_{t} == dateTour_{t} <> dateInactive,
+
+
+	%activeTour_{t} == makespanTour_{t} > 0,
+	%activeTour_{t} == TimeTour_{t} <> {},
+	%activeTour_{t} == dateOrder_{sourceTour_{t}} <> dateInactive,
+	%activeTour_{t} == dateOrder_{sinkTour_{t}} <> dateInactive,
+),
+
+
+SourceActive = \bigcup_{t \in TourActive}{SourceTour_{t}},	% ??????
+SinkActive = \bigcup_{t \in TourActive}{SinkTour_{t}},		% ??????
+
+SourceActiveOrder = SourceActive \cup ORDER,
+
+OrderSinkActive = ORDER \cup SinkActive,
+SourceSinkActiveOrder = SourceActiveOrder \cup SinkActive,
+
+
+OrderSinkActive = \{ \forall o \in SourceActiveOrder nextOrder_{o} \},
+SourceActiveOrder = \{ \forall o \in OrderSinkActive prevOrder_{o} \},
+
+
+%\forall o \in SOURCEORDERSINK
+%	o \in SourceSinkActiveOrder == TimeOrder_{o} <> {},	% ??????
+
+%\forall o \in SourceActiveOrder
+%	TimeOrder_{o} <> {},
+%\forall o \in SOURCESINK \setminus SourceActive \setminus SinkActive
+%	TimeOrder_{o} = {},
+
+
+\forall o \in SOURCEORDER (
+%\forall o \in SourceActiveOrder (
+	% Coupling constraints
+	o \in SourceOrderVehicle_{vehicleOrder_{o}},
+
+	o \in SourceOrderTour_{tourOrder_{o}}, % ??????
+
+	%tourOrder_{o} = tourOrder_{nextOrder_{o}},
+),
+
+
+/******************************************************/
+/*                  	Heuristics                    */
+/******************************************************/
+
+/*\forall t \in TOUR (
+	\forall o \in ORDER
+	\forall i \in OrderTour_{t}
+		dOrderOrder_{o,i} =< dRightOrderOrderTour_{t,o,i},
+
+	\forall o \in ORDER (
+		dNotOrderSite1Tour_{t,o} =
+		\max_{i \in OrderTour_{t} \setminus o}{dOrderSite1Tour_{t,i}},
+
+		#{OrderTour_{t} \setminus o} < 1 -> dNotOrderSite1Tour_{t,o} = 0,
+
+
+		dOrderTour_{t,o} =
+		\max_{i \in OrderTour_{t} \setminus o}{dOrderOrder_{o,i}},
+
+		#{OrderTour_{t} \setminus o} < 1 -> dOrderTour_{t,o} = 0,
+	),
+
+	\forall o \in OrderTour_{t}
+		dOrderTour_{t,o} =<
+		\max(dOrderSite1Tour_{t,o}, dNotOrderSite1Tour_{t,o}),
+),*/
+
+
+
+% NextHeuristicsOrder
+%\forall o \in ORDER
+%	nextOrder_{o} \in NextHeuristicsOrder_{o},
+
+%\forall o,i \in ORDER
+%	timeOrderOrder_{o,i} = tOrderOrder_{o,i} + tOrderOrder_{i,o},
+
+/*
+\forall o \in ORDER
+\forall t \in \Delta{toutOrder_{o}} (
+	timeOrderTour_{t,o} = tOrderOrder_{prevOrder_{o},o} + tOrderOrder_{o,nextOrder_{o}},
+
+	%distanceOrderTour_{t,o} =
+	%	\overline{sumDistOrderTour_{t,o}} \div (\overline{#OrderTour_{t}} - 1) -
+	%	\overline{timeOrderTour_{t,o}},
+),
+*/
+
+
+
+/******************************************************/
+/*                  	DEPOT                         */
+/******************************************************/
+
+% DEPOT constraints
+quantityCapacitatedByProducts =>
+\forall d \in DEPOT (
+	TourDepot_{d} = \{ \forall t \in TOUR (site1Tour_{t} = siteDepot_{d} ? t : 0) \} \setminus 0,
+	VehicleDepot_{d} = \{ \forall v \in RESOURCE (site1Vehicle_{v} = siteDepot_{d} ? v : 0) \} \setminus 0,
+
+	\forall p \in PRODUCT (
+		quantityProductDepot_{d,p} =
+			\sum_{t \in TourDepot_{d}}{quantityProductTour_{t,p}} -
+			\sum_{v \in VehicleDepot_{d}}{quantity0ProductVehicle_{v,p}},
+
+		quantityProductDepot_{d,p} \in [minQuantityProductDepot_{d,p}, maxQuantityProductDepot_{d,p}] \vee
+		quantityProductDepot_{d,p} = 0,
+	),
+),
+
+TourActive = \bigcup_{v \in VehicleActive}{TourActiveVehicle_{v}},
+
+
+/*******************************************************/
+/*                  	WORKTIME                       */
+/*******************************************************/
+
+% Max makespan/time constraints
+\forall v \in RESOURCE (
+	\forall o<>i \in SourceOrderVehicle_{v}
+		TimeOrder_{o} \cap TimeOrder_{i} = {},
+
+	%\forall o \in SourceOrderVehicle_{v}
+	%	TimeOrder_{o} \prec TimeOrder_{nextOrder_{o}},
+
+	\forall d \in DateVehicle_{v} (
+		SourceActiveOrderDateVehicle_{v,d} = \{
+			\forall o \in SourceOrderVehicle_{v}
+			(dateOrder_{o} = d ? o : 0)
+		\} \setminus 0,
+
+		% date worktime
+		TimeActiveDateVehicle_{v,d} = TimeActiveVehicle_{v} \cap HorizonDateVehicle_{v,d},
+		%TimeDateVehicle_{v,d} = TimeVehicle_{v} \cap HorizonDateVehicle_{v,d},
+
+		% date makespan
+		t1DateVehicle_{v,d} \in ScheduleExtendedVehicle_{v},
+		t2DateVehicle_{v,d} \in Schedule0Resource_{v},
+
+		t1DateVehicle_{v,d} = \inf TimeActiveDateVehicle_{v,d},
+		t2DateVehicle_{v,d} = \sup TimeActiveDateVehicle_{v,d},
+
+		SpanDateVehicle_{v,d} = [t1DateVehicle_{v,d}, t2DateVehicle_{v,d}],
+		SpanDateVehicle_{v,d} \subset HorizonDate_{d},
+
+		% active logic for date worktime/makespan
+		activeDateVehicle_{v,d} == SourceActiveOrderDateVehicle_{v,d} <> {},
+		activeDateVehicle_{v,d} == TimeActiveDateVehicle_{v,d} <> {},
+		activeDateVehicle_{v,d} == SpanDateVehicle_{v,d} <> {},
+
+		% active time and makespan
+		timeActiveDateVehicle_{v,d} = #TimeActiveDateVehicle_{v,d},
+		makespanDateVehicle_{v,d} = #SpanDateVehicle_{v,d},
+
+		timeActiveDateVehicle_{v,d} =< maxWorktimeDayVehicle_{v},	% 10:00:00
+		timeActiveDateVehicle_{v,d} =< maxWorktimeDateVehicle_{v,d},
+
+		makespanDateVehicle_{v,d} =< maxMakespanDayVehicle_{v},	% 12:00:00
+		makespanDateVehicle_{v,d} =< maxMakespanDateVehicle_{v,d},
+	),
+
+	SourceActiveOrderVehicle_{v} = \bigcup_{d \in DateVehicle_{v}}{SourceActiveOrderDateVehicle_{v,d}},
+
+	makespanVehicle_{v} = \sum_{d \in DateVehicle_{v}}{makespanDateVehicle_{v,d}},
+
+
+	\forall d1<d2 \in DateVehicle_{v} (
+		TimeActiveDateVehicle_{v,d1} \prec TimeActiveDateVehicle_{v,d2},
+		%activeDateVehicle_{v,d2} -> activeDateVehicle_{v,d1},
+	),
+
+
+	nbDayVehicle_{v}	= \sum_{d \in DateVehicle_{v}}{activeDateVehicle_{v,d}},
+	nbNightVehicle_{v}	= (nbDayVehicle_{v}-1 > 0) * (nbDayVehicle_{v}-1),	% ??????
+),
+
+
+% Order time constraint
+\forall o \in SOURCEORDER (
+	SpanTourOrder_{o} = SpanTour_{tourOrder_{o}},
+
+	% Important for reasoning
+	TimeTourOrder_{o} = TimeTour_{tourOrder_{o}},			% ??????
+	TimeActiveTourOrder_{o} = TimeActiveTour_{tourOrder_{o}},	% ??????
+
+	ruleRouteTimeInterruptible => (
+		TimeOrder_{o} \subset SpanTourOrder_{o},
+		;
+
+		TimeOrder_{o} \subset ScheduleOrder_{o},
+	),
+),
+
+
+%\forall v \in RESOURCE (
+%	UnionSpanVehicle_{v} = \bigcup_{t \in TourActiveVehicle_{v}}{SpanTour_{t}},
+%	TimeActiveVehicle_{v} \subset Schedule0Resource_{v} \cap UnionSpanVehicle_{v},
+%),
+
+
+ruleDailyTour =>
+['Work Directory'  "Model\Solver\DailyTour.n"],
+
+
+
+
+/******************************************************/
+/*                 PREFIXED/LOCKED                    */
+/******************************************************/
+
+\forall o \in SOURCEORDER (
+	TimeServiceOrder_{o} = [t1Order_{o}, t2ServiceOrder_{o}],
+	NarrowedTimeWinOrder_{o} = TimeWinOrder_{o} \cap ScheduleOrder_{o},
+),
+
+
+\forall o \in OrderToPlan (
+	vehicleOrder_{o} \in VehicleOrder_{o},
+
+	% Time window constraint
+	TimeServiceOrder_{o} \subset NarrowedTimeWinOrder_{o},
+
+	t1Order_{o} \in NarrowedTimeWinOrder_{o},
+	t2ServiceOrder_{o} \in NarrowedTimeWinOrder_{o},
+ 
+	tourOrder_{o} \in TourToPlan,
+),
+
+
+
+/******************************************************/
+/*                  	PLAN                          */
+/******************************************************/
+
+/*
+\forall o \in OrderPlan (
+	t1Order_{o}		= t1PlanOrder_{o},
+	t2ServiceOrder_{o}	= t2ServicePlanOrder_{o},
+
+	tourOrder_{o}		= tourPlanOrder_{o},
+),
+*/	// ??????
+
+
+
+/******************************************************/
+/*                  	CAPACITY                      */
+/******************************************************/
+
+worktime :: defaultTime,
+makespan :: defaultTime,
+
+(TAG_RESOURCE_TOUR_CAPACITY_INSUFFICIENT \overline{#TourActive} :
+	% quantity/weight/volume
+	quantity = \sum_{t \in TourActive}{quantityTour_{t}},
+	quantity = \sum_{v \in VehicleActive}{quantityVehicle_{v}},
+
+	weightCapacitated => (
+		weight = \sum_{t \in TourActive}{weightTour_{t}},
+		weight = \sum_{v \in VehicleActive}{weightVehicle_{v}},
+	),
+	volumeCapacitated => (
+		volume = \sum_{t \in TourActive}{volumeTour_{t}},
+		volume = \sum_{v \in VehicleActive}{volumeVehicle_{v}},
+	),
+
+
+	% mileage
+	mileage = \sum_{v \in VehicleActive}{mileageVehicle_{v}},
+	mileage	= \sum_{t \in TourActive}{mileageTour_{t}},
+	mileage	= \sum_{o \in SourceActiveOrder}{mileageOrder_{o}},
+
+	% worktime
+	worktime = \sum_{t \in TourActive}{timeActiveTour_{t}},
+	worktime = \sum_{v \in VehicleActive}{timeActiveVehicle_{v}},
+	worktime = \sum_{o \in SOURCEORDER}{timeActiveOrder_{o}},	// ?????? for compensation in NCL
+	worktime = \sum_{o \in SourceActiveOrder}{timeActiveOrder_{o}},
+	worktime =< totalWorktime,
+
+	% makespan
+	makespan = \sum_{v \in VehicleActive}{makespanVehicle_{v}},
+	makespan =< totalMakespan,
+),
+
+
+
+/*
+% Symmetry breaking
+loop =< 0 => (
+	\forall i \in IdIdenticalTypeScheduleSite	% ?????? risk ?
+	\forall v1<v2 \in VehicleIdIdenticalTypeScheduleSite_{i} (
+		activeVehicle_{v2} -> activeVehicle_{v1},
+	),
+),
+*/
+
+
+
+/********************************************************/
+/*                        OBJECTIVE                     */
+/********************************************************/
+
+% profit
+cost	= \sum_{v \in VehicleActive}{costVehicle_{v}},
+profit	= receipts - cost,
+
+
+
+
+% nbVehicleActive
+nbVehicleActive = #{VehicleActive},
+
+% nbTourActive
+nbTourActive = #{TourActive},
+
+
+
+
+? nameObjectiveTop (
+TAG_RESOURCE_NB:
+	\min	nbVehicleActive,
+	\min	mileage : stepDistance,
+	;
+TAG_TOUR_NB:
+	\min	nbTourActive,
+	\min	mileage : stepDistance,
+	;
+TAG_PROFIT:
+	\max	profit : stepCost,
+	;
+TAG_COST:
+	\min	cost : stepCost,
+	;
+TAG_MILEAGE:
+	\min	mileage : stepDistance,
+	;
+TAG_WORKTIME:
+	\min	worktime : stepTime,
+	;
+TAG_MAKESPAN:
+	\min	makespan : stepTime,
+),
+
+
+
+
+/********************************************************/
+/*                      PRE-QUERY                       */
+/********************************************************/
+
+'Search Count' = 0 =>
+singleTourCapacitySufficient := \bigvee_{t \in \overline{TourActive}}{
+	\overline{#OrderTour_{t}} >= nbOrder
+},
+
+costOriented := (loop > 0 || maxVehicleConfig =< 1 || singleTourCapacitySufficient),
+
+
+
+\forall n \in ORDERSINK (
+	slackPrevOrder_{n} := #{\Delta{prevOrder_{n}}},
+),
+
+\forall o \in SOURCEORDER (
+	DeltaNextOrder_{o} := \Delta{nextOrder_{o}} \cap ORDER,
+
+	slackNextOrder_{o} = #{DeltaNextOrder_{o}},
+	%slackNextOrder_{o} = #{\Delta{nextOrder_{o}}},	% ??????
+
+	slackTimeOrder_{o} = #{\Delta{timeActiveOrder_{o}}},
+
+
+	DistNextOrder_{o} := \{\forall i \in DeltaNextOrder_{o}  tOrderOrder_{o,i}\},
+	diffDistNextOrder_{o} := DistNextOrder_{o}[2] - DistNextOrder_{o}[1],
+),
+
+
+\forall s \in Site2Vehicle \cup SiteDepot
+\forall t \in TOUR
+	tSinkSiteTour_{t,s} = \underline{tSiteSite_{siteOrder_{prevOrder_{sinkTour_{t}}},s}},
+
+\forall t \in TOUR (
+	slackOrderTour_{t} = #{\Delta{OrderTour_{t}}},
+
+	instantiatedOrderTour_{t} := slackOrderTour_{t} = 0,	%\underline{activeTour_{t}} && slackOrderTour_{t} = 0,	% 0825
+
+	\forall o,n \in SOURCEORDER (
+		detourOrderOrderTour_{t,o,n} =
+		detourSiteSiteTour_{t,siteOrder_{o},siteOrder_{n}},
+	),
+
+	\forall n \in ORDER (
+		detourOrderTour_{t,n} = \max_{o \in SourceOrderTour_{t}}{
+			detourOrderOrderTour_{t,o,n}
+		},
+	),
+
+
+	%\forall o<i \in OrderTour_{t} (
+	%	areaSquareOrderOrderTour_{t,o,i} =<
+	%	areaSquareRightOrderOrderTour_{t,o,i},
+	%),
+
+	%sourceChainedToNextTour_{t} := (#{DeltaNextOrder_{sourceTour_{t}}} = 1),
+),
+
+
+\forall t \in TOUR
+	instantiatedPreviousTour_{t} :=
+	\bigwedge_{i \in TourVehicle_{vehicleTour_{t}} : i < t}{instantiatedOrderTour_{i}},
+
+
+\forall o \in ORDER (
+	slackVehicleOrder_{o} = #{\Delta{vehicleOrder_{o}}},
+
+	slackT1Order_{o} = #{\Delta{t1Order_{o}}},
+
+	t1QueryOrder_{o} = \underline{t1Order_{o}} - 1,
+
+
+	%\forall t \in TOUR (
+	%	incompatibilityOrderTour_{t,o} := \overline{#OrderTour_{t}} - \overline{cardIfOrderTour_{t,o}},
+	%),
+	%maxIncompatibilityOrder_{o} := \max_{t \in \Delta{tourOrder_{o}}}{incompatibilityOrderTour_{t,o}},
+),
+
+\forall o \in SOURCEORDER (
+	slackTourOrder_{o} = \sum_{t \in \Delta{tourOrder_{o}}}{instantiatedPreviousTour_{t}},
+
+	%tourNotInstantiatedOrder_{o} == slackTourOrder_{o} > 1,
+
+	\forall n \in ORDER
+		timeNextOrder_{o,n} = \underline{time0ServiceOrder_{o} + tOrderOrder_{o,n}},
+
+	% Memory efficient by DeltaNextOrder
+	\forall n \in DeltaNextOrder_{o} (
+		t1NextOrder_{o,n} := \overline{TimeActiveOrder_{o}}[timeNextOrder_{o,n}],
+
+		t1QueryNextOrder_{o,n} :: defaultDateTime,
+		t1QueryNextOrder_{o,n} := \max(t1NextOrder_{o,n}, t1QueryOrder_{n}),
+		%t1QueryNextOrder_{o,n} := (! relaxation) * \max(t1NextOrder_{o,n}, t1QueryOrder_{n}),
+	),
+
+	%minSlackTourOrder_{o} = \min_{i \in DeltaNextOrder_{o}}{slackTourOrder_{i}},
+	%t1MinNextOrder_{o} = \min_{i \in DeltaNextOrder_{o}}{t1QueryNextOrder_{o,i}},
+
+	\forall n \in ORDER (
+		timeQueryOrderOrder_{o,n} :: defaultTime,
+		
+		timeQueryOrderOrder_{o,n} = (
+			%\underline{tOrderOrder_{o,n}}
+			\underline{tOrderOrder_{o,n} + timeToNextOrder_{n}}
+		),
+	),
+),
+
+
+
+\forall o \in SOURCEORDER
+	chainedQueryOrder_{o} :: true,
+
+\forall o \in SOURCE
+	! chainedQueryOrder_{o},		% ????????
+
+\forall o \in ORDER (
+	instantiatedOrder_{o} == slackTourOrder_{o} = 1,
+
+	chainedQueryOrder_{o} := (#{\Delta{prevOrder_{o}}} = 1),
+	%chainedQueryOrder_{o} := (#{\Delta{prevOrder_{o}}} = 1 && chainedQueryOrder_{prevOrder_{o}}),
+),
+
+
+
+
+% Relaxation based query
+
+/*
+relaxation == (loop > 0),
+
+
+% Relaxation based constraints
+\forall o \in OrderToRelaxBuffer
+	tourOrder_{o} \in TourToRelaxBuffer,
+*/
+
+
+
+
+/********************************************************/
+/*                      QUERY                           */
+/********************************************************/
+
+% Toward last 2 tours not instantiated
+nbTourOrderInstantiated = \sum_{t \in \underline{TourActive}}{instantiatedOrderTour_{t}},
+nbOrderInstantiated = \sum_{t \in \underline{TourActive}}{#{\underline{OrderTour_{t}}}},
+nbOrderToInstantiate = #ORDER - nbOrderInstantiated,
+
+
+minTourToInstantiate = \underline{nbTourActive} - nbTourOrderInstantiated,
+maxTourToInstantiate = \overline{nbTourActive}  - nbTourOrderInstantiated,
+
+minCapacityTourFuzzy =
+	\min_{t \in \Delta{TourActive}}{\overline{#{OrderTour_{t}}} - #{\underline{OrderTour_{t}}}},
+
+
+% Instantiate active tour number if critical point reached
+minTourToInstantiate =< 2 && nbOrderToInstantiate =< minCapacityTourFuzzy => (
+	nbTourActive = ?,
+
+	\forall t \in \overline{TourActive} -> (
+		\min	#{\Delta{#OrderTour_{t}}},
+		\min	\overline{#{OrderTour_{t}}},
+	)
+	(
+		activeTour_{t} ?,
+		%#{OrderTour_{t}} = ? (<-),	% ????????
+	),
+),
+
+
+\forall o \in ORDER
+instantiatedOrder_{o} => (
+	\forall i \in OrderSiteOrder_{o}
+		sameTourOrderOrder_{o,i} ?,
+),
+
+
+% To chain orders to orders
+\forall t \in TourToPlan -> (
+	% Sequential: First a tour whose previous vehicle tours are all instantiated.
+	\max	instantiatedPreviousTour_{t},
+)
+(
+	\forall s \in SITE
+		inTourSite_{s,t} == s = site2Tour_{t},
+	
+
+	activeTour_{t} =>
+		dateTour_{t} = ? (->),
+
+
+	% To instantiate as soon as a tour is assigned all of its orders
+	instantiatedOrderTour_{t} => (
+		t " " idTour_{t} :
+
+		\forall s \in \Delta{site2Tour_{t}} -> (
+			\min	\Delta{site2Tour_{t}},
+			\min	tSinkSiteTour_{t,s},
+		)
+		inTourSite_{s,t} ?,
+
+		%site2Tour_{t} = s ?,
+	),
+
+	\forall o \in SourceOrderTour_{t} -> (
+		% Tour integrity: tour to be chained continuously
+		%\max	sourceChainedToNextTour_{t},
+
+		%\max	\underline{chainedQueryOrder_{o}},
+		\max	(maxTourToInstantiate > 2) * \underline{chainedQueryOrder_{o}},
+	)
+	\forall n \in DeltaNextOrder_{o} -> (
+		% Least tour slack
+		\min	slackTourOrder_{n},
+
+		%\min	\underline{detourOrderTour_{t,n}},
+
+		\min	detourOrderOrderTour_{t,o,n},
+
+
+		% Earliest in terms of time window
+		\min	t1QueryNextOrder_{o,n},
+
+
+		% Least distance
+		\min	timeQueryOrderOrder_{o,n},
+
+		%\min	(! relaxation) * slackTourOrder_{n},
+		%\min	distQueryOrderTour_{t,n},
+		%\min	relaxation * (slackNextOrder_{o} * slackPrevOrder_{n}),
+		%\max	relaxation * slackTimeOrder_{o} * slackTimeOrder_{n},
+		%\min	(slackNextOrder_{o} * slackPrevOrder_{n}),
+		%\min	(!relaxation) * slackTimeOrder_{o} * slackTimeOrder_{n},
+		%\max	diffDistNextOrder_{o},
+		%\min	incompatibilityOrderTour_{t,n},
+		%\max	\overline{dOrderOrder_{o, n} =< distOrderSourceTour_{t,n}},
+
+		\max	maxQuantityTour_{t},
+		\max	maxWeightTour_{t},
+
+		% Gready: greatest priority
+		\max	priorityOrder_{n},
+	)
+	( o " " idOrder_{o} " " idSite_{siteOrder_{o}} " >> next " n " " idOrder_{n} " " idSite2Order_{n} " " t " " idTour_{t} :
+			nextOrder_{o} = n ?,
+	)
+),
+
+
+\forall t \in TourActive (
+	t " " idTour_{t} :
+
+	% To be in time: the first of order as early as possible
+	t1NextSourceTour_{t} = ? (->),
+
+	t1Tour_{t} = ? (<-),
+	t2Tour_{t} = ? (->),
+),
+
+
+% To instantiate at first t1 of each order, as early as possible
+\forall o \in OrderToPlan -> (
+	\min	\underline{t1Order_{o}},	% sequential search 
+	\min	\Delta{timeOrder_{o}},		% least slack
+)
+t1Order_{o} = ? (->),
+
+% To instantiate at first t1 of each order, as early as possible
+\forall o \in SOURCEORDER -> (
+	\min	\Delta{timeOrder_{o}},		% least slack
+)
+timeOrder_{o} = ?,
+
+
+
+
+%?? activeTour_{1},
+%?? activeTour_{2},
+
+%?? !activeTour_{36},	% BUG
+%?? !activeTour_{54},
+%?? !activeTour_{60},
+%\forall t \in {20,32,44,50}
+%?? !activeTour_{t},
+
+%?? activeVehicle_{6},
+%?? !activeVehicle_{7},
+
+
+%BUG universally parallel constraint
+
+% 100 O 15 T
+%\forall o \in {-33,31,47,56}
+%?? nextOrder_{29} = o,
+
+%\forall o \in {-33,29,31,47}
+%?? nextOrder_{56} = o,
+
+
+% DEBUG
+\forall t \in TourActive (
+	\forall o \in OrderTour_{t} (
+		cardIfOrderTour_{t,o}		:: 0,
+		weightIfOrderTour_{t,o}		:: 0.0,
+
+		cardIfNotOrderTour_{t,o}	:: 0,
+		weightIfNotOrderTour_{t,o}	:: 0.0,
+
+		TimeOrder_{o} 			:: DefaultDateTime,
+		TimeActiveOrder_{o}		:: DefaultDateTime,
+
+		quantityOrder_{o} 		:: 0,
+		weightOrder_{o} 		:: 0.0,
+	),
+
+	\forall o \in ORDER (
+		quantityOrder_{o} 			:: 0,
+		weightOrder_{o} 			:: 0.0,
+
+		cardIfOrderTour_{t,o}			:: 0,
+		cardIfNotOrderTour_{t,o}		:: 0,
+
+		\forall i \in ORDER \setminus o (
+			sameTourOrderOrderTour_{t,o,i}	:: true,
+			sameTourOrderOrder_{o,i}	:: true,
+			chainedOrderOrder_{o,i}		:: true,
+		),
+
+		idOrder_{o}		:: "",
+		idSite2Order_{o}	:: "",
+
+		vehicleOrder_{o}	:: 0,
+		tourOrder_{o}		:: 0,
+
+		prevOrder_{o}		:: 0,
+		nextOrder_{o}		:: 0,
+
+		TimeOrder_{o}		:: DefaultDateTime,
+		TimeActiveOrder_{o}	:: DefaultDateTime,
+	),
+
+	\forall o \in OrderSinkTour_{t}
+		prevOrder_{o}		:: 0,
+
+	\forall o \in SourceOrderTour_{t} (
+		TimeOrder_{o}		:: DefaultDateTime,
+		TimeActiveOrder_{o}	:: DefaultDateTime,
+
+		timeActiveOrder_{o}	:: defaultTime,
+		timeServiceOrder_{o}	:: defaultTime,
+		nextOrder_{o}		:: 0,
+
+		\forall i \in OrderSinkTour_{t} \setminus o (
+			timeServiceOrder_{o} :: defaultTime,
+			tOrderOrder_{o,i} :: defaultTime,
+
+			sameTourOrderOrder_{o,i}	:: true,
+			precOrderOrder_{o,i}		:: true,
+			chainedOrderOrder_{o,i}		:: true,
+		),
+	),
+),
+
+\forall v \in RESOURCE (
+	TourVehicle_{v}		:: {},
+	TourActiveVehicle_{v}	:: {},
+	OrderVehicle_{v}	:: {},
+	activeVehicle_{v}	:: true,
+),
+
+\forall t \in TourActive (
+	\forall o<>i \in OrderTour_{t} (
+		sameTourOrderOrderTour_{t,o,i}	:: true,
+		tOrderOrder_{o,i}		:: defaultTime,
+		sameTourOrderOrder_{o,i}	:: true,
+		precOrderOrder_{o,i}		:: true,
+		chainedOrderOrder_{o,i}		:: true,
+	),
+
+	SpanTour_{t} 		:: DefaultDateTime,
+	TimeTour_{t} 		:: DefaultDateTime,
+	TimeActiveTour_{t} 	:: DefaultDateTime,
+
+	idTour_{t}		:: "",
+
+	sinkTour_{t} 		:: 0,
+
+	quantityTour_{t} 	:: 0,
+	weightTour_{t} 		:: 0.0,
+),
+
+
+
+.
+
+
+
+TourFocus = {3..6},
+OrderFocus = {2,10,18,20,22},
+
+
+\forall t \in TourFocus (
+
+TimeActiveTour_{t} :: {},
+OrderTour_{t} :: {},
+
+
+\forall o \in OrderFocus \cup \{-t\}
+\forall i \in OrderFocus \setminus o
+timeServiceOrder_{o} + tOrderOrder_{o,i} :: defaultTime,
+
+
+%?? nextOrder_{20} <> 35,
+%?? nextOrder_{35} <> 20,
+
+
+\forall o \in OrderFocus (
+
+?? cardIfOrderTour_{t,o} = 7,
+?? cardIfOrderTour_{t,o} = 8,
+
+
+%?? nextOrder_{o} = -8,
+%?? cardIfNotOrderTour_{t,o} > 6,
+
+prevOrder_{o}			:: 0,
+tourOrder_{o}			:: 0,
+cardIfOrderTour_{t,o}		:: 0,
+cardIfNotOrderTour_{t,o}	:: 0,
+quantityOrder_{o} 		:: 0,
+
+
+TimeOrder_{o} :: DefaultDateTime,
+TimeOrder_{nextOrder_{o}} :: DefaultDateTime,
+
+%?? ['2024-12-28 16:52', '2024-12-28 17:07'] \subset TimeOrder_{o},
+%?? ['2024-12-28 16:52', '2024-12-28 17:07'] \subset TimeActiveOrder_{o},
+
+
+\forall i \in OrderFocus \setminus o (
+
+sameTourOrderOrderTour_{t,o,i} :: true,
+sameTourOrderOrder_{o,i}	:: true,
+precOrderOrder_{o,i}		:: true,
+chainedOrderOrder_{o,i}		:: true,
+
+precOrderOrder_{i,o}		:: true,
+chainedOrderOrder_{i,o}		:: true,
+),
+
+
+),
+),
+
+

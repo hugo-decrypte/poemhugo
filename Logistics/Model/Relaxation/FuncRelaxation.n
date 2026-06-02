@@ -1,0 +1,276 @@
+/****************************************************/
+/*              Routing	       	       	    	    */
+/*                                                  */
+/*		FuncRelaxation.n		    */
+/*                                                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE             */
+/* All rights reserved                              */
+/****************************************************/
+
+
+<initRelaxation>(solutionBuf, mileage0)
+(
+	'()' => (
+		['Work Directory' "Model\Relaxation\InitRelaxation.n"],
+	),
+
+	'@' => (
+		['Work Directory' "Model\Relaxation\WriteRelaxation.n"],
+	),
+),
+
+
+<relaxSolution>(
+	loop, solutionBuf, maxBacktrack,
+	Swap_o, Swap_i, tour_o, tour_i, mileageNotRelaxed)
+(
+	'()' => (
+		['Work Directory' "Model\Relaxation\ReadRelaxation.n"],
+
+		['Work Directory' "Model\Relaxation\ComputeDetour.n"],
+	),
+
+
+	% Swap_o, Swap_i
+	tour_o \in TourActiveBuffer,
+	tour_i \in TourActiveBuffer \setminus tour_o,
+
+	TourToRelax \subset TourActiveBuffer,
+	TourToRelax = \{ tour_o, tour_i \},
+
+	minMaxDist = \min_{t \in TourToRelax}{maxDistTour_{t}},
+
+
+	ORDER_o \subset ORDER,
+	ORDER_i \subset ORDER,
+
+	ORDER_o = OrderTourBuffer_{tour_o} \setminus ORDER_i,
+	ORDER_i = OrderTourBuffer_{tour_i} \setminus ORDER_o,
+
+
+	SWAP_o \subset ORDER_o,
+	SWAP_i \subset ORDER_i,
+
+
+	SWAP_o = \{
+		\forall o \in ORDER_o (
+			minDistOrderTour_{tour_i,o} < minMaxDist &&
+			#{TimeWinOrder_{o} \cap SpanTourBuffer_{tour_i}} >= timeServiceOrderBuffer_{o} ?
+			o : 0
+		)
+	\} \setminus 0,
+
+	SWAP_i = \{
+		\forall i \in ORDER_i \setminus ORDER_o (
+			minDistOrderTour_{tour_o,i} < minMaxDist &&
+			#{TimeWinOrder_{i} \cap SpanTourBuffer_{tour_o}} >= timeServiceOrderBuffer_{i} ?
+			i : 0
+		)
+	\} \setminus 0,
+
+
+	Swap_o \subset SWAP_o,
+	Swap_i \subset SWAP_i,
+
+
+%?? 24 \not\in Swap_o,
+%?? 45 \not\in Swap_o,
+%41 \in Swap_i,
+%tour_i = 1,
+
+
+	Swap_o <> {},
+	Swap_o \cap Swap_i = {},
+
+
+	Swap_o \subset SWAP_o \setminus Swap_oRelaxedTourBuffer_{tour_i},
+
+
+	SiteSwap_o = \{ \forall o \in Swap_o siteOrderBuffer_{o} \},
+	SiteSwap_o \subset SiteOrder,
+
+
+	distSwap_o = \min_{s<>i \in SiteSwap_o}{dSiteSite_{s,i}},
+	#SiteSwap_o < 2 -> distSwap_o = 0,
+
+
+	%\forall o \in ORDER (
+		%distSwap_oOrder_{o} = \min_{i \in Swap_o}{distOrderOrder_{o,i}},
+
+		%distSwap_iOrder_{o} = \min_{i \in Swap_i}{distOrderOrder_{o,i}},
+		%Swap_i = {} -> distSwap_iOrder_{o} = +\infty,
+	%),
+
+
+	\forall o \in SWAP_o (
+		siteOrderBuffer_{o} \in SiteSwap_o -> o \in Swap_o,
+
+		%(siteOrderBuffer_{o} \in SiteSwap_o ||
+		%distSwap_oOrder_{o} < distSwap_o) -> o \in Swap_o,
+	),
+
+	\sum_{o \in Swap_o}{nextOrderBuffer_{o} \in Swap_o} = #Swap_o - 1,
+
+	%\forall o \in Swap_o
+	%	#Swap_o = 1 \vee
+	%	nextOrderBuffer_{o} \in Swap_o \vee
+	%	prevOrderBuffer_{o} \in Swap_o,
+
+
+	SiteSwap_i = \{ \forall o \in Swap_i siteOrderBuffer_{o} \},
+	SiteSwap_i \subset SiteOrder,
+
+	distSwap_i = \min_{s<>i \in SiteSwap_i}{dSiteSite_{s,i}},
+	#SiteSwap_i < 2 -> distSwap_i = 0,
+
+
+	\forall o \in SWAP_i (
+		siteOrderBuffer_{o} \in SiteSwap_i -> o \in Swap_i,
+
+		%(siteOrderBuffer_{o} \in SiteSwap_i ||
+		%distSwap_iOrder_{o} < distSwap_i)
+		%-> o \in Swap_i,
+	),
+
+
+	\sum_{i \in Swap_i}{nextOrderBuffer_{i} \in Swap_i} >= #Swap_i - 1,
+
+	%\forall i \in Swap_i
+	%	#Swap_i =< 1 \vee
+	%	nextOrderBuffer_{i} \in Swap_i \vee
+	%	prevOrderBuffer_{i} \in Swap_i,
+
+
+	% Order of tours o/i after swap
+	Order_o \subset ORDER,
+	Order_i \subset ORDER,
+
+	Order_o = (ORDER_o \setminus Swap_o) \cup Swap_i,
+	Order_i = (ORDER_i \setminus Swap_i) \cup Swap_o,
+
+
+	% Capacity
+	quantity_o = \sum_{o \in Order_o}{quantityOrderBuffer_{o}},
+	weight_o = \sum_{o \in Order_o}{weightOrderBuffer_{o}},
+	volume_o = \sum_{o \in Order_o}{volumeOrderBuffer_{o}},
+
+	quantity_o =< maxQuantityTour_{tour_o},
+	weight_o =< maxWeightTour_{tour_o},
+	volume_o =< maxVolumeTour_{tour_o},
+
+
+	quantity_i = \sum_{o \in Order_i}{quantityOrderBuffer_{o}},
+	weight_i = \sum_{o \in Order_i}{weightOrderBuffer_{o}},
+	volume_i = \sum_{o \in Order_i}{volumeOrderBuffer_{o}},
+
+	quantity_i =< maxQuantityTour_{tour_i},
+	weight_i =< maxWeightTour_{tour_i},
+	volume_i =< maxVolumeTour_{tour_i},
+
+
+	% Improvement
+	improvement_o = \sum_{s \in SiteSwap_o}{
+		improvementIfTourTourSite_{s,tour_o,tour_i}
+	},
+	improvement_i = \sum_{s \in SiteSwap_i}{
+		improvementIfTourTourSite_{s,tour_i,tour_o}
+	},
+
+	improvement = improvement_o + improvement_i,
+
+	improvement_o > 0,
+
+	improvement > 0,
+
+
+	\forall t \in TourActiveBuffer (
+		maxImproveIfTour_{t} =
+		\max_{o \in Swap_o \setminus OrderTourBuffer_{t}}{
+			improvementIfTourOrder_{o,t}
+		},
+
+		Swap_o \setminus OrderTourBuffer_{t} = {} ->
+		maxImproveIfTour_{t} = 0,
+	),
+
+	\forall t \in \Delta{tour_i} -> (
+		\max	\overline{maxImproveIfTour_{t}},
+	)
+	tour_i = t ?,
+
+
+	\forall o \in \Delta{Swap_o} -> (
+		\max	\overline{improvementIfTourOrder_{o,tour_i}},
+	)
+	o \in Swap_o ?,
+
+
+	\forall i \in \Delta{Swap_i} -> (
+		\max	\overline{improvementIfTourOrder_{i,tour_o}},
+	)
+	i \in Swap_i ?,
+
+
+	% Objective
+	\max	improvement,
+
+
+	'@' => (
+		TourNotRelaxed = TourActiveBuffer \setminus TourToRelax,
+		mileageNotRelaxed = \sum_{t \in TourNotRelaxed}{mileageTourBuffer_{t}},
+
+
+		['Work Directory' "Model\Relaxation\WriteRelaxation.n"],
+
+
+		% For debug
+		Vertex2Tour_o \subset SITE,
+		Vertex2Tour_i \subset SITE,
+		Vertex2Tour_o = Vertex2Tour2Tour1_{tour_i, tour_o},
+		Vertex2Tour_i = Vertex2Tour2Tour1_{tour_o, tour_i},
+
+
+		IdSite_o = \{ \forall o \in Swap_o idSiteOrderBuffer_{o} \},
+		IdSite_i = \{ \forall i \in Swap_i idSiteOrderBuffer_{i} \},
+
+		('hh:mm:ss' TAG_TAB_1 loop " "
+			TAG_TOUR_TO_RELAX " : "
+			tour_o " " tour_i "  "
+			idTour_{tour_o} "  " idTour_{tour_i} "  "
+
+
+			TAG_TOUR_SITE " : "
+			Vertex2Tour_o " " Vertex2Tour_i "  " 
+			\{ \forall s \in Vertex2Tour_o idSite_{s} \} " "
+			\{ \forall s \in Vertex2Tour_i idSite_{s} \} "  "
+
+
+			TAG_KEY_SITE " : "
+			%TAG_KEY_ORDER " : "
+			%Swap_o " " Swap_i "  "
+			%\{ \forall o \in Swap_o idOrderBuffer_{o} \} " "
+			%\{ \forall o \in Swap_i idOrderBuffer_{o} \} "  "
+			IdSite_o ", " IdSite_i "  "
+
+
+			TAG_IMPROVEMENT " : " 
+			\underline{improvement_o} ", " \underline{improvement_i}
+
+			: 
+		),
+
+%!!,
+
+%'Solution Count' = 3 => !!,
+
+	),
+
+
+	% Termination
+	'Solution Count' >= 1 && 'Search Gap' > maxBacktrack => (
+		'.',
+	),
+
+	%'Solution Count' >= 1 => '.',
+),
+

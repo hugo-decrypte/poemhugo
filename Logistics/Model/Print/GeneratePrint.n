@@ -1,0 +1,41 @@
+%===============================================%
+%		ERP				%
+%						%
+%		GeneratePrint.n			%
+%						%
+%	Copyright (C) 2000 ENGINEST SOFTWARE	%
+%	All rights reserved.			%
+%===============================================%
+
+'@' => (
+
+	% Order
+	[['Work Directory' "Model\Print\PrintOrderConfirmation.n"], ['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintOrderDelivery.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintOrderInvoice.n"], 		['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintOrderProforma.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Delivery
+	[['Work Directory' "Model\Print\PrintDelivery.n"],			['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintDeliveryInvoice.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintDeliveryPalletSheet.n"],['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintDeliveryPreparation.n"],['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Tour
+	[['Work Directory' "Model\Print\PrintTourDelivery.n"],			['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintTourDeliveryInvoice.n"], 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintTourDeliveryPalletSheet.n"],['Work Directory' "ncl.cfg"], 'Trace Level'],
+	[['Work Directory' "Model\Print\PrintTourDeliveryPreparation.n"],['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Packing
+	[['Work Directory' "Model\Print\PrintPackingPalletSheet.n"],['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Product
+	[['Work Directory' "Model\Print\PrintProductSheet.n"],		['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Quote
+	[['Work Directory' "Model\Print\PrintQuote.n"],			 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+
+	% Supply
+	[['Work Directory' "Model\Print\PrintSupply.n"],			 	['Work Directory' "ncl.cfg"], 'Trace Level'],
+),

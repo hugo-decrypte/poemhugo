@@ -1,0 +1,124 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTablePrevisionProduct.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu  
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tablePrevisionProduct>(id,type,aliasTable,bestfit,doubleclick,title,related,idUserPostfix)	% JZ 1013
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		%postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : (related)),
+		viewFile = ("TablePrevisionProduct" postfix),
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+
+
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+
+		dateMonth :: "",
+		? databaseType (
+			"ACCESS" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"SQLSERVER" :
+				dateMonth = ("DateAdd("SQL_DATEPART_MONTH", -M.NoMonth, "SQL_CURRENTDATE")"),
+				;
+
+			"MYSQL" :
+				dateMonth = ("date_Add("SQL_CURRENTDATE", INTERVAL -M.NoMonth MONTH)"), 
+				;
+
+			"ORACLE" :
+				dateMonth = ("ADD_MONTHS("SQL_CURRENTDATE",-M.NoMonth)"),
+		),
+
+
+		@ ("SELECT  Val.ID as ID, Val.ID as REFERENCE,\\\n"),
+		@ ("\t\t Val.PU as PRICE,\\\n"),
+ 		@ ("\t\t sum(Val.Q) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(Val.C), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t int(sum(Val.W)+0.5) as WEIGHT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=1" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY1, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=1"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST1, sum("SQL_CASEWHEN"Val.NoM=1"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT1,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=2" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY2, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=2"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST2, sum("SQL_CASEWHEN"Val.NoM=2"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT2,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=3" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY3, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=3"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST3, sum("SQL_CASEWHEN"Val.NoM=3"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT3,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=4" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY4, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=4"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST4, sum("SQL_CASEWHEN"Val.NoM=4"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT4,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=5" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY5, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=5"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST5, sum("SQL_CASEWHEN"Val.NoM=5"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT5,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=6" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY6, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=6"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST6, sum("SQL_CASEWHEN"Val.NoM=6"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT6,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=7" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY7, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=7"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST7, sum("SQL_CASEWHEN"Val.NoM=7"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT7,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=8" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY8, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=8"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST8, sum("SQL_CASEWHEN"Val.NoM=8"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT8,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=9" SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY9, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=9"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST9, sum("SQL_CASEWHEN"Val.NoM=9"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT9,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY10,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST10,sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT10,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY11,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST11,sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT11,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY12,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST12,sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT12,\\\n"),
+		@ ("\t\t Val.DES as DESIGNATION,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM  \\\n"),
+ 		@ ("\t\t (select P.ID as ID, P.Reference as REF, P.PriceUnit as PU, P.designation as DES,\\\n"),
+ 		@ ("\t\t		13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \\\n"),
+ 		@ ("\t\t	from " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M \\\n"),
+ 		@ ("\t\t	WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\\\n"),
+		@ ("\t\t 		AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \\\n"),
+ 		@ ("\t\t	GROUP BY P.ID, P.Reference, P.designation, P.PriceUnit, P.Weight, M.NoMonth\\\n"),
+ 		@ ("\t\t ) Val\\\n"),
+ 		@ ("\t GROUP BY Val.ID, Val.REF,Val.PU, Val.DES \\\n"),
+
+
+		@ ("\t UNION SELECT '" TAG_TOTAL "' as ID, 'ZZZ' as REFERENCE, \\\n"),
+		@ ("\t\t 0 as PRICE,\\\n"),
+ 		@ ("\t\t sum(Val.Q) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(Val.C), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t int(sum(Val.W)+0.5) as WEIGHT,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=1"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY1, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=1"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST1, sum("SQL_CASEWHEN"Val.NoM=1"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT1,\\\n"),
+	 	@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=2"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY2, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=2"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST2, sum("SQL_CASEWHEN"Val.NoM=2"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT2,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=3"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY3, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=3"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST3, sum("SQL_CASEWHEN"Val.NoM=3"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT3,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=4"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY4, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=4"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST4, sum("SQL_CASEWHEN"Val.NoM=4"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT4,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=5"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY5, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=5"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST5, sum("SQL_CASEWHEN"Val.NoM=5"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT5,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=6"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY6, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=6"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST6, sum("SQL_CASEWHEN"Val.NoM=6"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT6,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=7"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY7, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=7"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST7, sum("SQL_CASEWHEN"Val.NoM=7"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT7,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=8"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY8, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=8"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST8, sum("SQL_CASEWHEN"Val.NoM=8"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT8,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=9"SQL_THEN" Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY9, "SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=9"SQL_THEN" Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST9, sum("SQL_CASEWHEN"Val.NoM=9"SQL_THEN"  int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT9,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN"Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY10,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST10,sum("SQL_CASEWHEN"Val.NoM=10"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT10,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN"Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY11,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST11,sum("SQL_CASEWHEN"Val.NoM=11"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT11,\\\n"),
+ 		@ ("\t\t sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN"Val.Q"SQL_ELSE" 0"SQL_CASEEND") as QTY12,"SQL_FORMATNUM"(sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN"Val.C"SQL_ELSE" 0"SQL_CASEEND"),"SQL_FORMATSCALE2") as COST12,sum("SQL_CASEWHEN"Val.NoM=12"SQL_THEN" int(Val.W+0.5)"SQL_ELSE" 0"SQL_CASEEND") as WEIGHT12,\\\n"),
+		@ ("\t\t ' ' as DESIGNATION,\\\n"),
+ 		@ ("\t\t '(220 220 255 )' as LINERGB \\\n"),
+ 		@ ("\t FROM \\\n"),
+ 		@ ("\t\t (select 13-M.NoMonth as NoM, sum(DP.QuantityReal) as Q, sum(DP.QuantityReal*DP.PriceUnit) as C, sum(DP.QuantityReal*P.Weight) as W \\\n"),
+ 		@ ("\t\t	from " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M \\\n"),
+ 		@ ("\t\t	WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct not in ('F','S')\\\n"),
+		@ ("\t\t 		AND D.DateDelivery>="SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-01'"SQL_CONCATEND" \\\n"),
+		@ ("\t\t 		AND D.DateDelivery<"SQL_CONCAT""SQL_FORMATDATE"("dateMonth",'"SQL_FORMATDATE_Y"-"SQL_FORMATDATE_M"')"SQL_CONCATWITH"'-31'"SQL_CONCATEND" \\\n"),
+ 		@ ("\t\t	GROUP BY M.NoMonth\\\n"),
+ 		@ ("\t\t ) Val\\\n"),
+
+		@ ("\t ORDER BY REFERENCE \"\n\n"),
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

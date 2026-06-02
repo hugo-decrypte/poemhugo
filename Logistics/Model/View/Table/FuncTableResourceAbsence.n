@@ -1,0 +1,126 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  	FuncTableResourceAbsence.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%% 2025.01.29   DATE() => SQL_CURRENTDATE   ;  DateAdd( 
+%% 2025.07.12   Order by idResource, dateStart, timeStart
+
+
+% related
+%	"User" 		: access limited to user accessibility
+%	table name	: related to table
+%	... 		: e.g., special view opened in view menu
+%
+% idUserPostfix
+%	not "" : idUserLogin as postfix
+
+<tableResourceAbsence>(id,type,aliasTable,bestfit, doubleclick, IdSelected,strDate1,strDate2, title0,related,idUserPostfix) % JZ 1013
+(
+
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableResourceAbsence" postfix),
+		
+
+
+		['Work Directory' "Model\Common\SQL\SqlTask.n"],
+		['Work Directory' "Model\Common\SQL\SqlResource.n"],
+		
+
+		related = "" =>(
+			title = (title0 TAG_OF_THIS_MONTH_OR_NOT_ARCHIVED),
+			;
+			title = (title0 " : [" strDate1 ", " strDate2 "]"),
+		),
+
+
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB,,,13.0.0);(string,IDRESOURCE,,,);(string,NAMERESOURCE,,,);(string,TYPE,,,);]\" \\\n"),
+
+		@ VIEWSQL,
+
+
+%%% 				(SELECT r.name from " DB_PREFIX "RESOURCE r where r.id=rr.idResource) AS NAMERESOURCE, \
+%%% 
+
+	    	@ ("SELECT 	r.idClub 			AS IDCLUB,\
+				"SQL_ClubNameIdIs"r.idClub) 	AS NAMECLUB, \
+	    			rr.idResource			AS IDRESOURCE, \
+				r.name				AS NAMERESOURCE, \
+				rr.idTypeAbsence 		AS TYPEABSENCE, \
+				t.name				AS NAMETYPEABSENCE, \
+				rr.dateStart 			AS DATESTART,\
+				rr.dateEnd 			AS DATEEND,\
+				rr.timeStart			AS TIMESTART,\
+				rr.timeEnd			AS TIMEEND,\
+				rr.duration			AS DURATION,\
+				rr.state 			AS STATE,\
+				" SQL_ActivityStateName 	" AS NAMESTATE,\
+				" SQL_AbsenceComments 		" AS COMMENTS,\
+				" SQL_AbsenceColor 		" AS LINERGB \\\n"),
+
+
+			@ ("\t FROM (" DB_PREFIX "RESOURCE r INNER JOIN " DB_PREFIX "RESOURCE_ABSENCE rr ON rr.idResource=r.id)\\\n"),
+			@ ("\t 	LEFT JOIN " DB_PREFIX "TYPEABSENCE t ON t.id=rr.idTypeAbsence \\\n"),
+			@ ("\t WHERE r.id=rr.idResource \\\n"),
+
+
+			related = "" =>
+			@ ("\t AND (rr.dateEnd>=format(DateAdd("SQL_DATEPART_DAY ",-37,"SQL_CURRENTDATE "),'" SQL_FORMATDATESTR "') OR rr.state<>'" STATE_ARCHIVED "' OR rr.state IS NULL)\\\n"),
+			related = "User" => (
+				sqlIdSelected = "\t AND r.id IN ((/*IDOBJ*/))",
+
+				@ (sqlIdSelected),
+				@ (" \\\n\t AND (rr.dateEnd>=format(DateAdd('d',-37,Date()),'" SQL_FORMATDATE_FR "') OR rr.state<>'" STATE_ARCHIVED "' OR rr.state IS NULL)\\\n"),
+			),
+
+			related = "Menu" => (
+				sqlIdSelected = ("\t AND r.id IN (" concatSetQuoted(IdSelected) ")\\\n"),
+
+				@ (sqlIdSelected),
+				@ (" \\\n\t AND rr.dateStart >= '" strDate1 "' AND rr.dateEnd <= '" strDate2 "'\\\n"),
+
+			),			
+			
+			@ (" AND" sqlResourceVisibility),
+	    		@ (" ORDER BY rr.idResource,rr.dateStart DESC,rr.timeStart DESC\"\n\n\n"),
+
+%%%	    		@ ("\t ORDER BY rr.state,r.idClub,rr.idResource,rr.dateStart DESC,rr.timeStart DESC\"\n\n\n"),
+
+
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResourceAbsence2EditResourceAbsence.n"],
+
+
+%		['Work Directory' "Model\Interaction\View\Table\ScenarioTableResourceAbsence2TableAbsencePaidOverview.n"],
+
+%		related="" => 
+%			['Work Directory' "Model\Interaction\View\Table\ScenarioTableResourceAbsence2TableResourceAbsence.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+).
+
+

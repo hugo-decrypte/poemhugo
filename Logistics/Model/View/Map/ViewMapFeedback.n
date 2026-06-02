@@ -1,0 +1,16 @@
+%===============================================%
+%						%
+%		Vehicle Routing			%
+%						%
+%		ViewMapFeedback.n		%
+%						%
+%	(c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+['Work Directory' "Model\View\Map\FuncMapFeedback.n"],
+
+
+'@' => (
+	mapFeedback({},{}, "",TAG_MAP_RESOURCE_FEEDBACK, "",		""),
+	%mapFeedback({},{}, "",TAG_MAP_RESOURCE_FEEDBACK, "Simulation",	""),
+),

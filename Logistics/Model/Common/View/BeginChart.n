@@ -1,0 +1,73 @@
+%==================================================%
+%                                                  %
+%            BeginChart.n	    	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+@ "View ",
+
+% ID
+@ ("ViewChart" idItem),
+%@ "_ ",
+
+% Caption
+@ (" '" title "'"),  
+
+% Title
+@ (" '" title "'"),  
+
+% Red Green Blue
+@ "255 255 255 ",
+
+% Icon	
+@ ("_ "),
+
+% Rect(X Y SX SY )	
+@ ("0 0 0 0 "),
+
+% Margin
+@ chartMargin,
+%@ ("5 5 5 5 "),
+
+% [Option items]
+@ ("'[TRACELEVEL=0;"),
+@ ("TRACEFILE=;"),
+@ ("TOOLBAR=0;"),
+@ ("FLIPVERTICALLY=0;"),
+@ ("FLIPHORIZONTALLY=0;"),
+
+bestfit => (
+	@ ("NATURESCALE=0;"),
+	@ ("BESTFIT=1;"),
+			;
+
+	@ ("NATURESCALE=1;"),
+	@ ("BESTFIT=0;"),
+),
+
+@ ("SCROLLBAR=1;"),
+@ ("SHOWNAME=1;"),
+@ ("ZOOMOBJECT=;"),
+@ ("CURRENTPAGE=1;"),
+@ ("CLOSEEVENT=1;"),
+
+@ ("BKGROUNDCOLOR=" 	RGB_CHART_BACKGROUND),
+@ (";SCREENCOLOR=" 	RGB_CHART_BACKGROUND),
+@ (";PATHLINEWIDTH=9;"),
+
+@ ("PATHLINECOLOR=" 	RGB_CHART_LINE 	";PATHARROWWIDTH=15"),
+@ (";PATHARROWCOLOR=" 	RGB_RED 	";"),
+
+@ ("POEMSERVER=;"),
+@ ("MAPLOGFILE=;"), 
+@ ("MATRIXCRITERION=Distance;"),
+@ ("MATRIXCOMPUTERADIUS=0.5;"),
+@ ("SPEEDKMHOUR=50;"),
+@ ("STRAIGHTDISTANCERATIO=1.4;"),
+@ ("SITEINTRADISTANCE=;"),
+@ ("MATRIXMAXCOMPUTEWIDTH=;"),
+@ ("NEIGHBOURHOOD=;"),
+@ ("MATRIXFILENAME=;"),
+@ ("MATRIXDIRECTORY=;]'\n\n"),
+

@@ -1,0 +1,53 @@
+%==================================================%
+%                                                  %
+%            	 ERP-HR		    	           %
+%                                                  %
+%  		FuncTableCalendar.n 	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+%% 2025.01.29  Date() = > SQL_CURRENTDATE
+%% 2025.01.29 SQL_CASEWHEN
+
+<tableCalendar>(id,type,aliasTable,bestfit, doubleclick,title,related,idUserPostfix)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+
+	'@' => (
+		postfix = (related = "" ? (idUserPostfix = "" ? "" : idUserLogin) : ("_" related)),
+		viewFile = ("TableCalendar" postfix),
+
+		
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(color,LINERGB,,,13.0.0);]\" \\\n"),
+
+		@ VIEWSQL,
+
+		
+	    	@ ("SELECT DISTINCT c.id AS IDDATE,\
+			" SQL_AliasCategoryIs "'CALENDAR' AND al.field='weekday' AND al.id=c.weekday) AS WEEKDAY,\
+			c.comments AS COMMENTS,\
+			" SQL_CASEWHEN "c.id>=format(" SQL_CURRENTDATE ",'" SQL_FORMATDATE_FR "')" SQL_THEN 
+			SQL_ColorCategoryIs "'STATE' AND al.id='" STATE_ACTIVE "')" SQL_ELSE 
+			SQL_ColorCategoryIs "'STATE' AND al.id='" STATE_INACTIVE "')" SQL_CASEEND " AS LINERGB\
+			FROM " DB_PREFIX "CALENDAR c\
+			ORDER BY c.id DESC \"\n\n\n"),
+
+
+
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableCalendar2EditCalendar.n"],
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+), 
+

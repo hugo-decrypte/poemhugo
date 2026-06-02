@@ -1,0 +1,52 @@
+%==================================================%
+%                                                  %
+%            	  Vehicle Routing    	           %
+%                                                  %
+% 		   Backup.n              	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadConfig.n"],
+
+'()' => ( % bai 0429
+	'()' <- database,
+
+	typeBackup = TAG_TYPE_BACKUP,
+	%autoSnapshot,
+
+	(SQL : SQL_SelectBackupTypeIs typeBackup"' " SQL_AndWhereBackupClubIs idClubLogin "'"), % Zhou 0822
+
+/*		"SQLSERVER":
+		(SQL : "SELECT 	COUNT(id) AS nb,
+				CAST((CASE WHEN MIN(id)='"TAG_EMPTY_STRING"' OR MIN(id) IS NULL THEN '0' ELSE MIN(id) END) AS int) AS minId,
+				CAST((CASE WHEN MAX(id)='"TAG_EMPTY_STRING"' OR MAX(id) IS NULL THEN '0' ELSE MAX(id) END) AS int) AS maxId
+			FROM 	[BACKUP]
+			WHERE 	type='" typeBackup "' AND
+				idClub='" idClubLogin "'"),
+	),*/
+
+	_		= (),
+
+	nbIdx		:: 0, 
+	minIdBackup	:: 0,
+	maxIdBackup	:: 0,
+
+	nbIdx		= (),
+	minIdBackup	= (),
+	maxIdBackup	= (),
+
+	database <- '()',
+
+
+	idBackup	= ((maxIdBackup = 0 ? backup0Interaction : maxIdBackup+1) ""),	
+	nameBackup	= "",
+
+	colorBackup	= colorIdx_{nbIdx \mod nbColor},
+),		
+
+['Work Directory' "Model\\Interaction\\Backup\\Backup0.n"],
+
+'()' => (
+	('hh:mm:ss' "  "TAG_BACKUP_SOLUTION TAG_END "\n" : ),	
+),

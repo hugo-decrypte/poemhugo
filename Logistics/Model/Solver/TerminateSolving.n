@@ -1,0 +1,35 @@
+%==================================================%
+%                                                  %
+% 		TerminateSolving.n      	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Termination condition without solution
+'Solution Count' = 0 && 'Backtrack Count' > maxBacktrack => (
+	%!!,
+	'.',
+),
+
+'Solution Count' = 0 && 'Backtrack Count' > maxBacktrack => (
+	'.'
+%	('hh:mm:ss' TAG_TAB_3 TAG_TERMINATE_AT_BACKTRACK_LIMIT 'Backtrack Count' : '.'),	% ??????
+),
+
+
+% Termination conditions after min solution
+'Solution Count' >= 1 && ('Search Gap' > maxBacktrack || 'Local Time' > maxTime) => (
+	'.'
+	%('hh:mm:ss' TAG_TAB_3 TAG_TERMINATE_AT_BACKTRACK_GAP 'Search Gap' : '.'),
+),
+
+
+% Termination at solution
+'Solution Count' >= 1 && ruleTerminateAtSolution => (
+	('hh:mm:ss' TAG_TAB_3 TAG_TERMINATE_AT_SOLUTION : '.'),
+),
+
+
+% Progress message
+loop = 0 && 'Solution Count' = 0 && 'Search Count' > 0 && 'Search Count' \mod 100 = 0 && 'Backtrack Count' < 'Search Depth' =>
+	('hh:mm:ss' (loop > 0 ? TAG_TAB_2 : TAG_TAB_1) TAG_PROGRESS ": " 'Search Count' : true),

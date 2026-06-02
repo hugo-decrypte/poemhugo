@@ -1,0 +1,41 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 DeletePointDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+	
+	
+	idClientBuffer				:: "",
+	idPointDeliveryBuffer		:: "",
+	
+	
+	
+	idClientBuffer				= (),
+	idPointDeliveryBuffer		= (),
+	
+	
+
+	'()' <- database,
+
+	DeletePointDelivery_SQL1 = (
+		"Delete from " DB_PREFIX "POINTDELIVERY pd 
+		where IdClient='"idClientBuffer"' and IdPoint='"idPointDeliveryBuffer"'
+		and not exists (select 1 from " DB_PREFIX "CLIENTORDER o where o.IdClient=pd.IdClient and o.IdPointDelivery=pd.IdPoint)"
+	),
+	
+
+	(SQL : DeletePointDelivery_SQL1), 
+
+	
+	database <- '()',
+),

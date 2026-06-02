@@ -1,0 +1,162 @@
+/********************************************************/
+/*							*/
+/*		    WebGetTour.n			*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+'()' => (
+	nameVehicle	:: "",
+	idVehicle	:: "",
+
+	idTour		:: "",
+
+
+	nbArgument	= (),
+
+
+	nameVehicle	= (),
+	idTour		= (),
+
+
+
+	'()' <- database,
+
+	sqlReadTour = (
+		"SELECT s.id,s.latitude,s.longitude FROM "
+			DB_PREFIX "OPT_RESOURCE_TASK p,"DB_PREFIX "OPT_RESOURCE r,"DB_PREFIX "SITE s
+		WHERE p.idResource=r.id AND r.name='" nameVehicle "' AND p.idTour='" idTour "' AND p.idSite1=s.id
+		ORDER BY p.idResource,p.idTour,p.idx"
+	),
+ 
+	(SQL: sqlReadTour),
+
+
+	Tour = [1,()],
+
+	\forall i \in Tour (
+		idSiteTour_{i}		:: "",
+		latitudeTour_{i}	:: 0.0,
+		longitudeTour_{i}	:: 0.0,
+
+		idSiteTour_{i}		= (),
+		latitudeTour_{i}	= (),
+		longitudeTour_{i}	= (),
+	),
+
+
+	selectRisk = (
+		"SELECT DISTINCT p.idTypeRisk FROM "
+		DB_PREFIX "OPT_RESOURCE_TASK rt," DB_PREFIX "OPT_RESOURCE r," DB_PREFIX "OPT_ORDER o," DB_PREFIX "OPT_PRODUCT p
+		WHERE o.id=rt.idProject AND r.id=rt.idResource AND p.id=o.idProduct AND r.name='" nameVehicle "'
+		ORDER BY p.idTypeRisk"
+	),
+
+	(SQL: selectRisk),
+
+	idTypeRiskVehicle	:: "",
+
+	() > 0 => (
+		idTypeRiskVehicle = (),
+		;
+
+		idTypeRiskVehicle = "none",	% JZ 0825
+	),
+
+
+	selectVehicle = (
+		"SELECT DISTINCT r.id,t.id,t.length,t.width,t.height,t.maxWeight,t.categoryTunnel,t.nbTrailer FROM "
+		DB_PREFIX "OPT_RESOURCE r," DB_PREFIX "OPT_TYPERESOURCE t
+		WHERE r.idTypeResource=t.id AND r.name='" nameVehicle "'
+		ORDER BY t.id"
+	),
+
+	(SQL: selectVehicle),
+
+	( TAG_SQL_ERROR :
+		() > 0,
+	),
+
+	idVehicle		:: "",
+
+	idTypeResourceVehicle	:: "",
+	lengthVehicle		:: "",
+	widthVehicle		:: "",
+	heightVehicle		:: "",
+	maxWeightVehicle	:: "",
+	categoryTunnelVehicle	:: "",
+	nbTrailerVehicle	:: 0,
+
+	idVehicle		= (),
+	idTypeResourceVehicle	= (),
+	lengthVehicle		= (),
+	widthVehicle		= (),
+	heightVehicle		= (),
+	maxWeightVehicle	= (),
+	categoryTunnelVehicle	= (),
+	nbTrailerVehicle	= (),	% JZ 0825
+
+
+	database <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+
+
+	@(#Tour "\n"),
+	\forall i \in Tour (
+		@ (	"'" idSiteTour_{i}		"'  "
+			\underline{latitudeTour_{i}}	"  "
+			\underline{longitudeTour_{i}}	"  \n"
+		),
+	),
+
+
+	@ (idTypeResourceVehicle	"\t" 
+	   idTypeRiskVehicle 		"\t"
+	   lengthVehicle		"\t"
+	   widthVehicle			"\t"
+	   heightVehicle		"\t"
+	   maxWeightVehicle		"\t"
+	   categoryTunnelVehicle	"\t"
+	   nbTrailerVehicle		"\n"),	% JZ 0825
+
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+
+),
+
+
+.
+
+
+
+
+9
+'50010'  48.583969116210937500  2.951419830322265625
+'24837'  48.289737701416015625  3.307849884033203125
+'24837'  48.289737701416015625  3.307849884033203125
+'24809'  48.199569702148437500  3.283219814300537110
+'24816'  48.223186492919921875  3.223749876022338868
+'24816'  48.223186492919921875  3.223749876022338868
+'24816'  48.223186492919921875  3.223749876022338868
+'24793'  48.248218536376953125  3.159619808197021485
+'50010'  48.583969116210937500  2.951419830322265625
+
+
+
+

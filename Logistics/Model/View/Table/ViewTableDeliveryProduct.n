@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics 	           %
+%                                                  %
+%  		ViewTableDeliveryProduct.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableDeliveryProduct.n"],
+
+'@' => (
+	tableDeliveryProduct("DELIVERYPRODUCT",TAG_TABLE,"DELIVERYPRODUCT",true,"", "(/*TITLEOBJ*/)", ""),	% JZ 0926
+),

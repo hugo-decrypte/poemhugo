@@ -1,0 +1,32 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 CreateProductFamily.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+'()' => (
+	
+	idProductBuffer			:: "",
+	designationBuffer	:: "",
+
+	idProductBuffer		= (),
+	designationBuffer	= (),
+
+
+	'()' <- database,
+	
+	CreateProductFamily_SQL1 = (
+		"INSERT INTO " DB_PREFIX "FAMILYPRODUCT (Id, Designation) values ('"idProductBuffer"', '"designationBuffer"')"
+	),
+	
+	(SQL : CreateProductFamily_SQL1), 
+
+	
+	database <- '()',
+),

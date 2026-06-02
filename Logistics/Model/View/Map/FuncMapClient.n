@@ -1,0 +1,119 @@
+/******************************************************/
+/*	          Vehicle Routing	              */
+/*	                                              */
+/* 		 FuncMapClient.n  	    	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapSite>(title,tag,IdSiteSelected,postfix0)
+(
+	'@' => (
+		['Work Directory' "Model\Common\View\ResetDateForView.n"],
+
+		IdSiteSelected = {} => (
+			sqlIdSite = "",
+			;
+			sqlIdSite = (" AND s.id IN (" concatSetQuoted(IdSiteSelected) ")"),
+		),
+
+		sqlWhereSiteSelected = (" WHERE s.id=p.idSite1 OR s.id=p.idSite2"), % Chen 1024
+
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+	
+		viewFile =  ("MapClient" postfix),
+
+		[viewDirectory viewFile ".view"] <- '@',
+		
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+
+		
+		%====
+		% Data: SITECLIENT
+		@ "Data ",
+
+		% ID
+		@ "CLIENT '", 
+
+		% Caption
+		@ tag,
+
+		% Group
+		@ "' CLIENT ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+		% Object item "[TYPE=SITE/....;  MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;MAP=VRP;WIDTH=-30;FIND={ID,NAME,IDZONE,IDSITE,NAMESITE,POSTCODE,LATITUDE,LONGITUDE};TIPINFO=" TIPINFO_CLIENT "]' _ \\\n"),
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+%		@ ("\"[13;(string,ID,ID);(string,NAME,NAME);(string,IDSITE,IDSITE);(string,NAMESITE,NAMESITE);(string,POSTCODE,POSTCODE);(string,IDZONE,IDZONE);(int,X,X);(int,Y,Y);"),
+%		@ ("(float,LATITUDE,LATITUDE);(float,LONGITUDE,LONGITUDE);(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,);]\" \\\n"),
+
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]" 
+		@ ("\"[9;(string,ID,"TAG_ID");(string,NAME,"TAG_NAME");(string,IDZONE,"TAG_ZONE_ID");(string,IDSITE,"TAG_SITE_ID");"),
+		@ ("(string,NAMESITE,"TAG_SITE_NAME");(string,POSTCODE,"TAG_POSTCODE");"),
+		@ ("(float,LATITUDE,"TAG_LATITUDE");(float,LONGITUDE,"TAG_LONGITUDE");(int,X,X);(int,Y,Y);"),
+		@ ("(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]\" \\\n"),
+
+
+
+		@ VIEWSQL,
+
+% JZ 1024 : OPT_ORDER OPT_CLIENT
+		@ ("SELECT DISTINCT 	c.id AS ID, \\
+						c.name AS NAME, \\
+						s.id AS IDSITE, \\
+				                s.name AS NAMESITE, \\
+						s.postcode AS POSTCODE, \\
+                                                s.x AS X, \\
+				                s.y AS Y, \\
+                                                s.latitude AS LATITUDE, \\
+                                                s.longitude AS LONGITUDE, \\
+					        z.id AS IDZONE, \\
+						z.color as COLOR, \\
+                                                z.sizeIcon AS WIDTH, \\
+                                                IIF(z.idIcon=NULL,'',z.idIcon) AS ICON \\
+                                                FROM " DB_PREFIX"SITE s," DB_PREFIX "OPT_CLIENT c, " DB_PREFIX"ZONE z \\
+                                                WHERE s.id=c.idSite and z.id=c.idZone\\
+			UNION \\
+			SELECT DISTINCT 	c.id AS ID, \\
+						c.name AS NAME, \\
+						s.id AS IDSITE, \\
+				                s.name AS NAMESITE, \\
+						s.postcode AS POSTCODE, \\
+                                                s.x AS X, \\
+				                s.y AS Y, \\
+                                                s.latitude AS LATITUDE, \\
+                                                s.longitude AS LONGITUDE, \\
+					        '' AS IDZONE, \\
+						'(195 195 195)' as COLOR, \\
+                                                -30 AS WIDTH, \\
+                                                '' AS ICON \\
+                                                FROM " DB_PREFIX"SITE s," DB_PREFIX "OPT_CLIENT c \\
+                                                WHERE s.id=c.idSite and c.idZone=''\"\n\n"), 
+		
+% JZ 1024 : OPT_ORDER OPT_CLIENT
+
+		
+		% Data : ZONE2  wp 07/02/2023
+		['Work Directory' "Model\View\Data\DataZone2.n"],
+		
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+).

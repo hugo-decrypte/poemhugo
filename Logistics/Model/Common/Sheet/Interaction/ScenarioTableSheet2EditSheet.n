@@ -1,0 +1,110 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+%   	ScenarioTableSheet2EditSheet.n	  	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "EditSheet ",
+
+% Caption
+@ (" '" TAG_EDIT "' "),	
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT,
+
+% Label
+@ (" '" TAG_EDIT "' "),	
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSHEET' ",
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ (PREFIX_POEMDATA_OPEN
+"SHEET&category IN ({/*selected(tableSHEET;1;(string,CATEGORY))*/}) AND id IN ({/*selected(tableSHEET;1;(string,ID))*/}) AND line IN ({/*selected(tableSHEET;1;(int,LINE))*/}) AND 'V'+CSTR(column) IN ({/*selected(tableSHEET;1;(string,[_FIELDID_]))*/})\"\\\n"),
+
+@ POEMDATA_RELOAD,
+
+
+
+
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "InsertCell ",
+
+% Caption
+@ (" '" TAG_INSERT_CELL "' "),	
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_INSERT,
+
+% Label
+@ (" '" TAG_INSERT_CELL "' "),	
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableSHEET' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+@ ("'[COUNT=2;" NCLPREFIX "]'\\\n"),
+
+
+% Instruction... (When Count>0)
+@ (NCLSCRIPT "Model\Common\Sheet\Interaction\InsertCell.n'\\\n"),
+
+@ NCL_ARGUMENT_BEGIN,
+@ ("{/*selected(tableSHEET;4;(string,CATEGORY);(string,ID);(int,LINE);(string,[_FIELDID_]);)*/} \\\n"),
+@ ("{/*Input(" TAG_INSERT_CELL ";1;(string,VALUE," TAG_VALUE ",,30." inputWidth ",,);)*/}"),
+@ NCL_ARGUMENT_END_WITH,
+
+@ "Reload _ _ _ _\n\n",

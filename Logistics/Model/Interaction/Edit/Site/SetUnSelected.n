@@ -1,0 +1,47 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 SetUnSelected.n		   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+['Work Directory' "Model\Common\Config\ReadConfigLogin.n"],
+['Work Directory' "Model\Common\Config\CheckLog.n"],
+
+['Work Directory' "Model\Common\Config\ReadMacroView.n"],
+
+'()' => (
+	aliasTable	= "SITE",
+),
+
+['Work Directory' "Model\Common\Config\ReadField.n"],	
+
+'()' => (
+	nbSelected = (),
+	nbParam    = (),
+	
+	\forall i \in [1, nbSelected] (
+		idSelectedBuffer_{i} ::"",
+		idSelectedBuffer_{i} = (),
+		
+		i < nbSelected =>(
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "',"),
+			;
+			strIdSelectedBuffer_{i} = ("'" idSelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDSELECTEDBUFFER :: "",
+	IDSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdSelectedBuffer_{i}],
+	
+
+
+	'()' <- database,
+
+	(SQL : "UPDATE " DB_PREFIX "SITE s SET s.selected='' WHERE s.id IN (" IDSELECTEDBUFFER ")"),
+
+	database <- '()',
+),

@@ -1,0 +1,16 @@
+%==================================================%
+%                                                  %
+%            	  Routing	    	           %
+%                                                  %
+% 		 LoginMobile.n			   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Interface\Login.n"],
+
+
+( TAG_CONFIGURATION_ERROR :
+	['Work Directory' "Model\Common\Interface\GetMobileConfig.n"],
+),
+

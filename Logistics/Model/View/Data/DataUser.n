@@ -1,0 +1,43 @@
+%==================================================%
+%                                                  %
+%  		   DataUser.n  	  	   	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: USER
+@ "Data ",
+
+% ID
+@ ("USER '"),	
+
+% Caption
+@ "USER",
+%@ TAG_ABSENCE,
+
+% Group
+@ "' USER ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,NAMEUSER,NAMEUSER,,255,0);(string,PERMISSIONUSER,PERMISSIONUSER,,255,0);]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT " SQL_TABLE_USER ".name AS NAMEUSER,al.name AS PERMISSIONUSER FROM "
+	SQL_TABLE_USER "," DB_PREFIX "ALIAS al WHERE " SQL_TABLE_USER ".id=(/*USERID*/) AND al.category='PERMISSION' AND al.id=" SQL_TABLE_USER "."SQL_FIELD_PERMISSION" \"\n\n"),
+
+

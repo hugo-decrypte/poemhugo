@@ -1,0 +1,44 @@
+%==================================================%
+%                                                  %
+%           		ERP   	              	   %
+%                                                  %
+%  		   DataAliasMonth.n  	  	   %
+%                                                  %
+%     (c)2000. Enginest. All rights reserved.      %
+%==================================================%
+
+% Data: ALIAS
+@ "Data ",
+
+% ID
+@ ("DATAMTH"),	
+
+% Caption
+@ " 'ALIAS MONTH' ",
+
+% Group
+@ "DATAMTH ",
+
+% Source type
+@ typeDataUser,
+
+% Editable
+@ " 0 ",
+
+% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+@ "_ ",
+
+% Script item "[Scripts when delete, insert or update]"
+@ ("_ \\\n"),
+
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[2;(string,ID,,,);(string,DATAMONTH,,,);]\"\\\n"),	
+
+@ VIEWSQL,
+
+@ ("SELECT DISTINCT a.id AS ID, a.name AS DATAMONTH\
+ 		FROM ALIAS a\
+		WHERE a.category='CALENDAR' AND a.field='month'\
+		ORDER BY a.id\"\n\n\n"),

@@ -1,0 +1,194 @@
+%==================================================%
+%                                                  %
+%            	  Scheduling    	           %
+%                                                  %
+% 		FuncConcatSet.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<concatSetQuoted>(Str)
+(
+	Str :: {""},
+	#Str =< maxConcatSet,
+
+	Str <> {} => (
+		\forall i \in [1,#Str]
+			concat_{i} :: "",
+
+		concat_{1} = ("'" \inf Str),
+		\forall i \in [2,#Str]
+			concat_{i} = (concat_{i-1} ("','" Str[i])),
+
+		concatSetQuoted = (concat_{#Str} "'"),
+		;
+
+		concatSetQuoted = TAG_QUOTED_EMPTY_STRING,
+	),
+),
+
+.
+
+<concatSetNotQuoted>(Str)
+(
+	Str :: {""},
+	#Str =< maxConcatSet,
+
+	Str <> {} => (
+		\forall i \in [1,#Str]
+			concat_{i} :: "",
+
+		concat_{1} = \inf Str,
+		\forall i \in [2,#Str]
+			concat_{i} = (concat_{i-1} ("," Str[i])),
+
+		concatSetNotQuoted = concat_{#Str},
+		;
+
+		concatSetNotQuoted = TAG_EMPTY_STRING
+	),
+),
+
+
+/*
+bufHandle = ["buffer" : buffer],
+
+<concatSet>(Str)
+(
+	'@' => (
+		Str :: {""},
+		#Str =< maxTaskSolver,
+
+		bufHandle <- '@',
+
+		Str = {} => (
+			@ TAG_EMPTY_STRING,
+			;
+
+			\forall i \in [1,#Str-1] (
+				@ Str[i],
+				@ ",",
+			),
+			@ \sup Str,
+		),
+
+		'@' <- bufHandle,
+
+		concatSet := buffer,
+	),
+),
+
+<concatSetQuoted>(Str)
+(
+	Str :: {""},
+	#Str =< maxConcatSet,
+
+	Str = {} => (
+		concatSetQuoted = TAG_EMPTY_STRING,
+		;
+
+		\forall i \in [1,#Str]
+			concat_{i} :: "",
+
+		concat_{1} = ("'" \inf Str "'"),
+		\forall i \in [2,#Str]
+			concat_{i} = (concat_{i-1} (",'" Str[i] "'")),
+
+		concatSetQuoted = concat_{#Str},
+	),
+),
+
+<concatSetQuoted>(Str)
+(
+	'()' => (
+		Str :: {""},
+
+		Str = {} => (
+			concatSetQuoted = TAG_EMPTY_STRING,
+			;
+
+			#Str = 1 => (
+				concatSetQuoted = ("'" \inf Str "'"),
+				;
+
+				\forall i \in [1,#Str]
+					concat_{i} :: "",
+
+				concat_{1} = ("'" \inf Str "'"),
+				\forall i \in [2,#Str]
+					concat_{i} = (concat_{i-1} (",'" Str[i] "'")),
+
+				concatSetQuoted = concat_{#Str},
+			)
+		),
+	),
+),
+
+<concatSetQuoted>(Str)
+(
+	'@' => (
+		Str :: {""},
+		#Str =< maxTaskSolver,
+
+		bufHandle <- '@',
+
+		Str = {} => (
+			@ TAG_EMPTY_STRING,
+			;
+			\forall i \in [1,#Str-1] (
+				@ "'",
+				@ Str[i],
+				@ "',",
+			),
+
+			@ "'",
+			@ \sup Str,
+			@ "'",
+		),
+
+		'@' <- bufHandle,
+
+		concatSetQuoted = buffer,
+	),
+),
+
+<concatSetQuoted>(Str)
+(
+	'()' => (
+		Str :: {""},
+
+		Str = {} => (
+			concatSetQuoted = TAG_EMPTY_STRING,
+			;
+
+			#Str = 1 => (
+				concatSetQuoted = ("'" \inf Str "'"),
+				;
+
+				Str1 = Str \setminus \inf Str,
+				concatSetQuoted = (("'" \inf Str "', ")  concatSetQuoted(Str1)),
+			)
+		),
+	),
+),
+
+<concatSet>(Str)
+(
+	'()' => (
+		Str :: {""},
+
+		Str = {} => (
+			concatSet = TAG_EMPTY_STRING,
+			;
+
+			#Str = 1 => (
+				concatSet = \inf Str,
+				;
+
+				Str1 = Str \setminus \inf Str,
+				concatSet = (\inf Str "," concatSet(Str1)),
+			),
+		),
+	),
+),
+*/

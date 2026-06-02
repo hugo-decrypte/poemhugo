@@ -1,0 +1,6 @@
+
+'()' => (
+	( "TableTourOrder.view,0" : '.'),
+	%( "TableProduct.view" : '.'),
+),
+

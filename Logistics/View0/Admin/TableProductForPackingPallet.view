@@ -1,0 +1,118 @@
+View ViewTablePRODUCTFORPACKING 'Produits pour entrée en stock N° (/*IDPACKING*/) Palette N° (/*NOPALLET*/)' 'Produits pour entrée en stock N° (/*IDPACKING*/) Palette N° (/*NOPALLET*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tablePRODUCTFORPACKING _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Produits pour entrée en stock N° (/*IDPACKING*/) Palette N° (/*NOPALLET*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Right,Right,Right,Right,Right,Right,Left,Left,Left,Center,Center,Left}]"\
+"[DATAOBJ=PRODUCTFORPACKING;FILLCOLOR=LINERGB]"
+
+Data PRODUCTFORPACKING 'Produits pour entrée en stock N° (/*IDPACKING*/) Palette N° (/*NOPALLET*/)' PRODUCTFORPACKING HTTPSQL 0 '[FIND={IDPRODUCT,FAMILY,DESIGNATION,QUANTITYPACKAGE,QUANTITYSTOCK,QUANTITYORDERED,NBPACKAGE,QUANTITY,QUANTITYDELIVERY,QUANTITYREST,QUANTITYDEFECTIVE,COMMENTS,DATECREATE,DATEEXPIRATION,STATE}]'   [DOUBLECLICK=] \
+"[15;(string,IDPRODUCT,ID produit,,10,,);(string,FAMILY,Famille,,30,,);(string,DESIGNATION,Désignation,,30,,);(float,QUANTITYPACKAGE,Qté paquet,,10,,);(float,QUANTITYSTOCK,Qté stock,,10,,);(float,QUANTITYORDERED,Qté commande,,10,,);(float,NBPACKAGE,#Paquets,,10,,);(float,QUANTITY,Quantité,,10,,);(float,QUANTITYDELIVERY,Qté en livraison,,10,,);(float,QUANTITYREST,Qté reste,,10,,);(float,QUANTITYDEFECTIVE,Qté défectueuse,,10,,);(string,COMMENTS,Commentaire,,25,,);(date,DATECREATE,Date entrée,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEEXPIRATION,Date expiration,,20,,YYYY-MM-DD|DD/MM/YYYY);(string,STATE,Etat,,10,,);(string,IDCLIENT,ID client,,20.0.50,0);\
+(float,PRICE,Prix unitaire,,8.2.50,0);\
+(float,WEIGHT,Poids,,8.2.50,0);\
+(float,WEIGHTPACKAGE,Poids/Paquet,,8.2.50,0);\
+(int,PALLET,Palette,,8.0.50,0);\
+(float,WEIGHTPALLET,Poids Palette,,8.2.50,0);\
+(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT \
+		 Prd.Id as IDPRODUCT,\
+		  Prd.Designation as DESIGNATION,\
+		  Prd.Family as FAMILY,\
+		  Prd.QuantityPackaging as QUANTITYPACKAGE,\
+		  Prd.QuantityStock as QUANTITYSTOCK,\
+		  Prd.QuantityOrdered as QUANTITYORDERED,\
+		  Prd.PriceUnit as PRICE,\
+		  Prd.Weight as WEIGHTUNIT,\
+		  format(Prd.Weight*Prd.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		  ' ' as NBPACKAGE,\
+		  ' ' as QUANTITY,\
+		  ' ' as QUANTITYDELIVERY,\
+		  ' ' as QUANTITYREST,\
+		  ' ' as QUANTITYDEFECTIVE,\
+		  ' ' as DATECREATE,\
+		  ' ' as DATEEXPIRATION,\
+		  ' ' as WEIGHT,\
+		  ' ' AS IDPACKING,\
+		  ' ' as COMMENTS,\
+		  ' ' as PALLET,\
+		  ' ' as WEIGHTPALLET,\
+		  0 as INCOMMAND,\
+		  ' ' AS STATE,\
+		  '(255 255 255)' AS LINERGB \
+	 FROM PRODUCT Prd \
+	 WHERE ( Prd.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+	  and Prd.TypeProduct<>'F'\
+	  and Prd.Id not in (select PaPrd.IdProduct from PALLET_PRODUCT PaPrd where PaPrd.IdPacking in ((/*IDPACKING*/)) and PaPrd.NoPallet in ((/*NOPALLET*/))) \
+	 UNION ALL \
+	 SELECT \
+		  Prd.Id as IDPRODUCT,\
+		  Prd.Designation as DESIGNATION,\
+		  Prd.Family as FAMILY,\
+		  Prd.QuantityPackaging as QUANTITYPACKAGE,\
+		  Prd.QuantityStock as QUANTITYSTOCK,\
+		  Prd.QuantityOrdered as QUANTITYORDERED,\
+		  Prd.PriceUnit as PRICE,\
+		  Prd.Weight as WEIGHTUNIT,\
+		  format(Prd.Weight*Prd.QuantityPackaging,'0.0') as WEIGHTPACKAGE,\
+		  IIF( format(PaPrd.Quantity*100/Prd.QuantityPackaging,'0')=format(PaPrd.Quantity/Prd.QuantityPackaging,'0')*100, format(PaPrd.Quantity/Prd.QuantityPackaging,'0'), format(PaPrd.Quantity/Prd.QuantityPackaging,'0.0')) as NBPACKAGE,\
+		  format(PaPrd.Quantity,'0') as QUANTITY,\
+		  format(PaPrd.QuantityOut,'0') as QUANTITYDELIVERY,\
+		  format(PaPrd.QuantityStock,'0') as QUANTITYREST,\
+		  format(PaPrd.QuantityDefective,'0') as QUANTITYDEFECTIVE,\
+		  PaPrd.DateCreate as DATECREATE,\
+		  PaPrd.DateExpiration as DATEEXPIRATION,\
+		  format(Prd.Weight*PaPrd.Quantity,'0.0') as WEIGHT,\
+		  Pal.IdPacking AS IDPACKING,\
+		  PaPrd.Comments as COMMENTS,\
+		  IIF(PaPrd.NoPallet is NULL,0,PaPrd.NoPallet) as PALLET,\
+		  (select format(sum(Pal0.Quantity*Prd0.Weight),'0.0') from PALLET_PRODUCT Pal0 inner join PRODUCT Prd0 on Prd0.Id=Pal0.IdProduct where Pal0.IdPacking=Pal.IdPacking and Pal0.NoPallet=PaPrd.NoPallet) as WEIGHTPALLET,\
+		  1 as INCOMMAND,\
+		  IIF(format(PaPrd.Quantity*100/Prd.QuantityPackaging,'0')<>format(PaPrd.Quantity/Prd.QuantityPackaging,'0')*100,'Paquet incomplet','' ) AS STATE,\
+		  IIF(format(PaPrd.Quantity*100/Prd.QuantityPackaging,'0')<>format(PaPrd.Quantity/Prd.QuantityPackaging,'0')*100,'(255 255 160)',\
+		   IIF(PaPrd.Quantity=0,'(200 200 200)',\
+		    '(150 150 255)') ) AS LINERGB \
+	 FROM PRODUCT Prd \
+	  inner join (PALLET Pal inner join PALLET_PRODUCT PaPrd on Pal.IdPacking=PaPrd.IdPacking and Pal.NoPallet=PaPrd.NoPallet) on PaPrd.IdProduct=Prd.Id \
+	 WHERE ( Prd.Family in ((/*FAMILY*/)) or 'XXX' in ((/*FAMILY*/)) )\
+	 AND (Pal.IdPacking in ((/*IDPACKING*/)) and Pal.NoPallet in ((/*NOPALLET*/)) )\
+	 ORDER BY INCOMMAND desc, Family, DESIGNATION, IDPRODUCT "
+
+Script AddProductToPallet  'Quantité + un paquet' _ 61 'Quantité + un paquet' _ 'tablePRODUCTFORPACKING' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Parking\AddProductToPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \
+'\
+Reload _ _ _
+
+// modify the number of packs of all articles selected in pallet ; add the article into pallet if it is not in the pallet
+// update quantity in Pallet, Product
+Script ModifyProductQty  'Ajouter/modifier #paquet' _ 62 'Ajouter/modifier #paquet' _ 'tablePRODUCTFORPACKING' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\UpdatePalletProductQuantity.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \
+{/*Input(Ajouter/modifier #paquet;1;\
+(int,QTY,Quantité,1,10.0.580,0);\
+)*/}\
+'\
+Reload _ _ _
+
+// remove all articles selected from the pallet
+// update quantity in Pallet, Product
+Script RemoveProduct  'Enlever produit' _ 63 'Enlever produit' _ 'tablePRODUCTFORPACKING' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Packing\RemoveProductFromPallet.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \
+'\
+Reload _ _ _
+
+// modify the expiration date of the article selected in pallet
+Script ModifyDateExpiration  'Modifier date expiration' _ 64 'Modifier date expiration' _ 'tablePRODUCTFORPACKING' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\product\UpdateProductPalletDateExpiration.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/)  (/*IDPACKING*/) (/*NOPALLET*/) {/*Selected(tablePRODUCTFORPACKING;1;(string,IDPRODUCT))*/} \
+{/*Input(Modifier date expiration;1;\
+(date,DATEEXPIRATION,Date expiration,,10.0.580,1,YYYY-MM-DD);\
+)*/}\
+'\
+Reload _ _ _
+

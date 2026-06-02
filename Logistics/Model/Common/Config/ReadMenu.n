@@ -1,0 +1,64 @@
+%==================================================%
+%                                                  %
+%            	 Vehicle Routing	           %
+%      						   %
+%              	ReadMenu.n			   %
+%      						   %
+%  (c)2000. Enginest. All rights reserved.         %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	MENU = [1,maxMenu],
+
+	sqlReadSelectionMenu = (
+		"SELECT	selected01,selected02,selected03,selected04,selected05,
+			selected06,selected07,selected08,selected09,selected10,
+			selected11,selected12,selected13,selected14,selected15,
+			selected16,selected17,selected18,selected19,selected20
+		FROM	" DB_PREFIX "MENU
+		WHERE	id='" id "' AND type='" type "'"),
+
+	(SQL : sqlReadSelectionMenu),
+
+	() = 1,
+	\forall i \in MENU (
+		selected0Menu_{i} :: "",
+		selected0Menu_{i} = (),
+
+		selected0Menu_{i} = "T" ||
+		selected0Menu_{i} = "F" ||
+		selected0Menu_{i} = "",
+
+		selectedMenu_{i} == (selected0Menu_{i} = "T"),
+	),
+
+	MenuSelected \subset MENU,	% Zhou 0116	
+	MenuSelected = \{ \forall i \in MENU (selectedMenu_{i} ? i : 0) \} \setminus 0,
+
+	sqlReadNameMenu = (
+		"SELECT	name01,name02,name03,name04,name05,
+			name06,name07,name08,name09,name10,
+			name11,name12,name13,name14,name15,
+			name16,name17,name18,name19,name20
+		FROM	" DB_PREFIX "MENU
+		WHERE	id='" id "' AND type='" type "'"),
+
+	(SQL : sqlReadNameMenu),
+
+	() = 1,
+	\forall i \in MENU (	% bai 0123
+		nameMenu_{i} :: "",
+		nameMenu_{i} = (),
+	),
+
+	NameMenuSelected = \{ \forall i \in MenuSelected nameMenu_{i} \},
+
+
+%	\forall i \in [1,maxFuncMenu]
+%		postfixField_{i} = (i > 9 ? ("" i) : ("0" i)), % Li 0313
+
+
+	database <- '()',
+),	% Zhou 0111

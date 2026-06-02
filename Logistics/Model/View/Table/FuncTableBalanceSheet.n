@@ -1,0 +1,55 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	   	           %
+%                                                  %
+%  		FuncTableBalanceSheet.n 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableBalanceSheet>(id,type,aliasTable,bestfit,doubleclick,title)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+
+	'@' => (
+		viewFile = "TableBalanceSheet",
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+		@ ("(string,ID,No "	TAG_MONTH	",,10,0);\\\n"),
+		@ ("(color,LINERGB,"	RGB_WHITE		",,13.0.0);]\" \\\n"),
+
+
+		@ VIEWSQL,
+
+		@ ("SELECT  "SQL_CONCAT""SQL_FORMATDATE"(max(DP.DateDelivery),'"SQL_FORMATDATE_Y"')"SQL_CONCATWITH""SQL_FORMATNUM"(M.NoMonth,"SQL_FORMATSCALE0")"SQL_CONCATEND" as ID,\\\n"),
+		@ ("\t\t "SQL_CONCAT""SQL_FORMATDATE"(max(DP.DateDelivery),'"SQL_FORMATDATE_Y "')"SQL_CONCATWITH"'  '"SQL_CONCATWITH"M.NameFR"SQL_CONCATEND" as NAMEMONTH,\\\n"),
+ 		@ ("\t\t sum(DP.QuantityReal) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*DP.PriceUnit), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*P.Weight)+0.5,"SQL_FORMATSCALE0") as WEIGHT,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M \\\n"),
+		@ ("\t WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct<>'F'\\\n"),
+		@ ("\t AND D.DateDelivery>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and D.DateDelivery<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+ 		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \\\n"),
+		@ ("\t GROUP BY M.NoMonth, M.NameFR \\\n"),
+		@ ("\t UNION SELECT\\\n"),
+ 		@ ("\t\t "SQL_CONCAT""SQL_FORMATDATE"(max(DP.DateDelivery),'"SQL_FORMATDATE_Y"')"SQL_CONCATWITH"'99'"SQL_CONCATEND" as ID, '" TAG_TOTAL "' as NAMEMONTH,\\\n"),	% JZ 1013
+ 		@ ("\t\t sum(DP.QuantityReal) as QUANTITY,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*DP.PriceUnit), "SQL_FORMATSCALE2") as COST,\\\n"),
+ 		@ ("\t\t "SQL_FORMATNUM"(sum(DP.QuantityReal*P.Weight)+0.5,"SQL_FORMATSCALE0") as WEIGHT,\\\n"),
+ 		@ ("\t\t '(255 255 255 )' as LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "PRODUCT P, " DB_PREFIX "DELIVERY_PRODUCT DP, " DB_PREFIX "DELIVERY D , " DB_PREFIX "MONTHLABEL M  \\\n"),
+		@ ("\t WHERE DP.IdDelivery=D.id and DP.IdProduct=P.ID and P.TypeProduct<>'F'\\\n"),
+		@ ("\t AND D.DateDelivery>="SQL_FORMATDATE"("SQL_LastYear",'"SQL_FORMATDATESTR"') and D.DateDelivery<"SQL_FORMATDATE"("SQL_CURRENTDATE",'"SQL_FORMATDATESTR"')\\\n"),
+ 		@ ("\t AND M.NoMonth="SQL_FORMATDATE"(D.DateDelivery,'"SQL_FORMATDATE_M"')+0 \\\n"),
+		@ ("\t ORDER BY ID \"\n\n"),
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),

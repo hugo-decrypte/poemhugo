@@ -1,0 +1,67 @@
+View ViewTableORDERFORTOUR '(/*TITLEOBJ*/)' '(/*TITLEOBJ*/)'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableORDERFORTOUR _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=(/*TITLEOBJ*/);FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Left,Left,Center,Center,Right,Right,Center}]"\
+"[DATAOBJ=ORDERFORTOUR;FILLCOLOR=LINERGB]"
+
+Data ORDERFORTOUR '(/*TITLEOBJ*/)' ORDERFORTOUR HTTPSQL 0 '[FIND={ID,NAMECLIENT,PTDELIVERY,DATEORDER,DATEDELIVERY,QUANTITY,QUANTITYREST,STATEORDER}]'   [DOUBLECLICK=] \
+"[8;(string,ID,Commande,,10,,);(string,NAMECLIENT,Client,,15,,);(string,PTDELIVERY,Point livraison,,15,,);(date,DATEORDER,Date commande,,15,,YYYY-MM-DD|DD/MM/YYYY);(date,DATEDELIVERY,Date livraison,,15,,YYYY-MM-DD|DD/MM/YYYY);(int,QUANTITY,Quantité,,10,,);(int,QUANTITYREST,Qté reste,,10,,);(string,STATEORDER,Etat,,15,,);(color,LINERGB,(255 255 255),,13.0.0)]"\
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT O.Id AS ID, O.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\
+		 pt.City as PTDELIVERY,\
+		 O.DateOrder as DATEORDER, O.DateDelivery as DATEDELIVERY,\
+		 (select (trim(LABEL)+'('+ID+')') from STATE s where s.ID=O.IdState and s.Category='ORDER') as STATEORDER,\
+		 format(O.Quantity,'0')      AS QUANTITY,\
+		 format(O.QuantityRest,'0')  AS QUANTITYREST,\
+		 1 as ORD,\
+		 '(255 255 255)' AS LINERGB \
+	 FROM CLIENTORDER O, CLIENT cl, POINTDELIVERY pt \
+	 WHERE O.IdClient=cl.Id \
+		  and pt.IdClient=O.IdClient and pt.IdPoint=O.IdPointDelivery\
+		  and (O.DateDelivery is NULL or O.DateDelivery<='0' or O.DateDelivery='(/*DATETOUR*/)' )\
+		 and not exists (select 1 from DELIVERY d where d.Id='D'+O.Id and O.QuantityRest>0)\
+		 and not exists (select 1 from DELIVERY d where d.Id='D'+O.Id and d.IdTour is not NULL and d.IdTour>' ' ) \
+	  \
+	 UNION ALL SELECT O.Id AS ID, O.idClient AS IDCLIENT, cl.Name as NAMECLIENT,\
+		  pt.City as PTDELIVERY,\
+		 O.DateOrder as DATEORDER, O.DateDelivery as DATEDELIVERY,\
+		 (select (trim(LABEL)+'('+ID+')') from STATE s where s.ID=O.IdState and s.Category='ORDER') as STATEORDER,\
+		 format(O.Quantity,'0')      AS QUANTITY,\
+		 format(O.QuantityRest,'0')  AS QUANTITYREST,\
+		 0 as ORD,\
+		 IIF(O.IdState in (select s.Id from STATE s where s.CATEGORY='ORDER'),(select Color from STATE s where s.Id=O.IdState and s.CATEGORY='ORDER'),\
+		  '(220 220 255)') AS LINERGB \
+	 FROM CLIENTORDER O, CLIENT cl, POINTDELIVERY pt \
+	 WHERE O.IdClient=cl.Id \
+		   and pt.IdClient=O.IdClient and pt.IdPoint=O.IdPointDelivery\
+		  and exists (select 1 from DELIVERY d where d.Id='D'+O.Id and d.IdTour=(/*IDTOUR*/) ) \
+	 ORDER BY ORD, PTDELIVERY, ID
+
+Script TableOrderProduct 'Détail commandes' _ 31 'Produits' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableOrderProduct_Order.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);TITLEOBJ=Produits pour commande {/*Selected(tableORDER;1;(string,ID))*/};IDPRODUCT='XXX';IDORDER={/*Selected(tableORDER;1;(string,ID))*/}]"
+
+Script TableDeliveryOrder  'Livraisons pour commande' _ 25 'Livraisons' _ 'tableORDER' '( 0 0 0 0 )' _ _ _ '[COUNT=1;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);TIMEOUT=86400000;MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]'\
+ Open '[DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE);FILE=(/*HTTPVIEW*/)TableDelivery_Menu.view]' _ _ \
+"[POEMSERVER=(/*SERVERIP*/);SERVERPORT=(/*SERVERPORT*/);USERID=(/*USERID*/);CLUBID=(/*CLUBID*/);NBDAY=7;OWNEROBJ=IdClient;IDOBJ='XXX';TITLEOBJ=de la commande {/*Selected(tableORDER;1;(string,ID))*/};OWNERSUBOBJ=IdOrder;IDSUBOBJ={/*Selected(tableORDER;1;(string,ID))*/};IDTOUR='XXX']"
+
+Script PrintOrder  'Imrpimer confirmation commande' _ 80 'Imrpimer confirmation commande' _ 'tableORDER' '( 0 0 0 0 )' _ _ _  '[COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=1;]' \
+ WinExec "[WAITTIME=300S;CONSOLE=0;WORKDIR=(/*CLIENTDIRECTORY*/);DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 '(/*POEMPRINTEXE*/)'\
+	 '(/*POEMPRINTPATH*/)\ConfirmCommand.ini' '[DSN=(/*DBNAME*/);UID=(/*DBUSER*/);PWD=(/*DBPWD*/);OWN=(/*DBOWNER*/);DEVICENAME=(/*POEMPRINTDEVICE*/);OUTPUT=(/*POEMPRINTPATH*/)/ConfirmCommand{/*selected(tableORDER;1;(string,ID))*/}.pdf]'\
+	 '{/*selected(tableORDER;1;(string,ID))*/}' "'(/*CLUBID*/)'"\
+	 '(/*POEMPRINTPATH*/)' _ _ _ _ \
+ WinExec "[WAITTIME=300S;CONSOLE=0;;DATAFMT=(SEP=',',RET=',',FMT=T,QUOT=SQUOT,HEADER=F,COUNT=F)]"\
+	 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' '(/*POEMPRINTPATH*/)/ConfirmCommand{/*selected(tableORDER;1;(string,ID))*/}.pdf' _ _ _ _ _ 
+
+Script AddOrderToTour 'Commandes à ajouter pour tournée' _ 61 'Commandes à complémenter' _ 'tableORDERFORTOUR' '( 0 0 0 0 )' '[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' _ _  '[SINGLESEL=1;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \
+Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\Tour\AddOrder.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \
+ '(/*SERVERPORT*/) (/*USERID*/) (/*IDTOUR*/) (/*DATETOUR*/) {/*Selected(tableORDERFORTOUR;1;(string,ID);)*/} \
+'\
+Reload _ _ _
+

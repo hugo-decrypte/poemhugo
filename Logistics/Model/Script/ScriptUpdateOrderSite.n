@@ -1,0 +1,185 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		ScriptUpdateOrderSite.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+'()' => (
+
+	'()' <- database,
+
+
+	% ORDER
+	(SQL: "SELECT DISTINCT s.id FROM " DB_PREFIX "SITE s, " DB_PREFIX "OPT_ORDER o WHERE o.idSite2=s.id AND o.state>='" STATE_CANDIDATE "' AND o.idClub='" idClubLogin "' ORDER BY s.id"),
+
+	IdSiteOrder :: {""},
+	IdSiteOrder = \{ \forall i \in [1, ()] () \},
+
+
+
+	% GROUPRESOURCE
+	(SQL: "SELECT DISTINCT idSite FROM " DB_PREFIX "GROUPRESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite"),
+
+	IdSiteGroupResourcce :: {""},
+	IdSiteGroupResourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+
+	% RESOURCE
+	(SQL: "SELECT DISTINCT idSite1 FROM " DB_PREFIX "RESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	IdSite1Resourcce :: {""},
+	IdSite1Resourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+	(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX "RESOURCE WHERE idClub='" idClubLogin "' ORDER BY idSite2"),
+
+	IdSite2Resourcce :: {""},
+	IdSite2Resourcce = \{ \forall i \in [1,()] () \} \setminus "",
+
+
+
+	% SITE
+	IDSITE = (IdSiteOrder \cup IdSiteGroupResourcce \cup IdSite1Resourcce \cup IdSite2Resourcce) \setminus "",
+
+	SITE = [1,#IDSITE],
+	\forall s \in SITE
+		idSite_{s} = IDSITE[s],
+
+	\forall i \in IDSITE
+		siteId_{i} \in SITE,
+
+	\forall s \in SITE
+		siteId_{idSite_{s}} = s,
+
+
+
+
+	% latitude,longitude
+	\forall s \in SITE (
+		(SQL: "SELECT latitude,longitude FROM " DB_PREFIX "SITE WHERE id='" idSite_{s} "'"),
+
+		() > 0,
+
+		latitudeSite_{s}	:: "",
+		longitudeSite_{s}	:: "",
+
+		latitudeSite_{s}	= (),
+		longitudeSite_{s}	= (),
+	),
+
+
+
+
+	% ORDER
+	IdSiteOrderNoCoordinate = \{
+		\forall s \in SITE (latitudeSite_{s} = "" || longitudeSite_{s} = "" ? idSite_{s} : "")
+	\} \setminus "",
+
+	SiteOrderNoCoordinate = \{ \forall i \in IdSiteOrderNoCoordinate siteId_{i} \},
+
+
+
+
+
+	% Matrix sites by idSite1 : Site1Matrix
+	(SQL: "SELECT DISTINCT idSite1 FROM " DB_PREFIX "SITE_SITE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	IdSite1Matrix :: {""},
+	IdSite1Matrix = \{ \forall i \in [1, ()] () \} \cap IDSITE,
+
+	Site1Matrix = \{ \forall i \in IdSite1Matrix siteId_{i} \},
+
+
+
+	% Matrix sites by idSite2 : Site2Matrix
+	(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "'"),
+
+	maxSite2 = (),
+
+	\forall s \in Site1Matrix (
+		(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' AND idSite1='" idSite_{s} "'"),
+
+		nbSite2Site1_{s} = (),
+		nbSite2Site1_{s} =< maxSite2,
+
+		IdSite2Site1_{s} :: {""},
+		IdSite2Site1_{s} = \{ \forall i \in [1, nbSite2Site1_{s}] () \} \cap IdSite1Matrix,
+	),
+
+	IdSite2Matrix :: {""},
+	IdSite2Matrix = \bigcap_{s \in Site1Matrix}{IdSite2Site1_{s}},
+
+	Site1Matrix = {} -> IdSite2Matrix = {},
+
+
+	% Matrix sites verified valid for idSite1/idSite2 : SiteMatrix
+	SiteMatrix = \{ \forall i \in IdSite2Matrix siteId_{i} \},
+
+
+
+/*	% MATRIX
+	(SQL: "SELECT DISTINCT idSite1 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	IdSite1Matrix :: {""},
+	IdSite1Matrix = \{ \forall i \in [1, ()] () \} \cap IDSITE,
+
+	Site1Matrix = \{ \forall i \in IdSite1Matrix siteId_{i} \},
+
+
+
+
+
+	(SQL: "SELECT DISTINCT idSite2 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' ORDER BY idSite2"),
+
+	IdxSite2Matrix = [1, ()],
+
+	\forall i \in IdxSite2Matrix (
+		idIdxSite2Matrix_{i} :: "",
+		idIdxSite2Matrix_{i} = (),
+	),
+	IdSite2Matrix = \{ \forall i \in IdxSite2Matrix (idIdxSite2Matrix_{i} \in IDSITE ? idIdxSite2Matrix_{i} : "") \} \setminus "",
+	Site20Matrix = \{ \forall i \in IdSite2Matrix siteId_{i} \} \cap SITE,
+
+
+	(SQL: "SELECT COUNT(idSite2) FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "'"),
+	1 = (),
+	maxSite2 = (),
+
+	\forall s \in Site20Matrix (
+		(SQL: "SELECT idSite1 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' AND idSite2='" idSite_{s} "'"),
+
+		nbSite1Site_{s} =< maxSite2,
+		nbSite1Site_{s} = (),
+
+		IdSite1Site2Matrix_{s} = \{ \forall i \in [1,nbSite1Site_{s}] () \},
+	),
+
+	Site2Matrix = \{ \forall s \in Site20Matrix (IdSite1Site2Matrix_{s} \supset IDSITE ? s : 0) \} \setminus 0,
+*/
+
+
+
+
+	% SELECTED
+	SiteSelected = (SITE \setminus SiteMatrix) \cup SiteOrderNoCoordinate,
+
+	(SQL : "UPDATE " DB_PREFIX "SITE SET selected='" STATE_FALSE "'"),
+
+	\forall s \in SiteSelected (
+		(SQL : "UPDATE " DB_PREFIX "SITE SET selected='" STATE_TRUE "' WHERE id='" idSite_{s} "'"),
+	),
+
+
+	database <- '()',
+
+
+	TAG_TO_BE_SYNCHRONIZED = " to be synchronized",
+
+	(#SiteSelected  TAG_TO_BE_SYNCHRONIZED : !!),
+),

@@ -1,0 +1,190 @@
+%==================================================%
+%                                                  %
+%            	Routing 	          	   %
+%                                                  %
+%	     WriteSolutionMappingBuffer.n          %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+
+solutionBuf <- '@',
+
+
+@ "Relaxation\n",
+@ (TourToRelaxBuffer "  " Swap_oBuffer "  " Swap_iBuffer "  " tour_oBuffer "  " tour_iBuffer "\n"),
+%@ (Swap_oRelaxed "  " TourToRelaxBuffer "  " Swap_oBuffer "  " Swap_iBuffer "  " tour_oBuffer "  " tour_iBuffer "\n"),
+
+
+
+
+worktime :: defaultTime,
+makespan :: defaultTime,
+
+@ "Objectives\n",
+@ (\overline{profit} "  "),
+@ (\underline{cost} "  "),
+@ (nbVehicleActive "  "),
+@ (nbTourActive "  "),
+@ (mileage "  "),
+
+@ (worktime "  "),
+@ (makespan "\n\n"),
+
+
+
+@ "Vehicle\n",
+@ (VehicleActive "  " SourceActive "  " SourceActiveOrder "  " SourceSinkActiveOrder "\n\n"),
+
+
+
+
+@ "TourActive\n",
+@ (TourActive "\n"),
+
+\forall t \in TourActive (
+	@ (Swap_oRelaxedTour_{reverseTour_{t}} "  "),
+
+
+	@ (idSite1Tour_{t} "  "),
+	@ (idSite2Tour_{t} "  "),
+
+
+	@ (OrderTour_{reverseTour_{t}} "  "),
+
+	@ (quantityTour_{reverseTour_{t}} "  "),
+	@ (\underline{weightTour_{reverseTour_{t}}} "  "),
+	@ (\underline{volumeTour_{reverseTour_{t}}} "  "),
+
+	@ (\underline{receiptsTour_{reverseTour_{t}}} "  "),
+
+	@ (\underline{costTour_{reverseTour_{t}}} "  "),
+
+
+	@ (mileageTour_{reverseTour_{t}} "  "),
+
+	@ (t1Tour_{reverseTour_{t}} "  "),
+	@ (t2Tour_{reverseTour_{t}} "  "),
+
+	@ (timeServiceTour_{reverseTour_{t}} "  "),
+	@ (timeRouteTour_{reverseTour_{t}} "\n"),
+),
+@ "\n\n",
+
+
+
+\forall t \in TourActive (
+	SourceOrderReverseTour_{t} = SourceOrderMappingTour_{reverseTour_{t}},
+	SourceOrderReverseTour_{t} \subset SourceActiveOrder,
+
+	\forall o \in SourceOrderReverseTour_{t} (
+		timeServiceOrder_{o}	:: defaultTime,
+		timeToNextOrder_{o}	:: defaultTime,
+	
+		@ (idOrder_{o} "  "),
+		@ (nextOrderMapping_{o} "  "),
+
+		@ (t1Order_{o} "  "),
+		@ (t2Order_{o} "  "),
+
+		@ (timeServiceOrder_{o} "  "),
+		@ (timeToNextOrder_{o} "  "),
+
+		@ (mileageOrder_{o} "  "),
+
+		@ (receiptsOrder_{o} "  "),
+	),
+	@ "\n",
+
+
+),
+@ "\n",
+
+
+
+@ "ORDER\n",
+@ (ORDER "\n"),
+\forall o \in ORDER (
+	strictTimeOrder_{o}	:: true,
+
+	idShiftOrder_{o}	:: "",
+	t1Service0Order_{o}	:: defaultDateTime,
+	t2Service0Order_{o}	:: defaultDateTime,
+	timeFixed0Order_{o}	:: 0,
+
+	quantityOrder_{o}	:: 0,
+	weightOrder_{o}		:: 0.0,
+	volumeOrder_{o}		:: 0.0,
+
+	priorityOrder_{o}	:: 0,
+
+
+	@ (strictTimeOrder_{o} "  "),
+
+	@ ("\"" idShiftOrder_{o} "\"  "),
+	@ (t1Service0Order_{o} "  "),
+	@ (t2Service0Order_{o} "  "),
+	@ (timeFixed0Order_{o} "  "),
+
+	@ (quantityOrder_{o} "  "),
+	@ (weightOrder_{o} "  "),
+	@ (volumeOrder_{o} "  "),
+
+	@ (priorityOrder_{o} "\n"),
+),
+@ "\n\n",
+
+
+
+@ "tour/site\n",
+\forall o \in SourceSinkActiveOrder (
+	@ (o "  "),
+
+	o \in ORDER => (
+		@ (mappingTour_{tourOrder_{o}} "  "),
+		;
+
+		@ (tourOrder_{o} "  "),
+	),
+
+	@ (idSiteOrder_{o} "  "),
+),
+@ "\n\n",
+
+
+
+@ "VehicleActive\n",
+\forall v \in VehicleActive (
+	@ ((tour1Vehicle_{v} + #TourActiveVehicle_{reverseVehicle_{v}} - 1) "  "),
+
+	@ (nbDayVehicle_{reverseVehicle_{v}} "  "),
+	@ (nbNightVehicle_{reverseVehicle_{v}} "  "),
+
+	@ makespanVehicle_{reverseVehicle_{v}} : "",
+	@ "  ",
+
+	DateReverseVehicle_{v} = DateVehicle_{reverseVehicle_{v}},
+	DateReverseVehicle_{v} \subset DATE,
+
+	\forall d \in DateReverseVehicle_{v} (
+		@ timeActiveDateVehicle_{reverseVehicle_{v},d} : "",
+		@ "  ",
+
+		@ makespanDateVehicle_{reverseVehicle_{v},d} : "",
+		@ "  ",
+	),
+	@ "\n",
+),
+@ "\n\n",
+
+
+
+\forall t \in TourActive
+\forall o \in ORDER
+	mappingTour_{tourOrder_{o}} = t == o \in OrderTour_{reverseTour_{t}},
+
+!!,
+
+
+'@' <- solutionBuf,
+

@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics		   %
+%                                                  %
+%  	ViewTableProductForSupply.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductForSupply.n"],
+
+'@' => (
+	tableProductForSupply("",TAG_TABLE,"PRODUCTFORSUPPLY",true,"",TAG_PRODUCT_TO_ADD_FOR_SUPPLY,""),
+),

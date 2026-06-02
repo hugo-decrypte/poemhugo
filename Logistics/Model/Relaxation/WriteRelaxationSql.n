@@ -1,0 +1,366 @@
+/******************************************************/
+/*	         Vehicle Routing	              */
+/*	                                              */
+/*		WriteRelaxationSql.n		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+
+
+TourActiveToPlan = TourActiveBuffer \cap TOUR,
+
+SourceSinkActiveOrderBuffer = SourceActiveOrderBuffer \cup SinkActiveBuffer,
+
+\forall t \in TourActiveBuffer (
+	costUnitTour_{t}	= costUnitTypeVehicle_{typeVehicleVehicle_{vehicleTour_{t}}},
+	costKilometerTour_{t}	= costKilometerTypeVehicle_{typeVehicleVehicle_{vehicleTour_{t}}},
+	makespanTourBuffer_{t} 	= t2TourBuffer_{t} - t1TourBuffer_{t} + 1,
+),
+
+
+\forall o \in SourceSinkActiveOrderBuffer (
+	%idSiteOrderBuffer_{o}	:: "",
+
+	idOrderNextOrderBuffer_{o} :: "",
+	idSiteNextOrderBuffer_{o} :: "",
+
+	costOrderBuffer_{o} :: 0.0,
+),
+
+
+\forall o \in OrderSinkActiveBuffer
+	prevOrderBuffer_{o} \in SourceActiveOrderBuffer,
+
+\forall o \in SourceActiveOrderBuffer
+	prevOrderBuffer_{nextOrderBuffer_{o}} = o,
+
+
+
+\forall o \in SourceActiveBuffer \cup SinkActiveBuffer
+	costOrderBuffer_{o} = 0.0,
+
+
+\forall o \in ORDER (
+	cost0KilometerOrderBuffer_{o} = 
+	(mileageOrderBuffer_{prevOrderBuffer_{o}} + mileageOrderBuffer_{o}) * costKilometerTour_{tourOrderBuffer_{o}},
+
+	costOrderBuffer_{o} =
+	quantityOrderBuffer_{o} * costUnitTour_{tourOrderBuffer_{o}} + cost0KilometerOrderBuffer_{o},
+),
+
+
+
+\forall o \in SourceActiveOrderBuffer (
+	idOrderNextOrderBuffer_{o} = idOrderBuffer_{nextOrderBuffer_{o}},
+	idSiteNextOrderBuffer_{o} = idSiteOrderBuffer_{nextOrderBuffer_{o}},
+),
+
+
+\forall t \in TourActiveBuffer (
+	idSiteOrderBuffer_{sourceTour_{t}}	= idSite1TourBuffer_{t},
+	idSiteOrderBuffer_{sinkTour_{t}}	= idSite2TourBuffer_{t},
+	
+	idOrderNextOrderBuffer_{sinkTour_{t}} 	= idOrderBuffer_{sinkTour_{t}},
+	idSiteNextOrderBuffer_{sinkTour_{t}}	= idSite2TourBuffer_{t},
+
+	t1OrderBuffer_{sinkTour_{t}}		= t2TourBuffer_{t} + 1,
+	t2OrderBuffer_{sinkTour_{t}}		= t2TourBuffer_{t} + 1,
+
+	timeServiceOrderBuffer_{sinkTour_{t}}	= defaultTime,
+	timeToNextOrderBuffer_{sinkTour_{t}}	= defaultTime,
+
+	mileageOrderBuffer_{sinkTour_{t}}	= 0,
+
+	quantityOrderBuffer_{sourceTour_{t}}	= 0,
+	quantityOrderBuffer_{sinkTour_{t}}	= 0,
+
+	%costOrderBuffer_{sinkTour_{t}}	= 0.0,
+	%nextOrderBuffer_{sinkTour_{t}}	= sinkTour_{t},
+),
+
+
+
+\forall t \in TourActiveToPlan (
+	%SourceOrderSinkTourBuffer_{t}	= SourceOrderTourBuffer_{t} \cup SinkTour_{t},
+
+	\forall o \in SourceOrderSinkTourBuffer_{t}
+		idxOrderTourBuffer_{t,o} \in [1, #{SourceOrderSinkTourBuffer_{t}}],
+
+	%\forall o<i \in SourceOrderSinkTourBuffer_{t}
+	%	idxOrderTourBuffer_{t,o} <> idxOrderTourBuffer_{t,i},
+
+	idxOrderTourBuffer_{t,sourceTour_{t}} = 1,
+
+	\forall o \in SourceOrderTourBuffer_{t}
+		idxOrderTourBuffer_{t,nextOrderBuffer_{o}} = idxOrderTourBuffer_{t,o} + 1,
+),
+
+
+\forall o \in SourceSinkActiveOrderBuffer (
+	t2ServiceOrderBuffer_{o} :: defaultDateTime,
+	t2ServiceOrderBuffer_{o} = t2OrderBuffer_{o}-timeToNextOrderBuffer_{o},
+),
+
+
+% TYPERESOURCE
+\forall t \in TYPEVEHICLE (
+	maxQuantityTypeVehicle_{t} 	= (maxQuantity0TypeVehicle_{t} = 0 ? +\infty : maxQuantity0TypeVehicle_{t}),
+
+	maxWeightTypeVehicle_{t} 	= (maxWeight0TypeVehicle_{t} = 0.0 ? +\infty : maxWeight0TypeVehicle_{t}),
+	maxVolumeTypeVehicle_{t} 	= (maxVolume0TypeVehicle_{t} = 0.0 ? +\infty : maxVolume0TypeVehicle_{t}),
+),
+
+% RESOURCE
+\forall v \in VehicleActiveBuffer (
+	timeRouteVehicle_{v} :: 0,
+	timeServiceVehicle_{v} :: 0,
+
+
+	TourActiveVehicle_{v}	= TourVehicleBuffer_{v} \cap TourActiveBuffer,
+	tour2ActiveVehicle_{v}	= \sup TourActiveVehicle_{v},
+
+	OrderVehicle_{v}	= \bigcup_{t \in TourActiveVehicle_{v}}{OrderTourBuffer_{t}},
+
+	timeServiceVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{timeServiceTourBuffer_{t}},
+	timeRouteVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{timeRouteTourBuffer_{t}},
+	makespanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{makespanTourBuffer_{t}},
+
+	mileageVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{mileageTourBuffer_{t}},
+	receiptsVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{receiptsTourBuffer_{t}},
+
+	costVehicle_{v}		=
+		costDayTypeVehicle_{typeVehicleVehicle_{v}} * nbDayVehicleBuffer_{v} +
+		costNightTypeVehicle_{typeVehicleVehicle_{v}} * nbNightVehicleBuffer_{v} +
+		\sum_{t \in TourActiveVehicle_{v}}{costTourBuffer_{t}},
+
+
+	quantityPlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{quantityTourBuffer_{t}},
+	weightPlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{weightTourBuffer_{t}},
+	volumePlanVehicle_{v}	= \sum_{t \in TourActiveVehicle_{v}}{volumeTourBuffer_{t}},
+
+
+	maxQuantityTourVehicle_{v} 	= (maxQuantityTour0Vehicle_{v} 	= 0 ? maxQuantityTypeVehicle_{typeVehicleVehicle_{v}}	: maxQuantityTour0Vehicle_{v}),
+	maxWeightTourVehicle_{v} 	= (maxWeightTour0Vehicle_{v} 	= 0.0 ? maxWeightTypeVehicle_{typeVehicleVehicle_{v}}	: maxWeightTour0Vehicle_{v}),
+	maxVolumeTourVehicle_{v} 	= (maxVolumeTour0Vehicle_{v} 	= 0.0 ? maxVolumeTypeVehicle_{typeVehicleVehicle_{v}}	: maxVolumeTour0Vehicle_{v}),
+
+
+
+	maxQuantityTourVehicle_{v} = 0 => (
+		rateQuantityVehicle_{v}	= (quantityPlanVehicle_{v} / \max_{v1 \in VehicleActiveBuffer}{quantityPlanVehicle_{v1}}) * 100,
+		;
+
+		rateQuantityVehicle_{v}	= (quantityPlanVehicle_{v} / (maxQuantityTourVehicle_{v}*#TourActiveVehicle_{v})) * 100,
+	),
+
+	maxWeightTourVehicle_{v} = 0 => (
+		rateWeightVehicle_{v}	= (weightPlanVehicle_{v} / \max_{v1 \in VehicleActiveBuffer}{weightPlanVehicle_{v1}}) * 100,
+		;
+
+		rateWeightVehicle_{v}	= (weightPlanVehicle_{v} / (maxWeightTourVehicle_{v}*#TourActiveVehicle_{v})) * 100,
+	),
+
+	maxVolumeTourVehicle_{v} = 0 => (
+		rateVolumeVehicle_{v}	= (volumePlanVehicle_{v} / \max_{v1 \in VehicleActiveBuffer}{volumePlanVehicle_{v1}}) * 100,
+		;
+
+		rateVolumeVehicle_{v}	= (volumePlanVehicle_{v} / (maxVolumeTourVehicle_{v}*#TourActiveVehicle_{v})) * 100,
+	),
+),
+
+
+\forall t \in TourActiveToPlan (
+	maxQuantityTour_{t}	= maxQuantityTourVehicle_{vehicleTour_{t}},
+	maxWeightTour_{t}	= maxWeightTourVehicle_{vehicleTour_{t}},
+	maxVolumeTour_{t}	= maxVolumeTourVehicle_{vehicleTour_{t}},
+
+	maxQuantityTour_{t} = 0 => (
+		rateQuantityTour_{t}	= (quantityTourBuffer_{t} / \max_{t1 \in TourActiveToPlan}{quantityTourBuffer_{t1}}) * 100,
+		;
+
+		rateQuantityTour_{t}	= (quantityTourBuffer_{t} / maxQuantityTour_{t}) * 100,
+	),
+
+	maxWeightTour_{t} = 0.0 => (
+		rateWeightTour_{t}	= (weightTourBuffer_{t} / \max_{t1 \in TourActiveToPlan}{weightTourBuffer_{t1}}) * 100,
+		;
+
+		rateWeightTour_{t}	= (weightTourBuffer_{t} / maxWeightTour_{t}) * 100,
+	),
+
+	maxVolumeTour_{t} = 0.0 => (
+		rateVolumeTour_{t}	= (volumeTourBuffer_{t} / \max_{t1 \in TourActiveToPlan}{volumeTourBuffer_{t1}}) * 100,
+		;
+
+		rateVolumeTour_{t}	= (volumeTourBuffer_{t} / maxVolumeTour_{t}) * 100,
+	),
+),
+
+database <- '@',
+
+
+% CLEAN
+(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idResource NOT IN (SELECT id FROM " DB_PREFIX "RESOURCE WHERE state>='" STATE_CANDIDATE "')"),
+(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR WHERE idClub='" idClubLogin "' AND t1>='" t1 "' AND t2 <='" t2 "'"),
+
+(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN WHERE idResource NOT IN (SELECT id FROM " DB_PREFIX "RESOURCE WHERE state>='" STATE_CANDIDATE "')"),
+(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN WHERE idClub='" idClubLogin "' AND t1Service>='" t1 "' AND t2 <='" t2 "'"),
+
+\forall t \in TOUR (
+	(SQL : "DELETE FROM " DB_PREFIX "OPT_PLAN p WHERE p.idTour='" idTour_{t} "'"),
+	(SQL : "DELETE FROM " DB_PREFIX "OPT_TOUR t WHERE t.id='" idTour_{t} "'"),
+),
+
+
+(SQL : "UPDATE " DB_PREFIX "OPT_PLAN p SET p.selected='"  STATE_FALSE "'"),
+(SQL : "UPDATE " DB_PREFIX "OPT_ORDER o SET o.selected='" STATE_FALSE "'"),
+
+(SQL : "UPDATE " DB_PREFIX "RESOURCE SET
+			nbTour=0,nbOrder=0,
+			timeService=0,timeRoute=0,
+			makespan=0,mileage=0,
+			cost=0,receipts=0,
+			quantity=0,weight=0,volume=0,
+			rateQuantity=0,rateWeight=0,rateVolume=0
+	  	WHERE state<'" STATE_CANDIDATE "'"
+),
+
+\forall v \in RESOURCE \setminus VehicleActiveBuffer (
+	SQL :	"UPDATE " DB_PREFIX "RESOURCE SET
+			nbTour=0,nbOrder=0,
+			timeService=0,timeRoute=0,
+			makespan=0,mileage=0,
+			cost=0,receipts=0,
+			quantity=0,weight=0,volume=0,
+			rateQuantity=0,rateWeight=0,rateVolume=0,
+			state='" STATE_CANDIDATE "'
+	  	WHERE id='" idResource_{v} "'"
+),
+
+
+% PLAN
+\forall t \in TourActiveToPlan
+\forall o \in SourceOrderSinkTourBuffer_{t} (
+	SQL :	"INSERT INTO OPT_PLAN (idClub,idTour,idResource,tourResource,idx,idOrder,idOrderNext,idSite1,idSite2,t1Service,t2Service,t2,timeService,timeRoute,quantity,mileage,cost,receipts) VALUES ('"
+		idClubActive 				"','"
+
+		idTour_{t} 				"','"
+		idResource_{vehicleTour_{t}} 		"',"
+		idxTourVehicleTour_{t}			","
+
+		idxOrderTourBuffer_{t,o}		",'"
+
+		idOrderBuffer_{o} 			"','"
+		idOrderNextOrderBuffer_{o}	 	"','"
+
+		idSiteOrderBuffer_{o}			"','"
+		idSiteNextOrderBuffer_{o}		"','"
+
+
+		t1OrderBuffer_{o}			"','"
+		t2ServiceOrderBuffer_{o}		"','"
+		t2OrderBuffer_{o}			"',"
+
+		timeServiceOrderBuffer_{o}[""]		","
+		timeToNextOrderBuffer_{o}[""]		","
+
+		quantityOrderBuffer_{o}			","
+		mileageOrderBuffer_{o}			","
+		\underline{costOrderBuffer_{o}}		","
+		\underline{receiptsOrderBuffer_{o}}	")"
+),
+
+
+% Selected?
+%\forall o \in OrderSelected (
+%	(SQL : "UPDATE OPT_ORDER o SET o.selected='" STATE_TRUE "' WHERE p.idOrder='" idOrderBuffer_{o} "'"),
+%	(SQL : "UPDATE OPT_ORDER o SET o.selected='" STATE_TRUE "' WHERE o.id='" idOrderBuffer_{o} "'"),
+%),
+
+
+% ORDER
+%\forall o \in OrderPlan
+%	(SQL : "UPDATE OPT_ORDER o SET o.state='" STATE_PLANNED "' WHERE o.id='" idOrderBuffer_{o} "'"),
+
+
+\forall o \in ORDER (
+	SQL :	"UPDATE OPT_ORDER o "
+		"SET o.state='"		STATE_PLANNED "' "
+		",o.cost="		\underline{costOrderBuffer_{o}}
+
+		",o.idResource='"	idResource_{vehicleTour_{tourOrderBuffer_{o}}} "'"
+		",o.tourResource="	idxTourVehicleTour_{tourOrderBuffer_{o}}
+
+		",o.t1='"		t1OrderBuffer_{o} "'"
+		",o.t2='"		t2OrderBuffer_{o} "'"
+		"WHERE o.id='"		idOrderBuffer_{o} "'"
+),
+
+
+\forall v \in VehicleActiveBuffer (
+	SQL :	"UPDATE " DB_PREFIX
+			"RESOURCE SET state='" 	(OrderVehicle_{v} <> {} ? STATE_PLANNED : STATE_CANDIDATE) "'"
+			",nbTour="		#TourActiveVehicle_{v}
+			",nbOrder="		#OrderVehicle_{v}
+
+			",timeService="		timeServiceVehicle_{v}
+			",timeRoute="		timeRouteVehicle_{v}
+			",makespan="		makespanVehicle_{v}
+
+			",mileage="		mileageVehicle_{v}
+
+			",cost="		\underline{costVehicle_{v}}
+			",receipts="		\underline{receiptsVehicle_{v}}
+
+			",quantity="		\underline{quantityPlanVehicle_{v}}
+			",weight="		\underline{weightPlanVehicle_{v}}
+			",volume="		\underline{volumePlanVehicle_{v}}
+
+			",rateQuantity="	\underline{rateQuantityVehicle_{v}}
+			",rateWeight="		\underline{rateWeightVehicle_{v}}
+			",rateVolume="		\underline{rateVolumeVehicle_{v}}
+
+		 	" WHERE id='" idResource_{v} "'"
+),
+
+
+% TOUR
+\forall t \in TourActiveToPlan (
+	(SQL :	"INSERT INTO OPT_TOUR (idClub,id,idResource,tourResource,idSite1,idSite2,nbOrder,t1,t2,timeService,timeRoute,makespan,mileage,cost,receipts,quantity,weight,volume,rateQuantity,rateWeight,rateVolume) VALUES ('"
+		idClubActive				"','"
+
+		idTour_{t}				"','"
+		idResource_{vehicleTour_{t}} 		"',"
+		idxTourVehicleTour_{t}			",'"
+
+		idSiteOrderBuffer_{sourceTour_{t}}	"','"
+		idSiteOrderBuffer_{sinkTour_{t}}	"',"
+
+
+		#OrderTourBuffer_{t}			",'"
+
+		t1TourBuffer_{t}			"','"
+		t2TourBuffer_{t}			"',"
+
+		timeServiceTourBuffer_{t}		","
+		timeRouteTourBuffer_{t}			","
+		makespanTourBuffer_{t}			","
+		mileageTourBuffer_{t}			","
+
+		\underline{costTourBuffer_{t}}		","
+		\underline{receiptsTourBuffer_{t}}	","
+
+		\underline{quantityTourBuffer_{t}}	","
+		\underline{weightTourBuffer_{t}}	","
+		\underline{volumeTourBuffer_{t}}	","
+
+		\underline{rateQuantityTour_{t}}	","
+		\underline{rateWeightTour_{t}}		","
+		\underline{rateVolumeTour_{t}}		")"),
+),
+
+
+'@' <- database,
+
+

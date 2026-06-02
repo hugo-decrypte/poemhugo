@@ -1,0 +1,133 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateClient.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+
+'()' => (
+	% Input buffer
+	
+	idClientBuffer				:: "",
+	nameClientBuffer			:: "",
+	addressInvoiceBuffer		:: "",
+	addressSupInvoiceBuffer		:: "",
+	postcodeBuffer				:: "",
+	cityBuffer					:: "",
+	countryBuffer				:: "",
+	vatcodeBuffer				:: "",
+	siretBuffer					:: "",
+	commentBuffer				:: "",
+	idPointDeliveryBuffer		:: "",
+	nameClientDeliveryBuffer	:: "",
+	addressDeliveryBuffer		:: "",
+	addressSupDeliveryBuffer	:: "",
+	postcodeDeliveryBuffer		:: "",
+	cityDeliveryBuffer			:: "",
+	countryDeliveryBuffer		:: "",
+	agencyNameBuffer			:: "",
+	bankaccountBuffer			:: "",
+
+	
+	idClientBuffer				= (),
+	nameClientBuffer			= (),
+	addressInvoiceBuffer		= (),
+	addressSupInvoiceBuffer		= (),
+	postcodeBuffer				= (),
+	cityBuffer					= (),
+	countryBuffer				= (),
+	vatcodeBuffer				= (),
+	siretBuffer					= (),
+	commentBuffer				= (),
+	idPointDeliveryBuffer		= (),
+	nameClientDeliveryBuffer	= (),
+	addressDeliveryBuffer		= (),
+	addressSupDeliveryBuffer	= (),
+	postcodeDeliveryBuffer		= (),
+	cityDeliveryBuffer			= (),
+	countryDeliveryBuffer		= (),
+	agencyNameBuffer			= (),
+	bankaccountBuffer			= (),
+	
+	
+%% establishment = SIRET
+	'()' <- database,
+
+	UpdateClient_SQL1=(
+		"INSERT INTO " DB_PREFIX "CLIENT (idClub, id, name, address, AddressSup, City, PostCode, Country, codeTax, establishment, IdAgency, BankAccount) 
+		select '(/*CLUBID*/)', '"idClientBuffer"', '"nameClientBuffer"', '"addressInvoiceBuffer"', '"addressSupInvoiceBuffer"','"cityBuffer"','"postcodeBuffer"','"countryBuffer"', '"vatcodeBuffer"','"siretBuffer"',ay.Id, b.Id
+		from " DB_PREFIX "AGENCY ay, " DB_PREFIX "BANKACCOUNT b 
+		where ay.Name='"agencyNameBuffer"' and b.Name='"bankaccountBuffer"'
+		and not exists (select 1 from " DB_PREFIX "CLIENT where ID='"idClientBuffer"')"
+	),
+
+	UpdateClient_SQL2=(
+		"UPDATE " DB_PREFIX "CLIENT SET
+		Name='"nameClientBuffer"',
+		Address='"addressInvoiceBuffer"', AddressSup='"addressSupInvoiceBuffer"',
+		City='"cityBuffer"', PostCode='"postcodeBuffer"', Country='"countryBuffer"',
+		codeTax='"vatcodeBuffer"', establishment='"siretBuffer"',
+		Comments='"commentBuffer"'
+		where ID='"idClientBuffer"'"
+	),
+	("UpdateClient_SQL2=" UpdateClient_SQL2 : ),
+	
+	databaseType = "ACCESS" => (
+		UpdateClient_SQL3=(
+			"UPDATE " DB_PREFIX "CLIENT cl, " DB_PREFIX "AGENCY ay 
+			set cl.IdAgency=ay.Id
+			where cl.ID='"idClientBuffer"' and ay.Name='"agencyNameBuffer"' "
+		),
+		UpdateClient_SQL4=(
+			"UPDATE " DB_PREFIX "CLIENT cl, " DB_PREFIX "BANKACCOUNT b 
+			set cl.BankAccount=b.Id
+			where cl.ID='"idClientBuffer"' and b.Name='"bankaccountBuffer"'"
+		),
+	;
+
+		UpdateClient_SQL3=(
+			" \"UPDATE " DB_PREFIX "CLIENT set \
+				IdAgency=(select ay.Id from " DB_PREFIX "AGENCY ay where ay.Name='"agencyNameBuffer"')\
+			where  ID='"idClientBuffer"'\"\\\n"
+		),
+		UpdateClient_SQL4=(
+			" \"UPDATE " DB_PREFIX "CLIENT set \
+				BankAccount=(select b.Id from " DB_PREFIX "BANKACCOUNT b where b.Name='"bankaccountBuffer"')\
+			where  ID='"idClientBuffer"'\"\\\n"
+		),
+	),
+
+	UpdateClient_SQL5=(
+		"INSERT INTO " DB_PREFIX "POINTDELIVERY (IdClient, IdPoint, NameClient, Address, AddressSup, City, PostCode,Country) 
+		select '"idClientBuffer"','"idPointDeliveryBuffer"', '"nameClientDeliveryBuffer"', '"addressDeliveryBuffer"', '"addressSupDeliveryBuffer"','"cityDeliveryBuffer"','"postcodeDeliveryBuffer"','"countryDeliveryBuffer"'
+		from " DB_PREFIX "CLIENT cl 	
+		where cl.ID='"idClientBuffer"' and '"idPointDeliveryBuffer"'>' '
+		and not exists (select 1 from " DB_PREFIX "POINTDELIVERY where IdClient='"idClientBuffer"' and IdPoint='"idPointDeliveryBuffer"')"
+	),
+
+	UpdateClient_SQL6=(
+		"UPDATE " DB_PREFIX "POINTDELIVERY SET 
+		NameClient='"nameClientDeliveryBuffer"',
+		Address='"addressDeliveryBuffer"', AddressSup='"addressSupDeliveryBuffer"',
+		City='"cityDeliveryBuffer"', PostCode='"postcodeDeliveryBuffer"',Country='"countryDeliveryBuffer"'
+		where IdClient='"idClientBuffer"' and IdPoint='"idPointDeliveryBuffer"'"
+	),
+	
+
+
+	(SQL : UpdateClient_SQL1), 
+	(SQL : UpdateClient_SQL2), 
+	(SQL : UpdateClient_SQL3), 
+	(SQL : UpdateClient_SQL4), 
+	(SQL : UpdateClient_SQL5), 
+	(SQL : UpdateClient_SQL6), 
+	
+	database <- '()',
+),

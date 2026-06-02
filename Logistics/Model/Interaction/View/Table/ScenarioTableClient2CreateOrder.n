@@ -1,0 +1,104 @@
+%=======================================================%
+%							%
+%			GestionStock			%
+%							%
+%	    ScenarioTableClient2CreateOrder		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "CreateOrder ",
+
+% Caption
+@ ("'Create Order' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_ADD_ORDER,
+
+% Label
+@ (" '" TAG_INSERT_ORDER "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableCLIENT' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+%@ ("'" TAG_ASK_MODIFY "' "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+%typeExecute = "NCL",
+% typeExecute = "SQLVIEW",
+
+? typeExecute (
+	"NCL" :
+		%%%%%%%%%%%  by NCL
+		@ ("'[COUNT=1;" NCLPREFIX "]'\\\n"),
+
+		% Instruction... (When Count>0)
+		@ (NCLSCRIPT "Model\Script\ScriptClientCreateOrder.n'"),
+
+		@ NCL_ARGUMENT_BEGIN,
+		@ ("{/*Input(" TAG_INSERT_ORDER ";5;\\\n"),	% JZ 0919
+ 		@ ("(string,IDORDER," TAG_ORDER_ID ",,50." inputWidth ",0,,);\\\n"),
+ 		@ ("(string,REFERENCE," TAG_REFERENCE ",,50." inputWidth ",1,,);\\\n"),
+		@ ("(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*CLIENT.TOMORROW*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"),
+ 		@ ("(string,CLIENT,Client,[/*CLIENT.ID*/],50." inputWidth ",0,0,[/*CLIENT.ID*/]);\\\n"),
+ 		@ ("(string,POINTDELIVERY," TAG_DELIVERY_POINT ",[/*CLIENT.IDPOINTDELIVERY*/],50." inputWidth ",0,0,[/*CLIENT.IDPOINTDELIVERY*/]);\\\n"),
+		@ (")*/}"),
+		@ NCL_ARGUMENT_END,
+		;
+
+	"SQLVIEW" :
+		%%% By SQL on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=2;MESSAGE=1;CANCEL=0;WAITCURSOR=0;;DATAFMT=(SEP=COMMA,RET=COMMA,FMT=T,QUOT=SQUOT,HEADER=FALSE,COUNT=FALSE)]' \\\n"),
+
+		% Instruction... (When Count>0)
+
+
+		@ (" '{/*Input(" TAG_INSERT_ORDER ";5;\\\n"),
+ 		@ ("(string,IDORDER," TAG_ORDER_ID ",,100." inputWidth ",0,,);\\\n"),
+ 		@ ("(string,REFERENCE," TAG_REFERENCE ",,100." inputWidth ",1,,);\\\n"),
+		@ ("(date,DATEDELIVERY," TAG_DELIVERY_DATE ",[/*CLIENT.TOMORROW*/],10." inputWidth ",1,YYYY-MM-DD);\\\n"),
+ 		@ ("(string,CLIENT,Client,[/*CLIENT.ID*/],100." inputWidth ",0,0,[/*CLIENT.ID*/]);\\\n"),
+ 		@ ("(string,POINTDELIVERY," TAG_DELIVERY_POINT ",[/*CLIENT.IDPOINTDELIVERY*/],100." inputWidth ",0,0,[/*CLIENT.IDPOINTDELIVERY*/]);\\\n"),
+		@ (" )*/}'\\\n"),
+
+		@ (" \"INSERT INTO " DB_PREFIX "CLIENTORDER (IdClub, Id, Reference, IdClient, IdPointDelivery, DateOrder, DateDelivery, IdAgency, IdState) \\\n"),
+		@ (" select cl.IdClub, '[/*IDORDER*/]', '[/*REFERENCE*/]', cl.Id, p.IdPoint, date_format(sysDate(), '%Y%m%d'), [/*DATEDELIVERY*/], cl.IdAgency, '0'\\\n"),
+		@ (" from " DB_PREFIX "CLIENT cl inner join " DB_PREFIX "POINTDELIVERY p on p.IdClient=cl.Id\\\n"),
+		@ (" where cl.ID='[/*IDCLIENT*/]' and p.IdPoint='[/*POINTDELIVERY*/]' \"\n\n\n"),
+% JZ 0924 : CLIENT -> IDCLIENT
+		;
+	),
+/*
+No	Item
+100	    Type (string/int/float/date/time/datetime/Duration/Set/IntSet)
+101	    ID
+102	    Label
+103	    Default Value
+104	    Precision.Scale.Width
+105	    Nullability (0/1)
+106	    Format
+107	    Domain
+108	    Editable
+*/

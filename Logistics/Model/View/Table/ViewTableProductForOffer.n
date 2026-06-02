@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  	Logistics  	           %
+%                                                  %
+%  		ViewTableProductForOffer.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductForOffer.n"],
+
+'@' => (
+	tableProductForOffer("",TAG_TABLE,"PRODUCTFOROFFER",true,"", (TAG_PRODUCT_FOR_OFFER " (/*IDSUPPLIER*/)"),""),
+),

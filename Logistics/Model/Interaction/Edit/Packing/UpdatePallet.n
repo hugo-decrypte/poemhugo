@@ -1,0 +1,60 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		UpdatePallet.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+	
+'()' => (
+	
+	
+	nbParameter	= (),
+	
+	nbSelected	= (),
+	
+	idPackingSelectedBuffer 	:: "",
+	noPalletSelectedBuffer		:: 0,
+	
+	idPackingSelectedBuffer	= (),
+	noPalletSelectedBuffer	= (),
+	
+	lengthBuffer	:: 0,
+	widthBuffer		:: 0,
+	heightBuffer	:: 0,
+	weightBuffer	:: 0,
+	
+	lengthBuffer	= (),
+	widthBuffer		= (),
+	heightBuffer	= (),
+	weightBuffer	= (),
+	
+	idZoneBuffer	:: "",
+	idRowBuffer		:: "",
+	idColumnBuffer	:: "",
+	commentsBuffer	:: "",
+
+	idZoneBuffer	= (),
+	idRowBuffer		= (),
+	idColumnBuffer	= (),
+	commentsBuffer	= (),
+
+	'()' <- database,
+	
+	UpdatePallet_SQL1=(
+		"update " DB_PREFIX "PALLET set
+			Length="lengthBuffer", Width="widthBuffer", Height="heightBuffer",WeightPallet="weightBuffer",
+			IdZone='"idZoneBuffer"', IdRow='"idRowBuffer"', IdColumn='"idColumnBuffer"',
+			Designation='"commentsBuffer"'
+		where IdPacking ='"idPackingSelectedBuffer"' and NoPallet="noPalletSelectedBuffer
+	),
+	
+	(SQL : UpdatePallet_SQL1), 
+	
+	
+	database <- '()',
+),

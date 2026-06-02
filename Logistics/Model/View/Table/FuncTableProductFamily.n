@@ -1,0 +1,60 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	           	   %
+%                                                  %
+%  		 FuncTableProductFamily.n	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableProductFamily>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		viewFile = ("TableProductFamily" postfix),
+
+		
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0);]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT f.id AS ID, \\\n"),
+		@ ("\t f.Designation AS DESIGNATION,\\\n"),
+		@ ("\t (select Name from " DB_PREFIX "SUPPLIER s where s.Id=f.Idsupplier) as SUPPLIER,\\\n"),
+		@ ("\t f.QuantityStock AS QUANTITYSTOCK,\\\n"),
+		@ ("\t f.QuantityOrdered AS QUANTITYORDERED,\\\n"),
+		@ ("\t f.QuantitySupplied AS QUANTITYSUPPLIED,\\\n"),
+		@ ("\t f.MinStorageUnit AS MINSTORAGEUNIT,\\\n"),
+		@ ("\t f.MaxStorageUnit AS MAXSTORAGEUNIT,\\\n"),
+		@ ("\t f.IdStockState as STATE,\\\n"),
+		@ ("\t f.IDZONE as IDZONE,\\\n"),
+		@ ("\t f.IDROW as IDROW,\\\n"),
+		@ ("\t f.IDCOLUMN as IDCOLUMN,\\\n"),
+		@ ("\t '(220 220 255)' as LINERGB \\\n"),
+		@ (" FROM " DB_PREFIX "FAMILYPRODUCT f \\\n"),
+		@ (" ORDER BY f.ID\"\n\n\n\n"), 
+
+
+
+
+		%['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductFamily2EditProductFamily.n"],	% JZ 0911
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductFamily2TableDefaultRateMenu.n"],
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableProductFamily2EditOnView.n"],
+
+
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

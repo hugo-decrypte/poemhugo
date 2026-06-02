@@ -1,0 +1,56 @@
+%==================================================%
+%                                                  %
+%            	  Logistics	    	           %
+%                                                  %
+%  		 FuncTableQuoteProduct.	 	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+<tableQuoteProduct>(id,type,aliasTable,bestfit,doubleclick,title,postfix0)
+(
+	['Work Directory' "Model\Common\Config\ReadField.n"],
+
+	'@' => (
+		postfix = (postfix0 = "" ? "" : idUserLogin),
+		%viewFile = ("TableQuoteProduct" (doubleclick = "" ? "" : "_") doubleclick postfix),
+		viewFile = ("TableQuoteProduct"  postfix),
+		
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+
+		['Work Directory' "Model\Common\View\HeaderTable.n"],
+		
+
+		@ ("(string,IDCLIENT," TAG_CLIENT_ID ",,15.0.80,0);\\\n"),
+		@ ("(string,NAMECLIENT," TAG_CLIENT_NAME ",,50.0.150,0);\\\n"),
+		@ ("(string,PTDELIVERY," TAG_DELIVERY_POINT ",,50.0.150,0);\\\n"),
+		@ ("(color,LINERGB," RGB_WHITE ",,13.0.0)]\"\\\n"),
+
+		@ VIEWSQL,
+
+		@ ("SELECT Q.id AS IDQUOTE, Q.idClient AS IDCLIENT, CL.Name as NAMECLIENT,\\\n"),
+ 		@ ("\t\t (select City from " DB_PREFIX "POINTDELIVERY PT where PT.IdClient=Q.IdClient and PT.IdPoint=Q.IdPointDelivery) as PTDELIVERY,\\\n"),
+ 		@ ("\t\t QP.idProduct AS IDPRODUCT, P.Designation as DESIGNATION, QP.PriceUnitReference as PRICEREFERENCE,\\\n"),
+ 		@ ("\t\t QP.Quantity AS QUANTITY, QP.PriceUnit AS PRICEQUOTE, QP.Discount as DISCOUNT,\\\n"),
+ 		@ ("\t\t QP.AmountHT AS AMOUNTHT, QP.ToolCost AS TOOLCOST, QP.Comments AS COMMENTS,\\\n"),
+ 		@ ("\t\t QP.Comments_1 AS COMMENTS2, QP.IdVAT as TVA,\\\n"),
+ 		@ ("\t\t " SQL_CASEWHEN "Q.idState in (select ID from " DB_PREFIX "STATE where Category='QUOTE')" SQL_THEN "(select COLOR from " DB_PREFIX "STATE where ID=Q.idState and Category='QUOTE')" SQL_ELSE "'(255 220 220)'" SQL_CASEEND " AS LINERGB \\\n"),
+		@ ("\t FROM " DB_PREFIX "QUOTE Q, " DB_PREFIX "QUOTE_PRODUCT QP, " DB_PREFIX "CLIENT CL, " DB_PREFIX "PRODUCT P \\\n"),
+		@ ("\t WHERE Q.id=QP.IdQuote and Q.IdClient=CL.id and QP.IdProduct=P.Id\\\n"),
+  		@ ("\t AND(QP.(/*OWNEROBJ*/) in ((/*IDOBJ*/)) or 'XXX' in ((/*IDOBJ*/)))\\\n"),
+		@ ("\t ORDER BY QP.IdQuote, QP.IdProduct\"\n\n\n"), 
+
+		
+		
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuoteProduct2EditQuoteProduct.n"],
+				
+		%==========================
+		['Work Directory' "Model\Interaction\View\Table\ScenarioTableQuoteProduct2EditOnView.n"],
+		%===========================
+
+
+		'@' <- [viewDirectory viewFile ".view"], 
+	),
+),

@@ -1,0 +1,48 @@
+%==================================================%
+%                                                  %
+%          	 Logistics                 	   %
+%                                                  %
+% 		 UpdateState.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+.
+"(string,LABEL," TAG_LABEL ",[/*STATE.LABEL*/],100.0.200,0,,);\\\n"
+	"(string,COMMENTS," TAG_COMMENT ",[/*STATE.COMMENTS*/],100.0.200,0,,);\\\n"
+	"(color,COLOR,Couleur,[/*STATE.COLOR*/],100.0.200,0,,);\\\n"
+	
+'()' => (
+	
+	categoryBuffer	:: "",
+	categoryBuffer	= (),
+	
+	nbSelected	= (),
+	nbParameter	= (),
+
+	idBuffer :: "",
+	idBuffer = (),
+	
+	labelBuffer		:: "",
+	commentsBuffer	:: "",
+	colorBuffer		:: "",
+
+	
+	labelBuffer		= (),
+	commentsBuffer	= (),
+	colorBuffer		= (),
+
+	'()' <- database,
+	
+	UpdateState_SQL1=(
+		"Update " DB_PREFIX "STATE"
+		"set Label= '"labelBuffer"', Comments='"commentsBuffer"', Color='"colorBuffer"'"
+		"where ID='"idBuffer"' and  Category="categoryBuffer" "
+	),
+	
+	(SQL : UpdateState_SQL1), 
+	
+	
+	database <- '()',
+),

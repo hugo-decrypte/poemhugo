@@ -1,0 +1,19 @@
+%===============================================%
+%						%
+%		Logistics			%
+%						%
+%	ViewHistogramBalanceSheetRevenue.n	%
+%						%
+% (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+['Work Directory' "Model\View\Histogram\FuncHistogramBalanceSheetRevenue.n"],
+
+'@' => (
+	histogramBalanceSheetRevenue("MONTHLYREVENUE",true, TAG_MONTH,TAG_K_EURO, "","", {},TAG_MONTHLY_REVENUE,""),
+	histogramBalanceSheetRevenue("MONTHLYREVENUE",true, TAG_MONTH,TAG_K_EURO, "","", {},TAG_MONTHLY_REVENUE,"Menu"),	% JZ 1022
+
+
+	('hh:mm:ss' "  " TAG_MONTHLY_REVENUE TAG_END TAG_COST_TIME 'Global Time'[1..6] "\n" : ),
+),

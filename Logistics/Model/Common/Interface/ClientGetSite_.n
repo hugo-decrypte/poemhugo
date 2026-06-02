@@ -1,0 +1,126 @@
+/********************************************************/
+/*							*/
+/*		ClientGetSite.n				*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%   selected           matrix          
+% -------------------------------------
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        | matrix
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% |          |                        |
+% -------------------------------------
+% |                                   |
+% |                                   |
+% |                                   | selected
+% |                                   |
+% |                                   |
+% |                                   |
+% -------------------------------------
+
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+'()' => (
+	'()' <- database,
+
+
+	(SQL: "SELECT id,latitude,longitude FROM " DB_PREFIX "SITE WHERE idClub='" idClubLogin "' ORDER BY id"),
+
+	SITE = [1, ()],
+
+	\forall s \in SITE (
+		idSite_{s}		:: "",
+		latitudeSite_{s}	:: "",
+		longitudeSite_{s}	:: "",
+
+		idSite_{s}		= (),
+		latitudeSite_{s}	= (),
+		longitudeSite_{s}	= (),
+	),
+	IDSITE = \{ \forall s \in SITE idSite_{s} \},
+
+	\forall i \in IDSITE
+		siteId_{i} \in SITE,
+
+	\forall s \in SITE
+		siteId_{idSite_{s}} = s,
+
+
+
+
+	(SQL: "SELECT distinct id FROM " DB_PREFIX"SITE WHERE selected='" STATE_TRUE "' AND idClub='" idClubLogin "' ORDER BY id"),
+
+	Site0Selected = [1, ()],
+
+	\forall s \in Site0Selected (
+		idSiteSelected_{s} :: "",
+
+		idSiteSelected_{s} = (),
+	),
+	IdSiteSelected = \{ \forall s \in Site0Selected (idSiteSelected_{s} \in IDSITE ? idSiteSelected_{s} : "") \} \setminus "",
+	SiteSelected = \{ \forall i \in IdSiteSelected siteId_{i} \},
+
+
+
+
+	(SQL: "SELECT distinct idSite1 FROM " DB_PREFIX"SITE_SITE WHERE idClub='" idClubLogin "' ORDER BY idSite1"),
+
+	Site0Matrix = [1, ()],
+
+	\forall s \in Site0Matrix (
+		idSiteMatrix_{s} :: "",
+
+		idSiteMatrix_{s} = (),
+	),
+	IdSiteMatrix = \{ \forall s \in Site0Matrix (idSiteMatrix_{s} \in IDSITE ? idSiteMatrix_{s} : "") \} \setminus "",
+	SiteMatrix = \{ \forall i \in IdSiteMatrix \setminus IdSiteSelected siteId_{i} \},
+
+
+
+	database <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+
+
+	@ (#SiteMatrix "  \n"),
+
+	\forall s \in SiteMatrix (
+		@ (	"'" 	idSite_{s}
+			"'  '"	latitudeSite_{s}
+			"'  '"	longitudeSite_{s} "'  \n"
+		),
+	),
+	@ "\n",
+
+
+	@ (#SiteSelected "  \n"),
+
+	\forall s \in SiteSelected (
+		@ ("'" idSite_{s} "'  '" latitudeSite_{s} "'  '" longitudeSite_{s} "'\n"),
+	),
+
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+),
+

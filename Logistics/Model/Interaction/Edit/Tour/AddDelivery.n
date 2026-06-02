@@ -1,0 +1,125 @@
+%==================================================%
+%                                                  %
+%          	 Scheduling                 	   %
+%                                                  %
+% 		 AddDelivery.n		   	   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\Config\ReadUserLogin.n"],
+
+
+
+'()' => (
+	% Input buffer
+
+	idTourBuffer	:: "",
+	idTourBuffer	= (),
+	
+	nbParameter	= (),
+	nbSelected	= (),
+	
+	\forall i \in [1, nbSelected] (
+		idDeliverySelectedBuffer_{i} 			:: "",
+		idDeliverySelectedBuffer_{i}			= (),
+		
+		i < nbSelected =>(
+			strIdDeliverySelectedBuffer_{i} = ("'" idDeliverySelectedBuffer_{i} "',"),
+			;
+			strIdDeliverySelectedBuffer_{i} = ("'" idDeliverySelectedBuffer_{i} "'"),
+		),
+	),
+	
+	IDDELIVERYSELECTEDBUFFER :: "",
+	IDDELIVERYSELECTEDBUFFER = [\forall i \in [1, nbSelected] strIdDeliverySelectedBuffer_{i}],
+
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	'()' <- database,
+
+AddDeliveryToTour_SQL1 = (
+	"Update " DB_PREFIX "DELIVERY"
+	"   set IdTour=" idTourBuffer " "
+	"  WHERE (IdTour is NULL or IdTour<=' ')"
+	"   and 'XXX' not in (" idTourBuffer ")"
+	"   and Id in (" IDDELIVERYSELECTEDBUFFER" ) "
+),
+
+AddDeliveryToTour_SQL2 = (
+	"Update " DB_PREFIX "DELIVERY"
+	"   set idState='2' "
+	"  WHERE (IdTour is not NULL and IdTour>' ')"
+	"   and idState<'2'"
+	"   and Id in (" IDDELIVERYSELECTEDBUFFER" ) "
+),
+
+databaseType = "ACCESS" => (
+
+	AddDeliveryToTour_SQL3 = (
+		"Update " DB_PREFIX "TOUR T set T.Weight=0, Volume=0, NbPallet=0 "
+		"  WHERE T.Id=" idTourBuffer " "
+	),
+
+	AddDeliveryToTour_SQL4 = (
+		"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+		" set T.Weight=T.Weight + DP.Quantity*P.Weight"
+		" WHERE T.Id=" idTourBuffer " and P.Weight is not NULL "
+	),
+
+	AddDeliveryToTour_SQL5 = (
+		"Update ((" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		"  inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+		"  inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+		" set T.Volume=T.Volume + DP.Quantity*P.Volume"
+		" WHERE T.Id=" idTourBuffer " and P.Volume is not NULL "
+	),
+
+	AddDeliveryToTour_SQL6 = (
+		"Update (" DB_PREFIX "TOUR T inner join " DB_PREFIX "DELIVERY D on T.Id=D.IdTour)"
+		" set T.NbPallet=T.NbPallet + D.NbPallet"
+		" WHERE T.Id=" idTourBuffer " and D.NbPallet is not NULL \n\n\n"
+	),
+
+	; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	AddDeliveryToTour_SQL3 = (
+		"Update " DB_PREFIX "TOUR set "
+			"   Weight= (select sum(DP.Quantity*P.Weight) from ( " DB_PREFIX "DELIVERY D "
+			"	  	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+			"	  	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+			" 		where TOUR.Id=D.IdTour and P.Weight is not NULL), "
+			"   Volume= (select sum(DP.Quantity*P.Volume) from ( " DB_PREFIX "DELIVERY D "
+			" 	 	inner join " DB_PREFIX "DELIVERY_PRODUCT DP on D.Id=DP.IdDelivery)"
+			" 	 	inner join " DB_PREFIX "PRODUCT P on P.ID=DP.IdProduct"
+			" 		where TOUR.Id=D.IdTour and P.Volume is not NULL), "
+			"   NbPallet= (select sum(D.NbPallet) from " DB_PREFIX "DELIVERY D "
+			" 		where TOUR.Id=D.IdTour and D.NbPallet is not NULL) "
+			" WHERE Id=" idTourBuffer " "
+	),
+
+	AddDeliveryToTour_SQL4 = (
+		Update " DB_PREFIX "TOUR set Weight=0 WHERE Id=" idTourBuffer " and Weight is NULL "
+	),
+	AddDeliveryToTour_SQL5 = (
+		Update " DB_PREFIX "TOUR set Volume=0 WHERE Id=" idTourBuffer " and Volume is NULL "
+	),
+	AddDeliveryToTour_SQL6 = (
+		Update " DB_PREFIX "TOUR set NbPallet=0 WHERE Id=" idTourBuffer " and NbPallet is NULL "
+	),
+),
+
+
+	(SQL : AddDeliveryToTour_SQL1), 
+	(SQL : AddDeliveryToTour_SQL2), 
+	(SQL : AddDeliveryToTour_SQL3), 
+	(SQL : AddDeliveryToTour_SQL4), 
+	(SQL : AddDeliveryToTour_SQL5), 
+	(SQL : AddDeliveryToTour_SQL6), 
+	
+
+	database <- '()',
+),

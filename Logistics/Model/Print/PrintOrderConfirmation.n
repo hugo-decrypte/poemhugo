@@ -1,0 +1,389 @@
+%===================================================%
+%													%
+%            	  ERP								%
+%													%
+%			PrintOrderConfirmation.n				%
+%													%
+% (c)2000. Enginest. All rights reserved.			%
+%===================================================%
+
+reference = "Référence",
+
+%% 2025.09.03
+%% NumTVA = > codeTax
+%% Siret  = > establishment
+
+'@' => (
+
+	printFile = "/PrintOrderConfirmation",
+	[serverPrintPath printFile ".ini"] <- '@',
+
+	("printFile=" serverPrintPath printFile ".ini" : ),
+
+@ ("//////////////////////////////////////////// \n"),
+@ ("////////////////////////////////////////////\n"),
+@ ("// PARAMETRES\n"),
+@ ("//\"DataPrint.exe\" \"DIR/PoemPrint/PrintOrderConfirmation.ini\" \"[DSN=; DBUSR=; DBPWD=; OWNER=; DEVICENAME=Microsoft Print to PDF; OUTPUT=ConfirmOrder.pdf; XMLFILE=OrderTmp.txt]\" \"11020170131\" \n"),
+@ ("// {/*PARAM0*/}  \"PoemPrint.exe\" \n"),
+@ ("// {/*PARAM1*/}  \" \" file  INI\n"),
+@ ("// {/*PARAM2*/}  \"[DSN= ; DBUSR= ; DBPWD=; OWNER= ; DEVICENAME= ; OUTPUT= ; XMLFILE= ]\"  les options separes par ;\n"),
+@ ("// {/*PARAM3*/}  picture directury\n"),
+@ ("// {/*PARAM4*/}  code Order  \n"),
+@ ("// {/*PARAM5*/}  code user\n"),
+@ ("//DSN=\n"),
+@ ("//USR= \n"),
+@ ("//PWD= \n"),
+@ ("//OWNER= \n"),
+
+@ ("[HEADER]\n"),
+@ ("VERSION=1.0\n"),
+@ ("TITLE=Confirmation de commande\n"),
+
+ ['Work Directory' "Model\Print\PrintHeaderFooter.n"],
+
+
+%@ ("[FOOTER]\n"),
+
+
+
+@ ("[BACKGROUND]\n"),
+
+@ ("[CONFIG]\n"),
+
+@ ("PRINTERTYPE=1\n"),
+@ ("//DEVICENAME=PDF Architect Driver\n"),
+@ ("//DEVICENAME=PDFCreator\n"),
+@ ("//DEVICENAME=WIN2PDF\n"),
+@ ("//DEVICENAME=Microsoft XPS Document Writer\n"),
+@ ("//OUTPUT=c:/DataPrint/Confirm.xps\n"),
+@ ("//OUTPUT=c:/DataPrint/Confirm.pdf\n"),
+@ ("//OUTPUT={/*PARAM4*/}\n"),
+@ ("\n"),
+
+@ ("DEBUG=0\n"),
+@ ("TRACEDATA=1\n"),
+@ ("TRACESYS=1\n"),
+@ ("TRACESCRIPT=1\n"),
+@ ("TRACEFILE={/*PARAM3*/}/TraceConfirmOrder.log\n"),
+
+@ ("DOCNAME=Confirmation de commande\n"),
+@ ("PAGESIZE=A4\n"),
+@ ("//LANDSCAPEMODE= ( 0 : portrai; 1 : paysage)\n"),
+@ ("LANDSCAPEMODE=0\n"),
+
+@ ("PAGEWIDTH= 2100\n"),
+@ ("PAGEHEIGHT= 2970\n"),
+@ ("MARGIN=100 450 100 100\n"),
+@ ("PAGENUMER=AUTO\n"),
+@ ("PAGEBREAK=AUTO\n"),
+@ ("\n"),
+
+
+
+%@ ("[STYLE]\n"),
+
+ ['Work Directory' "Model\Print\PrintStyleConfig.n"],
+
+
+@ ("[PICTURE]\n"),
+@ ("PICTURECOUNT=1\n"),
+@ ("PICTURE1={/*PARAM3*/}Logo.jpg\n"),
+@ ("\n\n"),
+
+@ ("[DATA]\n"),
+@ ("//DSN=\n"),
+@ ("//USR=\n"),
+@ ("//PWD=\n"),
+@ ("//OWNER=\n"),
+@ ("PWD={/*PARAM6*/}\n"),
+
+@ ("\n\n"),
+
+@ ("DATACOUNT=5\n"),
+
+@ ("//////////////\n"),
+@ ("// agency info used in HEADER and FOOTER\n"),
+@ ("DATA1=MY_ADRESS\n"),
+@ ("NAME1=MYADRESS\n"),
+@ ("\n"),
+
+
+
+% ['Work Directory' "Model\Print\PrintMyInfosData.n"],
+
+
+@ ("SQL1=SELECT \n"),
+@ ("SQL1_1=   " SQL_CASEWHEN "AG.NAME is not NULL" SQL_THEN "AG.NAME" SQL_ELSE "' '" SQL_CASEEND " as Nom,\n"),
+@ ("SQL1_2=   " SQL_CASEWHEN "AG.LABEL is not NULL" SQL_THEN "AG.LABEL" SQL_ELSE "' '" SQL_CASEEND " as Label,\n"),
+@ ("SQL1_3=   " SQL_CASEWHEN "AG.ADDRESS is not NULL" SQL_THEN "AG.ADDRESS" SQL_ELSE "' '" SQL_CASEEND " as Adr,\n"),
+@ ("SQL1_4=   " SQL_CASEWHEN "AG.ADDRESSSUP is not NULL" SQL_THEN "AG.ADDRESSSUP" SQL_ELSE "' '" SQL_CASEEND " as Adr2,\n"),
+@ ("SQL1_5=   " SQL_CASEWHEN "AG.PostCode is not NULL" SQL_THEN "AG.PostCode" SQL_ELSE "' '" SQL_CASEEND " as CodePost,\n"),
+@ ("SQL1_6=   " SQL_CASEWHEN "AG.City is not NULL" SQL_THEN "AG.City" SQL_ELSE "' '" SQL_CASEEND " as City,\n"),
+@ ("SQL1_7=   " SQL_CASEWHEN "AG.Country is not NULL" SQL_THEN "AG.Country" SQL_ELSE "'France'" SQL_CASEEND " as Country,\n"),
+@ ("SQL1_8=   " SQL_CASEWHEN "AG.Phone is not NULL" SQL_THEN "AG.Phone" SQL_ELSE "' '" SQL_CASEEND " as Phone,\n"),
+@ ("SQL1_9=   " SQL_CASEWHEN "AG.Fax is not NULL" SQL_THEN "AG.Fax" SQL_ELSE "' '" SQL_CASEEND " as Fax,\n"),
+@ ("SQL1_10=  " SQL_CASEWHEN "AG.EMAIL is not NULL" SQL_THEN "AG.EMAIL" SQL_ELSE "' '" SQL_CASEEND " as Mail,\n"),
+@ ("\n"),
+@ ("SQL1_11=  " SQL_CASEWHEN "AG.Capital is not NULL" SQL_THEN "AG.Capital" SQL_ELSE "'Type Société : ________ au capital de ______ _'" SQL_CASEEND " as TypeCompagny,\n"),
+@ ("SQL1_12=  " SQL_CONCAT "'TVA Intracom : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.codeTax is not NULL" SQL_THEN "AG.codeTax" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATEND " as NoTVA,\n"),
+@ ("SQL1_13=  " SQL_CASEWHEN "AG.establishment is not NULL" SQL_THEN "AG.establishment" SQL_ELSE "'SIRET :'" SQL_CASEEND " as Siret,\n"),
+@ ("SQL1_14=  " SQL_CASEWHEN "AG.RCS is not NULL" SQL_THEN "AG.RCS" SQL_ELSE "'RCS :'" SQL_CASEEND " as RCS,\n"),
+@ ("SQL1_15=  " SQL_CASEWHEN "AG.APE is not NULL" SQL_THEN "AG.APE" SQL_ELSE "'APE :'" SQL_CASEEND " as APE,\n"),
+@ ("\n"),
+@ ("SQL1_16=  " SQL_CONCAT "'SIRET : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.establishment is not NULL" SQL_THEN "trim(AG.establishment)" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATWITH "' - RCS : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.RCS is not NULL" SQL_THEN "trim(AG.RCS)" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATWITH "' - APE : '" SQL_CONCATWITH " " SQL_CASEWHEN "AG.APE is not NULL" SQL_THEN "AG.APE" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATEND " as InfoRegistre,\n"),
+@ ("SQL1_17=  " SQL_CONCAT "'IBAN : '" SQL_CONCATWITH " " SQL_CASEWHEN "B.IBAN is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.IBAN)" SQL_CASEEND " " SQL_CONCATWITH "' - BIC : '" SQL_CONCATWITH " " SQL_CASEWHEN "B.BIC is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.BIC)" SQL_CASEEND " " SQL_CONCATWITH "'  '" SQL_CONCATWITH " " SQL_CASEWHEN "B.Name is NULL" SQL_THEN "' '" SQL_ELSE "trim(B.Name)" SQL_CASEEND " " SQL_CONCATEND " as BankInfo,\n"),
+@ ("SQL1_18=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "" SQL_CONCAT "'Imprimée le '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ", '" SQL_FORMATDATE_FR ", " SQL_FORMATTIMESTR "')" SQL_CONCATEND " " SQL_ELSE "" SQL_CONCAT "'Printed '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ", '" SQL_FORMATDATESTR ", " SQL_FORMATTIMESTR "')" SQL_CONCATEND " " SQL_CASEEND " as PrintDate,\n"),
+@ ("\n"),
+@ ("SQL1_19=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Confirmation Commande'" SQL_ELSE "'Confirmation Order'" SQL_CASEEND " as TitleDoc,\n"),
+@ ("SQL1_20=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Commande No : '" SQL_ELSE "'Order no : '" SQL_CASEEND " as TitleOrder,\n"),
+@ ("SQL1_21=  O.Id as IdOrder,\n"),
+@ ("SQL1_22=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Date de commande : '" SQL_ELSE "'Order date : '" SQL_CASEEND " as TitleOrderDate,\n"),
+@ ("SQL1_23=  " SQL_CASEWHEN "CL.Country='France'"
+				 SQL_THEN " " SQL_CONCAT " " SQL_SUBSTRING "(O.DateOrder,9,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,6,2)" SQL_CONCATWITH "'/'" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,1,4)" SQL_CONCATEND " "
+				 SQL_ELSE " " SQL_CONCAT " " SQL_SUBSTRING "(O.DateOrder,1,4)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,6,2)" SQL_CONCATWITH "'-'" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,9,2)" SQL_CONCATEND " "
+			     SQL_CASEEND " as OrderDate,\n"),
+@ ("SQL1_24=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Référence : '" SQL_ELSE "'Reference : '" SQL_CASEEND " as TitleReference,\n"),
+@ ("SQL1_25=  O.Reference as Reference\n"),
+@ ("SQL1_26= FROM (({/*OWNER*/}CLIENTORDER O left join {/*OWNER*/}AGENCY AG on AG.ID=O.IdAgency)\n"),
+@ ("SQL1_27=  left join {/*OWNER*/}CLIENT CL on CL.Id=O.IdClient)\n"),
+@ ("SQL1_28=  left join {/*OWNER*/}BANKACCOUNT B on B.Id=CL.BankAccount\n"),
+@ ("SQL1_29= WHERE  O.Id={/*PARAM4*/}\n"),
+
+@ ("// compagny Registre info, BankInfo in FOOTER\n"),
+@ ("\n"),
+@ ("\n"),
+
+@ ("DATA2=INFO_ADRESS\n"),
+@ ("NAME2=InfoAdress\n"),
+@ ("\n"),
+
+dateInvoice :: "",
+? databaseType (
+
+"ACCESS" :
+	dateInvoice = "DateAdd('d', 30, O.DateDelivery)",
+	;
+
+"MYSQL" :
+	dateInvoice = "addDate(O.DateDelivery,30)",
+),
+
+
+@ ("SQL2=SELECT 
+SQL2_1=   " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "" SQL_CONCAT "'Date : '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ",'" SQL_FORMATDATE_D "') " SQL_CONCATWITH "' '" SQL_CONCATWITH " MTD.NameFR " SQL_CONCATWITH "' '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ",'" SQL_FORMATDATE_Y "')" SQL_CONCATEND " 
+SQL2_2=   " SQL_ELSE "" SQL_CONCAT "'Date : '" SQL_CONCATWITH " MTD.NameEN " SQL_CONCATWITH "' '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ",'" SQL_FORMATDATE_D "') " SQL_CONCATWITH "', '" SQL_CONCATWITH " " SQL_FORMATDATE "(" SQL_CURRENTDATETIME ",'" SQL_FORMATDATE_Y "')" SQL_CONCATEND " " SQL_CASEEND " as DateFactC1,
+SQL2_3=   " SQL_CONCAT "" SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Commande : '" SQL_ELSE "'Order no : '" SQL_CASEEND " " SQL_CONCATWITH "O.Id" SQL_CONCATEND " as IdCommandC2,
+SQL2_4=   " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "" SQL_CONCAT "'" TAG_DATE_ORDER " : '" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,9,2)" SQL_CONCATWITH "' '" SQL_CONCATWITH "MCM.NameFR" SQL_CONCATWITH "' '" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,1,4)" SQL_CONCATEND " 
+SQL2_5=     " SQL_ELSE "" SQL_CONCAT "'Order date : '" SQL_CONCATWITH "MCM.NameEN" SQL_CONCATWITH "' '" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,9,2)" SQL_CONCATWITH "', '" SQL_CONCATWITH "" SQL_SUBSTRING "(O.DateOrder,1,4)" SQL_CONCATEND " " SQL_CASEEND " as DateCommandC3,
+SQL2_6=   " SQL_CONCAT "" SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Notre Référence : '" SQL_ELSE "'Our reference: '" SQL_CASEEND " " SQL_CONCATWITH " " SQL_CASEWHEN "O.Reference is not NULL" SQL_THEN "O.Reference" SQL_ELSE "' '" SQL_CASEEND " " SQL_CONCATEND " as ReferenceC4,
+SQL2_7=   " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "'Destinataire'" SQL_ELSE "'Recipient'" SQL_CASEEND " as TitleAdressC5, 
+SQL2_8=   CL.Name as NameCliC6, 
+SQL2_9=   CL.Address as AddresCliC7, 
+SQL2_10=  CL.AddressSup as AddresSupCliC8, 
+SQL2_11=  " SQL_CONCAT "TRIM(CL.PostCode)" SQL_CONCATWITH "'   '" SQL_CONCATWITH "CL.City" SQL_CONCATEND " as PostCodeCityC9, 
+SQL2_12=  " SQL_CASEWHEN "CL.Country='France'" SQL_THEN "' '" SQL_ELSE "CL.Country" SQL_CASEEND " as CountryC10
+SQL2_13= FROM {/*OWNER*/}CLIENTORDER O, {/*OWNER*/}CLIENT CL, {/*OWNER*/}MONTHLABEL MTD, {/*OWNER*/}MONTHLABEL MCM
+SQL2_14= WHERE CL.Id=O.IdClient 
+SQL2_15=   AND MTD.NoMonth=" SQL_FORMATDATE "(" SQL_CURRENTDATETIME ", '" SQL_FORMATDATE_M "')
+SQL2_16=   AND MCM.NoMonth=" SQL_SUBSTRING "(O.DateOrder, 6,2) + 0
+SQL2_17=   AND O.Id in ({/*PARAM4*/})\n"),
+
+
+@ ("
+/////////////////////////
+DATA3=INFO_TITLE
+NAME3=InfoTitre
+
+
+SQL3=SELECT DISTINCT
+SQL3_1=   'Référence' as C1, 'Désignation' as C2, 'Date de' as C3, 'livraison' as C4, 'prévue' as C5, 
+SQL3_2=   'Quantité' as C6, 'Prix d''achat' as C7, 'unitaire en' as C8, 'EUR' as C9,
+SQL3_3=   '%' as C10, 'Remise' as C11, 'Montant net' as C12, 'H.T. en' as C13, 'EUR' as C14, Comments as C15
+SQL3_4= FROM {/*OWNER*/}CLIENTORDER O
+SQL3_5= WHERE O.Id={/*PARAM4*/}
+
+
+DATA4=INFO_ORDERS
+NAME4=INFOORDERS
+
+SQL4=SELECT 
+SQL4_1=   LC.IdProduct as C1,
+SQL4_2=   A.Designation as \"DesigC2\",
+SQL4_3=   " SQL_CASEWHEN "LC.DateDelivery is not NULL and LC.DateDelivery>'0'" SQL_THEN "" SQL_FORMATDATE "(LC.DateDelivery,'" SQL_FORMATDATE_FR "')" SQL_ELSE "' '" SQL_CASEEND " as \"DateLivC3\",
+SQL4_4=   LC.Quantity as \"QTYC4\",
+SQL4_5=   " SQL_FORMATNUM "(LC.PriceUnit," SQL_FORMATSCALE4 ") as C5,
+SQL4_6=   " SQL_CASEWHEN "LC.Discount is not NULL and LC.Discount>0" SQL_THEN "" SQL_CONCAT "" SQL_FORMATNUM "(LC.Discount," SQL_FORMATSCALE1 ")" SQL_CONCATWITH "'%'" SQL_CONCATEND " " SQL_ELSE "' '" SQL_CASEEND " as C6,
+SQL4_7=   " SQL_CASEWHEN "LC.Discount is not NULL and LC.Discount>0" SQL_THEN "" SQL_FORMATNUM "(LC.Quantity*LC.PriceUnit*(LC.Discount)/100.0, " SQL_FORMATSCALE2 ")" SQL_ELSE "' '" SQL_CASEEND " as C7,
+SQL4_8=   " SQL_FORMATNUM "(LC.Quantity*LC.PriceUnit*(100.0-LC.Discount)/100.0, " SQL_FORMATSCALE2 ") as C8
+SQL4_9=  FROM {/*OWNER*/}ORDER_PRODUCT LC, {/*OWNER*/}PRODUCT A
+SQL4_10= WHERE LC.IdOrder={/*PARAM4*/}
+SQL4_11=   AND LC.IdProduct=A.ID 
+SQL4_12= ORDER BY LC.DateDelivery, LC.IdProduct
+
+
+
+
+
+DATA5=LINE_TOTAL
+NAME5=LINETOTAL
+
+SQL5=SELECT 
+SQL5_1=   'TOTAL' as C1,
+SQL5_2=   ' ' as \"DesigC2\",
+SQL5_3=   ' ' as \"DateLivC3\",
+SQL5_4=   ' ' as \"QTYC4\",
+SQL5_5=   ' ' as C5,
+SQL5_6=   ' ' as C6,
+SQL5_7=   " SQL_FORMATNUM "(sum(LC.Quantity*LC.PriceUnit*(LC.Discount)/100.0)," SQL_FORMATSCALE2 ")  as C7,
+SQL5_8=   " SQL_FORMATNUM "(sum(LC.Quantity*LC.PriceUnit*(100-LC.Discount)/100.0)," SQL_FORMATSCALE2 ") as C8,
+SQL5_9=   LC.IdOrder as C9 
+SQL5_10= FROM {/*OWNER*/}ORDER_PRODUCT LC
+SQL5_11= WHERE LC.IdOrder={/*PARAM4*/}
+SQL5_12= GROUP BY LC.IdOrder
+
+
+
+[TABLE]
+
+TABLECOUNT=0
+
+[XML]
+
+//FILE={/*XMLFILE*/}
+XMLCOUNT =0
+//XML1=|\"NOM_PDF {/*OUTPUT*/}\"
+//XML2=|\"NUM_FAX1 {/*DATA1.1*/}\"
+//XML3=|\"NUM_FAX2 {/*DATA1.2*/}\"
+//XML4=|\"CODE_FACT {/*DATA1.3*/}\"
+//XML5=|\"MAIL1_RAPPORT {/*DATA1.6*/}\"
+//XML6=|\"MAIL2_RAPPORT {/*DATA1.7*/}\"
+//XML7=|\"TYPE_RAPPORT {/*DATA1.8*/}\"
+
+
+[SCRIPT]
+
+INSTRCOUNT=11
+
+INSTR1=StartDoc
+
+INSTR2=StartPage 1
+
+// table  adresses livraisons 
+
+INSTR3=Table(DATAOBJ=DATA2; RECT=10 0 1900 440; BORDERHORZ=; BORDERVERT=; LINEHORZ=; LINEVERT=; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR3_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=440;
+INSTR3_2=TITLE=\"TOUR INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR3_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR3_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR3_5=FIELDCOUNT=12;
+INSTR3_6=NAMES=(
+INSTR3_7=FIELD1=[NAME=\"Dat\",   RECT=(0      0  1000  40),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.1];
+INSTR3_8=FIELD2=[NAME=\"Cmd\",   RECT=(0     80  1000 120),  FONT=9, ALIGN=3, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.2];
+INSTR3_9=FIELD3=[NAME=\"DatC\",  RECT=(0    120  1000 160),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.3];
+INSTR3_10=FIELD4=[NAME=\"Ref\",  RECT=(0    160  1000 200),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.4];
+INSTR3_11=FIELD5=[NAME=\"Dest\", RECT=(1000   0  1900  40),  FONT=4, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.5];
+INSTR3_12=FIELD6=[NAME=\"Nom\",  RECT=(1000  80  1900 120),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.6];
+INSTR3_13=FIELD7=[NAME=\"Adr\",  RECT=(1000 120  1900 160),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.7];
+INSTR3_14=FIELD8=[NAME=\"AdS\",  RECT=(1000 160  1900 200),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.8];
+INSTR3_15=FIELD9=[NAME=\"CP\",   RECT=(1000 200  1900 240),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.9];
+INSTR3_16=FIELD10=[NAME=\"Pays\",RECT=(1000 240  1900 280),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, OBJ=DATA2.10];
+INSTR3_17=FIELD11=[NAME=\"MS\",  RECT=(0    300  1900 360),  FONT=9, ALIGN=3, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, TEXT=\"Madame, Monsieur,\"];
+INSTR3_18=FIELD12=[NAME=\"L1\",  RECT=(0    360  1900 400),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, TEXT=\"Nous vous remercions pour l'intérét et la confiance que vous témoignez pour nos produits et service.\"];
+INSTR3_19=)
+
+/////////////////////////////////////////////////////////////////////
+
+//INSTR4=Line(10  500, 1900  500, PEN1); 
+INSTR4=Text(10  400  1900  440, \"Nous avons bien pris en compte les services et produits suivants pour votre commande :\", FONT9, LEFT|VCENTER, COLOR1)
+//INSTR3_19=FIELD13=[NAME=\"L2\",  RECT=(10   400  1900 440),  FONT=9, ALIGN=2, TCOLOR=1, FCOLOR=4, LPEN=,  RPEN=,  TPEN=,  BPEN=, TEXT=\"Nous avons bien pris en compte les services et produits suivants pour votre commande :\"];
+//INSTR4=Text(10 540 1900 580, {/*DATA1.2.1*/}, FONT9, LEFT|VCENTER, COLOR1)
+//INSTR4=Text(10  500 1900  550, \"Confirmation de commande {/*DATA2.1.1*/}\", FONT4, CENTER|VCENTER, COLOR1)
+
+/////////////////////////////////////////////////////////////
+// table infos lignes de commande 
+INSTR5=Table(DATAOBJ=DATA3; RECT=0 500 1900 620; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR5_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=120;
+INSTR5_2=TITLE=\"TOUR INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR5_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR5_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR5_5=FIELDCOUNT=24;
+INSTR5_6=NAMES=(
+INSTR5_7=FIELD1=[NAME=\"Ref\",     RECT=(0     0   250  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR5_8=FIELD2=[NAME=\"Ref\",     RECT=(0    40   250  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.1];
+INSTR5_9=FIELD3=[NAME=\"Ref\",     RECT=(0    80   250 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\" \"];
+INSTR5_10=FIELD4=[NAME=\"Des\",    RECT=(250   0   900  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR5_11=FIELD5=[NAME=\"Des\",    RECT=(250  40   900  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.2];
+INSTR5_12=FIELD6=[NAME=\"Des\",    RECT=(250  80   900 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\" \"];
+INSTR5_13=FIELD7=[NAME=\"Dat\",    RECT=(900   0  1080  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, OBJ=DATA3.3];
+INSTR5_14=FIELD8=[NAME=\"Dat1\",   RECT=(900  40  1080  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.4];
+INSTR5_15=FIELD9=[NAME=\"Dat2\",   RECT=(900  80  1080 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.5];
+INSTR5_16=FIELD10=[NAME=\"Qty\",   RECT=(1080  0  1200  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR5_17=FIELD11=[NAME=\"Qty\",   RECT=(1080 40  1200  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.6];
+INSTR5_18=FIELD12=[NAME=\"Qty\",   RECT=(1080 80  1200 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\" \"];
+INSTR5_19=FIELD13=[NAME=\"Prox\",  RECT=(1200  0  1400  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, OBJ=DATA3.7];
+INSTR5_20=FIELD14=[NAME=\"Prox\",  RECT=(1200 40  1400  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.8];
+INSTR5_21=FIELD15=[NAME=\"Prox\",  RECT=(1200 80  1400 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.9];
+INSTR5_22=FIELD16=[NAME=\"Rem\",   RECT=(1400  0  1550  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, OBJ=DATA3.10];
+INSTR5_23=FIELD17=[NAME=\"Rem\",   RECT=(1400 40  1550  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, OBJ=DATA3.11];
+INSTR5_24=FIELD18=[NAME=\"Rem\",   RECT=(1400 80  1550 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\" \"];
+INSTR5_25=FIELD19=[NAME=\"Rem\",   RECT=(1550  0  1700  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=1,  BPEN=, TEXT=\" \"];
+INSTR5_26=FIELD20=[NAME=\"Rem\",   RECT=(1550 40  1700  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\"Remise\"];
+INSTR5_27=FIELD21=[NAME=\"Rem\",   RECT=(1550 80  1700 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=, TPEN=,  BPEN=, TEXT=\" \"];
+INSTR5_28=FIELD22=[NAME=\"HT\",    RECT=(1700  0  1900  40),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1, TPEN=1,  BPEN=, OBJ=DATA3.12];
+INSTR5_29=FIELD23=[NAME=\"HT\",    RECT=(1700 40  1900  80),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1, TPEN=,  BPEN=, OBJ=DATA3.13];
+INSTR5_30=FIELD24=[NAME=\"HT\",    RECT=(1700 80  1900 120),  FONT=9, ALIGN=5, TCOLOR=1, FCOLOR=4, LPEN=1, RPEN=1, TPEN=,  BPEN=, OBJ=DATA3.14];
+INSTR5_31=)
+
+
+////////////////////////////////////////////////
+// table infos 
+INSTR6=TableEx(DATAOBJ=DATA4; RECT=0 620 1900 _; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR6_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=50;
+INSTR6_2=TITLE=\"TOUR INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR6_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR6_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+INSTR6_5=FIELDCOUNT=8;
+INSTR6_6=NAMES=(\"Ref\", \"Desi\", \"Dat\", \"Qty\", \"PU\", \"Rem\", \"Rem\", \"HT\"); 
+INSTR6_7=WIDTHES=(250, 650, 180, 120, 200, 150, 150, 200); 
+INSTR6_8=FONTS=(FONT9,FONT19,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9); 
+INSTR6_9=TEXTALIGNS=(ALIGN2, ALIGN2, ALIGN5, ALIGN8, ALIGN8, ALIGN8, ALIGN8, ALIGN8); 
+INSTR6_10=TEXTCOLORS=(COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1); 
+INSTR6_11=FILLCOLORS=(COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4); 
+INSTR6_12=FIELDS=(DATA4.1, DATA4.2, DATA4.3, DATA4.4, DATA4.5, DATA4.6, DATA4.7, DATA4.8); 
+INSTR6_13=)
+
+////
+INSTR7=SetTopOfPage;
+////
+
+// total
+
+// table infos 
+INSTR8=Table(DATAOBJ=DATA5; RECT=0 0 1900 60; BORDERHORZ=PEN1; BORDERVERT=PEN1; LINEHORZ=PEN1; LINEVERT=PEN1; FILLCOLOR=COLOR5; FONT=FONT9; TEXT_COLOR=(100 0 0); 
+INSTR8_1=CY_TITLE=0; CY_HORZHDR=0; CX_VERTHDR=0; CY_ROW=60;
+INSTR8_2=TITLE=\"TOUR INFO\"; FONT_TITLE=FONT1; ALIGN_TITLE=CENTER|VCENTER; COLOR_TITLE=COLOR1;
+INSTR8_3=FONT_HORZHDR=FONT9; ALIGN_HORZHDR=CENTER|VCENTER; COLOR_HORZHDR=COLOR1; LINEHORZ_HORZHDR=; 
+INSTR8_4=FONT_VERTHDR=FONT9; ALIGN_VERTHDR=CENTER|VCENTER; COLOR_VERTHDR=COLOR1; LINEVERT_VERTHDR=; 
+
+INSTR8_5=FIELDCOUNT=8;
+INSTR8_6=NAMES=(\"Ref\", \"Desi\", \"Dat\", \"Qty\", \"PU\", \"Rem\", \"Rem\", \"HT\"); 
+INSTR8_7=WIDTHES=(250, 650, 180, 120, 200, 150, 150, 200); 
+INSTR8_8=FONTS=(FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9,FONT9); 
+INSTR8_9=TEXTALIGNS=(ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN2, ALIGN8, ALIGN8, ALIGN8); 
+INSTR8_10=TEXTCOLORS=(COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1, COLOR1); 
+INSTR8_11=FILLCOLORS=(COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4, COLOR4);
+INSTR8_12=FIELDS=(DATA5.1, DATA5.2, DATA5.3, DATA5.4, DATA5.5, DATA5.6, DATA5.7, DATA5.8); 
+INSTR8_13=)
+
+// 2021.06.09 imprimer commentaire de commande 
+INSTR9=Text(10 80 2100 120, {/*DATA3.15.1*/}, FONT9, LEFT|VCENTER, COLOR1)
+
+
+INSTR10=EndPage
+INSTR11=EndDoc
+
+//INSTR11=XML
+\n"),
+	'@' <- [serverPrintPath printFile ".ini"], 
+
+),

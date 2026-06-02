@@ -1,0 +1,195 @@
+/******************************************************/
+/*	                                              */
+/* 		FuncMapFeedback.n	  	      */
+/*                                                    */
+/* This is a part of the NCL Models.                  */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+<mapFeedback>(IdVehicle,IdTour, doubleclick,title,related,idUserPostfix)
+(
+	'@' => (
+		postfix = (idUserPostfix = "" ? (related = "" ? "" : ("_" related)) : idUserLogin),
+		viewFile = ("MapFeedback" postfix),
+		
+
+
+
+
+		[viewDirectory viewFile ".view"] <- '@',
+
+
+		['Work Directory' "Model\Common\View\HeaderMap.n"],
+
+
+
+		IdVehicle = {} => (
+			sqlVehicleSelected = (SQL_ViewUserVisibleClubIs "v.idClub)"),
+			;
+
+			sqlVehicleSelected = (SQL_ViewUserVisibleClubIs "v.idClub) AND v.id IN (" concatSetQuoted(IdVehicle) ") "),
+		),
+
+
+
+		% Data: SITE
+		@ "Data ",
+
+		% ID
+		@ "VRP_SITE '", 
+
+		% Caption
+		@ TAG_SITE,
+
+		% Group
+		@ "' VRP_SITE ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=SITE;MAP=VRP;WIDTH=-30;FIND={IDSITE,IDTOUR,IDVEHICLE,T0,KM,LATITUDE,LONGITUDE};TIPINFO=]'"),
+
+
+
+		@ "'_' \\\n",
+
+		@ ("\"[12;(string,ID,"TAG_SITE",,,);(string,IDTOUR,"TAG_TOUR",,,);"),
+		@ ("(string,IDVEHICLE,"TAG_VEHICLE");(string,T0,"TAG_T0");(int,KM," TAG_MILEAGE ");"),
+		@ ("(float,LATITUDE,"TAG_LATITUDE");(float,LONGITUDE,"TAG_LONGITUDE");(int,X,X);(int,Y,Y);"),
+		@ ("(int,WIDTH,WIDTH,,,0);(string,ICON,ICON,,,0);(string,COLOR,COLOR,,,)]\"\\\n"),
+
+		sqlSite = (
+			"SELECT DISTINCT	f.idResource & ' ' & f.datetime	AS ID, \
+				f.id		AS IDTOUR, \
+				f.idResource 	AS IDVEHICLE, \
+				f.datetime 	AS T0, \
+				f.KM 		AS KM, \
+				f.latitude 	AS LATITUDE, \
+				f.longitude 	AS LONGITUDE, \
+				NULL	 	AS X, \
+				NULL	 	AS Y, \
+				v.idIcon 	AS ICON, \
+				v.sizeIcon 	AS WIDTH, \
+				v.color  	AS COLOR \
+			FROM 	" DB_PREFIX "FEEDBACK f, " DB_PREFIX "RESOURCE v \
+			WHERE v.id=f.idResource "),
+			%WHERE v.id=f.idResource AND " sqlVehicleSelected),
+
+		@ (VIEWSQL sqlSite "\"\n\n"),
+
+
+
+
+		
+		% Data: TASK
+		@ "Data ",
+
+		% ID
+		@ "VRP_TASK '",
+
+		% Caption
+		@ TAG_TASK,
+
+		% Group
+		@ "' VRP_TASK ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 0 ",
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ "\"[TYPE=TASK;MAP=VRP; SITEDATA=VRP_SITE;PATHDATA=VRP_PATH; SITEID=IDSITE;PATHID=IDTOUR; FIND={IDTOUR,IDVEHICLE};WIDTH=-35;]\" ",
+
+		% Script item "[Scripts when delete, insert or update]"
+		@ "_ \\\n",
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"(string,Successor,Successor,,10,0);
+		@ ("\"[9;(string,ID,"TAG_SITE",,10,0);(string,IDSITE,"TAG_SITE",,10,0);(string,IDTOUR,"TAG_TOUR",,10,0);\\\n"),
+		@ ("(date,DateBegin,"TAG_DATE1",,,,"dateFormatView");\\\n"),
+		@ ("(time,TimeBegin,"TAG_TIME1",,,,"timeFormatView");(int,KM,"TAG_MILEAGE");\\\n"),
+		@ ("(string,IDVEHICLE,"TAG_VEHICLE",,10,0);(string,ICON,ICON,,50,0);(int,WIDTH,WIDTH,,,0);(color,COLOR,COLOR);]\"\\\n"),
+
+		sqlDataTask = (
+			"SELECT	f.id & ' ' & f.datetime			AS ID, \
+				f.idResource & ' ' & f.datetime		AS IDSITE, \
+				f.id 					AS IDTOUR, \
+				LEFT(f.datetime,10)			AS DateBegin, \
+				RIGHT(f.datetime,5)  			AS TimeBegin,  \
+				f.KM 					AS KM, \
+				f.idResource 				AS IDVEHICLE, \
+				v.idIcon 				AS ICON, \
+				v.sizeIcon 				AS WIDTH, \
+				v.color  				AS COLOR \
+			FROM 	" DB_PREFIX "FEEDBACK f," DB_PREFIX "RESOURCE v \
+			WHERE 	v.id=f.idResource "
+			%WHERE 	v.id=f.idResource AND " sqlVehicleSelected
+		),
+
+		@ (VIEWSQL sqlDataTask "\"\n\n" ),
+
+
+		
+
+		% Data: PATH
+		@ "Data ",
+
+		% ID
+		@ "VRP_PATH '",
+
+		% Caption
+		@ TAG_TOUR,
+
+		% Group
+		@ "' VRP_PATH ",
+
+		% Source type
+		@ typeDataUser,
+
+		% Editable
+		@ " 1 ",
+
+
+		% Object item "[TYPE=Site/...; MAP=map_id; LOCALIZE=map_object_class_id; ...]"
+		@ ("'[TYPE=PATH;MAP=VRP; TASKDATA=VRP_TASK;SITEDATA=VRP_SITE; PATHID=IDTOUR;SITEID=IDSITE; SPEED=" pathSpeed ";FIND={ID,IDVEHICLE};TIPINFO=]'"),
+
+		@ " '_' \\\n",
+
+
+
+		% Fileds item "[Field count; (Field 1); (Field 2); ...]"
+		@ ("\"[8;(string,ID,"TAG_TOUR");"),
+		@ ("(int,LINEWIDTH,LINEWIDTH);(color,LINECOLOR,LINECOLOR);(color,FILLCOLOR,FILLCOLOR);"),
+		@ ("(int,ARROWWIDTH,ARROWWIDTH);(color,ARROWCOLOR,ARROWCOLOR);"),
+		@ ("(string,ICON,ICON,,,0);(int,WIDTH,WIDTH,,,0);]\" \\\n"),
+
+		sqlDataTour = (
+			"SELECT DISTINCT f.id AS ID, \
+				v.widthLine AS LINEWIDTH, \
+				v.colorLine AS LINECOLOR, \
+				v.colorFill AS FILLCOLOR, \
+				v.widthArrow AS ARROWWIDTH, \
+				v.colorArrow AS ARROWCOLOR, \
+				v.idIcon AS ICON, \
+				v.sizeIcon AS WIDTH \
+			FROM " DB_PREFIX "FEEDBACK f," DB_PREFIX "RESOURCE v \
+			WHERE f.idResource=v.id " 
+			%WHERE f.idResource=v.id AND " sqlVehicleSelected
+		),
+
+		@ (VIEWSQL sqlDataTour "\"\n\n"),
+
+
+		'@' <- [viewDirectory viewFile ".view"],
+	),
+),
+

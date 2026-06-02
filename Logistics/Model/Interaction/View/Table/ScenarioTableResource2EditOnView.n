@@ -1,0 +1,90 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableResource2EditOnView.n		%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+
+
+% Script
+@ "Script ",
+
+% ID
+@ "ModifyResourceState ",
+
+
+% Caption
+@ ("'" TAG_UPDATE_STATE "' "),
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_EDIT_ONVIEW1,
+
+% Label
+@ (" '" TAG_UPDATE_STATE "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableRESOURCE' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+%@ "'[0,(0 0 0),(255 255 255);;Arial,,-20;(C M),(2 2 2 2)]' ",
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+%@ (" '[SINGLESEL=1;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+%@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+%"{/*Input(MCM;" TAG_UPDATE " [/*DELIVERYNOTE.IDRESOURCE*/];1;\\\n"
+
+% Instruction... (When Count>0)
+UpdateResourceState_Input = (
+	"{/*Input(MCM;" TAG_UPDATE_STATE ";1;\\\n"
+	"(string,STATEHERE," TAG_STATE ",[/*RESOURCE.NAMESTATE*/],50." inputWidth ",0,,[/*STATE.LABELSTATE*/]);\\\n"
+	")*/}"
+),
+
+UpdateResourceState_SQL1 = (
+		"\"Update " DB_PREFIX "RESOURCE r, " DB_PREFIX "STATE s\
+		set r.state=s.Id\
+		where r.Id in (trim( [/*RESOURCE.IDRESOURCE*/] )) \
+		 and "SQL_CONCAT"trim(s.LABEL) "SQL_CONCATWITH" '(' "SQL_CONCATWITH" trim(s.ID) "SQL_CONCATWITH" ')'"SQL_CONCATEND" = '[/*STATEHERE*/]' and s.CATEGORY='RESOURCE'\"\n\n"
+),
+	
+? typeExecute (
+	"NCL" :
+		@ (" '[SINGLESEL=0;COUNT=2;NETNCL=HTTP;SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);MESSAGE=0;CANCEL=0;SKIP=0;WAITCURSOR=0;]' \\\n"),
+		@ ("Ncl '(/*SERVERDIRECTORY*/)' '(/*SERVERDIRECTORY*/)Model\Interaction\Edit\RESOURCE\UpdateResourceState.n' '(/*SERVERDIRECTORY*/)ncl.cfg' _ _ _ 1 \\\n"),
+		@ (" '(/*SERVERPORT*/) (/*USERID*/)  {/*Selected(tableRESOURCE;1;(string,IDRESOURCE))*/} \\\n"),
+		@ UpdateResourceState_Input,
+		@ ("'\\\n"),
+		@ ("Reload _ _ _\n\n"),
+		;
+	"SQLVIEW" :
+		%%% on View
+		@ (" '[SINGLESEL=0;RELOAD=1;TYPE=SQL;COUNT=3;MESSAGE=1;CANCEL=0;WAITCURSOR=0]' \\\n"),
+		@ ("'" UpdateResourceState_Input),
+		@ ("'\\\n"),
+		@ UpdateResourceState_SQL1,
+		@ ("Reload _ _ _ \n\n\n"),
+),
+
+.
+
+

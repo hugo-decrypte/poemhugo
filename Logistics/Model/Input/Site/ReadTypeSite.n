@@ -1,0 +1,38 @@
+%==================================================%
+%						   %
+%            	  Scheduling    	           %
+%						   %
+%		 ReadTypeSite.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	'()' <- database,
+
+	(SQL: "SELECT id,name FROM " DB_PREFIX "TYPESITE"),
+
+	nbTypeSite = (),
+	TYPESITE   = [1, nbTypeSite],
+
+	\forall t \in TYPESITE (
+	        idTypeSite_{t}		:: "",
+	        nameTypeSite_{t}	:: "",
+	
+		idTypeSite_{t}		= (),
+	        nameTypeSite_{t}	= (),
+	),
+
+	IDTYPESITE = \{\forall s \in TYPESITE idTypeSite_{s} \},
+
+	\forall i \in IDTYPESITE \cup {""}
+		typeSiteId_{i} :: 0,
+
+	typeSiteId_{""} = 0,
+	\forall i \in IDTYPESITE (
+		typeSiteId_{i} \in TYPESITE,
+		idTypeSite_{typeSiteId_{i}} = i,
+	),
+
+	database <- '()',
+),

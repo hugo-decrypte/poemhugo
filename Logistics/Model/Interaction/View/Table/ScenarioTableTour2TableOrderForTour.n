@@ -1,0 +1,56 @@
+%=======================================================%
+%							%
+%			Logistics			%
+%							%
+%	    ScenarioTableTour2TableOrderForTour.n	%
+%							%
+% 	(c)2000 Enginest. All rights reserved.		%
+%=======================================================%
+
+% Script
+@ "Script ",
+
+% ID
+@ "TableOrderForTour ",
+
+% Caption
+@ (" '" TAG_ORDER_TO_ADD_FOR_TOUR "' "),
+
+
+% Group
+@ "_ ",
+
+% Integer Code [0..1000]
+@ SCRIPT_ADD_ORDER,
+
+% Label
+@ (" '" TAG_ORDER_TO_ADD "' "),
+
+% Object Group Set "{G1, G2, ...}"
+@ "_ ",
+
+% Object Id. Set / Object Item
+@ "'tableTOUR' ", 
+
+% Rect "(X Y SX SY)" / "[RECT=(X Y SX SY);POSITION=Left/Right/Top/Bottom]"
+@ "'( 0 0 0 0 )' ",
+
+% Color "(R G B)" / "[Label format]"
+@ "_ ",
+
+% Icon file
+@ "_ ",
+
+% Alert message
+@ ("_ "),
+
+% Count / Script-item "[COUNT=Instruction count; TYPE=SQL/NCL/SIMULATE; TIMER=Timer-frequence; TIMESCALE=Simulation's time-scale; PATHCLASS=Path-data-id; ]", "[FILE=Script file; ID=Script id]"
+
+
+@ (PREFIX_OPENTABLE_BEGIN "TableOrderForTour.view" OPENTABLE_END),
+
+@ (TABLE_ARGUMENTS 
+"OWNEROBJ=IdTour;IDOBJ='XXX';TITLEOBJ=" TAG_ORDER_TO_ADD_FOR_TOUR " {/*Selected(tableTOUR;1;(string,ID))*/};OWNERSUBOBJ=IdProduct;IDSUBOBJ='XXX';IDTOUR={/*Selected(tableTOUR;1;(string,ID))*/};DATETOUR={/*Selected(tableTOUR;1;(int,DATETOUR))*/}]\"\n\n"),
+
+
+

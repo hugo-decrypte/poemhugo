@@ -1,0 +1,17 @@
+%==================================================%
+%                                                  %
+%            	 Vehicle Routing	           %
+%                                                  %
+%		ViewTableLog.n        	           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\Common\View\Table\FuncTableLog.n"],
+
+'@' => (
+	tableLog("LOG",TAG_TABLE,"LOG",true,"EditLog",TAG_TABLE_LOG,"", ""),
+	tableLog("LOG",TAG_TABLE,"LOG",true,"EditLog",TAG_TABLE_LOG,"User",""),
+
+	('hh:mm:ss' TAG_TAB_0 TAG_TABLE_LOG TAG_END TAG_GLOBAL_TIME 'Global Time'[1..8] : '@'),
+),

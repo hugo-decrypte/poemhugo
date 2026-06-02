@@ -1,0 +1,58 @@
+/******************************************************/
+/*	                                              */
+/*		SolveMoveOrderTSP.n   		      */
+/*                                                    */
+/* Copyright (C) 2000 ENGINEST SOFTWARE               */
+/* All rights reserved.                               */
+/******************************************************/
+
+'()' => (
+	['Work Directory' "Model\Relaxation\ReadMoveOrderTSP.n"],
+),
+
+
+<TSP>(	loop, solutionBuf, maxBacktrack, maxTime, stepCost,stepTime,stepDistance,
+	tourTSP, nameObjectiveTop,
+	boundWorktime, boundMakespan, boundMileage,
+	mileage)
+(
+
+	['Work Directory' "Model\Solver\TSP.n"],
+
+	'@' => (
+		['Work Directory' "Model\Output\WriteBufferTSP.n"],
+	),
+
+
+	['Work Directory' "Model\Solver\TerminateSolving.n"],
+),
+
+
+% Global variables : mileageTour_{t}
+
+'@' => (
+
+
+
+	resultTSP = TSP(
+		loop, solutionBuf, maxBacktrack*3, maxTime, stepCost,stepTime,stepDistance,
+		tourTSP, TAG_MILEAGE,
+		maxWorktimeDayVehicle, maxMakespanDayVehicle, +\infty,
+		mileageTour_{tourTSP}
+	),
+
+
+	resultTSP = 'optimal solution proved' =>
+		('hh:mm:ss' TAG_TAB_2 idTourTSP " : " TAG_VEHICLE " " idVehicleTSP  " " TAG_TOUR " " idxTourVehicleTSP " " TAG_OPTIMIZED : ),
+
+
+	? resultTSP (
+	'stopped without solution',
+	'no solution exists' :
+		(TAG_NO_SOLUTION " : " idTourTSP : false),
+	),
+
+%!!,
+
+	(resultTSP : '.'),
+),

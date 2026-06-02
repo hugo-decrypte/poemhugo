@@ -1,0 +1,98 @@
+/********************************************************/
+/*							*/
+/*		GetTypeResourceTypeRisk.n		*/
+/*							*/
+/*	 Copyright (C) 2000 ENGINEST SOFTWARE		*/
+/*	          All rights reserved.			*/
+/********************************************************/
+
+%"httpProgram=Model/Common/Interface/GetAddressTable.n&CONFIG=ncl.cfg&DIRECTORY=./&REPLY=NULL"
+
+
+['Work Directory' "Model\Common\Config\ReadBoot.n"],
+
+
+'()' => (
+	nameTypeResource	:: "",
+	nameTypeRisk		:: "",
+
+	nameTypeResource	= (),	% JZ 0711
+	nameTypeRisk		= (),
+
+
+	'()' <- database,
+
+	sqlTypeResourceTypeRisk = (
+		"SELECT rc.id,rk.id,rc.length,rc.width,rc.height,rc.maxWeight,rc.categoryTunnel,rc.nbTrailer FROM "
+		DB_PREFIX "TYPERESOURCE rc," DB_PREFIX "TYPERISK rk
+		WHERE rc.name='" nameTypeResource "' AND rk.name='" nameTypeRisk "'"
+	),
+
+
+	(SQL: sqlTypeResourceTypeRisk),
+
+	( TAG_SQL_ERROR :
+		() > 0,
+	),
+
+	idTypeResource	:: "",
+	idTypeRisk	:: "",
+
+	categoryTunnel	:: "",
+
+	length		:: 0.0,
+	width		:: 0.0,
+	height		:: 0.0,
+	maxWeight	:: 0.0,
+	nbTrailer	:: 0,
+
+
+	idTypeResource	= (),
+	idTypeRisk	= (),
+
+	length		= (),
+	width		= (),
+	height		= (),
+	maxWeight	= (),
+	categoryTunnel	= (),
+	nbTrailer	= (),
+
+	database <- '()',
+),
+
+'@' => (
+	messageBuffer = [message : "message buffer"],
+
+
+	messageBuffer <- '@',
+
+	@ (  "'" idTypeResource		% JZ 0711
+	   "' '" idTypeRisk
+	    "' " length[(10,3)]
+	     " " width[(10,3)]
+	     " " height[(10,3)]
+	     " " maxWeight[(10,3)]
+	    " '" categoryTunnel		% JZ 0712
+	    "' " nbTrailer),
+
+	@ "\n",
+
+	'@' <- messageBuffer,	% Sent to solution message
+
+
+	( message : '.'),
+),
+
+
+
+.
+
+
+2
+'6T5' 'VR03' '7.17' '2.33' '3.30' '6.50' 'C'  0 'flammable'
+'7T5' 'VR03' '7.72' '2.36' '3.30' '7.20' 'C'  0 'flammable'
+
+
+
+
+

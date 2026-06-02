@@ -1,0 +1,66 @@
+%==================================================%
+%                                                  %
+%             ParameterizeTimeDistance.n           %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+% distanceMeterPrecision, timeSecondPrecision, mileageRatio, timeRatio
+mileageRatio 	:: 0.1,
+timeRatio	:: 0.1,
+
+
+% Distance patameter
+mileageRatio		= (distanceMeterPrecision / 1000), 		% m -> km
+
+
+
+% Time patameter
+? dateTimeFormat(
+"yyyy-mm-dd":
+	timeRatio	= (timeSecondPrecision / 24*60*60),		% s -> timeFormat
+	;
+
+"yyyy-mm-dd hh":
+	timeRatio	= (timeSecondPrecision / 60*60),
+	;
+
+"yyyy-mm-dd hh:mm":
+	timeRatio	= (timeSecondPrecision / 60),
+	;
+
+"yyyy-mm-dd hh:mm:ss":
+	timeRatio	= timeSecondPrecision,
+),
+
+
+\forall t \in TYPEVEHICLE (
+	timeFixedTypeVehicle_{t}		:: defaultTime,
+	timeLoadingUnitTypeVehicle_{t}		:: defaultTime,
+	timeUnloadingUnitTypeVehicle_{t}	:: defaultTime,
+
+	timeFixedTypeVehicle_{t}		= \lfloor \underline{timeFixed0TypeVehicle_{t} * timeRatio + 0.5} \rfloor,
+	timeLoadingUnitTypeVehicle_{t}		= \lfloor \underline{timeLoadingUnit0TypeVehicle_{t} * timeRatio + 0.5} \rfloor,
+	timeUnloadingUnitTypeVehicle_{t}	= \lfloor \underline{timeUnloadingUnit0TypeVehicle_{t} * timeRatio + 0.5} \rfloor,
+),
+
+
+
+\forall s,i \in SITE (
+	dSiteSite_{s,i} :: 0,
+	tSiteSite_{s,i} :: defaultTime,
+),
+
+\forall s \in SITE (
+	dSiteSite_{s,s}	= 0,
+	tSiteSite_{s,s} = 0,
+),
+
+\forall s<>i \in SITE (
+	dSiteSite_{s,i} = \lfloor \underline{d0SiteSite_{s,i} * mileageRatio + 0.5} \rfloor,
+	tSiteSite_{s,i} = \lfloor \underline{t0SiteSite_{s,i} * timeRatio + 0.5} \rfloor,
+
+	tSiteSite_{s,i} >= 0,
+	tSiteSite_{s,i} =< #HORIZON,
+),
+

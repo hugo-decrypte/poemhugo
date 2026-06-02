@@ -1,0 +1,64 @@
+View ViewTableRESULT 'Etat calcul' 'Etat calcul'  255 255 255 _ 0 0 0 0 5 5 5 5 '[TRACELEVEL=(/*TRACELEVEL*/);TRACEFILE=;TOOLBAR=0;FLIPVERTICALLY=0;FLIPHORIZONTALLY=0;NATURESCALE=0;BESTFIT=1;SCROLLBAR=1;SHOWNAME=1;ZOOMOBJECT=;CURRENTPAGE=1;CLOSEEVENT=0;BKGROUNDCOLOR=(255 255 255);SCREENCOLOR=(255 255 255);PATHLINEWIDTH=9;PATHLINECOLOR=(0 0 0);PATHARROWWIDTH=15;PATHARROWCOLOR=(255 0 0);POEMSERVER=;MAPLOGFILE=;MATRIXCRITERION=Distance;MATRIXCOMPUTERADIUS=0.5;SPEEDKMHOUR=50;STRAIGHTDISTANCERATIO=1.4;SITEINTRADISTANCE=;MATRIXMAXCOMPUTEWIDTH=;NEIGHBOURHOOD=;MATRIXFILENAME=;MATRIXDIRECTORY=;GLOBALVARIABLE=0]'
+
+Table tableRESULT _ _ 0 0 2000 500 \
+"[]" - \
+"[TITLE=Etat calcul;FONTCOLOR=(0 0 0);FONTSIZE=10;FONTNAME=Times New Roman;LINESEPARATOR=\n;HEIGHT=30;BORDER=0;]"\
+"[FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;]" \
+"[FONTCOLOR=(0 0 0);FONTSIZE=8;FONTNAME=Times New Roman;]" \
+"[MARGIN=(10 0 10 0);FONTCOLOR=(0 0 0);FONTSIZE=9;FONTNAME=Times New Roman;] \
+COLUMNFILL={(255 255 255),(255 255 255)};\
+ALIGNTEXT={Left,Right}]"\
+"[DATAOBJ=RESULT;FILLCOLOR=LINERGB]"
+
+Data RESULT 'Etat calcul' RESULT HTTPSQL 0 '[FIND={ID,RESULT}]'   [DOUBLECLICK=] \
+"[2;(string,ID,Paramètre,,50,,);(string,RESULT,Résultat,,50,,);(color,LINERGB,(255 255 255),,13.0.0);(string,IDCLUB,,,20,0)]" \
+"SERVER=(/*SERVERIP*/);PORT=(/*SERVERPORT*/);QUERY=SELECT	'(192 255 192)'			AS LINERGB, \
+				'#Commande'		AS ID,\
+				COUNT(id)			AS RESULT,\
+				1				AS IDX \
+			FROM	(SELECT DISTINCT o.id FROM OPT_ORDER o WHERE o.idClub='(/*CLUBID*/)' AND o.state>='2') \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='#Véhicule','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'#Véhicule'		AS ID,\
+				v1.count1+' / '+v2.count2	AS RESULT,\
+				2				AS IDX \
+			FROM	(SELECT CSTR(COUNT(id)) AS count1 FROM RESOURCE WHERE idClub='(/*CLUBID*/)' AND state>='2') v1, \
+				(SELECT CSTR(COUNT(id)) AS count2 FROM RESOURCE WHERE idClub='(/*CLUBID*/)') v2 \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='#Tournée','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'#Tournée'		AS ID,\
+				t1.count1+' / '+t2.count2	AS RESULT,\
+				3				AS IDX \
+			FROM	(SELECT CSTR(COUNT(id)) AS count1 FROM OPT_TOUR WHERE idClub='(/*CLUBID*/)') t1, \
+				(SELECT IIF(parameter='0' OR parameter='' OR parameter IS NULL,'_',parameter) AS count2 FROM CONFIG WHERE id='maxTour' AND idClub='(/*CLUBID*/)') t2 \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='Profit','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'Profit'		AS ID,\
+				sum(receipts)-sum(cost)		AS RESULT,\
+				4				AS IDX \
+			FROM	RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='2' \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='Coût','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'Coût'			AS ID,\
+				sum(cost)			AS RESULT,\
+				5				AS IDX \
+			FROM	RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='2' \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='KM','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'KM'		AS ID,\
+				SUM(mileage)			AS RESULT,\
+				6				AS IDX \
+			FROM	RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='2' \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='Temps travail','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'Temps travail'		AS ID,\
+				SUM(timeService)+SUM(timeRoute)	AS RESULT,\
+				7				AS IDX \
+			FROM	OPT_PLAN \
+			WHERE	idClub='(/*CLUBID*/)' \
+		UNION	SELECT	IIF((SELECT TOP 1 parameter FROM	CONFIG WHERE idClub='(/*CLUBID*/)' AND id IN ('objectiveProfit','objectiveCost','objectiveVehicle','objectiveTour','objectiveMileage','objectiveWorktime','objectiveMakespan') AND selected='1' ORDER BY idx)='Durée','(255 140 0)','(192 192 255)')	AS LINERGB, \
+				'Durée total'		AS ID,\
+				SUM(makespan)			AS RESULT,\
+				8				AS IDX \
+			FROM	RESOURCE \
+			WHERE	idClub='(/*CLUBID*/)' AND state>='2' \
+		ORDER BY IDX"
+
+

@@ -1,0 +1,31 @@
+%===============================================%
+%						%
+%	 	HistogramBar1.n			%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+[viewDirectory viewFile] <- '@',
+
+['Work Directory' "Model\Common\View\HeaderHistogram.n"],
+
+
+% Script item
+@ (" 0 '[TIPINFO=[/*X*/] :  [/*Y*/]]'  '_' \\\n"), % bai 0712
+%@ (" 0 '[FIND={X,Y};TIPINFO=[/*X*/] :  [/*Y*/]]'  '_' \\\n"), % bai 0712
+
+@ ("\"[3;(string,X,,,,);(float,Y,,,,,," float_y_axis ");(color,C_1,,,,,RGB);]\" \\\n"),
+
+% Data
+@ (VIEWSQL
+	sqlDataXY 
+	SQL_CASEWHEN "Y>0"
+		SQL_THEN "'" RGB_Y1_RATE1 "'"
+		SQL_ELSE "'" RGB_Y1_RATE2 "'"
+	SQL_CASEEND " AS C_1 " sqlFrom "\"\n\n"
+),
+
+
+'@' <- [viewDirectory viewFile],
+

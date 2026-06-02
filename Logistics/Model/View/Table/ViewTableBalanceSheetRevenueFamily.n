@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	  Logistics    	          	   %
+%                                                  %
+%	ViewTableBalanceSheetRevenueFamily.n       %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\View\Table\FuncTableBalanceSheetRevenueFamily.n"],
+
+'@' => (
+	tableBalanceSheetRevenue("",TAG_TABLE,"BALANCEREVENUEFAMILY",true,"", TAG_BALANCE_REVENUE_FAMILY, "", ""), % JZ 1021
+),

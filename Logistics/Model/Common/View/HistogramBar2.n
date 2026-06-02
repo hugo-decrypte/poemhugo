@@ -1,0 +1,30 @@
+%===============================================%
+%						%
+%	 	HistogramBar2.n			%
+%						%
+%   (c)2000. Enginest. All rights reserved.	%
+%===============================================%
+
+
+[viewDirectory viewFile] <- '@',
+
+['Work Directory' "Model\Common\View\HeaderHistogram.n"],
+
+
+
+% Script item
+@ (" 0 '[TIPINFO=[/*X_1*/] : [/*Y_1*/]   [/*X_2*/] : [/*Y_2*/]]'  '_' \\\n"), 
+
+
+% Fields item "[Field count; (Field 1); (Field 2); ...]"
+@ ("\"[6;(string,X_1,,,,);(string,X_2,,,,);\\\n"),
+@ ("(int,Y_1,,,,,," int_y1_y2_axis ");(int,Y_2,,,,,," int_y1_y2_axis ");\\\n"),
+@ ("(color,C_1,,,,,RGB);(color,C_2,,,,,RGB);]\" \\\n"),
+
+
+% Data
+@ (VIEWSQL sqlDataHistogram "\"\n\n"),
+
+
+'@' <- [viewDirectory viewFile],
+

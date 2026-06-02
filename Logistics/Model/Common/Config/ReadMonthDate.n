@@ -1,0 +1,49 @@
+%==================================================%
+%                                                  %
+%            		ERP		 	   %
+%                                                  %
+%		ReadMonthDate.n                    %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+'()' => (
+	%%%% month info
+
+	dateStartPlanning	:: defaultDate,
+	dateEndPlanning		:: defaultDate,
+
+	%% input one date of the month
+	dateMonth		:: defaultDate,
+	dateMonth		= (),
+
+	%% the first date of the month
+	dateStartPlanning["yyyy"]	= dateMonth["yyyy"],
+	dateStartPlanning["mm"]		= dateMonth["mm"],
+	dateStartPlanning["dd"]		= 1,
+
+	%% the last date of the month = the first date of next month - 1 
+	date1NextMonth 	:: defaultDate,
+	%% the first date of next month
+	dateMonth["mm"] = 12 => (
+		date1NextMonth["yyyy"]	= dateMonth["yyyy"] + 1,
+		date1NextMonth["mm"]	= 1,
+		date1NextMonth["dd"]	= 1,
+	),
+	dateMonth["mm"] < 12 => (
+		date1NextMonth["yyyy"]	= dateMonth["yyyy"],
+		date1NextMonth["mm"]	= dateMonth["mm"] + 1,
+		date1NextMonth["dd"]	= 1,
+	),
+
+	%% the first date of next month - 1 
+	dateEndPlanning = date1NextMonth - 1,
+
+
+	("dateMonth		= " dateMonth 		: ),
+	("dateStartPlanning	= " dateStartPlanning 	: ),
+	("dateEndPlanning	= " dateEndPlanning 	: ),
+
+
+	DATE = [dateStartPlanning, dateEndPlanning],
+),

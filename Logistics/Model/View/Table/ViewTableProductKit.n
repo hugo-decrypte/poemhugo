@@ -1,0 +1,14 @@
+%==================================================%
+%                                                  %
+%            	 Logistics	  	           %
+%                                                  %
+%  		ViewTableProductKit.n		   %
+%                                                  %
+% (c)2000. Enginest. All rights reserved.          %
+%==================================================%
+
+['Work Directory' "Model\\View\\Table\\FuncTableProductKit.n"],
+
+'@' => (
+	tableProductKit("",TAG_TABLE,"PRODUCTKIT",true,"TableProductComponent",TAG_PRODUCT_KIT,""),	% JZ 1018
+),
